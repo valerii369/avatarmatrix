@@ -1,0 +1,86 @@
+{
+    "Sun": {
+        "archetype_id": 19,
+        "name": "Солнце",
+        "priority": "critical",
+        "description": "Ядро 'я', витальность, эго"
+    },
+    "Moon": {
+        "archetype_id": 2,
+        "name": "Луна",
+        "priority": "critical",
+        "description": "Подсознание, интуиция, внутренний мир"
+    },
+    "Mercury": {
+        "archetype_id": 1,
+        "name": "Меркурий",
+        "priority": "medium",
+        "description": "Коммуникация, связь миров, слово → реальность"
+    },
+    "Venus": {
+        "archetype_id": 3,
+        "name": "Венера",
+        "priority": "medium",
+        "description": "Изобилие, красота, творение, ценности"
+    },
+    "Mars": {
+        "archetype_id": 7,
+        "name": "Марс",
+        "priority": "medium",
+        "description": "Воля, действие, движение, завоевание"
+    },
+    "Jupiter": {
+        "archetype_id": 10,
+        "name": "Юпитер",
+        "priority": "medium",
+        "description": "Расширение, удача, циклы роста"
+    },
+    "Saturn": {
+        "archetype_id": 4,
+        "name": "Сатурн",
+        "priority": "critical",
+        "description": "Структура, ограничения, закон"
+    },
+    "Uranus": {
+        "archetype_id": 0,
+        "name": "Уран",
+        "priority": "additional",
+        "description": "Разрушение шаблонов, свобода, неожиданность"
+    },
+    "Neptune": {
+        "archetype_id": 18,
+        "name": "Нептун",
+        "priority": "additional",
+        "description": "Иллюзии, бессознательное, мечты"
+    },
+    "Pluto": {
+        "archetype_id": 13,
+        "name": "Плутон",
+        "priority": "critical",
+        "description": "Трансформация, власть, тень, перерождение"
+    },
+    "TrueNode": {
+        "archetype_id": 21,
+        "name": "Северный узел",
+        "priority": "high",
+        "description": "Направление эволюции, завершение"
+    },
+    "SouthNode": {
+        "archetype_id": 12,
+        "name": "Южный узел",
+        "priority": "additional",
+        "description": "Прошлый опыт, паттерны"
+    },
+    "Chiron": {
+        "archetype_id": 9,
+        "name": "Хирон",
+        "priority": "high",
+        "description": "Раненый целитель, путь через боль"
+    },
+    "Lilith": {
+        "archetype_id": 15,
+        "name": "Лилит",
+        "priority": "high",
+        "description": "Подавленное, теневая одержимость"
+    }
+}

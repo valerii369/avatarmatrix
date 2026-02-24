@@ -1,0 +1,62 @@
+{
+    "Aries": {
+        "ruler": "Mars",
+        "primary_archetype": 4,
+        "secondary_archetype": 16
+    },
+    "Taurus": {
+        "ruler": "Venus",
+        "primary_archetype": 3,
+        "secondary_archetype": 8
+    },
+    "Gemini": {
+        "ruler": "Mercury",
+        "primary_archetype": 1,
+        "secondary_archetype": 6
+    },
+    "Cancer": {
+        "ruler": "Moon",
+        "primary_archetype": 2,
+        "secondary_archetype": 7
+    },
+    "Leo": {
+        "ruler": "Sun",
+        "primary_archetype": 19,
+        "secondary_archetype": 8
+    },
+    "Virgo": {
+        "ruler": "Mercury",
+        "primary_archetype": 9,
+        "secondary_archetype": 11
+    },
+    "Libra": {
+        "ruler": "Venus",
+        "primary_archetype": 6,
+        "secondary_archetype": 11
+    },
+    "Scorpio": {
+        "ruler": "Pluto",
+        "primary_archetype": 13,
+        "secondary_archetype": 15
+    },
+    "Sagittarius": {
+        "ruler": "Jupiter",
+        "primary_archetype": 5,
+        "secondary_archetype": 14
+    },
+    "Capricorn": {
+        "ruler": "Saturn",
+        "primary_archetype": 4,
+        "secondary_archetype": 21
+    },
+    "Aquarius": {
+        "ruler": "Uranus",
+        "primary_archetype": 17,
+        "secondary_archetype": 0
+    },
+    "Pisces": {
+        "ruler": "Neptune",
+        "primary_archetype": 18,
+        "secondary_archetype": 12
+    }
+}

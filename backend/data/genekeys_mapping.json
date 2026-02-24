@@ -1,0 +1,258 @@
+{
+    "1": {
+        "archetype_id": 1,
+        "archetype_name": "Маг"
+    },
+    "2": {
+        "archetype_id": 2,
+        "archetype_name": "Жрица"
+    },
+    "3": {
+        "archetype_id": 3,
+        "archetype_name": "Императрица"
+    },
+    "4": {
+        "archetype_id": 4,
+        "archetype_name": "Император"
+    },
+    "5": {
+        "archetype_id": 5,
+        "archetype_name": "Иерофант"
+    },
+    "6": {
+        "archetype_id": 6,
+        "archetype_name": "Влюблённые"
+    },
+    "7": {
+        "archetype_id": 4,
+        "archetype_name": "Император"
+    },
+    "8": {
+        "archetype_id": 8,
+        "archetype_name": "Сила"
+    },
+    "9": {
+        "archetype_id": 9,
+        "archetype_name": "Отшельник"
+    },
+    "10": {
+        "archetype_id": 10,
+        "archetype_name": "Колесо Фортуны"
+    },
+    "11": {
+        "archetype_id": 11,
+        "archetype_name": "Справедливость"
+    },
+    "12": {
+        "archetype_id": 9,
+        "archetype_name": "Отшельник"
+    },
+    "13": {
+        "archetype_id": 17,
+        "archetype_name": "Звезда"
+    },
+    "14": {
+        "archetype_id": 8,
+        "archetype_name": "Сила"
+    },
+    "15": {
+        "archetype_id": 14,
+        "archetype_name": "Умеренность"
+    },
+    "16": {
+        "archetype_id": 16,
+        "archetype_name": "Башня"
+    },
+    "17": {
+        "archetype_id": 0,
+        "archetype_name": "Шут"
+    },
+    "18": {
+        "archetype_id": 11,
+        "archetype_name": "Справедливость"
+    },
+    "19": {
+        "archetype_id": 19,
+        "archetype_name": "Солнце"
+    },
+    "20": {
+        "archetype_id": 9,
+        "archetype_name": "Отшельник"
+    },
+    "21": {
+        "archetype_id": 4,
+        "archetype_name": "Император"
+    },
+    "22": {
+        "archetype_id": 16,
+        "archetype_name": "Башня"
+    },
+    "23": {
+        "archetype_id": 5,
+        "archetype_name": "Иерофант"
+    },
+    "24": {
+        "archetype_id": 17,
+        "archetype_name": "Звезда"
+    },
+    "25": {
+        "archetype_id": 0,
+        "archetype_name": "Шут"
+    },
+    "26": {
+        "archetype_id": 4,
+        "archetype_name": "Император"
+    },
+    "27": {
+        "archetype_id": 3,
+        "archetype_name": "Императрица"
+    },
+    "28": {
+        "archetype_id": 11,
+        "archetype_name": "Справедливость"
+    },
+    "29": {
+        "archetype_id": 12,
+        "archetype_name": "Повешенный"
+    },
+    "30": {
+        "archetype_id": 14,
+        "archetype_name": "Умеренность"
+    },
+    "31": {
+        "archetype_id": 1,
+        "archetype_name": "Маг"
+    },
+    "32": {
+        "archetype_id": 21,
+        "archetype_name": "Мир"
+    },
+    "33": {
+        "archetype_id": 9,
+        "archetype_name": "Отшельник"
+    },
+    "34": {
+        "archetype_id": 7,
+        "archetype_name": "Колесница"
+    },
+    "35": {
+        "archetype_id": 10,
+        "archetype_name": "Колесо Фортуны"
+    },
+    "36": {
+        "archetype_id": 16,
+        "archetype_name": "Башня"
+    },
+    "37": {
+        "archetype_id": 6,
+        "archetype_name": "Влюблённые"
+    },
+    "38": {
+        "archetype_id": 7,
+        "archetype_name": "Колесница"
+    },
+    "39": {
+        "archetype_id": 7,
+        "archetype_name": "Колесница"
+    },
+    "40": {
+        "archetype_id": 6,
+        "archetype_name": "Влюблённые"
+    },
+    "41": {
+        "archetype_id": 20,
+        "archetype_name": "Суд"
+    },
+    "42": {
+        "archetype_id": 0,
+        "archetype_name": "Шут"
+    },
+    "43": {
+        "archetype_id": 2,
+        "archetype_name": "Жрица"
+    },
+    "44": {
+        "archetype_id": 13,
+        "archetype_name": "Смерть"
+    },
+    "45": {
+        "archetype_id": 19,
+        "archetype_name": "Солнце"
+    },
+    "46": {
+        "archetype_id": 10,
+        "archetype_name": "Колесо Фортуны"
+    },
+    "47": {
+        "archetype_id": 13,
+        "archetype_name": "Смерть"
+    },
+    "48": {
+        "archetype_id": 12,
+        "archetype_name": "Повешенный"
+    },
+    "49": {
+        "archetype_id": 15,
+        "archetype_name": "Дьявол"
+    },
+    "50": {
+        "archetype_id": 11,
+        "archetype_name": "Справедливость"
+    },
+    "51": {
+        "archetype_id": 20,
+        "archetype_name": "Суд"
+    },
+    "52": {
+        "archetype_id": 8,
+        "archetype_name": "Сила"
+    },
+    "53": {
+        "archetype_id": 12,
+        "archetype_name": "Повешенный"
+    },
+    "54": {
+        "archetype_id": 10,
+        "archetype_name": "Колесо Фортуны"
+    },
+    "55": {
+        "archetype_id": 17,
+        "archetype_name": "Звезда"
+    },
+    "56": {
+        "archetype_id": 5,
+        "archetype_name": "Иерофант"
+    },
+    "57": {
+        "archetype_id": 18,
+        "archetype_name": "Луна"
+    },
+    "58": {
+        "archetype_id": 19,
+        "archetype_name": "Солнце"
+    },
+    "59": {
+        "archetype_id": 3,
+        "archetype_name": "Императрица"
+    },
+    "60": {
+        "archetype_id": 18,
+        "archetype_name": "Луна"
+    },
+    "61": {
+        "archetype_id": 2,
+        "archetype_name": "Жрица"
+    },
+    "62": {
+        "archetype_id": 5,
+        "archetype_name": "Иерофант"
+    },
+    "63": {
+        "archetype_id": 18,
+        "archetype_name": "Луна"
+    },
+    "64": {
+        "archetype_id": 21,
+        "archetype_name": "Мир"
+    }
+}

@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+.env
+*.egg-info/
+.eggs/
+*.egg
+dist/
+build/
+
+# Alembic
+migrations/versions/*.py
+
+# Node / Next.js
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.vercel
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Misc
+*.log
+*.bak
+.cache/
+.pytest_cache/
+.mypy_cache/
+htmlcov/
+.coverage
+
+# Secrets
+*.pem
+*.key
