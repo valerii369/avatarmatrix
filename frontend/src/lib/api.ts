@@ -1,10 +1,24 @@
 import axios from "axios";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+// Hardcoded to point to the Timeweb VPS, ignoring old Vercel env vars pointing to Railway
+const API_BASE = "http://103.74.92.72";
 
 export const api = axios.create({
     baseURL: API_BASE,
     timeout: 30000,
+});
+
+export const voiceAxios = axios.create({
+    baseURL: API_BASE,
+    timeout: 60000,   // 60s for Whisper transcription
+});
+
+voiceAxios.interceptors.request.use((config) => {
+    if (typeof window !== "undefined") {
+        const token = localStorage.getItem("avatar_token");
+        if (token) config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
 });
 
 // Inject user token from localStorage
@@ -69,8 +83,10 @@ export const voiceAPI = {
         const form = new FormData();
         form.append("user_id", String(userId));
         form.append("session_type", sessionType);
-        form.append("audio", audioBlob, "voice.ogg");
-        return api.post("/api/voice", form, { headers: { "Content-Type": "multipart/form-data" } });
+        // Use the correct file extension based on actual mime type
+        const ext = audioBlob.type.includes("mp4") ? "m4a" : "webm";
+        form.append("audio", audioBlob, `voice.${ext}`);
+        return voiceAxios.post("/api/voice", form);
     },
 };
 

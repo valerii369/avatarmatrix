@@ -1,8 +1,8 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { cardsAPI, createSessionWS } from "@/lib/api";
+import { cardsAPI, createSessionWS, voiceAPI } from "@/lib/api";
 import { useUserStore } from "@/lib/store";
 
 const STAGE_NAMES = [
@@ -35,14 +35,18 @@ export default function SessionPage() {
     const [error, setError] = useState("");
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+    // Voice recording state
+    const [isRecording, setIsRecording] = useState(false);
+    const [isTranscribing, setIsTranscribing] = useState(false);
+    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+    const chunksRef = useRef<Blob[]>([]);
+
     useEffect(() => {
         if (!userId || !params.id) return;
         const cardId = Number(params.id);
 
-        // Load card
         cardsAPI.getOne(userId, cardId).then(r => setCard(r.data));
 
-        // Connect WebSocket
         const ws = createSessionWS(userId, cardId);
         wsRef.current = ws;
 
@@ -80,7 +84,6 @@ export default function SessionPage() {
         return () => ws.close();
     }, [userId, params.id]);
 
-    // Auto-scroll
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
@@ -93,11 +96,7 @@ export default function SessionPage() {
         setInput("");
         setIsAiTyping(true);
 
-        wsRef.current.send(JSON.stringify({
-            type: "message",
-            content,
-            stage,
-        }));
+        wsRef.current.send(JSON.stringify({ type: "message", content, stage }));
 
         if (textareaRef.current) textareaRef.current.style.height = "auto";
     };
@@ -105,11 +104,7 @@ export default function SessionPage() {
     const completeStage = () => {
         if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
         setIsAiTyping(true);
-        wsRef.current.send(JSON.stringify({
-            type: "complete_stage",
-            content: "",
-            stage,
-        }));
+        wsRef.current.send(JSON.stringify({ type: "complete_stage", content: "", stage }));
 
         if (stage < 6) {
             setMessages(prev => [...prev, {
@@ -126,15 +121,51 @@ export default function SessionPage() {
         router.push(`/card/${params.id}`);
     };
 
+    // Voice recording handlers
+    const startRecording = useCallback(async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const recorder = new MediaRecorder(stream, {
+                mimeType: MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm" : "audio/mp4",
+            });
+            chunksRef.current = [];
+            recorder.ondataavailable = e => { if (e.data.size > 0) chunksRef.current.push(e.data); };
+            recorder.onstop = async () => {
+                stream.getTracks().forEach(t => t.stop());
+                const blob = new Blob(chunksRef.current, { type: recorder.mimeType });
+                setIsTranscribing(true);
+                try {
+                    const res = await voiceAPI.transcribe(userId!, blob, "session");
+                    setInput(prev => prev ? prev + " " + res.data.transcript : res.data.transcript);
+                } catch {
+                    alert("Ошибка транскрибации");
+                } finally {
+                    setIsTranscribing(false);
+                }
+            };
+            recorder.start();
+            mediaRecorderRef.current = recorder;
+            setIsRecording(true);
+        } catch {
+            alert("Нет доступа к микрофону");
+        }
+    }, [userId]);
+
+    const stopRecording = useCallback(() => {
+        mediaRecorderRef.current?.stop();
+        setIsRecording(false);
+    }, []);
+
     const progress = (stage / 6) * 100;
-    const hawkinsPercent = (hawkins / 1000) * 100;
+    const lastMessage = messages[messages.length - 1];
+    const showStageButton = !isAiTyping && lastMessage?.role === "ai" && !isComplete;
 
     if (error) return (
         <div className="flex flex-col items-center justify-center min-h-screen px-6 gap-4">
             <div className="text-4xl">⚠️</div>
             <p className="text-center text-sm" style={{ color: "#fc8181" }}>{error}</p>
             <button onClick={() => router.back()} className="px-6 py-3 rounded-xl text-sm"
-                style={{ background: "var(--violet)", color: "#fff" }}>
+                style={{ background: "var(--violet)", color: "#fff", fontSize: "16px" }}>
                 Назад
             </button>
         </div>
@@ -169,13 +200,12 @@ export default function SessionPage() {
                             </span>
                         )}
                         <button onClick={closeSession} className="text-xs px-3 py-1.5 rounded-lg"
-                            style={{ background: "rgba(255,255,255,0.06)", color: "var(--text-muted)" }}>
+                            style={{ background: "rgba(255,255,255,0.06)", color: "var(--text-muted)", fontSize: "14px" }}>
                             Завершить
                         </button>
                     </div>
                 </div>
 
-                {/* Stage progress */}
                 {!isComplete && (
                     <>
                         <div className="phase-bar mb-1">
@@ -241,7 +271,7 @@ export default function SessionPage() {
                         </p>
                         <button onClick={() => router.push(`/diary`)}
                             className="w-full py-3 rounded-xl font-semibold"
-                            style={{ background: "linear-gradient(135deg, var(--violet), var(--gold))", color: "#fff" }}>
+                            style={{ background: "linear-gradient(135deg, var(--violet), var(--gold))", color: "#fff", fontSize: "16px" }}>
                             Записи в дневнике →
                         </button>
                     </motion.div>
@@ -254,33 +284,56 @@ export default function SessionPage() {
             {!isComplete && (
                 <div className="flex-none px-4 pb-6 pt-2"
                     style={{ background: "linear-gradient(0deg, var(--bg-deep) 80%, transparent)" }}>
-                    {/* Stage advance */}
-                    {messages.length > 0 && messages[messages.length - 1]?.role === "ai" && !isAiTyping && (
+                    {/* Stage advance button */}
+                    {showStageButton && (
                         <button onClick={completeStage} className="w-full text-xs py-2 mb-2 rounded-lg transition-all"
-                            style={{ background: "rgba(139,92,246,0.12)", color: "var(--violet-l)", border: "1px solid rgba(139,92,246,0.2)" }}>
-                            {stage < 6 ? `→ Перейти к этапу ${stage + 1}: ${STAGE_NAMES[stage + 1]}` : "✅ Завершить сессию"}
+                            style={{ background: "rgba(139,92,246,0.12)", color: "var(--violet-l)", border: "1px solid rgba(139,92,246,0.2)", fontSize: "14px" }}>
+                            {stage < 6
+                                ? `→ Перейти к этапу ${stage + 1}: ${STAGE_NAMES[stage + 1]}`
+                                : "✅ Завершить сессию"
+                            }
                         </button>
                     )}
+
                     <div className="flex gap-2 items-end">
                         <textarea
                             ref={textareaRef}
-                            value={input}
+                            value={isTranscribing ? "🎤 Обработка голоса..." : input}
                             onChange={(e) => {
                                 setInput(e.target.value);
                                 e.target.style.height = "auto";
                                 e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
                             }}
                             onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
-                            placeholder="Ваш ответ... (Enter — отправить)"
+                            placeholder="Ваш ответ..."
                             rows={1}
-                            className="flex-1 px-4 py-3 rounded-xl text-sm outline-none resize-none"
+                            readOnly={isTranscribing}
+                            className="flex-1 px-4 py-3 rounded-xl outline-none resize-none"
                             style={{
                                 background: "rgba(255,255,255,0.06)",
                                 border: "1px solid var(--border)",
                                 color: "var(--text-primary)",
                                 maxHeight: "120px",
+                                fontSize: "16px",   // Prevents mobile auto-zoom
+                                lineHeight: "1.5",
                             }}
                         />
+                        {/* Mic button */}
+                        <button
+                            onPointerDown={startRecording}
+                            onPointerUp={stopRecording}
+                            onPointerLeave={isRecording ? stopRecording : undefined}
+                            disabled={isTranscribing || isAiTyping}
+                            className="flex-none w-11 h-11 rounded-xl flex items-center justify-center text-xl transition-all select-none"
+                            style={{
+                                background: isRecording ? "rgba(236,72,153,0.3)" : "rgba(255,255,255,0.06)",
+                                border: isRecording ? "1px solid rgba(236,72,153,0.6)" : "1px solid var(--border)",
+                                color: isTranscribing ? "var(--text-muted)" : isRecording ? "#EC4899" : "var(--text-muted)",
+                            }}
+                        >
+                            {isTranscribing ? "⏳" : isRecording ? "⏹" : "🎤"}
+                        </button>
+                        {/* Send button */}
                         <button onClick={sendMessage} disabled={!input.trim() || isAiTyping}
                             className="flex-none w-11 h-11 rounded-xl flex items-center justify-center text-lg transition-all"
                             style={{

@@ -1,72 +1,66 @@
 "use client";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
-import { useUserStore, useCardsStore, type CardProgress } from "@/lib/store";
+import { motion } from "framer-motion";
+import { useUserStore, useCardsStore } from "@/lib/store";
 import { authAPI, cardsAPI } from "@/lib/api";
 
-const SPHERES = [
-  { key: "IDENTITY", name: "Личность", emoji: "✦", color: "#F59E0B" },
-  { key: "MONEY", name: "Деньги", emoji: "◈", color: "#10B981" },
-  { key: "RELATIONS", name: "Отношения", emoji: "❤", color: "#EC4899" },
-  { key: "FAMILY", name: "Род", emoji: "⚘", color: "#F97316" },
-  { key: "MISSION", name: "Миссия", emoji: "◉", color: "#3B82F6" },
-  { key: "HEALTH", name: "Здоровье", emoji: "⬡", color: "#22C55E" },
-  { key: "SOCIETY", name: "Влияние", emoji: "◐", color: "#8B5CF6" },
-  { key: "SPIRIT", name: "Духовность", emoji: "∞", color: "#A78BFA" },
-];
+// ─── Constants ────────────────────────────────────────────────────────────────
 
-const STATUS_ICONS: Record<string, string> = {
-  locked: "🔒", recommended: "✨", in_sync: "🔄", synced: "✅", aligning: "⚡", aligned: "🌟"
-};
-const RANK_STARS = ["☆", "⭐", "⭐⭐", "⭐⭐⭐", "⭐⭐⭐⭐", "⭐⭐⭐⭐⭐"];
+const TOTAL_CARDS = 176;
+const MAX_LEVEL = 100;
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+/** Format number with space separator: 131323 → "131 323" */
+function formatScore(n: number): string {
+  return n.toLocaleString("ru-RU").replace(/,/g, " ");
+}
+
+// ─── Home Page ────────────────────────────────────────────────────────────────
 
 export default function HomePage() {
   const router = useRouter();
-  const { userId, setUser, energy, streak, evolutionLevel, title, onboardingDone } = useUserStore();
+  const {
+    userId, setUser, energy, evolutionLevel, title, firstName, onboardingDone,
+  } = useUserStore();
   const { cards, setCards, setLoading } = useCardsStore();
-  const [activeSphere, setActiveSphere] = useState<string | null>(null);
   const [initialized, setInitialized] = useState(false);
 
   const init = useCallback(async () => {
     try {
-      // Telegram WebApp init
       const tg = (window as any).Telegram?.WebApp;
-      if (tg) {
-        tg.ready();
-        tg.expand();
-      }
+      if (tg) { tg.ready(); tg.expand(); }
 
-      // Authenticate
       const initData = tg?.initData || "";
       const isDev = process.env.NODE_ENV === "development";
       const authRes = await authAPI.login(initData, isDev);
-      const userData = authRes.data;
+      const d = authRes.data;
 
       setUser({
-        userId: userData.user_id,
-        tgId: userData.tg_id,
-        firstName: userData.first_name,
-        token: userData.token,
-        energy: userData.energy,
-        streak: userData.streak,
-        evolutionLevel: userData.evolution_level,
-        title: userData.title,
-        onboardingDone: userData.onboarding_done,
+        userId: d.user_id, tgId: d.tg_id, firstName: d.first_name,
+        token: d.token, energy: d.energy, streak: d.streak,
+        evolutionLevel: d.evolution_level, title: d.title,
+        onboardingDone: d.onboarding_done,
       });
 
-      if (typeof window !== "undefined") {
-        localStorage.setItem("avatar_token", userData.token);
-      }
+      if (typeof window !== "undefined")
+        localStorage.setItem("avatar_token", d.token);
 
-      if (!userData.onboarding_done) {
-        router.push("/onboarding");
-        return;
-      }
+      if (!d.onboarding_done) { router.push("/onboarding"); return; }
 
-      // Load cards
+      // Safety net: if onboarding_done=true but birth_date was cleared (e.g. after /reset),
+      // fetch the profile and redirect to onboarding if birth data is missing.
+      try {
+        const profileRes = await profileAPI.get(d.user_id);
+        if (!profileRes.data.birth_date) {
+          router.push("/onboarding");
+          return;
+        }
+      } catch { /* profile fetch failed, continue normally */ }
+
       setLoading(true);
-      const cardsRes = await cardsAPI.getAll(userData.user_id);
+      const cardsRes = await cardsAPI.getAll(d.user_id);
       setCards(cardsRes.data);
       setLoading(false);
     } catch (e) {
@@ -78,22 +72,23 @@ export default function HomePage() {
 
   useEffect(() => { init(); }, [init]);
 
-  const getSphereCards = (sphereKey: string) =>
-    cards.filter((c) => c.sphere === sphereKey);
+  // ── Derived stats ──────────────────────────────────────────────────────────
+  const openedSpheres = new Set(
+    cards.filter((c) => c.status !== "locked" && c.hawkins_peak > 0).map((c) => c.sphere)
+  ).size;
+  const openedCards = cards.filter((c) => c.status !== "locked").length;
+  const recommended = cards.filter((c) => c.is_recommended_astro).length;
 
-  const getSphereStats = (sphereKey: string) => {
-    const sc = getSphereCards(sphereKey);
-    const played = sc.filter((c) => c.hawkins_peak > 0);
-    const recommended = sc.filter((c) => c.is_recommended_astro && c.status !== "locked");
-    const avgHawkins = played.length > 0
-      ? Math.round(played.reduce((a, c) => a + c.hawkins_peak, 0) / played.length)
-      : 0;
-    return { played: played.length, total: sc.length, recommended: recommended.length, avgHawkins };
-  };
+  // Total score: sum of all hawkins peaks
+  const totalScore = cards.reduce((sum, c) => sum + (c.hawkins_peak || 0), 0);
 
+  // Level progress 0..1
+  const levelProgress = Math.min(evolutionLevel / MAX_LEVEL, 1);
+
+  // ── Spinner ────────────────────────────────────────────────────────────────
   if (!initialized) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen" style={{ background: "var(--bg-deep)" }}>
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
@@ -104,145 +99,252 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen pb-24">
-      {/* Header */}
-      <div className="sticky top-0 z-50 px-4 pt-4 pb-3"
-        style={{ background: "linear-gradient(180deg, rgba(6,8,24,1) 70%, transparent)" }}>
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold gradient-text">AVATAR</h1>
-            <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-              {title} • Ур. {evolutionLevel}
-            </p>
+    <div
+      className="min-h-screen flex flex-col"
+      style={{ background: "var(--bg-deep)", paddingBottom: 96 }}
+    >
+
+      {/* ── Header ── */}
+      <div className="px-4 pt-5 pb-3">
+        <div
+          className="flex items-center gap-3 p-3"
+          style={{
+            background: "rgba(255,255,255,0.05)",
+            border: "1px solid var(--border)",
+            borderRadius: 18,
+          }}
+        >
+          <div style={{
+            width: 44, height: 44, borderRadius: "50%",
+            background: "rgba(255,255,255,0.1)",
+            border: "1px solid var(--border)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: 20, color: "var(--text-muted)", flexShrink: 0,
+          }}>
+            👤
           </div>
-          <div className="flex items-center gap-3">
-            <div className="energy-display text-sm">
-              <span>✦</span>
-              <span>{energy}</span>
-            </div>
-            <div className="flex items-center gap-1 text-sm" style={{ color: "var(--text-secondary)" }}>
-              <span>🔥</span>
-              <span>{streak}</span>
-            </div>
-          </div>
+          <span className="font-semibold text-base" style={{ color: "var(--text-primary)" }}>
+            {firstName || "Пользователь"}
+          </span>
         </div>
       </div>
 
-      <div className="px-4 pt-2">
-        {/* Sphere Grid */}
-        <div className="grid grid-cols-2 gap-3 mb-4">
-          {SPHERES.map((sphere) => {
-            const stats = getSphereStats(sphere.key);
-            const isActive = activeSphere === sphere.key;
-            return (
-              <motion.button
-                key={sphere.key}
-                whileTap={{ scale: 0.96 }}
-                onClick={() => setActiveSphere(isActive ? null : sphere.key)}
-                className={`sphere-${sphere.key} glass text-left p-4 relative overflow-hidden transition-all`}
-                style={{
-                  borderColor: isActive ? sphere.color : undefined,
-                  boxShadow: isActive ? `0 0 20px ${sphere.color}40` : undefined,
-                }}>
-                <div className="flex items-center justify-between mb-2">
-                  <span style={{ color: sphere.color, fontSize: "1.4rem" }}>{sphere.emoji}</span>
-                  {stats.recommended > 0 && (
-                    <span className="text-xs px-2 py-0.5 rounded-full text-yellow-400"
-                      style={{ background: "rgba(245,158,11,0.15)" }}>
-                      {stats.recommended} ✨
-                    </span>
-                  )}
-                </div>
-                <p className="font-semibold text-sm mb-1" style={{ color: "var(--text-primary)" }}>
-                  {sphere.name}
-                </p>
-                <div className="flex items-center gap-2 text-xs" style={{ color: "var(--text-secondary)" }}>
-                  <span>{stats.played}/{stats.total}</span>
-                  {stats.avgHawkins > 0 && <span>• {stats.avgHawkins} Хокинс</span>}
-                </div>
-                {/* Progress fill */}
-                <div className="absolute bottom-0 left-0 right-0 h-0.5"
-                  style={{ background: `${sphere.color}60` }} />
-              </motion.button>
-            );
-          })}
+      {/* ── Stats tiles ── */}
+      <div className="px-4 mb-4">
+        <div className="grid grid-cols-3 gap-2">
+          <StatTile label="Сферы" value={`${openedSpheres}/8`} color="#F59E0B" />
+          <StatTile label="Карточки" value={`${openedCards}/${TOTAL_CARDS}`} color="#10B981" />
+          <StatTile label="Рекомендовано" value={String(recommended)} color="#60A5FA" />
         </div>
-
-        {/* Card list for selected sphere */}
-        <AnimatePresence>
-          {activeSphere && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="overflow-hidden mb-4">
-              <h2 className="text-sm font-semibold mb-3" style={{ color: "var(--text-secondary)" }}>
-                {SPHERES.find(s => s.key === activeSphere)?.name} — 22 архетипа
-              </h2>
-              <div className="space-y-2">
-                {getSphereCards(activeSphere).map((card) => (
-                  <CardRow key={card.id} card={card} onTap={() => router.push(`/card/${card.id}`)} />
-                ))}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
 
-      {/* Bottom Nav */}
+      {/* ── Score ── */}
+      <div className="px-4 text-center mb-1">
+        <motion.p
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          style={{
+            fontSize: 48,
+            fontWeight: 800,
+            color: "var(--text-primary)",
+            letterSpacing: "-1px",
+            lineHeight: 1,
+            fontFamily: "'Outfit', sans-serif",
+          }}
+        >
+          {formatScore(totalScore || energy || 0)}
+        </motion.p>
+      </div>
+
+      {/* ── Rank + Level row ── */}
+      <div className="px-4 mb-3">
+        <div className="flex items-center justify-between mb-1">
+          <span style={{ fontSize: 13, color: "var(--text-secondary)", fontWeight: 500 }}>
+            {title || "Новичек"}
+          </span>
+          <span style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 500 }}>
+            Level <span style={{ color: "var(--text-primary)", fontWeight: 700 }}>{evolutionLevel}</span>/100
+          </span>
+        </div>
+        {/* Progress bar */}
+        <div style={{
+          height: 3, background: "rgba(255,255,255,0.08)", borderRadius: 2, overflow: "hidden",
+        }}>
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: `${levelProgress * 100}%` }}
+            transition={{ duration: 1, ease: "easeOut", delay: 0.3 }}
+            style={{
+              height: "100%",
+              background: "linear-gradient(90deg, #10B981, #06B6D4)",
+              borderRadius: 2,
+            }}
+          />
+        </div>
+      </div>
+
+      {/* ── Glowing Orb ── */}
+      <div className="flex-1 flex items-center justify-center px-4">
+        <div style={{ position: "relative", width: "85vw", maxWidth: 340, aspectRatio: "1/1" }}>
+
+          {/* Outer ambient glow */}
+          <div style={{
+            position: "absolute",
+            inset: -20,
+            borderRadius: "50%",
+            background: "radial-gradient(circle at 50% 50%, rgba(16,185,129,0.15) 0%, transparent 70%)",
+            filter: "blur(16px)",
+            pointerEvents: "none",
+          }} />
+
+          {/* Animated ring */}
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+            style={{
+              position: "absolute", inset: 0,
+              borderRadius: "50%",
+              border: "3px solid transparent",
+              backgroundImage: "conic-gradient(from 0deg, #10B981 0%, #06B6D4 40%, transparent 60%)",
+              WebkitMask: "radial-gradient(circle, transparent calc(100% - 3px), white calc(100% - 3px))",
+              mask: "radial-gradient(circle, transparent calc(100% - 3px), white calc(100% - 3px))",
+            }}
+          />
+
+          {/* Static outer ring */}
+          <div style={{
+            position: "absolute", inset: 0, borderRadius: "50%",
+            border: "3px solid rgba(255,255,255,0.05)",
+          }} />
+
+          {/* Main orb */}
+          <div style={{
+            position: "absolute", inset: 4, borderRadius: "50%",
+            background: "radial-gradient(circle at 35% 35%, rgba(16,185,129,0.15) 0%, rgba(6,182,212,0.08) 40%, rgba(13,18,38,0.95) 70%, #060818 100%)",
+            backdropFilter: "blur(4px)",
+            border: "1px solid rgba(16,185,129,0.2)",
+            boxShadow: "inset 0 0 60px rgba(6,182,212,0.08), 0 0 40px rgba(16,185,129,0.1)",
+          }} />
+
+          {/* Inner glow dot */}
+          <div style={{
+            position: "absolute", inset: "30%",
+            borderRadius: "50%",
+            background: "radial-gradient(circle at 40% 40%, rgba(6,182,212,0.2) 0%, transparent 70%)",
+            filter: "blur(20px)",
+          }} />
+
+          {/* Pulsing ring animation */}
+          <motion.div
+            animate={{ scale: [1, 1.03, 1], opacity: [0.4, 0.7, 0.4] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+            style={{
+              position: "absolute", inset: -3, borderRadius: "50%",
+              border: "1.5px solid rgba(16,185,129,0.3)",
+            }}
+          />
+        </div>
+      </div>
+
+      {/* ── Island Bottom Nav ── */}
       <BottomNav active="home" />
     </div>
   );
 }
 
-function CardRow({ card, onTap }: { card: CardProgress; onTap: () => void }) {
-  const isRecommended = card.is_recommended_astro && card.status !== "locked";
+// ─── StatTile ─────────────────────────────────────────────────────────────────
+
+function StatTile({ label, value, color }: { label: string; value: string; color: string }) {
   return (
-    <motion.button
-      whileTap={{ scale: 0.97 }}
-      onClick={onTap}
-      className={`w-full glass flex items-center gap-3 p-3 text-left ${isRecommended ? "pulse-recommended" : ""}`}>
-      <div className="text-lg w-8 text-center">
-        {STATUS_ICONS[card.status] || "🔒"}
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="font-medium text-sm truncate" style={{ color: "var(--text-primary)" }}>
-          {card.archetype_name}
-        </p>
-        <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-          {RANK_STARS[card.rank] || "☆"}
-          {card.hawkins_peak > 0 && ` • ${card.hawkins_peak}`}
-        </p>
-      </div>
-      {card.astro_priority === "critical" && (
-        <span className="text-xs text-red-400">🔴</span>
-      )}
-      {card.astro_priority === "high" && (
-        <span className="text-xs text-orange-400">🟠</span>
-      )}
-      <span style={{ color: "var(--text-muted)" }}>›</span>
-    </motion.button>
+    <div style={{
+      background: "rgba(255,255,255,0.04)",
+      border: "1px solid var(--border)",
+      borderRadius: 16,
+      padding: "12px 10px",
+      textAlign: "center",
+    }}>
+      <p style={{ fontSize: 11, color, fontWeight: 600, marginBottom: 4, lineHeight: 1 }}>
+        {label}
+      </p>
+      <p style={{ fontSize: 20, fontWeight: 700, color: "var(--text-primary)", lineHeight: 1 }}>
+        {value}
+      </p>
+    </div>
   );
 }
 
+// ─── Island Bottom Nav ────────────────────────────────────────────────────────
+
 export function BottomNav({ active }: { active: string }) {
   const router = useRouter();
+
   const navItems = [
-    { key: "home", icon: "◈", label: "Карта", path: "/" },
+    { key: "home", icon: "◈", label: "AVATAR", path: "/" },
+    { key: "cards", icon: "🃏", label: "Карточки", path: "/cards" },
     { key: "diary", icon: "📖", label: "Дневник", path: "/diary" },
     { key: "reflect", icon: "🌅", label: "Рефлексия", path: "/reflect" },
     { key: "profile", icon: "◉", label: "Профиль", path: "/profile" },
   ];
+
   return (
-    <nav className="bottom-nav">
-      {navItems.map((item) => (
-        <button key={item.key} onClick={() => router.push(item.path)}
-          className="flex flex-col items-center gap-1 px-4 py-1 transition-all"
-          style={{ color: active === item.key ? "var(--violet-l)" : "var(--text-muted)" }}>
-          <span className="text-lg">{item.icon}</span>
-          <span className="text-xs">{item.label}</span>
-        </button>
-      ))}
+    <nav style={{
+      position: "fixed",
+      bottom: 16,
+      left: 16,
+      right: 16,
+      background: "rgba(13,18,38,0.92)",
+      backdropFilter: "blur(24px)",
+      WebkitBackdropFilter: "blur(24px)",
+      border: "1px solid rgba(255,255,255,0.09)",
+      borderRadius: 28,
+      display: "flex",
+      justifyContent: "space-around",
+      alignItems: "center",
+      padding: "10px 4px",
+      zIndex: 100,
+      boxShadow: "0 8px 32px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.05) inset",
+    }}>
+      {navItems.map((item) => {
+        const isActive = active === item.key;
+        return (
+          <button
+            key={item.key}
+            onClick={() => router.push(item.path)}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 4,
+              padding: "6px 12px",
+              borderRadius: 18,
+              border: "none",
+              cursor: "pointer",
+              background: isActive ? "rgba(255,255,255,0.1)" : "transparent",
+              transition: "all 0.2s",
+              minWidth: 52,
+            }}
+          >
+            <span style={{
+              fontSize: 18,
+              color: isActive ? "var(--text-primary)" : "var(--text-muted)",
+              lineHeight: 1,
+              transition: "color 0.2s",
+            }}>
+              {item.icon}
+            </span>
+            <span style={{
+              fontSize: 10,
+              fontWeight: 500,
+              color: isActive ? "var(--text-primary)" : "var(--text-muted)",
+              letterSpacing: "0.01em",
+              transition: "color 0.2s",
+            }}>
+              {item.label}
+            </span>
+          </button>
+        );
+      })}
     </nav>
   );
 }
