@@ -24,6 +24,12 @@ with open(os.path.join(DATA_DIR, "archetypes.json")) as f:
 with open(os.path.join(DATA_DIR, "spheres.json")) as f:
     SPHERES_DATA = {item["key"]: item for item in json.load(f)}
 
+try:
+    with open(os.path.join(DATA_DIR, "archetype_sphere_matrix.json"), "r", encoding="utf-8") as f:
+        MATRIX_DATA = json.load(f)
+except Exception:
+    MATRIX_DATA = {}
+
 
 class CardSummary(BaseModel):
     id: int
@@ -114,6 +120,8 @@ async def get_card_detail(
     sphere = SPHERES_DATA.get(card.sphere, {})
     rank = hawkins_to_rank(card.hawkins_peak)
 
+    matrix_data = MATRIX_DATA.get(str(card.archetype_id), {}).get(card.sphere, {})
+    
     return CardDetail(
         id=card.id,
         archetype_id=card.archetype_id,
@@ -130,8 +138,8 @@ async def get_card_detail(
         astro_priority=card.astro_priority,
         sync_sessions_count=card.sync_sessions_count,
         align_sessions_count=card.align_sessions_count,
-        archetype_shadow=archetype.get("shadow", ""),
-        archetype_light=archetype.get("light", ""),
+        archetype_shadow=matrix_data.get("shadow", archetype.get("shadow", "")),
+        archetype_light=matrix_data.get("light", archetype.get("light", "")),
         archetype_description=archetype.get("description", ""),
         sphere_main_question=sphere.get("main_question", ""),
         sphere_agent_style=sphere.get("agent_style", ""),

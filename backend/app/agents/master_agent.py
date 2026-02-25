@@ -18,6 +18,12 @@ with open(os.path.join(DATA_DIR, "archetypes.json")) as f:
 with open(os.path.join(DATA_DIR, "spheres.json")) as f:
     SPHERES = {item["key"]: item for item in json.load(f)}
 
+try:
+    with open(os.path.join(DATA_DIR, "archetype_sphere_matrix.json"), "r", encoding="utf-8") as f:
+        MATRIX_DATA = json.load(f)
+except Exception:
+    MATRIX_DATA = {}
+
 with open(os.path.join(DATA_DIR, "hawkins_scale.json")) as f:
     HAWKINS_SCALE = json.load(f)
 
@@ -71,10 +77,14 @@ def build_sync_phase_prompt(
     archetype = ARCHETYPES.get(archetype_id, {})
     sphere_data = SPHERES.get(sphere, {})
 
+    matrix = MATRIX_DATA.get(str(archetype_id), {}).get(sphere, {})
+    arch_shadow = matrix.get("shadow", archetype.get('shadow', ''))
+    arch_light = matrix.get("light", archetype.get('light', ''))
+
     context = f"""
 Ты — агент-нейрогид синхронизации AVATAR.
 Цель: обойти логику и связаться с подсознанием, выявить скрытые истинные паттерны.
-Архетип: {archetype.get('name', '')} ({archetype.get('shadow', '')} / {archetype.get('light', '')})
+Архетип: {archetype.get('name', '')} ({arch_shadow} / {arch_light})
 Сфера: {sphere_data.get('name_ru', sphere)} — {sphere_data.get('main_question', '')}
 
 ВАЖНЕЙШИЙ КОНТЕКСТ:
@@ -106,7 +116,7 @@ def build_sync_phase_prompt(
 Предыдущий ответ: {phase_response or 'не получен'}
 Текущий багаж: {json.dumps(previous_phases, ensure_ascii=False)[:300]}
 
-Опиши короткую реакцию Тени архетипа ({archetype.get('shadow', '')}) на ответ пользователя. Тень провоцирует.
+Опиши короткую реакцию Тени архетипа ({arch_shadow}) на ответ пользователя. Тень провоцирует.
 Задай ОДИН вопрос: "Чего эта часть внутри вас боится больше всего?"
 """,
         4: f"""
@@ -134,7 +144,7 @@ def build_sync_phase_prompt(
 ФАЗА 7 — ВМЕШАТЕЛЬСТВО СВЕТА
 Данные: {json.dumps(previous_phases, ensure_ascii=False)[:500]}
 
-Введи неожиданный элемент Света архетипа ({archetype.get('light', '')}). Свет не спасает, он дает ясность.
+Введи неожиданный элемент Света архетипа ({arch_light}). Свет не спасает, он дает ясность.
 Спроси: "Если бы вы посмотрели на ситуацию глазами этой силы, что меняется?"
 """,
         8: f"""
