@@ -47,6 +47,11 @@ export default function CardsPage() {
 
     // Init: authenticate + load cards if not already in store
     useEffect(() => {
+        // Optimization: if we already have data, don't show the initial loading state
+        if (userId && cards.length > 0) {
+            setInitialized(true);
+        }
+
         const init = async () => {
             try {
                 if (!userId) {
@@ -64,12 +69,9 @@ export default function CardsPage() {
                     });
                     if (typeof window !== "undefined")
                         localStorage.setItem("avatar_token", d.token);
-                    if (cards.length === 0) {
-                        setLoading(true);
-                        const r = await cardsAPI.getAll(d.user_id);
-                        setCards(r.data);
-                        setLoading(false);
-                    }
+
+                    const r = await cardsAPI.getAll(d.user_id);
+                    setCards(r.data);
                 } else if (cards.length === 0) {
                     setLoading(true);
                     const r = await cardsAPI.getAll(userId);
@@ -172,9 +174,9 @@ export default function CardsPage() {
                     }}
                 >
                     {[
-                        { key: "all", label: "Все карточки" },
-                        { key: "recommended", label: "Рекоменд карточки" },
-                        { key: "active", label: "Активные карточки" },
+                        { key: "all", label: "Все" },
+                        { key: "recommended", label: "Рекомендованные" },
+                        { key: "active", label: "Активные" },
                     ].map((t) => (
                         <button
                             key={t.key}
