@@ -20,6 +20,7 @@ scp_file "/Users/valeriiguro/Desktop/AVATARv1.0/backend/data/genekeys_mapping.js
 scp_file "/Users/valeriiguro/Desktop/AVATARv1.0/backend/app/routers/cards.py" "/root/avatar/backend/app/routers/cards.py"
 scp_file "/Users/valeriiguro/Desktop/AVATARv1.0/backend/app/routers/sync.py" "/root/avatar/backend/app/routers/sync.py"
 scp_file "/Users/valeriiguro/Desktop/AVATARv1.0/backend/app/routers/session.py" "/root/avatar/backend/app/routers/session.py"
+scp_file "/Users/valeriiguro/Desktop/AVATARv1.0/backend/app/core/economy.py" "/root/avatar/backend/app/core/economy.py"
 scp_file "/Users/valeriiguro/Desktop/AVATARv1.0/backend/app/agents/master_agent.py" "/root/avatar/backend/app/agents/master_agent.py"
 
 spawn ssh -o StrictHostKeyChecking=no root@103.74.92.72 "systemctl restart avatar-backend && sleep 2 && systemctl status avatar-backend --no-pager | tail -5"

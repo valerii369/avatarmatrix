@@ -331,6 +331,7 @@ async def process_phase(
             card.hawkins_current = session.hawkins_score
             if session.hawkins_score > card.hawkins_peak:
                 card.hawkins_peak = session.hawkins_score
+            card.rank = hawkins_to_rank(card.hawkins_peak)
             card.sync_sessions_count += 1
             db.add(card)
 

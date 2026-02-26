@@ -72,7 +72,8 @@ export default function CardsPage() {
 
                     const r = await cardsAPI.getAll(d.user_id);
                     setCards(r.data);
-                } else if (cards.length === 0) {
+                } else {
+                    // Always re-fetch when page mounts to ensure fresh statuses
                     setLoading(true);
                     const r = await cardsAPI.getAll(userId);
                     setCards(r.data);

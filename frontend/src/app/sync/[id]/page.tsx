@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { syncAPI, cardsAPI, voiceAPI } from "@/lib/api";
-import { useUserStore } from "@/lib/store";
+import { useUserStore, useCardsStore } from "@/lib/store";
 import { BottomNav } from "@/app/page";
 
 export default function SyncPage() {
@@ -60,7 +60,11 @@ export default function SyncPage() {
             const res = await syncAPI.phase(userId, sessionId, currentPhase, userInput || undefined);
             setCurrentPhase(res.data.current_phase);
             setPhaseContent(res.data.phase_content);
-            setIsComplete(res.data.is_complete);
+            if (res.data.is_complete) {
+                setIsComplete(true);
+                // Also update the local store immediately for consistency
+                useCardsStore.getState().updateCard(Number(params.id), { status: "synced" });
+            }
             if (res.data.insights) setInsights(res.data.insights);
             setUserInput("");
             if (textareaRef.current) {

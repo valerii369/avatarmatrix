@@ -119,29 +119,20 @@ def calculate_xp_for_level(level: int) -> int:
 
 
 def hawkins_to_rank(hawkins_peak: int) -> int:
-    """Convert peak Hawkins score to card rank (0-5)."""
-    if hawkins_peak >= 700:
-        return 5  # ⭐⭐⭐⭐⭐ Просветлённый
-    elif hawkins_peak >= 540:
-        return 4  # ⭐⭐⭐⭐ Мудрец
-    elif hawkins_peak >= 400:
-        return 3  # ⭐⭐⭐ Мастер
-    elif hawkins_peak >= 250:
-        return 2  # ⭐⭐ Осознающий
-    elif hawkins_peak >= 175:
-        return 1  # ⭐ Пробуждающийся
-    else:
-        return 0  # ☆ Спящий
+    """
+    Convert peak Hawkins score to card level (1-20).
+    Logic: 1-50 -> 1, 51-100 -> 2, ..., 951-1000 -> 20.
+    """
+    if hawkins_peak <= 0:
+        return 0
+    
+    # 50 points per level
+    level = (hawkins_peak + 49) // 50
+    return min(20, level)
 
 
-RANK_NAMES = {
-    0: "☆ Спящий",
-    1: "⭐ Пробуждающийся",
-    2: "⭐⭐ Осознающий",
-    3: "⭐⭐⭐ Мастер",
-    4: "⭐⭐⭐⭐ Мудрец",
-    5: "⭐⭐⭐⭐⭐ Просветлённый",
-}
+RANK_NAMES = {i: f"LVL {i}" for i in range(21)}
+RANK_NAMES[0] = "☆ Спящий"
 
 SPHERE_AWARENESS_NAMES = {
     (0, 175): "В тени",
