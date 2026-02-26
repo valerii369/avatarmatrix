@@ -142,7 +142,6 @@ export default function SyncPage() {
     };
 
     const progress = Math.min((currentPhase / 6) * 100, 100);
-    const isComplete = currentPhase === 6;
     const isFirstPhase = currentPhase === 0;
     const needsInput = hasStarted && !isComplete;
 
