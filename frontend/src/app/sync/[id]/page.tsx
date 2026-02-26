@@ -264,24 +264,18 @@ export default function SyncPage() {
                                 </p>
                             </div>
                         ) : !hasStarted ? (
-                            <div style={{ textAlign: "center", padding: "10px 0" }}>
+                            <div style={{ textAlign: "center", padding: "20px 0" }}>
                                 <div style={{ fontSize: 40, marginBottom: 16 }}>👁</div>
                                 <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 14, color: "var(--text-primary)" }}>
-                                    Видение Синхронизации
+                                    Синхронизация
                                 </h2>
-                                <p style={{ fontSize: 15, lineHeight: 1.6, color: "var(--text-secondary)", marginBottom: 20 }}>
-                                    Мы пройдем через 5 слоев вашего подсознания для глубокой диагностики текущей энергии.
-                                    Оставьте логику — доверяйте первым образам, звукам и ощущениям.
+                                <p style={{ fontSize: 16, lineHeight: 1.6, color: "var(--text-secondary)", marginBottom: 24 }}>
+                                    Глубокая диагностика текущего состояния через 5 уровней подсознания.
+                                    Оставьте логику — доверяйте первым образам и ощущениям.
                                 </p>
-                                <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 8, fontSize: 12, color: "var(--text-muted)" }}>
-                                    <span style={{ padding: "4px 10px", borderRadius: 12, background: "rgba(255,255,255,0.05)" }}>Поверхность</span>
-                                    <span style={{ color: "var(--violet-l)" }}>•</span>
-                                    <span style={{ padding: "4px 10px", borderRadius: 12, background: "rgba(255,255,255,0.05)" }}>Глубина</span>
-                                    <span style={{ color: "var(--violet-l)" }}>•</span>
-                                    <span style={{ padding: "4px 10px", borderRadius: 12, background: "rgba(255,255,255,0.05)" }}>Разлом</span>
-                                    <span style={{ color: "var(--violet-l)" }}>•</span>
-                                    <span style={{ padding: "4px 10px", borderRadius: 12, background: "rgba(255,255,255,0.05)" }}>Дно</span>
-                                </div>
+                                <p style={{ fontSize: 18, fontWeight: 600, color: "var(--violet-l)", marginBottom: 20 }}>
+                                    Готовы войти?
+                                </p>
                             </div>
                         ) : currentPhase === 0 ? (
                             <div style={{ textAlign: "center", padding: "10px 0" }}>
