@@ -119,9 +119,9 @@ export default function SyncPage() {
         }
     };
 
-    const progress = Math.round((currentPhase / 10) * 100);
+    const progress = Math.round((currentPhase / 3) * 100);
     const isFirstPhase = currentPhase === 0;
-    const needsInput = currentPhase > 0 && currentPhase < 10;
+    const needsInput = currentPhase > 0 && currentPhase < 3;
 
     if (starting) return (
         <div className="flex items-center justify-center min-h-screen flex-col gap-4" style={{ background: "var(--bg-deep)" }}>
@@ -156,7 +156,7 @@ export default function SyncPage() {
                                 fontSize: 11, padding: "4px 12px", borderRadius: 20,
                                 background: "rgba(139,92,246,0.15)", color: "var(--violet-l)", fontWeight: 600,
                             }}>
-                                {currentPhase}/10
+                                {currentPhase}/3
                             </span>
                         )}
                     </div>
@@ -346,7 +346,7 @@ export default function SyncPage() {
                                 <motion.span animate={{ opacity: [1, 0.4, 1] }} transition={{ duration: 1, repeat: Infinity }}>
                                     ···
                                 </motion.span>
-                            ) : currentPhase >= 10
+                            ) : currentPhase >= 3
                                 ? "✅ Завершить синхронизацию"
                                 : isFirstPhase
                                     ? "Войти →"

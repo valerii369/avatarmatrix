@@ -269,24 +269,24 @@ async def process_phase(
         if current_layer == "intro":
             next_layer = "1"
             new_sub_phase = 0
-            new_phase_val = 3
+            new_phase_val = 1
         elif current_layer == "1":
             next_layer = "2"
             new_sub_phase = 0
-            new_phase_val = 6
+            new_phase_val = 2
         elif current_layer == "2":
             next_layer = "3"
             new_sub_phase = 0
-            new_phase_val = 9
+            new_phase_val = 3
         else:
             next_layer = "mirror"
             new_sub_phase = 0
-            new_phase_val = 10
+            new_phase_val = 3
     else:
         # Stay in same layer, narrow down
         next_layer = current_layer
         new_sub_phase = sub_phase + 1
-        new_phase_val = session.current_phase # Keep current or increment slightly?
+        new_phase_val = session.current_phase 
 
     # 2. Handle Mirror Analysis (Final)
     if next_layer == "mirror":
