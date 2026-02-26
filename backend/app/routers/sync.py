@@ -287,13 +287,17 @@ async def process_phase(
             new_sub_phase = 0
             new_phase_val = 4
         elif current_layer == "4":
-            next_layer = "mirror"
+            next_layer = "5"
             new_sub_phase = 0
             new_phase_val = 5
+        elif current_layer == "5":
+            next_layer = "mirror"
+            new_sub_phase = 0
+            new_phase_val = 6
         else:
             next_layer = "mirror"
             new_sub_phase = 0
-            new_phase_val = 5
+            new_phase_val = 6
     else:
         # Stay in same layer, narrow down
         next_layer = current_layer
@@ -308,7 +312,7 @@ async def process_phase(
         
         # Save results (Level 3 Knowledge Cell)
         session.is_complete = True
-        session.current_phase = 5
+        session.current_phase = 6
         session.session_transcript = transcript
         session.real_picture = analysis.get("real_picture")
         session.core_pattern = analysis.get("core_pattern")
@@ -353,7 +357,7 @@ async def process_phase(
 
         return {
             "session_id": session.id,
-            "current_phase": 5,
+            "current_phase": 6,
             "is_complete": True,
             "phase_content": f"Синхронизация завершена. Проявленный паттерн: {session.core_pattern}",
             "insights": analysis,

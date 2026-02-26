@@ -141,9 +141,10 @@ export default function SyncPage() {
         }
     };
 
-    const progress = Math.round((currentPhase / 5) * 100);
+    const progress = Math.min((currentPhase / 6) * 100, 100);
+    const isComplete = currentPhase === 6;
     const isFirstPhase = currentPhase === 0;
-    const needsInput = hasStarted && !isComplete && currentPhase < 5;
+    const needsInput = hasStarted && !isComplete;
 
     if (starting) return (
         <div className="flex items-center justify-center min-h-screen flex-col gap-4" style={{ background: "var(--bg-deep)" }}>
@@ -197,7 +198,7 @@ export default function SyncPage() {
                                 fontSize: 11, padding: "4px 12px", borderRadius: 20,
                                 background: "rgba(139,92,246,0.15)", color: "var(--violet-l)", fontWeight: 600,
                             }}>
-                                {currentPhase}/5
+                                {currentPhase}/6
                             </span>
                         )}
                     </div>
