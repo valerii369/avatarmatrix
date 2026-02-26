@@ -184,7 +184,7 @@ export default function SyncPage() {
                     ‹ Выйти
                 </button>
 
-                {card && (
+                {card && hasStarted && (
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
                         <div>
                             <p style={{ fontWeight: 600, color: "var(--text-primary)", fontSize: 15, margin: 0 }}>
@@ -204,13 +204,21 @@ export default function SyncPage() {
                 )}
 
                 {/* Progress bar */}
-                {!isComplete && (
+                {card && hasStarted && !isComplete && (
                     <div style={{ height: 3, background: "rgba(255,255,255,0.07)", borderRadius: 2, overflow: "hidden" }}>
                         <motion.div
                             animate={{ width: `${progress}%` }}
                             transition={{ duration: 0.5 }}
                             style={{ height: "100%", background: "linear-gradient(90deg, var(--violet), #6366f1)", borderRadius: 2 }}
                         />
+                    </div>
+                )}
+                {!hasStarted && card && (
+                    <div style={{ marginBottom: 16 }}>
+                        <p style={{ fontWeight: 600, color: "var(--text-primary)", fontSize: 17, margin: "0 0 4px 0" }}>
+                            {card.archetype_name}
+                        </p>
+                        <p style={{ fontSize: 13, color: "var(--text-muted)", margin: 0 }}>{card.sphere_name_ru}</p>
                     </div>
                 )}
             </div>
@@ -267,22 +275,18 @@ export default function SyncPage() {
                             <div style={{ textAlign: "center", padding: "20px 0" }}>
                                 <div style={{ fontSize: 40, marginBottom: 16 }}>👁</div>
                                 <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 14, color: "var(--text-primary)" }}>
-                                    Синхронизация
+                                    Врата Синхронизации
                                 </h2>
                                 <p style={{ fontSize: 16, lineHeight: 1.6, color: "var(--text-secondary)", marginBottom: 24 }}>
-                                    Глубокая диагностика текущего состояния через 5 уровней подсознания.
-                                    Оставьте логику — доверяйте первым образам и ощущениям.
+                                    Диагностика уровня сознания через 5 слоев подсознания.
                                 </p>
                                 <p style={{ fontSize: 18, fontWeight: 600, color: "var(--violet-l)", marginBottom: 20 }}>
                                     Готовы войти?
                                 </p>
                             </div>
                         ) : currentPhase === 0 ? (
-                            <div style={{ textAlign: "center", padding: "10px 0" }}>
-                                <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 12, color: "var(--text-primary)" }}>
-                                    Врата Синхронизации
-                                </h2>
-                                <p style={{ fontSize: 14, lineHeight: 1.6, color: "var(--text-secondary)", whiteSpace: "pre-line" }}>
+                            <div style={{ padding: "5px 0" }}>
+                                <p style={{ fontSize: 15, lineHeight: 1.6, color: "var(--text-primary)", whiteSpace: "pre-line", margin: 0 }}>
                                     {phaseContent}
                                 </p>
                             </div>
@@ -417,7 +421,7 @@ export default function SyncPage() {
                                 </motion.span>
                             ) : !hasStarted
                                 ? "Войти →"
-                                : (isFirstPhase || currentPhase > 0) ? "Далее →" : "Войти →"}
+                                : "Далее →"}
                         </motion.button>
                     </>
                 )}
