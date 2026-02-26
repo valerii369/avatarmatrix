@@ -8,24 +8,92 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.database import get_db
-from app.models import CardProgress, SyncSession, User
+from app.models import CardProgress, SyncSession, User, SphereKnowledge, UserWorldKnowledge
 from app.models.card_progress import CardStatus
-from app.agents.master_agent import sync_phase_response, extract_sync_insights, evaluate_hawkins
+from app.agents.master_agent import (
+    run_avatar_layer, 
+    run_mirror_analysis, 
+    is_abstract_response, 
+    evaluate_hawkins
+)
 from app.core.economy import award_energy, spend_energy, hawkins_to_rank, RANK_NAMES, calculate_xp_for_level
 from app.core.portrait_builder import build_portrait_for_sphere
 from app.database import AsyncSessionLocal
+from sqlalchemy import func
 
 router = APIRouter()
 
 
-async def _rebuild_sphere_portrait(user_id: int, sphere: str) -> None:
-    """Background task: rebuild portrait for one sphere with its own DB session."""
+async def _aggregate_knowledge(user_id: int, sphere: str) -> None:
+    """Background task: Aggregate Level 3 -> Level 2 -> Level 1."""
     async with AsyncSessionLocal() as session:
         try:
+            # 1. Aggregate to Level 2 (Sphere)
+            # Find all completed synced cards in this sphere
+            results = await session.execute(
+                select(SyncSession).where(
+                    SyncSession.user_id == user_id,
+                    SyncSession.sphere == sphere,
+                    SyncSession.is_complete == True
+                )
+            )
+            sessions = results.scalars().all()
+            if not sessions:
+                return
+
+            # Simple aggregation logic: average Hawkins, collect patterns
+            avg_hawkins = int(sum(s.hawkins_score for s in sessions) / len(sessions))
+            patterns = [s.core_pattern for s in sessions if s.core_pattern]
+            completed_archetypes = list(set(s.archetype_id for s in sessions))
+            
+            # Find or create SphereKnowledge
+            sk_result = await session.execute(
+                select(SphereKnowledge).where(
+                    SphereKnowledge.user_id == user_id,
+                    SphereKnowledge.sphere == sphere
+                )
+            )
+            sk = sk_result.scalar_one_or_none()
+            if not sk:
+                sk = SphereKnowledge(user_id=user_id, sphere=sphere)
+                session.add(sk)
+            
+            sk.sphere_picture = f"Сводная картина по {len(sessions)} архетипам."
+            sk.sphere_pattern = " / ".join(patterns[:3])
+            sk.sphere_hawkins = avg_hawkins
+            sk.cards_completed = completed_archetypes
+            
+            # 2. Aggregate to Level 1 (World)
+            # Find all sphere knowledges for this user
+            sk_all_result = await session.execute(
+                select(SphereKnowledge).where(SphereKnowledge.user_id == user_id)
+            )
+            sks = sk_all_result.scalars().all()
+            
+            if sks:
+                world_avg_hawkins = int(sum(s.sphere_hawkins for s in sks) / len(sks))
+                completed_spheres = [s.sphere for s in sks]
+                
+                wk_result = await session.execute(
+                    select(UserWorldKnowledge).where(UserWorldKnowledge.user_id == user_id)
+                )
+                wk = wk_result.scalar_one_or_none()
+                if not wk:
+                    wk = UserWorldKnowledge(user_id=user_id)
+                    session.add(wk)
+                
+                wk.hawkins_baseline = world_avg_hawkins
+                wk.spheres_completed = completed_spheres
+                wk.overall_pattern = "Комплексный паттерн развития."
+
+            await session.commit()
+            
+            # Also rebuild portrait
             await build_portrait_for_sphere(session, user_id, sphere)
+            
         except Exception as e:
             import logging
-            logging.getLogger(__name__).error(f"Portrait rebuild error: {e}")
+            logging.getLogger(__name__).error(f"Knowledge aggregation error: {e}")
 
 
 class StartSyncRequest(BaseModel):
@@ -103,8 +171,9 @@ async def start_sync(
         card_progress_id=request.card_progress_id,
         archetype_id=card.archetype_id,
         sphere=card.sphere,
-        current_phase=1,
-        phase_data={},
+        current_phase=0, # Intro
+        phase_data={"current_layer": "intro", "sub_phase": 0},
+        session_transcript=[]
     )
     db.add(session)
 
@@ -115,81 +184,107 @@ async def start_sync(
     await db.commit()
     await db.refresh(session)
 
-    # Generate Phase 1 content (no user input needed)
-    phase_content = await sync_phase_response(
-        phase=1,
+    # 1. Generate Intro content
+    ai_content = await run_avatar_layer(
+        layer="intro",
         archetype_id=card.archetype_id,
         sphere=card.sphere,
-        previous_phases={},
+        previous_messages=[],
     )
 
-    # Store phase 1 content
-    session.phase_data = {"1": {"ai_content": phase_content, "user_response": None}}
+    # Store first AI message
+    session.session_transcript = [{"role": "assistant", "content": ai_content}]
     db.add(session)
     await db.commit()
 
     return {
         "session_id": session.id,
-        "current_phase": 1,
+        "current_phase": 0,
         "is_complete": False,
-        "phase_content": phase_content,
+        "phase_content": ai_content,
         "resumed": False,
     }
-
-
-
 @router.post("/phase")
 async def process_phase(
     request: PhaseRequest,
     background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
 ):
-    """Process user response to a phase and generate next phase."""
-    session_result = await db.execute(
+    # Fetch current session state
+    result = await db.execute(
         select(SyncSession).where(
             SyncSession.id == request.sync_session_id,
             SyncSession.user_id == request.user_id,
         )
     )
-    session = session_result.scalar_one_or_none()
+    session = result.scalar_one_or_none()
     if not session:
-        raise HTTPException(status_code=404, detail="Session not found")
+        raise HTTPException(status_code=404, detail="Сессия не найдена")
 
-    if session.is_complete:
-        raise HTTPException(status_code=400, detail="Session already complete")
-
-    # Fetch user for energy/xp operations
     user_result = await db.execute(select(User).where(User.id == request.user_id))
     user = user_result.scalar_one_or_none()
 
-    # Store user response for current phase
-    phase_data = dict(session.phase_data or {})
-    phase_key = str(request.phase)
-    if phase_key not in phase_data:
-        phase_data[phase_key] = {}
-    phase_data[phase_key]["user_response"] = request.user_response
+    # Fetch current session state
+    transcript = list(session.session_transcript or [])
+    state = dict(session.phase_data or {"current_layer": "1", "sub_phase": 0})
+    current_layer = state.get("current_layer", "1")
+    sub_phase = state.get("sub_phase", 0)
 
-    # Evaluate Hawkins for this phase's response
-    if request.user_response:
-        hawkins_eval = await evaluate_hawkins(request.user_response)
-        phase_data[phase_key]["hawkins_eval"] = hawkins_eval
+    # Add user response to transcript (skip if empty/None — e.g. intro "Enter" click)
+    user_response_text = request.user_response or ""
+    if user_response_text:
+        transcript.append({"role": "user", "content": user_response_text})
 
-    # Check if this is the last phase
-    if request.phase >= 10:
-        # Complete the session
-        insights = await extract_sync_insights(phase_data, session.archetype_id, session.sphere)
+    # 1. Determine next move
+    if current_layer == "intro":
+        # Always move to Layer 1 from Intro
+        next_layer = "1"
+        should_move_deeper = True
+        is_abstract = False
+    else:
+        is_abstract = is_abstract_response(user_response_text)
+        should_move_deeper = not is_abstract or sub_phase >= 2
+    
+    if should_move_deeper:
+        # Move to next layer (if not already handled by intro)
+        if current_layer == "intro":
+            next_layer = "1"
+        elif current_layer == "1":
+            next_layer = "2"
+        elif current_layer == "2":
+            next_layer = "3"
+        else:
+            next_layer = "mirror"
+        
+        new_sub_phase = 0
+    else:
+        # Stay in same layer, narrow down
+        next_layer = current_layer
+        new_sub_phase = sub_phase + 1
 
-        session.phase_data = phase_data
+    # 2. Handle Mirror Analysis (Final)
+    if next_layer == "mirror":
+        analysis = await run_mirror_analysis(
+            session.archetype_id, session.sphere, transcript
+        )
+        
+        # Save results (Level 3 Knowledge Cell)
         session.is_complete = True
-        session.hawkins_score = insights.get("hawkins_score", 100)
-        session.hawkins_level = insights.get("hawkins_level", "Страх")
-        session.extracted_core_belief = insights.get("core_belief", "")
-        session.extracted_shadow_pattern = insights.get("shadow_pattern", "")
-        session.extracted_body_anchor = insights.get("body_anchor", "")
-        session.extracted_projection = insights.get("projection", "")
-        session.extracted_avoidance = insights.get("avoidance", "")
-        session.extracted_dominant_emotion = insights.get("dominant_emotion", "")
-        session.extracted_tags = insights.get("tags", [])
+        session.current_phase = 10
+        session.session_transcript = transcript
+        session.real_picture = analysis.get("real_picture")
+        session.core_pattern = analysis.get("core_pattern")
+        session.shadow_active = analysis.get("shadow_active")
+        session.body_anchor = analysis.get("body_anchor")
+        session.first_insight = analysis.get("first_insight")
+        session.hawkins_score = analysis.get("hawkins_score", 100)
+        session.hawkins_level = analysis.get("hawkins_level", "Страх")
+        
+        # Backward compatibility fields
+        session.extracted_core_belief = session.core_pattern
+        session.extracted_shadow_pattern = session.shadow_active
+        session.extracted_body_anchor = session.body_anchor
+        
         db.add(session)
 
         # Update card progress
@@ -202,64 +297,55 @@ async def process_phase(
             card.hawkins_current = session.hawkins_score
             if session.hawkins_score > card.hawkins_peak:
                 card.hawkins_peak = session.hawkins_score
-            card.hawkins_entry = session.hawkins_score
             card.sync_sessions_count += 1
             db.add(card)
 
-        # Update card rank
-        if card:
-            new_rank = hawkins_to_rank(card.hawkins_peak)
-            if new_rank > card.rank:
-                card.rank = new_rank
-                card.rank_name = RANK_NAMES[new_rank]
-                await award_energy(db, user, "card_rank_up") if user else None
-            db.add(card)
-
-        # Award XP to user
+        # Award XP
         if user:
-            xp_gained = insights.get("hawkins_score", 0) or 0
-            user.xp = (user.xp or 0) + xp_gained
-            # Level up?
+            user.xp = (user.xp or 0) + session.hawkins_score
             while user.evolution_level < 100 and user.xp >= calculate_xp_for_level(user.evolution_level + 1):
                 user.evolution_level += 1
             db.add(user)
-            await award_energy(db, user, "diary_entry")
 
         await db.commit()
 
-        # Trigger portrait rebuild in background
-        if card:
-            background_tasks.add_task(
-                _rebuild_sphere_portrait, request.user_id, session.sphere
-            )
+        # 3. Trigger context aggregation in background
+        background_tasks.add_task(_aggregate_knowledge, request.user_id, session.sphere)
 
         return {
             "session_id": session.id,
             "current_phase": 10,
             "is_complete": True,
-            "phase_content": f"Синхронизация завершена. Ваш уровень: {session.hawkins_level} ({session.hawkins_score}).\n\nЯдро-убеждение: {insights.get('core_belief', '')}",
-            "insights": insights,
+            "phase_content": f"Анализ завершен. Реальная картина: {session.real_picture}",
+            "insights": analysis,
         }
 
-    # Generate next phase
-    next_phase = request.phase + 1
-    next_content = await sync_phase_response(
-        phase=next_phase,
+    # 3. Handle next narrative step
+    ai_content = await run_avatar_layer(
+        layer=next_layer,
         archetype_id=session.archetype_id,
         sphere=session.sphere,
-        previous_phases=phase_data,
-        user_message=request.user_response,
+        previous_messages=transcript,
+        is_narrowing=(not should_move_deeper)
     )
 
-    phase_data[str(next_phase)] = {"ai_content": next_content, "user_response": None}
-    session.phase_data = phase_data
-    session.current_phase = next_phase
+    # Update session state
+    transcript.append({"role": "assistant", "content": ai_content})
+    session.session_transcript = transcript
+    session.phase_data = {"current_layer": next_layer, "sub_phase": new_sub_phase}
+    
+    # Map layers to phases for progress bar: intro=0, layer1=3, layer2=6, layer3=9
+    phase_map = {"intro": 0, "1": 3, "2": 6, "3": 9}
+    session.current_phase = phase_map.get(next_layer, session.current_phase)
+    
     db.add(session)
     await db.commit()
 
     return {
         "session_id": session.id,
-        "current_phase": next_phase,
+        "current_phase": session.current_phase,
         "is_complete": False,
-        "phase_content": next_content,
+        "phase_content": ai_content,
+        "layer": next_layer,
+        "sub_phase": new_sub_phase
     }
