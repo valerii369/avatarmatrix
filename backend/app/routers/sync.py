@@ -247,8 +247,8 @@ async def process_phase(
         user_response_text = "[Войти]"
 
     if user_response_text:
-        # If the transcript is empty and we are moving away from intro,
-        # we MUST have an assistant message first or OpenAI will error.
+        # Safety net: ensure transcript has the assistant's intro message
+        # if for some reason it's missing (DB didn't save or etc).
         if not transcript:
              transcript.append({"role": "assistant", "content": "..."})
         
@@ -265,21 +265,28 @@ async def process_phase(
         should_move_deeper = not is_abstract or sub_phase >= 2
     
     if should_move_deeper:
-        # Move to next layer (if not already handled by intro)
+        # Move to next layer
         if current_layer == "intro":
             next_layer = "1"
+            new_sub_phase = 0
+            new_phase_val = 3
         elif current_layer == "1":
             next_layer = "2"
+            new_sub_phase = 0
+            new_phase_val = 6
         elif current_layer == "2":
             next_layer = "3"
+            new_sub_phase = 0
+            new_phase_val = 9
         else:
             next_layer = "mirror"
-        
-        new_sub_phase = 0
+            new_sub_phase = 0
+            new_phase_val = 10
     else:
         # Stay in same layer, narrow down
         next_layer = current_layer
         new_sub_phase = sub_phase + 1
+        new_phase_val = session.current_phase # Keep current or increment slightly?
 
     # 2. Handle Mirror Analysis (Final)
     if next_layer == "mirror":
@@ -352,13 +359,16 @@ async def process_phase(
     transcript.append({"role": "assistant", "content": ai_content})
     session.session_transcript = transcript
     session.phase_data = {"current_layer": next_layer, "sub_phase": new_sub_phase}
+    session.current_phase = new_phase_val
     
-    # Map layers to phases for progress bar: intro=0, layer1=3, layer2=6, layer3=9
-    phase_map = {"intro": 0, "1": 3, "2": 6, "3": 9}
-    session.current_phase = phase_map.get(next_layer, session.current_phase)
+    # Explicitly mark as modified for SQLAlchemy just in case
+    from sqlalchemy.orm.attributes import flag_modified
+    flag_modified(session, "phase_data")
+    flag_modified(session, "session_transcript")
     
     db.add(session)
     await db.commit()
+    await db.refresh(session)
 
     return {
         "session_id": session.id,
