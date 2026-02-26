@@ -122,7 +122,7 @@ export default function HomePage() {
   // Level progress 0..1
   const levelProgress = Math.min(evolutionLevel / MAX_LEVEL, 1);
 
-  const activeCards = cards.filter((c) => c.status === "synced" || c.status === "aligned").length;
+  const activeCards = cards.filter((c) => ["synced", "aligned", "aligning"].includes(c.status)).length;
 
   // ── Loading/Error States ───────────────────────────────────────────────────
   if (status === "loading" || status === "redirecting") {

@@ -77,8 +77,8 @@ async def alignment_session(
             messages_json=[],
         )
         db.add(align_session)
-        card.status = CardStatus.ALIGNING
-        db.add(card)
+        # card.status = CardStatus.ALIGNING  # Keep it active
+        # db.add(card)
         await db.commit()
         await db.refresh(align_session)
 
@@ -168,7 +168,6 @@ async def alignment_session(
         db.add(align_session)
 
         # Update card progress
-        card.status = CardStatus.ALIGNED if current_stage >= 6 else CardStatus.SYNCED
         card.hawkins_current = hawkins_peak
         if hawkins_peak > card.hawkins_peak:
             card.hawkins_peak = hawkins_peak

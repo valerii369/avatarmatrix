@@ -13,8 +13,8 @@ const STATUS_CONFIG: Record<string, { label: string; statusLabel: string; color:
     recommended: { label: "РЕКОМЕНДОВАНА", statusLabel: "ДОСТУПНА", color: "#F59E0B" },
     in_sync: { label: "В ПРОЦЕССЕ", statusLabel: "В ПРОЦЕССЕ", color: "#06B6D4" },
     synced: { label: "АКТИВНА", statusLabel: "АКТИВНА", color: "#10B981" },
-    aligning: { label: "ВЫРАВНИВАНИЕ", statusLabel: "ВЫРАВНИВАНИЕ", color: "#A78BFA" },
-    aligned: { label: "ЗАВЕРШЕНА", statusLabel: "ЗАВЕРШЕНА", color: "#10B981" },
+    aligning: { label: "АКТИВНА", statusLabel: "АКТИВНА", color: "#10B981" },
+    aligned: { label: "АКТИВНА", statusLabel: "АКТИВНА", color: "#10B981" },
 };
 
 const getHawkinsColor = (score: number) => {
@@ -45,9 +45,16 @@ export default function CardPage() {
     useEffect(() => {
         if (!userId || !params.id) return;
         cardsAPI.getOne(userId, Number(params.id))
-            .then((r) => { setCard(r.data); setLoading(false); })
+            .then((r) => {
+                setCard(r.data);
+                setLoading(false);
+                // Removed auto-sync if recommended to let user see card details first
+                // if (r.data.status === "recommended") {
+                //     router.push(`/sync/${r.data.id}`);
+                // }
+            })
             .catch(() => setLoading(false));
-    }, [userId, params.id]);
+    }, [userId, params.id, router]);
 
     if (loading) return (
         <div className="flex items-center justify-center min-h-screen" style={{ background: "var(--bg-deep)" }}>
@@ -59,8 +66,8 @@ export default function CardPage() {
     if (!card) return null;
 
     const statusCfg = STATUS_CONFIG[card.status] ?? STATUS_CONFIG.locked;
-    const canSync = ["recommended", "synced", "aligned", "in_sync"].includes(card.status);
-    const canAlign = card.status === "synced" || card.status === "aligned";
+    const canSync = ["recommended", "in_sync"].includes(card.status);
+    const canAlign = ["synced", "aligning", "aligned"].includes(card.status);
     const isResuming = card.status === "in_sync";
     const sphereColor = card.sphere_color ?? "#10B981";
 

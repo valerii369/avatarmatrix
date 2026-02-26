@@ -31,7 +31,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
     recommended: { label: "Рекомендована", color: "#F59E0B" },
     in_sync: { label: "Синхронизация", color: "#06B6D4" },
     synced: { label: "Активна", color: "#10B981" },
-    aligning: { label: "Выравнивание", color: "#A78BFA" },
+    aligning: { label: "Активна", color: "#10B981" },
     aligned: { label: "Активна", color: "#10B981" },
 };
 
@@ -94,12 +94,11 @@ export default function CardsPage() {
     ).size;
     const openedCards = cards.filter((c) => c.status !== "locked").length;
     const recommended = cards.filter((c) => c.is_recommended_astro).length;
-    const activeCards = cards.filter((c) => c.status === "synced" || c.status === "aligned").length;
-
+    const activeCards = cards.filter((c) => ["synced", "aligned", "aligning"].includes(c.status)).length;
     // ── Tabs filter ──────────────────────────────────────────────────────────
     const byTab = (c: CardProgress) => {
         if (filterTab === "recommended") return c.is_recommended_astro;
-        if (filterTab === "active") return c.status === "synced" || c.status === "aligned";
+        if (filterTab === "active") return ["synced", "aligned", "aligning"].includes(c.status);
         return true;
     };
 
@@ -302,7 +301,7 @@ const getHawkinsColor = (score: number) => {
 
 function MiniCard({ card, onClick }: { card: CardProgress; onClick: () => void }) {
     const cfg = STATUS_CONFIG[card.status] ?? STATUS_CONFIG.locked;
-    const isActive = card.status === "synced" || card.status === "aligned";
+    const isActive = ["synced", "aligned", "aligning"].includes(card.status);
     const sphereColor = SPHERES.find((s) => s.key === card.sphere)?.color ?? "#ffffff";
     const actionText = isActive ? `Energy ${card.hawkins_peak}` : "Открыть";
     const actionColor = isActive ? getHawkinsColor(card.hawkins_peak || 0) : "#F59E0B";
