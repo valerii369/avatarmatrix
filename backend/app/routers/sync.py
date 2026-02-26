@@ -233,8 +233,13 @@ async def process_phase(
     user = user_result.scalar_one_or_none()
 
     # Fetch current session state
-    # Fetch current session state
-    transcript = list(session.session_transcript or [])
+    # Filter transcript to ensure no None/null entries or non-dict items
+    raw_transcript = session.session_transcript or []
+    transcript = []
+    for m in raw_transcript:
+        if isinstance(m, dict) and m.get("role") and m.get("content") is not None:
+            transcript.append({"role": m["role"], "content": str(m["content"])})
+    
     state = dict(session.phase_data or {"current_layer": "intro", "sub_phase": 0})
     current_layer = state.get("current_layer", "intro")
     sub_phase = state.get("sub_phase", 0)
@@ -248,11 +253,10 @@ async def process_phase(
 
     if user_response_text:
         # Safety net: ensure transcript has the assistant's intro message
-        # if for some reason it's missing (DB didn't save or etc).
         if not transcript:
              transcript.append({"role": "assistant", "content": "..."})
         
-        transcript.append({"role": "user", "content": user_response_text})
+        transcript.append({"role": "user", "content": str(user_response_text)})
 
     # 1. Determine next move
     if current_layer == "intro":
@@ -356,7 +360,7 @@ async def process_phase(
     )
 
     # Update session state
-    transcript.append({"role": "assistant", "content": ai_content})
+    transcript.append({"role": "assistant", "content": str(ai_content)})
     session.session_transcript = transcript
     session.phase_data = {"current_layer": next_layer, "sub_phase": new_sub_phase}
     session.current_phase = new_phase_val
