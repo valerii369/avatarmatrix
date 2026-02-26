@@ -360,7 +360,7 @@ function MiniCard({ card, onClick }: { card: CardProgress; onClick: () => void }
                         marginBottom: 3,
                         lineHeight: 1,
                     }}>
-                        Сфера: {card.sphere_name_ru}
+                        {card.sphere_name_ru}
                     </p>
                     <p style={{
                         fontSize: 13,
