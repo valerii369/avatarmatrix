@@ -17,7 +17,8 @@ export default function SyncPage() {
     const [userInput, setUserInput] = useState("");
     const [isComplete, setIsComplete] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [starting, setStarting] = useState(true);
+    const [starting, setStarting] = useState(false);
+    const [hasStarted, setHasStarted] = useState(false);
     const [card, setCard] = useState<any>(null);
     const [insights, setInsights] = useState<any>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -32,18 +33,25 @@ export default function SyncPage() {
         if (!userId || !params.id) return;
         const cardId = Number(params.id);
         cardsAPI.getOne(userId, cardId).then(r => setCard(r.data));
-        syncAPI.start(userId, cardId)
-            .then(r => {
-                setSessionId(r.data.session_id);
-                setCurrentPhase(r.data.current_phase);
-                setPhaseContent(r.data.phase_content);
-                setStarting(false);
-            })
-            .catch(e => {
-                alert(e.response?.data?.detail || "Ошибка запуска");
-                router.back();
-            });
-    }, [userId, params.id, router]);
+    }, [userId, params.id]);
+
+    const handleStartSync = async () => {
+        if (!userId || !params.id) return;
+        setStarting(true);
+        setHasStarted(true);
+        const cardId = Number(params.id);
+        try {
+            const r = await syncAPI.start(userId, cardId);
+            setSessionId(r.data.session_id);
+            setCurrentPhase(r.data.current_phase);
+            setPhaseContent(r.data.phase_content);
+        } catch (e: any) {
+            alert(e.response?.data?.detail || "Ошибка запуска");
+            setHasStarted(false);
+        } finally {
+            setStarting(false);
+        }
+    };
 
     // Auto-resize textarea when content changes (e.g. voice transcription)
     useEffect(() => {
@@ -135,7 +143,7 @@ export default function SyncPage() {
 
     const progress = Math.round((currentPhase / 5) * 100);
     const isFirstPhase = currentPhase === 0;
-    const needsInput = currentPhase > 0 && currentPhase < 5;
+    const needsInput = hasStarted && !isComplete && currentPhase < 5;
 
     if (starting) return (
         <div className="flex items-center justify-center min-h-screen flex-col gap-4" style={{ background: "var(--bg-deep)" }}>
@@ -255,6 +263,26 @@ export default function SyncPage() {
                                     {phaseContent}
                                 </p>
                             </div>
+                        ) : !hasStarted ? (
+                            <div style={{ textAlign: "center", padding: "10px 0" }}>
+                                <div style={{ fontSize: 40, marginBottom: 16 }}>👁</div>
+                                <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 14, color: "var(--text-primary)" }}>
+                                    Видение Синхронизации
+                                </h2>
+                                <p style={{ fontSize: 15, lineHeight: 1.6, color: "var(--text-secondary)", marginBottom: 20 }}>
+                                    Мы пройдем через 5 слоев вашего подсознания для глубокой диагностики текущей энергии.
+                                    Оставьте логику — доверяйте первым образам, звукам и ощущениям.
+                                </p>
+                                <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 8, fontSize: 12, color: "var(--text-muted)" }}>
+                                    <span style={{ padding: "4px 10px", borderRadius: 12, background: "rgba(255,255,255,0.05)" }}>Поверхность</span>
+                                    <span style={{ color: "var(--violet-l)" }}>•</span>
+                                    <span style={{ padding: "4px 10px", borderRadius: 12, background: "rgba(255,255,255,0.05)" }}>Глубина</span>
+                                    <span style={{ color: "var(--violet-l)" }}>•</span>
+                                    <span style={{ padding: "4px 10px", borderRadius: 12, background: "rgba(255,255,255,0.05)" }}>Разлом</span>
+                                    <span style={{ color: "var(--violet-l)" }}>•</span>
+                                    <span style={{ padding: "4px 10px", borderRadius: 12, background: "rgba(255,255,255,0.05)" }}>Дно</span>
+                                </div>
+                            </div>
                         ) : currentPhase === 0 ? (
                             <div style={{ textAlign: "center", padding: "10px 0" }}>
                                 <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 12, color: "var(--text-primary)" }}>
@@ -365,8 +393,8 @@ export default function SyncPage() {
                         {/* Main action button */}
                         <motion.button
                             whileTap={{ scale: 0.97 }}
-                            onClick={handleNext}
-                            disabled={loading || (needsInput && !userInput.trim() && !isTranscribing)}
+                            onClick={hasStarted ? handleNext : handleStartSync}
+                            disabled={loading || starting || (needsInput && !userInput.trim() && !isTranscribing)}
                             style={{
                                 width: "100%",
                                 padding: "16px",
@@ -378,26 +406,24 @@ export default function SyncPage() {
                                 fontFamily: "'Outfit', sans-serif",
                                 letterSpacing: "0.03em",
                                 transition: "all 0.2s",
-                                background: loading || (needsInput && !userInput.trim())
+                                background: (loading || starting || (needsInput && !userInput.trim()))
                                     ? "rgba(255,255,255,0.06)"
-                                    : currentPhase >= 10
-                                        ? "linear-gradient(135deg, #10B981, #059669)"
-                                        : "linear-gradient(135deg, var(--violet), #6366f1)",
-                                color: loading || (needsInput && !userInput.trim())
+                                    : "linear-gradient(135deg, var(--violet), #6366f1)",
+                                color: (loading || starting || (needsInput && !userInput.trim()))
                                     ? "var(--text-muted)"
-                                    : currentPhase >= 10 ? "#000" : "#fff",
-                                boxShadow: loading || (needsInput && !userInput.trim())
+                                    : "#fff",
+                                boxShadow: (loading || starting || (needsInput && !userInput.trim()))
                                     ? "none"
                                     : "0 8px 24px rgba(139,92,246,0.3)",
                             }}
                         >
-                            {loading ? (
+                            {loading || starting ? (
                                 <motion.span animate={{ opacity: [1, 0.4, 1] }} transition={{ duration: 1, repeat: Infinity }}>
                                     ···
                                 </motion.span>
-                            ) : isFirstPhase
+                            ) : !hasStarted
                                 ? "Войти →"
-                                : "Далее →"}
+                                : (isFirstPhase || currentPhase > 0) ? "Далее →" : "Войти →"}
                         </motion.button>
                     </>
                 )}
