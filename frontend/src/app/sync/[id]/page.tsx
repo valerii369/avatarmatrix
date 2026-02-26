@@ -278,10 +278,10 @@ export default function SyncPage() {
                                     Врата Синхронизации
                                 </h2>
                                 <p style={{ fontSize: 16, lineHeight: 1.6, color: "var(--text-secondary)", marginBottom: 24 }}>
-                                    Диагностика уровня сознания через 5 слоев подсознания.
+                                    Подготовка к глубокому погружению в 5 слоев вашего подсознания.
                                 </p>
-                                <p style={{ fontSize: 18, fontWeight: 600, color: "var(--violet-l)", marginBottom: 20 }}>
-                                    Готовы войти?
+                                <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 24 }}>
+                                    Настройтесь на свои внутренние образы...
                                 </p>
                             </div>
                         ) : currentPhase === 0 ? (
