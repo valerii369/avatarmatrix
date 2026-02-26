@@ -1,3 +1,15 @@
 {
+  "name": "avatar-platform",
+  "version": "1.0.0",
+  "description": "AVATAR — Платформа Эволюции Сознания",
+  "scripts": {
+    "install:all": "make install",
+    "migrate": "make migrate",
+    "dev:backend": "make dev",
+    "dev:bot": "make bot",
+    "dev:frontend": "make frontend",
+    "test": "make test",
+    "run:all": "./run.sh"
+  },
   "devDependencies": {}
 }

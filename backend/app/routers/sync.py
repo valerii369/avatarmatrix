@@ -145,9 +145,17 @@ async def start_sync(
 
     if existing_session:
         # Resume: return current phase content without charging energy
+        # Resume: return current phase content without charging energy
         current_phase = existing_session.current_phase
-        phase_data = existing_session.phase_data or {}
-        phase_content = phase_data.get(str(current_phase), {}).get("ai_content", "Продолжаем с места, где остановились...")
+        transcript = list(existing_session.session_transcript or [])
+        
+        # Get last assistant message if possible
+        phase_content = "Продолжаем с места, где остановились..."
+        for msg in reversed(transcript):
+            if msg.get("role") == "assistant":
+                phase_content = msg.get("content")
+                break
+        
         return {
             "session_id": existing_session.id,
             "current_phase": current_phase,
@@ -225,14 +233,25 @@ async def process_phase(
     user = user_result.scalar_one_or_none()
 
     # Fetch current session state
+    # Fetch current session state
     transcript = list(session.session_transcript or [])
-    state = dict(session.phase_data or {"current_layer": "1", "sub_phase": 0})
-    current_layer = state.get("current_layer", "1")
+    state = dict(session.phase_data or {"current_layer": "intro", "sub_phase": 0})
+    current_layer = state.get("current_layer", "intro")
     sub_phase = state.get("sub_phase", 0)
 
     # Add user response to transcript (skip if empty/None — e.g. intro "Enter" click)
     user_response_text = request.user_response or ""
+    
+    # Ensure valid history for intro transition: OpenAI requires alternating roles
+    if current_layer == "intro" and not user_response_text:
+        user_response_text = "[Войти]"
+
     if user_response_text:
+        # If the transcript is empty and we are moving away from intro,
+        # we MUST have an assistant message first or OpenAI will error.
+        if not transcript:
+             transcript.append({"role": "assistant", "content": "..."})
+        
         transcript.append({"role": "user", "content": user_response_text})
 
     # 1. Determine next move

@@ -1,7 +1,7 @@
 import axios from "axios";
 
-// Production API endpoint via Cloudflare Tunnel (provides valid SSL)
-const API_BASE = "https://avatar.aiguro.pro";
+// API endpoint via environment variable or fallback to production
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://avatar.aiguro.pro";
 
 export const api = axios.create({
     baseURL: API_BASE,
