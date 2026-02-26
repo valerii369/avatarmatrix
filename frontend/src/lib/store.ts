@@ -41,9 +41,12 @@ export const useUserStore = create<UserState>()(
 interface CardsState {
     cards: CardProgress[];
     loading: boolean;
+    filterTab: "all" | "recommended" | "active";
+    sphereFilter: string;
     setCards: (cards: CardProgress[]) => void;
     updateCard: (cardId: number, updates: Partial<CardProgress>) => void;
     setLoading: (v: boolean) => void;
+    setFilters: (tab?: "all" | "recommended" | "active", sphere?: string) => void;
 }
 
 export interface CardProgress {
@@ -64,18 +67,29 @@ export interface CardProgress {
     align_sessions_count: number;
 }
 
-export const useCardsStore = create<CardsState>()((set) => ({
-    cards: [],
-    loading: false,
-    setCards: (cards) => set({ cards }),
-    updateCard: (cardId, updates) =>
-        set((state) => ({
-            cards: state.cards.map((c) =>
-                c.id === cardId ? { ...c, ...updates } : c
-            ),
-        })),
-    setLoading: (loading) => set({ loading }),
-}));
+export const useCardsStore = create<CardsState>()(
+    persist(
+        (set) => ({
+            cards: [],
+            loading: false,
+            filterTab: "all",
+            sphereFilter: "ALL",
+            setCards: (cards) => set({ cards }),
+            updateCard: (cardId, updates) =>
+                set((state) => ({
+                    cards: state.cards.map((c) =>
+                        c.id === cardId ? { ...c, ...updates } : c
+                    ),
+                })),
+            setLoading: (loading) => set({ loading }),
+            setFilters: (tab, sphere) => set((state) => ({
+                filterTab: tab ?? state.filterTab,
+                sphereFilter: sphere ?? state.sphereFilter
+            })),
+        }),
+        { name: "avatar-cards" }
+    )
+);
 
 // Active sync session state  
 interface SyncState {

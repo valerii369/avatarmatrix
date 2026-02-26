@@ -42,10 +42,7 @@ const TOTAL_CARDS = 176;
 export default function CardsPage() {
     const router = useRouter();
     const { userId, firstName, setUser } = useUserStore();
-    const { cards, setCards, setLoading } = useCardsStore();
-
-    const [tab, setTab] = useState<"all" | "recommended" | "active">("all");
-    const [sphereFilter, setSphereFilter] = useState("ALL");
+    const { cards, setCards, setLoading, filterTab, sphereFilter, setFilters } = useCardsStore();
     const [initialized, setInitialized] = useState(false);
 
     // Init: authenticate + load cards if not already in store
@@ -99,8 +96,8 @@ export default function CardsPage() {
 
     // ── Tabs filter ──────────────────────────────────────────────────────────
     const byTab = (c: CardProgress) => {
-        if (tab === "recommended") return c.is_recommended_astro;
-        if (tab === "active") return c.status === "synced" || c.status === "aligned";
+        if (filterTab === "recommended") return c.is_recommended_astro;
+        if (filterTab === "active") return c.status === "synced" || c.status === "aligned";
         return true;
     };
 
@@ -181,15 +178,15 @@ export default function CardsPage() {
                     ].map((t) => (
                         <button
                             key={t.key}
-                            onClick={() => setTab(t.key as typeof tab)}
+                            onClick={() => setFilters(t.key as any)}
                             style={{
                                 padding: "8px 4px",
                                 borderRadius: 10,
                                 fontSize: 11,
                                 fontWeight: 500,
                                 transition: "all 0.2s",
-                                background: tab === t.key ? "rgba(255,255,255,0.1)" : "transparent",
-                                color: tab === t.key ? "var(--text-primary)" : "var(--text-muted)",
+                                background: filterTab === t.key ? "rgba(255,255,255,0.1)" : "transparent",
+                                color: filterTab === t.key ? "var(--text-primary)" : "var(--text-muted)",
                                 border: "none",
                                 cursor: "pointer",
                             }}
@@ -210,7 +207,7 @@ export default function CardsPage() {
                     return (
                         <button
                             key={s.key}
-                            onClick={() => setSphereFilter(s.key)}
+                            onClick={() => setFilters(undefined, s.key)}
                             style={{
                                 flexShrink: 0,
                                 padding: "6px 14px",
