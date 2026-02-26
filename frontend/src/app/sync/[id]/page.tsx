@@ -394,7 +394,7 @@ export default function SyncPage() {
                         <motion.button
                             whileTap={{ scale: 0.97 }}
                             onClick={hasStarted ? handleNext : handleStartSync}
-                            disabled={loading || starting || (needsInput && !userInput.trim() && !isTranscribing)}
+                            disabled={loading || starting || (needsInput && currentPhase > 0 && !userInput.trim() && !isTranscribing)}
                             style={{
                                 width: "100%",
                                 padding: "16px",
