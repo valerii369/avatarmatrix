@@ -243,31 +243,67 @@ export default function SyncPage() {
                     >
                         {isComplete ? (
                             <div style={{ textAlign: "center" }}>
-                                <div style={{ fontSize: 48, marginBottom: 16 }}>✅</div>
-                                <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12, color: "var(--text-primary)" }}
-                                    className="gradient-text">
+                                <div style={{ fontSize: 48, marginBottom: 16 }}>✨</div>
+                                <h2 style={{ fontSize: 24, fontWeight: 800, marginBottom: 8, color: "var(--text-primary)" }}>
                                     Синхронизация завершена
                                 </h2>
+                                <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 24 }}>Протоколы синхронизации активны</p>
 
                                 {insights?.hawkins_score && (
-                                    <div style={{ marginBottom: 20 }}>
-                                        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4, fontWeight: 600 }}>УРОВЕНЬ ЭНЕРГИИ (ПО ХОКИНСУ)</p>
+                                    <div style={{
+                                        background: "rgba(255,255,255,0.03)",
+                                        borderRadius: 24,
+                                        padding: "24px 16px",
+                                        marginBottom: 24,
+                                        border: "1px solid rgba(255,255,255,0.05)"
+                                    }}>
+                                        <p style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 8, fontWeight: 800, letterSpacing: "0.1em" }}>УРОВЕНЬ ЭНЕРГИИ</p>
                                         <div style={{
-                                            fontSize: 48,
-                                            fontWeight: 800,
+                                            fontSize: 56,
+                                            fontWeight: 900,
                                             color: getHawkinsColor(insights.hawkins_score),
                                             lineHeight: 1,
-                                            fontFamily: "'Outfit', sans-serif"
+                                            fontFamily: "'Outfit', sans-serif",
+                                            marginBottom: 8
                                         }}>
                                             {insights.hawkins_score}
                                         </div>
-                                        <p style={{ fontSize: 16, fontWeight: 600, color: getHawkinsColor(insights.hawkins_score), marginTop: 4 }}>
+                                        <p style={{
+                                            fontSize: 18,
+                                            fontWeight: 700,
+                                            color: getHawkinsColor(insights.hawkins_score),
+                                            textTransform: "uppercase",
+                                            letterSpacing: "0.05em"
+                                        }}>
                                             {insights.hawkins_level}
                                         </p>
                                     </div>
                                 )}
 
-                                <p style={{ fontSize: 14, color: "var(--text-secondary)", whiteSpace: "pre-line", lineHeight: 1.7 }}>
+                                {insights && (
+                                    <div style={{ textAlign: "left", display: "flex", flexDirection: "column", gap: 16, marginBottom: 24 }}>
+                                        {insights.key_choice && (
+                                            <div style={{ background: "rgba(139,92,246,0.05)", padding: 14, borderRadius: 16, borderLeft: "3px solid var(--violet)" }}>
+                                                <p style={{ fontSize: 11, color: "var(--violet-l)", fontWeight: 700, marginBottom: 4 }}>КЛЮЧЕВОЙ ВЫБОР</p>
+                                                <p style={{ fontSize: 14, color: "var(--text-primary)", lineHeight: 1.5 }}>{insights.key_choice}</p>
+                                            </div>
+                                        )}
+                                        {insights.recurring_symbol && (
+                                            <div style={{ background: "rgba(255,255,255,0.03)", padding: 14, borderRadius: 16 }}>
+                                                <p style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 700, marginBottom: 4 }}>СИМВОЛ ПОДСОЗНАНИЯ</p>
+                                                <p style={{ fontSize: 14, color: "var(--text-primary)", lineHeight: 1.5 }}>{insights.recurring_symbol}</p>
+                                            </div>
+                                        )}
+                                        {insights.first_insight && (
+                                            <div style={{ background: "rgba(255,255,255,0.03)", padding: 14, borderRadius: 16 }}>
+                                                <p style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 700, marginBottom: 4 }}>ИНСАЙТ</p>
+                                                <p style={{ fontSize: 14, color: "#fff", lineHeight: 1.5, fontWeight: 500 }}>{insights.first_insight}</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                <p style={{ fontSize: 14, color: "var(--text-secondary)", whiteSpace: "pre-line", lineHeight: 1.6, fontStyle: insights ? "italic" : "normal" }}>
                                     {phaseContent}
                                 </p>
                             </div>
