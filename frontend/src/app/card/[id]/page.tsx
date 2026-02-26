@@ -17,6 +17,22 @@ const STATUS_CONFIG: Record<string, { label: string; statusLabel: string; color:
     aligned: { label: "ЗАВЕРШЕНА", statusLabel: "ЗАВЕРШЕНА", color: "#10B981" },
 };
 
+const getHawkinsColor = (score: number) => {
+    if (score <= 200) {
+        const ratio = score / 200;
+        const r = Math.round(239 + (245 - 239) * ratio);
+        const g = Math.round(68 + (158 - 68) * ratio);
+        const b = Math.round(68 + (11 - 68) * ratio);
+        return `rgb(${r}, ${g}, ${b})`;
+    } else {
+        const ratio = Math.min(1, (score - 200) / 300);
+        const r = Math.round(245 + (16 - 245) * ratio);
+        const g = Math.round(158 + (185 - 158) * ratio);
+        const b = Math.round(11 + (129 - 11) * ratio);
+        return `rgb(${r}, ${g}, ${b})`;
+    }
+};
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function CardPage() {
@@ -112,7 +128,7 @@ export default function CardPage() {
                     <p style={{
                         fontSize: 30,
                         fontWeight: 800,
-                        color: card.hawkins_peak > 0 ? sphereColor : "rgba(255,255,255,0.2)",
+                        color: card.hawkins_peak > 0 ? getHawkinsColor(card.hawkins_peak) : "rgba(255,255,255,0.2)",
                         margin: 0,
                         lineHeight: 1,
                         fontFamily: "'Outfit', sans-serif",

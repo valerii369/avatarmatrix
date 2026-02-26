@@ -19,6 +19,7 @@ export default function SyncPage() {
     const [loading, setLoading] = useState(false);
     const [starting, setStarting] = useState(true);
     const [card, setCard] = useState<any>(null);
+    const [insights, setInsights] = useState<any>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     // Voice state
@@ -60,6 +61,7 @@ export default function SyncPage() {
             setCurrentPhase(res.data.current_phase);
             setPhaseContent(res.data.phase_content);
             setIsComplete(res.data.is_complete);
+            if (res.data.insights) setInsights(res.data.insights);
             setUserInput("");
             if (textareaRef.current) {
                 textareaRef.current.style.height = "auto";
@@ -129,7 +131,7 @@ export default function SyncPage() {
 
     const progress = Math.round((currentPhase / 3) * 100);
     const isFirstPhase = currentPhase === 0;
-    const needsInput = currentPhase > 0 && currentPhase < 3;
+    const needsInput = currentPhase > 0 && currentPhase <= 3;
 
     if (starting) return (
         <div className="flex items-center justify-center min-h-screen flex-col gap-4" style={{ background: "var(--bg-deep)" }}>
@@ -138,6 +140,25 @@ export default function SyncPage() {
             <p style={{ color: "var(--text-muted)", fontSize: 14 }}>Открываем врата...</p>
         </div>
     );
+
+    // Color gradient for Hawkins score: 0-200 (Red-Yellow), 200-500 (Yellow-Green)
+    const getHawkinsColor = (score: number) => {
+        if (score <= 200) {
+            // Lerp 0-200: Red (#EF4444) to Yellow (#F59E0B)
+            const ratio = score / 200;
+            const r = Math.round(239 + (245 - 239) * ratio);
+            const g = Math.round(68 + (158 - 68) * ratio);
+            const b = Math.round(68 + (11 - 68) * ratio);
+            return `rgb(${r}, ${g}, ${b})`;
+        } else {
+            // Lerp 200-500+: Yellow (#F59E0B) to Green (#10B981)
+            const ratio = Math.min(1, (score - 200) / 300);
+            const r = Math.round(245 + (16 - 245) * ratio);
+            const g = Math.round(158 + (185 - 158) * ratio);
+            const b = Math.round(11 + (129 - 11) * ratio);
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+    };
 
     return (
         <div className="min-h-screen flex flex-col pb-32" style={{ background: "var(--bg-deep)" }}>
@@ -207,6 +228,25 @@ export default function SyncPage() {
                                     className="gradient-text">
                                     Синхронизация завершена
                                 </h2>
+
+                                {insights?.hawkins_score && (
+                                    <div style={{ marginBottom: 20 }}>
+                                        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4, fontWeight: 600 }}>УРОВЕНЬ ЭНЕРГИИ (ПО ХОКИНСУ)</p>
+                                        <div style={{
+                                            fontSize: 48,
+                                            fontWeight: 800,
+                                            color: getHawkinsColor(insights.hawkins_score),
+                                            lineHeight: 1,
+                                            fontFamily: "'Outfit', sans-serif"
+                                        }}>
+                                            {insights.hawkins_score}
+                                        </div>
+                                        <p style={{ fontSize: 16, fontWeight: 600, color: getHawkinsColor(insights.hawkins_score), marginTop: 4 }}>
+                                            {insights.hawkins_level}
+                                        </p>
+                                    </div>
+                                )}
+
                                 <p style={{ fontSize: 14, color: "var(--text-secondary)", whiteSpace: "pre-line", lineHeight: 1.7 }}>
                                     {phaseContent}
                                 </p>
@@ -351,10 +391,10 @@ export default function SyncPage() {
                                 <motion.span animate={{ opacity: [1, 0.4, 1] }} transition={{ duration: 1, repeat: Infinity }}>
                                     ···
                                 </motion.span>
-                            ) : currentPhase >= 3
-                                ? "✅ Завершить синхронизацию"
-                                : isFirstPhase
-                                    ? "Войти →"
+                            ) : isFirstPhase
+                                ? "Войти →"
+                                : currentPhase >= 3 && !isComplete
+                                    ? "Завершить синхронизацию →"
                                     : "Далее →"}
                         </motion.button>
                     </>

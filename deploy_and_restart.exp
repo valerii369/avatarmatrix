@@ -1,0 +1,20 @@
+#!/usr/bin/expect -f
+set timeout 60
+set password "eCTyD*R.94zTba"
+set host "103.74.92.72"
+
+# 1. Deploy sync.py
+spawn scp -o StrictHostKeyChecking=no /Users/valeriiguro/Desktop/AVATARv1.0/backend/app/routers/sync.py root@$host:/root/avatar/backend/app/routers/sync.py
+expect "*assword:*" { send "$password\r"; exp_continue } eof
+
+# 2. Deploy master_agent.py
+spawn scp -o StrictHostKeyChecking=no /Users/valeriiguro/Desktop/AVATARv1.0/backend/app/agents/master_agent.py root@$host:/root/avatar/backend/app/agents/master_agent.py
+expect "*assword:*" { send "$password\r"; exp_continue } eof
+
+# 3. Restart backend service
+spawn ssh -o StrictHostKeyChecking=no root@$host "systemctl restart avatar-backend"
+expect "*assword:*" { send "$password\r"; exp_continue } eof
+
+# 4. Check status
+spawn ssh -o StrictHostKeyChecking=no root@$host "systemctl status avatar-backend --no-pager | head -n 20"
+expect "*assword:*" { send "$password\r"; exp_continue } eof

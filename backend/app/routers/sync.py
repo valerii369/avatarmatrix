@@ -282,6 +282,10 @@ async def process_phase(
             next_layer = "3"
             new_sub_phase = 0
             new_phase_val = 3
+        elif current_layer == "3":
+            next_layer = "mirror"
+            new_sub_phase = 0
+            new_phase_val = 3
         else:
             next_layer = "mirror"
             new_sub_phase = 0

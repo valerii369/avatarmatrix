@@ -284,12 +284,28 @@ function StatTile({ label, value, color }: { label: string; value: string; color
 // ─── MiniCard ─────────────────────────────────────────────────────────────────
 // Horizontal layout: square image left, text right, lvl|action bottom
 
+const getHawkinsColor = (score: number) => {
+    if (score <= 200) {
+        const ratio = score / 200;
+        const r = Math.round(239 + (245 - 239) * ratio);
+        const g = Math.round(68 + (158 - 68) * ratio);
+        const b = Math.round(68 + (11 - 68) * ratio);
+        return `rgb(${r}, ${g}, ${b})`;
+    } else {
+        const ratio = Math.min(1, (score - 200) / 300);
+        const r = Math.round(245 + (16 - 245) * ratio);
+        const g = Math.round(158 + (185 - 158) * ratio);
+        const b = Math.round(11 + (129 - 11) * ratio);
+        return `rgb(${r}, ${g}, ${b})`;
+    }
+};
+
 function MiniCard({ card, onClick }: { card: CardProgress; onClick: () => void }) {
     const cfg = STATUS_CONFIG[card.status] ?? STATUS_CONFIG.locked;
     const isActive = card.status === "synced" || card.status === "aligned";
     const sphereColor = SPHERES.find((s) => s.key === card.sphere)?.color ?? "#ffffff";
     const actionText = isActive ? `Energy ${card.hawkins_peak}` : "Открыть";
-    const actionColor = isActive ? "#10B981" : "#F59E0B";
+    const actionColor = isActive ? getHawkinsColor(card.hawkins_peak || 0) : "#F59E0B";
 
     return (
         <button
