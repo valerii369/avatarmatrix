@@ -1,0 +1,12 @@
+#!/usr/bin/expect -f
+set timeout 10
+set password "eCTyD*R.94zTba"
+
+spawn ssh -o StrictHostKeyChecking=no root@103.74.92.72 "systemctl status avatar-bot --no-pager && systemctl status avatar-backend --no-pager"
+expect {
+    "*assword:*" {
+        send "$password\r"
+        exp_continue
+    }
+    eof
+}

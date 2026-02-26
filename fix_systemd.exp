@@ -1,0 +1,15 @@
+#!/usr/bin/expect -f
+set timeout 10
+set password "eCTyD*R.94zTba"
+
+spawn scp -o StrictHostKeyChecking=no /Users/valeriiguro/Desktop/AVATARv1.0/avatar-bot.service root@103.74.92.72:/etc/systemd/system/avatar-bot.service
+expect {
+    "*assword:*" { send "$password\r"; exp_continue }
+    eof
+}
+
+spawn ssh -o StrictHostKeyChecking=no root@103.74.92.72 "systemctl daemon-reload && systemctl restart avatar-bot"
+expect {
+    "*assword:*" { send "$password\r"; exp_continue }
+    eof
+}

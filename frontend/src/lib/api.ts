@@ -1,7 +1,7 @@
 import axios from "axios";
 
-// Hardcoded to point to the Timeweb VPS, ignoring old Vercel env vars pointing to Railway
-const API_BASE = "http://103.74.92.72";
+// Production API endpoint via Cloudflare Tunnel (provides valid SSL)
+const API_BASE = "https://avatar.aiguro.pro";
 
 export const api = axios.create({
     baseURL: API_BASE,
@@ -66,6 +66,7 @@ export const gameAPI = {
 
 export const profileAPI = {
     get: (userId: number) => api.get(`/api/profile/${userId}`),
+    reset: (tgId: number) => api.post(`/api/profile/tg/${tgId}/reset`),
 };
 
 export const reflectAPI = {

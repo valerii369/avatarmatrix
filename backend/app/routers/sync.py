@@ -53,7 +53,7 @@ async def start_sync(
     request: StartSyncRequest,
     db: AsyncSession = Depends(get_db),
 ):
-    """Start a new synchronization session for a card."""
+    """Start or resume a synchronization session for a card."""
     # Get card
     card_result = await db.execute(
         select(CardProgress).where(
@@ -65,16 +65,39 @@ async def start_sync(
     if not card:
         raise HTTPException(status_code=404, detail="Card not found")
 
+    # Check for existing incomplete session to resume
+    existing_result = await db.execute(
+        select(SyncSession).where(
+            SyncSession.card_progress_id == request.card_progress_id,
+            SyncSession.user_id == request.user_id,
+            SyncSession.is_complete == False,
+        ).order_by(SyncSession.id.desc())
+    )
+    existing_session = existing_result.scalars().first()
+
+    if existing_session:
+        # Resume: return current phase content without charging energy
+        current_phase = existing_session.current_phase
+        phase_data = existing_session.phase_data or {}
+        phase_content = phase_data.get(str(current_phase), {}).get("ai_content", "Продолжаем с места, где остановились...")
+        return {
+            "session_id": existing_session.id,
+            "current_phase": current_phase,
+            "is_complete": False,
+            "phase_content": phase_content,
+            "resumed": True,
+        }
+
     # Get user
     user_result = await db.execute(select(User).where(User.id == request.user_id))
     user = user_result.scalar_one_or_none()
 
-    # Check energy
+    # Check energy for new session
     can_spend = await spend_energy(db, user, "sync")
     if not can_spend:
         raise HTTPException(status_code=402, detail="Недостаточно ✦ Энергии")
 
-    # Create sync session
+    # Create new sync session
     session = SyncSession(
         user_id=request.user_id,
         card_progress_id=request.card_progress_id,
@@ -110,7 +133,9 @@ async def start_sync(
         "current_phase": 1,
         "is_complete": False,
         "phase_content": phase_content,
+        "resumed": False,
     }
+
 
 
 @router.post("/phase")
@@ -132,6 +157,10 @@ async def process_phase(
 
     if session.is_complete:
         raise HTTPException(status_code=400, detail="Session already complete")
+
+    # Fetch user for energy/xp operations
+    user_result = await db.execute(select(User).where(User.id == request.user_id))
+    user = user_result.scalar_one_or_none()
 
     # Store user response for current phase
     phase_data = dict(session.phase_data or {})

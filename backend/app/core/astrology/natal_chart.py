@@ -24,6 +24,9 @@ with open(os.path.join(DATA_DIR, "sign_archetype_map.json")) as f:
 with open(os.path.join(DATA_DIR, "house_sphere_map.json")) as f:
     HOUSE_SPHERE_MAP = json.load(f)
 
+with open(os.path.join(DATA_DIR, "decan_map.json")) as f:
+    DECAN_MAP = json.load(f)
+
 ZODIAC_SIGNS = [
     "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
     "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"
@@ -61,9 +64,13 @@ class PlanetPosition:
     sign_ru: str
     house: int
     retrograde: bool
+    is_stationary: bool
+    speed: float
     archetype_id: int
     sign_primary_archetype: int
     sign_secondary_archetype: int
+    decan_ruler: str
+    decan_ruler_archetype: int
     priority: str
 
 
@@ -140,8 +147,13 @@ def calculate_natal_chart(
         utc_dt.hour + utc_dt.minute / 60.0
     )
 
-    # Calculate houses (Placidus)
-    cusps_raw, ascmc = swe.houses(jd, lat, lon, b"P")
+    # Calculate houses (Placidus with Whole Sign fallback)
+    try:
+        cusps_raw, ascmc = swe.houses(jd, lat, lon, b"P")
+    except Exception as e:
+        print(f"Placidus calculation failed or skewed (e.g. extreme latitude): {e}. Falling back to Whole Sign.")
+        cusps_raw, ascmc = swe.houses(jd, lat, lon, b"W")
+
     cusps = list(cusps_raw)
 
     ascendant_degree = ascmc[0]
@@ -168,12 +180,19 @@ def calculate_natal_chart(
             degree = pos[0] % 360
             speed = pos[3]  # negative = retrograde
             retrograde = speed < 0
+            is_stationary = abs(speed) < 0.03
 
-            sign_en, sign_ru, _ = degree_to_sign(degree)
+            sign_en, sign_ru, position_in_sign = degree_to_sign(degree)
             house_num = get_house(degree, cusps)
 
             planet_data = PLANET_ARCHETYPE_MAP.get(planet_name, {})
             sign_data = SIGN_ARCHETYPE_MAP.get(sign_en, {})
+            
+            # Decan logic
+            decan_idx = int(position_in_sign // 10)
+            if decan_idx > 2: decan_idx = 2
+            decan_ruler = DECAN_MAP.get(sign_en, ["Sun", "Sun", "Sun"])[decan_idx]
+            decan_ruler_archetype = PLANET_ARCHETYPE_MAP.get(decan_ruler, {}).get("archetype_id", 0)
 
             planet_pos = PlanetPosition(
                 name=planet_data.get("name", planet_name),
@@ -183,9 +202,13 @@ def calculate_natal_chart(
                 sign_ru=sign_ru,
                 house=house_num,
                 retrograde=retrograde,
+                is_stationary=is_stationary,
+                speed=round(speed, 6),
                 archetype_id=planet_data.get("archetype_id", 0),
                 sign_primary_archetype=sign_data.get("primary_archetype", 0),
                 sign_secondary_archetype=sign_data.get("secondary_archetype", 0),
+                decan_ruler=decan_ruler,
+                decan_ruler_archetype=decan_ruler_archetype,
                 priority=planet_data.get("priority", "medium"),
             )
             result.planets.append(planet_pos)
@@ -209,9 +232,13 @@ def calculate_natal_chart(
             sign_ru=south_sign_ru,
             house=south_house,
             retrograde=False,
+            is_stationary=False,
+            speed=0.0,
             archetype_id=12,  # Повешенный
             sign_primary_archetype=south_sign_data.get("primary_archetype", 0),
             sign_secondary_archetype=south_sign_data.get("secondary_archetype", 0),
+            decan_ruler=DECAN_MAP.get(south_sign_en, ["Sun", "Sun", "Sun"])[min(int((south_degree % 30) // 10), 2)],
+            decan_ruler_archetype=PLANET_ARCHETYPE_MAP.get(DECAN_MAP.get(south_sign_en, ["Sun"])[0], {}).get("archetype_id", 0),
             priority="additional",
         )
         result.planets.append(south_node)
@@ -246,9 +273,13 @@ def to_dict(chart: NatalChartData) -> dict:
                 "sign_ru": p.sign_ru,
                 "house": p.house,
                 "retrograde": p.retrograde,
+                "is_stationary": p.is_stationary,
+                "speed": p.speed,
                 "archetype_id": p.archetype_id,
                 "sign_primary_archetype": p.sign_primary_archetype,
                 "sign_secondary_archetype": p.sign_secondary_archetype,
+                "decan_ruler": p.decan_ruler,
+                "decan_ruler_archetype": p.decan_ruler_archetype,
                 "priority": p.priority,
             }
             for p in chart.planets

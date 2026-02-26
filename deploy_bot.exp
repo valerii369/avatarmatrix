@@ -1,0 +1,33 @@
+#!/usr/bin/expect -f
+set timeout -1
+set password "eCTyD*R.94zTba"
+
+proc scp_file {src dst} {
+    global password
+    spawn scp -o StrictHostKeyChecking=no $src root@103.74.92.72:$dst
+    expect {
+        "*assword:*" {
+            send "$password\r"
+            exp_continue
+        }
+        eof
+    }
+}
+
+# Upload updated bot
+scp_file "/Users/valeriiguro/Desktop/AVATARv1.0/bot/main.py" "/root/avatar/bot/main.py"
+
+# Upload updated .env
+scp_file "/Users/valeriiguro/Desktop/AVATARv1.0/backend/.env" "/root/avatar/backend/.env"
+
+# Upload recalculator script
+scp_file "/Users/valeriiguro/Desktop/AVATARv1.0/backend/recalculate_users.py" "/root/avatar/backend/recalculate_users.py"
+
+spawn ssh -o StrictHostKeyChecking=no root@103.74.92.72 "systemctl restart avatar-backend && systemctl restart avatar-bot"
+expect {
+    "*assword:*" {
+        send "$password\r"
+        exp_continue
+    }
+    eof
+}

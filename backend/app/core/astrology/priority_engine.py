@@ -41,10 +41,10 @@ def generate_recommended_cards(chart: NatalChartData) -> list[RecommendedCard]:
     Generate prioritized list of recommended cards from natal chart.
 
     Rules (from architecture):
-    - 🔴 Critical: Sun, Moon, Pluto, Saturn; Stellium planets; Ascendant ruler
+    - 🔴 Critical: Sun, Moon, Pluto, Saturn; Stellium planets; Ascendant ruler; Stationary planets
     - 🟠 High: North Node, Chiron, Lilith
     - 🟡 Medium: Mars, Venus, Jupiter, Mercury
-    - 🟢 Additional: Uranus, Neptune, South Node
+    - 🟢 Additional: Uranus, Neptune, South Node, Decan rulers
     - Retrograde planets → archetype active in SHADOW (still recommended, marked)
     """
     recommended: list[RecommendedCard] = []
@@ -90,7 +90,9 @@ def generate_recommended_cards(chart: NatalChartData) -> list[RecommendedCard]:
     for planet in chart.planets:
         # Determine effective priority
         priority = planet.priority
-        if planet.name_en in stellium_planets:
+        is_stationary = getattr(planet, "is_stationary", False)
+        
+        if planet.name_en in stellium_planets or is_stationary:
             priority = "critical"
 
         # Ascendant ruler → critical in IDENTITY
@@ -106,7 +108,8 @@ def generate_recommended_cards(chart: NatalChartData) -> list[RecommendedCard]:
         # Planet archetype in its house spheres
         planet_spheres = get_spheres_for_house(planet.house)
         retro_suffix = " (в ТЕНИ — ретроград)" if planet.retrograde else ""
-        reason_planet = f"{planet.name} в доме {planet.house}{retro_suffix}"
+        stat_suffix = " (Точка опоры — стационарна)" if is_stationary else ""
+        reason_planet = f"{planet.name} в доме {planet.house}{retro_suffix}{stat_suffix}"
 
         for sphere in planet_spheres:
             # Planet archetype
@@ -122,6 +125,13 @@ def generate_recommended_cards(chart: NatalChartData) -> list[RecommendedCard]:
             if planet.sign_secondary_archetype not in (planet.archetype_id, planet.sign_primary_archetype):
                 add_card(planet.sign_secondary_archetype, sphere, "additional",
                          f"{planet.name} в {planet.sign_ru} (знак, доп.)",
+                         planet.name_en, planet.retrograde)
+                         
+            # Decan ruler archetype
+            decan_archetype = getattr(planet, "decan_ruler_archetype", 0)
+            if decan_archetype and decan_archetype not in (planet.archetype_id, planet.sign_primary_archetype, planet.sign_secondary_archetype):
+                add_card(decan_archetype, sphere, "additional",
+                         f"{planet.name} в {planet.sign_ru} (декан: {getattr(planet, 'decan_ruler', '')})",
                          planet.name_en, planet.retrograde)
 
     # Sort by priority

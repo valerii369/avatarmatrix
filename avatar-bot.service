@@ -1,0 +1,13 @@
+[Unit]
+Description=Avatar Telegram Bot
+After=network.target avatar-backend.service
+
+[Service]
+User=root
+WorkingDirectory=/root/avatar/bot
+Environment="PATH=/root/avatar/backend/venv/bin"
+ExecStart=/root/avatar/backend/venv/bin/python main.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

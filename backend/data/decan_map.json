@@ -1,0 +1,62 @@
+{
+    "Aries": [
+        "Mars",
+        "Sun",
+        "Jupiter"
+    ],
+    "Taurus": [
+        "Venus",
+        "Mercury",
+        "Saturn"
+    ],
+    "Gemini": [
+        "Mercury",
+        "Venus",
+        "Uranus"
+    ],
+    "Cancer": [
+        "Moon",
+        "Pluto",
+        "Neptune"
+    ],
+    "Leo": [
+        "Sun",
+        "Jupiter",
+        "Mars"
+    ],
+    "Virgo": [
+        "Mercury",
+        "Saturn",
+        "Venus"
+    ],
+    "Libra": [
+        "Venus",
+        "Uranus",
+        "Mercury"
+    ],
+    "Scorpio": [
+        "Pluto",
+        "Neptune",
+        "Moon"
+    ],
+    "Sagittarius": [
+        "Jupiter",
+        "Mars",
+        "Sun"
+    ],
+    "Capricorn": [
+        "Saturn",
+        "Venus",
+        "Mercury"
+    ],
+    "Aquarius": [
+        "Uranus",
+        "Mercury",
+        "Venus"
+    ],
+    "Pisces": [
+        "Neptune",
+        "Moon",
+        "Pluto"
+    ]
+}

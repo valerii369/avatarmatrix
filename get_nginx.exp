@@ -1,0 +1,7 @@
+#!/usr/bin/expect -f
+set timeout 10
+set password "eCTyD*R.94zTba"
+spawn ssh -o StrictHostKeyChecking=no root@103.74.92.72 "cat /etc/nginx/sites-enabled/avatar"
+expect "*assword:*" { send "$password\r"; exp_continue } eof
+spawn ssh -o StrictHostKeyChecking=no root@103.74.92.72 "ls /etc/nginx/sites-enabled/"
+expect "*assword:*" { send "$password\r"; exp_continue } eof

@@ -1,0 +1,5 @@
+#!/usr/bin/expect -f
+set timeout 10
+set password "eCTyD*R.94zTba"
+spawn ssh -o StrictHostKeyChecking=no root@103.74.92.72 "curl -v http://127.0.0.1:8000/health"
+expect "*assword:*" { send "$password\r"; exp_continue } eof

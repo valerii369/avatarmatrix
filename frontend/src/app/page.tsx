@@ -3,7 +3,7 @@ import { useEffect, useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useUserStore, useCardsStore } from "@/lib/store";
-import { authAPI, cardsAPI } from "@/lib/api";
+import { authAPI, cardsAPI, profileAPI } from "@/lib/api";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -22,10 +22,11 @@ function formatScore(n: number): string {
 export default function HomePage() {
   const router = useRouter();
   const {
-    userId, setUser, energy, evolutionLevel, title, firstName, onboardingDone,
+    userId, tgId, setUser, energy, evolutionLevel, title, firstName, onboardingDone,
   } = useUserStore();
   const { cards, setCards, setLoading } = useCardsStore();
-  const [initialized, setInitialized] = useState(false);
+  const [status, setStatus] = useState<"loading" | "redirecting" | "ready" | "error">("loading");
+  const [errorInfo, setErrorInfo] = useState<string>("");
 
   const init = useCallback(async () => {
     try {
@@ -34,8 +35,21 @@ export default function HomePage() {
 
       const initData = tg?.initData || "";
       const isDev = process.env.NODE_ENV === "development";
+
+      console.log("DEBUG: Init started", { isDev, hasInitData: !!initData });
+
+      if (!initData && !isDev) {
+        throw new Error("Telegram initData missing. Please open the app from the bot.");
+      }
+
+      // 1. Auth & Get User Flag
       const authRes = await authAPI.login(initData, isDev);
       const d = authRes.data;
+
+      console.log("DEBUG: Auth success", {
+        userId: d.user_id,
+        onboardingDone: d.onboarding_done
+      });
 
       setUser({
         userId: d.user_id, tgId: d.tg_id, firstName: d.first_name,
@@ -47,26 +61,49 @@ export default function HomePage() {
       if (typeof window !== "undefined")
         localStorage.setItem("avatar_token", d.token);
 
-      if (!d.onboarding_done) { router.push("/onboarding"); return; }
+      // 2. Simple Logic: If NOT done -> redirect
+      if (!d.onboarding_done) {
+        console.log("DEBUG: Onboarding required, redirecting...");
+        setStatus("redirecting");
+        router.push("/onboarding");
+        return;
+      }
 
-      // Safety net: if onboarding_done=true but birth_date was cleared (e.g. after /reset),
-      // fetch the profile and redirect to onboarding if birth data is missing.
+      // 3. Robust Safety Net: If birth_date is missing, ALWAYS redirect
       try {
         const profileRes = await profileAPI.get(d.user_id);
         if (!profileRes.data.birth_date) {
+          console.warn("DEBUG: Birth date missing, forcing onboarding redirect.");
+          setStatus("redirecting");
           router.push("/onboarding");
           return;
         }
-      } catch { /* profile fetch failed, continue normally */ }
+      } catch (err) {
+        console.error("DEBUG: Profile check failed", err);
+      }
 
+      // 4. Load App Data
+      setStatus("loading");
       setLoading(true);
-      const cardsRes = await cardsAPI.getAll(d.user_id);
-      setCards(cardsRes.data);
-      setLoading(false);
-    } catch (e) {
-      console.error("Init error", e);
-    } finally {
-      setInitialized(true);
+      try {
+        const cardsRes = await cardsAPI.getAll(d.user_id);
+        setCards(cardsRes.data);
+      } catch (err) {
+        console.error("DEBUG: Failed to load cards", err);
+        throw new Error("Failed to load cards session data.");
+      } finally {
+        setLoading(false);
+      }
+
+      setStatus("ready");
+    } catch (e: any) {
+      console.error("DEBUG: Init error", e);
+      const msg = e.response?.data?.detail || e.message || "Unknown error";
+      setErrorInfo(msg);
+      setStatus("error");
+
+      const { reset } = useUserStore.getState();
+      reset();
     }
   }, [router, setUser, setCards, setLoading]);
 
@@ -85,15 +122,58 @@ export default function HomePage() {
   // Level progress 0..1
   const levelProgress = Math.min(evolutionLevel / MAX_LEVEL, 1);
 
-  // ── Spinner ────────────────────────────────────────────────────────────────
-  if (!initialized) {
+  // ── Loading/Error States ───────────────────────────────────────────────────
+  if (status === "loading" || status === "redirecting") {
     return (
-      <div className="flex items-center justify-center min-h-screen" style={{ background: "var(--bg-deep)" }}>
+      <div className="flex flex-col items-center justify-center min-h-screen" style={{ background: "var(--bg-deep)" }}>
         <motion.div
           animate={{ rotate: 360 }}
-          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-          className="w-12 h-12 border-2 border-violet-500 border-t-transparent rounded-full"
+          transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+          className="w-12 h-12 border-2 border-violet-500 border-t-transparent rounded-full mb-4"
         />
+        <p className="text-xs text-muted-foreground animate-pulse">
+          {status === "redirecting" ? "Подготовка онбординга..." : "Инициализация..."}
+        </p>
+      </div>
+    );
+  }
+
+  if (status === "error") {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen p-6 text-center" style={{ background: "var(--bg-deep)" }}>
+        <div style={{ fontSize: 48, marginBottom: 16 }}>⚠️</div>
+        <h2 className="text-xl font-bold text-white mb-2">Ошибка инициализации</h2>
+        <p className="text-sm text-gray-400 mb-6">{errorInfo}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-6 py-2 bg-violet-600 text-white rounded-lg font-semibold"
+        >
+          Попробовать снова
+        </button>
+        {/* Debug Info & Reset (Testing only) */}
+        <div style={{ marginTop: 20, padding: 10, border: '1px dashed rgba(255,255,255,0.1)', borderRadius: 10, fontSize: 10, color: 'var(--text-muted)' }}>
+          <p>Debug ID: {userId}</p>
+          <button
+            onClick={async () => {
+              if (!tgId) {
+                alert("No TG ID found in store.");
+                return;
+              }
+              if (confirm("Reset all data?")) {
+                try {
+                  await profileAPI.reset(tgId);
+                  window.location.reload();
+                } catch (err) {
+                  console.error("Reset failed", err);
+                  alert("Reset failed. Check logs.");
+                }
+              }
+            }}
+            style={{ marginTop: 5, padding: '4px 8px', background: 'rgba(255,0,0,0.1)', color: 'red', border: '1px solid red', borderRadius: 4 }}
+          >
+            Force Reset Data (Testing)
+          </button>
+        </div>
       </div>
     );
   }

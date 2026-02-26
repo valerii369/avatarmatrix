@@ -1,0 +1,8 @@
+#!/usr/bin/expect -f
+set timeout -1
+set password "eCTyD*R.94zTba"
+spawn ssh -o StrictHostKeyChecking=no root@103.74.92.72 "bash /root/setup_vps.sh"
+expect {
+    "*assword:*" { send "$password\r"; exp_continue }
+    eof
+}

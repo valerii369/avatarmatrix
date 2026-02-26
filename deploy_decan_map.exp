@@ -1,0 +1,9 @@
+#!/usr/bin/expect -f
+set timeout 30
+set password "eCTyD*R.94zTba"
+
+spawn scp -o StrictHostKeyChecking=no /Users/valeriiguro/Desktop/AVATARv1.0/backend/data/decan_map.json root@103.74.92.72:/root/avatar/backend/data/decan_map.json
+expect "*assword:*" { send "$password\r"; exp_continue } eof
+
+spawn ssh -o StrictHostKeyChecking=no root@103.74.92.72 "systemctl restart avatar-backend"
+expect "*assword:*" { send "$password\r"; exp_continue } eof

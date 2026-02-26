@@ -1,0 +1,29 @@
+#!/usr/bin/expect -f
+set timeout -1
+set password "eCTyD*R.94zTba"
+
+proc scp_file {src dst} {
+    global password
+    spawn scp -o StrictHostKeyChecking=no $src root@103.74.92.72:$dst
+    expect {
+        "*assword:*" {
+            send "$password\r"
+            exp_continue
+        }
+        eof
+    }
+}
+
+scp_file "/Users/valeriiguro/Desktop/AVATARv1.0/backend/data/archetypes.json" "/root/avatar/backend/data/archetypes.json"
+scp_file "/Users/valeriiguro/Desktop/AVATARv1.0/backend/data/archetype_sphere_matrix.json" "/root/avatar/backend/data/archetype_sphere_matrix.json"
+scp_file "/Users/valeriiguro/Desktop/AVATARv1.0/backend/app/routers/cards.py" "/root/avatar/backend/app/routers/cards.py"
+scp_file "/Users/valeriiguro/Desktop/AVATARv1.0/backend/app/agents/master_agent.py" "/root/avatar/backend/app/agents/master_agent.py"
+
+spawn ssh -o StrictHostKeyChecking=no root@103.74.92.72 "systemctl restart avatar-backend && sleep 2 && systemctl status avatar-backend --no-pager | tail -5"
+expect {
+    "*assword:*" {
+        send "$password\r"
+        exp_continue
+    }
+    eof
+}

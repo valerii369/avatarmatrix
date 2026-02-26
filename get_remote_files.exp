@@ -1,0 +1,7 @@
+#!/usr/bin/expect -f
+set timeout 10
+set password "eCTyD*R.94zTba"
+spawn scp -o StrictHostKeyChecking=no root@103.74.92.72:/root/avatar/backend/app/routers/profile.py /Users/valeriiguro/Desktop/AVATARv1.0/remote_profile_current.py
+expect "*assword:*" { send "$password\r"; exp_continue } eof
+spawn scp -o StrictHostKeyChecking=no root@103.74.92.72:/root/avatar/backend/app/routers/auth.py /Users/valeriiguro/Desktop/AVATARv1.0/remote_auth_current.py
+expect "*assword:*" { send "$password\r"; exp_continue } eof

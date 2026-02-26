@@ -1,0 +1,14 @@
+http:
+  routers:
+    avatar:
+      rule: "Host(`103-74-92-72.nip.io`)"
+      entryPoints:
+        - websecure
+      service: avatar
+      tls:
+        certResolver: letsencrypt
+  services:
+    avatar:
+      loadBalancer:
+        servers:
+          - url: "http://103.74.92.72:8000"

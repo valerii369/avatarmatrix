@@ -1,0 +1,13 @@
+[Unit]
+Description=Avatar FastAPI Backend
+After=network.target
+
+[Service]
+User=root
+WorkingDirectory=/root/avatar/backend
+Environment="PATH=/root/avatar/backend/venv/bin"
+ExecStart=/root/avatar/backend/venv/bin/gunicorn app.main:app -w 4 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

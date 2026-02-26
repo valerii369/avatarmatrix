@@ -1,0 +1,17 @@
+#!/usr/bin/expect -f
+set timeout -1
+set password "eCTyD*R.94zTba"
+spawn ssh -o StrictHostKeyChecking=no root@103.74.92.72
+expect {
+    "*assword:*" { send "$password\r"; exp_continue }
+    "*#" {
+        send "curl -L --output cloudflared.deb https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb\r"
+        expect "*#"
+        send "dpkg -i cloudflared.deb\r"
+        expect "*#"
+        send "cloudflared service install eyJhIjoiZTExY2FkMGY0NTcxZjEzYTA1NzhmMTMzYTMzODE2ZDEiLCJ0IjoiOWNiODE1OWYtYjYzZS00MGE0LWE0YmYtYmM0YzNiZGEyMjRiIiwicyI6Ik1qWmpaRFJrWkRFdE1EbGtOUzAwTWpNekxXRTVOVFV0TURKak1EZ3pPVGcwTmpWayJ9\r"
+        expect "*#"
+        send "exit\r"
+    }
+}
+expect eof

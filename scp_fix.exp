@@ -1,0 +1,8 @@
+#!/usr/bin/expect -f
+set timeout -1
+set password "eCTyD*R.94zTba"
+spawn scp -o StrictHostKeyChecking=no /Users/valeriiguro/Desktop/AVATARv1.0/avatar.yml /Users/valeriiguro/Desktop/AVATARv1.0/avatar-backend.service /Users/valeriiguro/Desktop/AVATARv1.0/fix_vps.sh root@103.74.92.72:/root/
+expect {
+    "*assword:*" { send "$password\r"; exp_continue }
+    eof
+}

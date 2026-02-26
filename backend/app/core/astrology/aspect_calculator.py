@@ -13,16 +13,17 @@ class Aspect:
     aspect_type: str  # conjunction, opposition, square, trine, sextile
     orb: float
     is_applying: bool
-    strength: int  # 1-5 (5 = exact)
+    is_exact: bool
+    strength: int  # 1-7 (base max 5, exact +2)
     connection_label: str
 
 
 ASPECT_DEFINITIONS = {
-    "conjunction":  {"angle": 0,   "orb": 8.0,  "symbol": "☌", "strength_base": 5, "label": "Слияние"},
-    "opposition":   {"angle": 180, "orb": 8.0,  "symbol": "☍", "strength_base": 4, "label": "Напряжённая полярность"},
-    "square":       {"angle": 90,  "orb": 7.0,  "symbol": "□", "strength_base": 3, "label": "Конфликт, точка роста"},
-    "trine":        {"angle": 120, "orb": 8.0,  "symbol": "△", "strength_base": 4, "label": "Гармония"},
-    "sextile":      {"angle": 60,  "orb": 6.0,  "symbol": "⚹", "strength_base": 2, "label": "Возможность"},
+    "conjunction":  {"angle": 0,   "orb": 7.0,  "symbol": "☌", "strength_base": 5, "label": "Слияние"},
+    "opposition":   {"angle": 180, "orb": 7.0,  "symbol": "☍", "strength_base": 4, "label": "Напряжённая полярность"},
+    "square":       {"angle": 90,  "orb": 6.0,  "symbol": "□", "strength_base": 3, "label": "Конфликт, точка роста"},
+    "trine":        {"angle": 120, "orb": 7.0,  "symbol": "△", "strength_base": 4, "label": "Гармония"},
+    "sextile":      {"angle": 60,  "orb": 5.0,  "symbol": "⚹", "strength_base": 2, "label": "Возможность"},
 }
 
 
@@ -46,23 +47,45 @@ def calculate_aspects(planets: list[dict]) -> list[Aspect]:
 
             diff = angle_diff(p1["degree"], p2["degree"])
 
+            v1 = p1.get("speed", 0.0)
+            v2 = p2.get("speed", 0.0)
+            p1_next = (p1["degree"] + v1) % 360
+            p2_next = (p2["degree"] + v2) % 360
+            future_diff = angle_diff(p1_next, p2_next)
+
             for aspect_name, aspect_def in ASPECT_DEFINITIONS.items():
                 target = aspect_def["angle"]
                 orb_limit = aspect_def["orb"]
 
                 actual_orb = abs(diff - target)
                 if actual_orb <= orb_limit:
+                    is_exact = actual_orb <= 1.0
+                    
+                    # Applying check
+                    future_orb = abs(future_diff - target)
+                    is_applying = future_orb < actual_orb
+
                     # Strength decreases with orb
                     strength = max(1, round(aspect_def["strength_base"] * (1 - actual_orb / orb_limit)))
+                    if is_exact:
+                        strength += 2
+
+                    label_suffix = []
+                    if is_exact: label_suffix.append("Точный")
+                    if is_applying: label_suffix.append("Сходящийся")
+                    else: label_suffix.append("Расходящийся")
+                    
+                    full_label = f"{aspect_def['label']} ({', '.join(label_suffix)})"
 
                     aspects.append(Aspect(
                         planet1=p1["name_en"],
                         planet2=p2["name_en"],
                         aspect_type=aspect_name,
                         orb=round(actual_orb, 2),
-                        is_applying=False,  # simplified — not tracking speed here
+                        is_applying=is_applying,
+                        is_exact=is_exact,
                         strength=strength,
-                        connection_label=aspect_def["label"],
+                        connection_label=full_label,
                     ))
                     break  # Only one aspect per pair
 
@@ -107,6 +130,8 @@ def to_dict(aspects: list[Aspect]) -> list[dict]:
             "planet2": a.planet2,
             "type": a.aspect_type,
             "orb": a.orb,
+            "is_applying": a.is_applying,
+            "is_exact": a.is_exact,
             "strength": a.strength,
             "label": a.connection_label,
         }
