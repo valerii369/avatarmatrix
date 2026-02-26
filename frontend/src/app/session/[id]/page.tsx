@@ -88,6 +88,14 @@ export default function SessionPage() {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
+    // Auto-resize textarea when content changes
+    useEffect(() => {
+        if (textareaRef.current) {
+            textareaRef.current.style.height = "auto";
+            textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 180)}px`;
+        }
+    }, [input, isTranscribing]);
+
     const sendMessage = () => {
         if (!input.trim() || !wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
 
@@ -98,7 +106,9 @@ export default function SessionPage() {
 
         wsRef.current.send(JSON.stringify({ type: "message", content, stage }));
 
-        if (textareaRef.current) textareaRef.current.style.height = "auto";
+        if (textareaRef.current) {
+            textareaRef.current.style.height = "auto";
+        }
     };
 
     const completeStage = () => {
@@ -301,8 +311,6 @@ export default function SessionPage() {
                             value={isTranscribing ? "🎤 Обработка голоса..." : input}
                             onChange={(e) => {
                                 setInput(e.target.value);
-                                e.target.style.height = "auto";
-                                e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
                             }}
                             onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
                             placeholder="Ваш ответ..."
@@ -313,7 +321,7 @@ export default function SessionPage() {
                                 background: "rgba(255,255,255,0.06)",
                                 border: "1px solid var(--border)",
                                 color: "var(--text-primary)",
-                                maxHeight: "120px",
+                                maxHeight: "180px",
                                 fontSize: "16px",   // Prevents mobile auto-zoom
                                 lineHeight: "1.5",
                             }}

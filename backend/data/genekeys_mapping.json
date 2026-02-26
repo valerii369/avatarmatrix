@@ -37,7 +37,7 @@
     },
     "10": {
         "archetype_id": 10,
-        "archetype_name": "Колесо Фортуны"
+        "archetype_name": "Фортуна"
     },
     "11": {
         "archetype_id": 11,
@@ -137,7 +137,7 @@
     },
     "35": {
         "archetype_id": 10,
-        "archetype_name": "Колесо Фортуны"
+        "archetype_name": "Фортуна"
     },
     "36": {
         "archetype_id": 16,
@@ -181,7 +181,7 @@
     },
     "46": {
         "archetype_id": 10,
-        "archetype_name": "Колесо Фортуны"
+        "archetype_name": "Фортуна"
     },
     "47": {
         "archetype_id": 13,
@@ -213,7 +213,7 @@
     },
     "54": {
         "archetype_id": 10,
-        "archetype_name": "Колесо Фортуны"
+        "archetype_name": "Фортуна"
     },
     "55": {
         "archetype_id": 17,

@@ -44,6 +44,14 @@ export default function SyncPage() {
             });
     }, [userId, params.id, router]);
 
+    // Auto-resize textarea when content changes (e.g. voice transcription)
+    useEffect(() => {
+        if (textareaRef.current) {
+            textareaRef.current.style.height = "auto";
+            textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 200)}px`;
+        }
+    }, [userInput, isTranscribing]);
+
     const handleNext = async () => {
         if (!sessionId || !userId) return;
         setLoading(true);
@@ -205,16 +213,15 @@ export default function SyncPage() {
                             </div>
                         ) : currentPhase === 0 ? (
                             <div style={{ textAlign: "center", padding: "10px 0" }}>
-                                <div style={{ fontSize: 40, marginBottom: 20 }}>🌌</div>
-                                <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 16, color: "var(--text-primary)" }}>
+                                <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 12, color: "var(--text-primary)" }}>
                                     Врата Синхронизации
                                 </h2>
-                                <p style={{ fontSize: 15, lineHeight: 1.8, color: "var(--text-secondary)", whiteSpace: "pre-line" }}>
+                                <p style={{ fontSize: 14, lineHeight: 1.6, color: "var(--text-secondary)", whiteSpace: "pre-line" }}>
                                     {phaseContent}
                                 </p>
                             </div>
                         ) : (
-                            <p style={{ fontSize: 15, lineHeight: 1.75, color: "var(--text-primary)", whiteSpace: "pre-line", margin: 0 }}>
+                            <p style={{ fontSize: 14, lineHeight: 1.6, color: "var(--text-primary)", whiteSpace: "pre-line", margin: 0 }}>
                                 {phaseContent}
                             </p>
                         )}
@@ -251,8 +258,6 @@ export default function SyncPage() {
                                         onChange={(e) => {
                                             if (isTranscribing) return;
                                             setUserInput(e.target.value);
-                                            e.target.style.height = "auto";
-                                            e.target.style.height = `${Math.min(e.target.scrollHeight, 140)}px`;
                                         }}
                                         placeholder="Напишите ваш ответ..."
                                         rows={1}
@@ -266,7 +271,7 @@ export default function SyncPage() {
                                             fontSize: 16,
                                             color: "var(--text-primary)",
                                             lineHeight: 1.5,
-                                            maxHeight: 140,
+                                            maxHeight: 200,
                                             fontFamily: "'Inter', sans-serif",
                                             padding: 0,
                                         }}
