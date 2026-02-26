@@ -1,0 +1,5 @@
+#!/usr/bin/expect -f
+set timeout 10
+set password "eCTyD*R.94zTba"
+spawn ssh -o StrictHostKeyChecking=no root@103.74.92.72 "sed -i 's|API_BASE_URL=http://103.74.92.72|API_BASE_URL=https://avatar.aiguro.pro|' /root/avatar/backend/.env && systemctl restart avatar-backend && systemctl restart avatar-bot"
+expect "*assword:*" { send "$password\r"; exp_continue } eof

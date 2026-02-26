@@ -122,6 +122,8 @@ export default function HomePage() {
   // Level progress 0..1
   const levelProgress = Math.min(evolutionLevel / MAX_LEVEL, 1);
 
+  const activeCards = cards.filter((c) => c.status === "synced" || c.status === "aligned").length;
+
   // ── Loading/Error States ───────────────────────────────────────────────────
   if (status === "loading" || status === "redirecting") {
     return (
@@ -213,7 +215,7 @@ export default function HomePage() {
       <div className="px-4 mb-4">
         <div className="grid grid-cols-3 gap-2">
           <StatTile label="Сферы" value={`${openedSpheres}/8`} color="#F59E0B" />
-          <StatTile label="Карточки" value={`${openedCards}/${TOTAL_CARDS}`} color="#10B981" />
+          <StatTile label="Карточки" value={`${activeCards}/${TOTAL_CARDS}`} color="#10B981" />
           <StatTile label="Рекомендовано" value={String(recommended)} color="#60A5FA" />
         </div>
       </div>

@@ -1,0 +1,31 @@
+#!/usr/bin/expect -f
+
+set timeout 300
+set host "103.74.92.72"
+set user "root"
+set pass "eCTyD*R.94zTba"
+
+# 1. Copy all necessary backend files
+spawn scp -o StrictHostKeyChecking=no backend/app/agents/master_agent.py backend/app/models/sync_session.py backend/app/models/knowledge.py backend/app/models/__init__.py backend/app/routers/sync.py backend/create_tables.py $user@$host:/root/avatar/backend/
+expect {
+    "*assword:" { send "$pass\r"; exp_continue }
+    eof
+}
+
+# 2. Move files to correct directories and run table creation
+spawn ssh -o StrictHostKeyChecking=no $user@$host "
+    cd /root/avatar/backend && \
+    mv master_agent.py app/agents/ && \
+    mv sync_session.py app/models/ && \
+    mv knowledge.py app/models/ && \
+    mv __init__.py app/models/ && \
+    mv sync.py app/routers/ && \
+    PYTHONPATH=. /root/avatar/backend/venv/bin/python3 create_tables.py && \
+    systemctl restart avatar-backend
+"
+expect {
+    "password:" { send "$pass\r"; exp_continue }
+    eof
+}
+
+puts "Deployment of Knowledge Cells completed successfully!"

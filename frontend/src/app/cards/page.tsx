@@ -95,6 +95,7 @@ export default function CardsPage() {
     ).size;
     const openedCards = cards.filter((c) => c.status !== "locked").length;
     const recommended = cards.filter((c) => c.is_recommended_astro).length;
+    const activeCards = cards.filter((c) => c.status === "synced" || c.status === "aligned").length;
 
     // ── Tabs filter ──────────────────────────────────────────────────────────
     const byTab = (c: CardProgress) => {
@@ -158,7 +159,7 @@ export default function CardsPage() {
             <div className="px-4 mb-4">
                 <div className="grid grid-cols-3 gap-2">
                     <StatTile label="Сферы" value={`${openedSpheres}/8`} color="#F59E0B" />
-                    <StatTile label="Карточки" value={`${openedCards}/${TOTAL_CARDS}`} color="#10B981" />
+                    <StatTile label="Карточки" value={`${activeCards}/${TOTAL_CARDS}`} color="#10B981" />
                     <StatTile label="Рекомендовано" value={String(recommended)} color="#60A5FA" />
                 </div>
             </div>

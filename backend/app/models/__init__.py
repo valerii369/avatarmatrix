@@ -7,6 +7,7 @@ from app.models.align_session import AlignSession
 from app.models.diary import DiaryEntry
 from app.models.portrait import UserPortrait, Pattern, Connection
 from app.models.game import GameState, Match, DailyReflect, VoiceRecord
+from app.models.knowledge import SphereKnowledge, UserWorldKnowledge
 
 __all__ = [
     "User",
@@ -23,4 +24,6 @@ __all__ = [
     "Match",
     "DailyReflect",
     "VoiceRecord",
+    "SphereKnowledge",
+    "UserWorldKnowledge",
 ]

@@ -120,8 +120,8 @@ export default function SyncPage() {
     };
 
     const progress = Math.round((currentPhase / 10) * 100);
-    const isFirstPhase = currentPhase <= 1;
-    const needsInput = currentPhase > 1;
+    const isFirstPhase = currentPhase === 0;
+    const needsInput = currentPhase > 0 && currentPhase < 10;
 
     if (starting) return (
         <div className="flex items-center justify-center min-h-screen flex-col gap-4" style={{ background: "var(--bg-deep)" }}>
@@ -200,6 +200,16 @@ export default function SyncPage() {
                                     Синхронизация завершена
                                 </h2>
                                 <p style={{ fontSize: 14, color: "var(--text-secondary)", whiteSpace: "pre-line", lineHeight: 1.7 }}>
+                                    {phaseContent}
+                                </p>
+                            </div>
+                        ) : currentPhase === 0 ? (
+                            <div style={{ textAlign: "center", padding: "10px 0" }}>
+                                <div style={{ fontSize: 40, marginBottom: 20 }}>🌌</div>
+                                <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 16, color: "var(--text-primary)" }}>
+                                    Врата Синхронизации
+                                </h2>
+                                <p style={{ fontSize: 15, lineHeight: 1.8, color: "var(--text-secondary)", whiteSpace: "pre-line" }}>
                                     {phaseContent}
                                 </p>
                             </div>

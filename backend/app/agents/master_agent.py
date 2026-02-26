@@ -66,135 +66,175 @@ def get_hawkins_agent_level(hawkins_score: int) -> int:
     return 10
 
 
-def build_sync_phase_prompt(
-    phase: int,
+def is_abstract_response(text: str) -> bool:
+    """
+    Check if user response is too abstract based on keywords and lack of body part mentions.
+    """
+    if not text:
+        return True
+    
+    text_lower = text.lower()
+    
+    # Body parts keywords (Russian)
+    body_parts = ["грудь", "живот", "горло", "рук", "ног", "спин", "плеч", "голов", "солнечн", "дыхани", "сердц", "тело", "мышц"]
+    has_body = any(bp in text_lower for bp in body_parts)
+    
+    # Abstract keywords
+    abstract_keywords = ["мир", "творить", "помогать", "всё", "развитие", "рост", "гармония", "счастье", "любовь"]
+    is_vague = any(ak == text_lower.strip() or f" {ak} " in f" {text_lower} " for ak in abstract_keywords)
+    
+    # If no body mention and contains abstract keywords OR it's just too short/generic
+    if not has_body and (is_vague or len(text.split()) < 3):
+        return True
+        
+    return False
+
+
+def build_avatar_prompt(
+    layer: str,
     archetype_id: int,
     sphere: str,
-    previous_phases: dict,
-    phase_response: str = None,
+    session_data: dict,
+    is_narrowing: bool = False
 ) -> str:
-    """Build the prompt for a specific synchronization phase."""
+    """Build the prompt for a specific narrative layer (1, 2, 3) or Mirror analysis."""
     archetype = ARCHETYPES.get(archetype_id, {})
     sphere_data = SPHERES.get(sphere, {})
-
+    
     matrix = MATRIX_DATA.get(str(archetype_id), {}).get(sphere, {})
     arch_shadow = matrix.get("shadow", archetype.get('shadow', ''))
     arch_light = matrix.get("light", archetype.get('light', ''))
 
-    context = f"""
-Ты — агент-нейрогид синхронизации AVATAR.
-Цель: обойти логику и связаться с подсознанием, выявить скрытые истинные паттерны.
+    base_context = f"""
+Ты — агент синхронизации AVATAR.
+Метод: нарративная проекция. Ты даешь образы-сцены, человек их достраивает.
+Цель: ЧИСТАЯ ДИАГНОСТИКА. Достать из подсознания реальную картину того, что происходит сейчас.
+Никакой трансформации или коррекции на этом этапе.
+
 Архетип: {archetype.get('name', '')} ({arch_shadow} / {arch_light})
 Сфера: {sphere_data.get('name_ru', sphere)} — {sphere_data.get('main_question', '')}
 
-ВАЖНЕЙШИЙ КОНТЕКСТ:
-Твоя задача — провести человека через исследование Тени и Света архетипа в этой сфере.
-Метафоры и сцены должны строиться на пересечении ЭТОГО Архетипа и ЭТОЙ Сферы.
-
 ПРАВИЛА:
-1. КРАТКОСТЬ: Твой ответ должен быть до 400 символов. Без портянок. Меньше слов, больше плотности.
-2. ФОРМАТ: Живой трансовый язык. Никаких списков, приветствий, воды.
-3. ЗАПРЕТ: НИКОГДА не предлагай варианты выбора (А/Б/В/Г). Задавай только ОДИН открытый вопрос, бьющий в суть.
-4. ФОКУС: Обращайся к чувствам, телу и метафорам, а не к логике. Не используй термины психологии.
+1. КРАТКОСТЬ: Мах 400 символов.
+2. ЖИВОЙ ЯЗЫК: Никаких списков, приветствий, психологических терминов.
+3. ОДИН ВОПРОС: Всегда заканчивай ОДНИМ открытым вопросом, бьющим в суть.
+4. НЕТ ВАРИАНТАМ: Не предлагай выбор (А/Б/В).
 """
 
-    phase_prompts = {
-        1: f"""
-ФАЗА 1 — ВРАТА (Настройка)
-Сделай короткое вступление. Коротко и ясно объясни, что сейчас будет происходить погружение в подсознание для сферы "{sphere_data.get('name_ru', sphere)}" через архетип "{archetype.get('name', '')}".
-Попроси человека отключить логику и фиксировать только самые ПЕРВЫЕ образы, мысли или ощущения в теле, которые будут всплывать. 
-Затем создай темный, притягательный образ-погружение (2 предложения), отражающий влияние Тени этого архетипа.
-Закончи коротким приглашением сделать шаг внутрь. Никаких вопросов пока не задавай.
+    layer_instructions = {
+        "intro": """
+ВСТУПЛЕНИЕ (БЕЗ ВОПРОСА)
+Цель: рассказать человеку, что сейчас будет происходить.
+Объясни кратко:
+1. Это диагностическая сессия из 3-х слоев: Поверхность, Под поверхностью, Дно.
+2. Метод — нарративная проекция (я даю образы, ты их достраиваешь).
+3. Важно отвечать конкретно, обращая внимание на чувства и тело.
+Закончи приглашением войти внутрь. НЕ ЗАДАВАЙ НИКАКИХ ВОПРОСОВ.
 """,
-        2: f"""
-ФАЗА 2 — СТОЛКНОВЕНИЕ
-Создай короткую острую сцену (2 предложения), где проявляется типичная проблема сферы "{sphere_data.get('name_ru', sphere)}".
-Задай ОДИН вопрос: "Что первое вырывается наружу в этот момент: гнев, страх, желание сжаться или убежать?"
+        "1": """
+СЛОЙ 1 — ПОВЕРХНОСТЬ
+Цель: зафиксировать то, что человек ДУМАЕТ о своей ситуации.
+Создай 1-2 образа, отражающих типичную социальную или внешнюю сторону этой сферы.
+Задай вопрос, помогающий человеку описать его текущую декларативную картину.
 """,
-        3: f"""
-ФАЗА 3 — ЗЕРКАЛО ТЕНИ
-Предыдущий ответ: {phase_response or 'не получен'}
-Текущий багаж: {json.dumps(previous_phases, ensure_ascii=False)[:300]}
+        "2": """
+СЛОЙ 2 — ПОД ПОВЕРХНОСТЬЮ
+Цель: обойти логику, достать реальные драйверы.
+Создай образы, создающие лёгкое давление (не комфортное, но не травматичное).
+Заставь человека заглянуть за его привычные объяснения.
+""",
+        "3": """
+СЛОЙ 3 — ДНО
+Цель: корневой паттерн + телесный якорь.
+Создай один мощный образ — исчезновение всего привычного ресурса в этой ситуации.
+Требуй фиксации: ГДЕ в теле, КАК выглядит, ОДНО слово-описание.
+""",
+        "mirror": f"""
+ФИНАЛ — ЗЕРКАЛО (АНАЛИЗ)
+Твоя задача — проанализировать ВСЮ сессию целиком и сформулировать реальную картину.
+Не интерпретируй, а отражай. Что на самом деле происходит?
+Какой паттерн управляет? Что из Тени активно? Где это живет в теле?
 
-Опиши короткую реакцию Тени архетипа ({arch_shadow}) на ответ пользователя. Тень провоцирует.
-Задай ОДИН вопрос: "Чего эта часть внутри вас боится больше всего?"
-""",
-        4: f"""
-ФАЗА 4 — ОПУСКАНИЕ НА ДНО
-Предыдущие данные: {json.dumps(previous_phases, ensure_ascii=False)[:300]}
+Обязательно определи НАЙНИЗШУЮ точку по шкале Хокинса во всей сессии.
 
-Углуби предыдущий ответ. Метафорически опусти человека в самое дискомфортное состояние его Тени.
-Спроси: "Если перестать бороться с этим чувством, какое одно слово его опишет?"
-""",
-        5: f"""
-ФАЗА 5 — ТЕЛО
-Данные предыдущих фаз: {json.dumps(previous_phases, ensure_ascii=False)[:400]}
-
-Переведи фокус с мыслей на физические ощущения.
-Спроси: "В какой части тела сейчас живет это напряжение или сопротивление? Как оно выглядит?"
-""",
-        6: f"""
-ФАЗА 6 — ПРЕДЕЛ
-Предыдущие данные: {json.dumps(previous_phases, ensure_ascii=False)[:400]}
-
-Смоделируй точку кипения. Ситуация в сфере "{sphere_data.get('name_ru', sphere)}" достигает максимума, старые стратегии больше не работают.
-Спроси: "Что вы готовы отпустить прямо сейчас, потому что нести это дальше невыносимо?"
-""",
-        7: f"""
-ФАЗА 7 — ВМЕШАТЕЛЬСТВО СВЕТА
-Данные: {json.dumps(previous_phases, ensure_ascii=False)[:500]}
-
-Введи неожиданный элемент Света архетипа ({arch_light}). Свет не спасает, он дает ясность.
-Спроси: "Если бы вы посмотрели на ситуацию глазами этой силы, что меняется?"
-""",
-        8: f"""
-ФАЗА 8 — НОВЫЙ ВЫБОР
-Данные сессии: {json.dumps(previous_phases, ensure_ascii=False)[:500]}
-
-Реальность начинает меняться. Укажи на крошечный, но реальный первый шаг по-новому.
-Спроси: "Какое крошечное действие по-другому вы можете сделать уже сегодня?"
-""",
-        9: f"""
-ФАЗА 9 — КРИСТАЛЛИЗАЦИЯ
-Все данные: {json.dumps(previous_phases, ensure_ascii=False)[:800]}
-
-Опираясь на инсайты сессии, сформулируй 1 коренное ограничивающее убеждение, которое мы обнаружили, и 1 освобождающее.
-Спроси: "Вам откликается этот сдвиг?"
-""",
-        10: f"""
-ФАЗА 10 — ИНТЕГРАЦИЯ
-Все данные: {json.dumps(previous_phases, ensure_ascii=False)[:800]}
-
-Мягкое завершение. Подсвети, что энергия, которая уходила на борьбу с Тенью, теперь свободна.
-Задай финальный вопрос: "Как ощущается пространство внутри вас сейчас?"
-""",
+Отвечай СТРОГО в JSON формате:
+{{
+  "real_picture": "...",
+  "core_pattern": "...",
+  "shadow_active": "...",
+  "body_anchor": "...",
+  "first_insight": "...",
+  "hawkins_score": 100,
+  "hawkins_level": "Страх"
+}}
+"""
     }
 
-    return context + phase_prompts.get(phase, "Продолжи сессию.")
+    prompt = base_context + layer_instructions.get(str(layer), "")
+    
+    if is_narrowing:
+        prompt += "\nВНИМАНИЕ: Предыдущий ответ пользователя был абстрактным. Используй СУЖАЮЩИЙ образ, чтобы добиться конкретики или телесного отклика.\n"
+
+    return prompt
 
 
-async def sync_phase_response(
-    phase: int,
+async def run_avatar_layer(
+    layer: str,
     archetype_id: int,
     sphere: str,
-    previous_phases: dict,
-    user_message: str = None,
-    token_budget: int = 1200,
+    previous_messages: list,
+    is_narrowing: bool = False
 ) -> str:
-    """Generate AI response for a synchronization phase."""
-    prompt = build_sync_phase_prompt(phase, archetype_id, sphere, previous_phases, user_message)
-
+    """Call OpenAI for a narrative layer."""
+    prompt = build_avatar_prompt(layer, archetype_id, sphere, {}, is_narrowing)
+    
     messages = [{"role": "system", "content": prompt}]
-    if user_message and phase > 1:
-        messages.append({"role": "user", "content": user_message})
+    # For intro, we don't need history, but for layers we do
+    if layer != "intro":
+        messages.extend(previous_messages)
 
     response = await client.chat.completions.create(
         model=settings.OPENAI_MODEL,
         messages=messages,
-        max_tokens=token_budget,
-        temperature=0.85,
+        max_tokens=400 if layer == "intro" else 300,
+        temperature=0.85 if layer != "mirror" else 0.2,
     )
     return response.choices[0].message.content
+
+
+async def run_mirror_analysis(
+    archetype_id: int,
+    sphere: str,
+    session_transcript: list
+) -> dict:
+    """Run the final analytical 'Mirror' call."""
+    prompt = build_avatar_prompt("mirror", archetype_id, sphere, {})
+    
+    messages = [{"role": "system", "content": prompt}]
+    # Format transcript for the analyst
+    transcript_text = "\n".join([f"{m['role']}: {m['content']}" for m in session_transcript])
+    messages.append({"role": "user", "content": f"Транскрипт сессии:\n{transcript_text}"})
+
+    response = await client.chat.completions.create(
+        model=settings.OPENAI_MODEL,
+        messages=messages,
+        max_tokens=600,
+        temperature=0.2,
+        response_format={"type": "json_object"},
+    )
+    
+    try:
+        return json.loads(response.choices[0].message.content)
+    except Exception:
+        return {
+            "real_picture": "Ошибка анализа",
+            "core_pattern": "Не определен",
+            "shadow_active": "Не определен",
+            "body_anchor": "Не определен",
+            "first_insight": "Не определен",
+            "hawkins_score": 100,
+            "hawkins_level": "Страх"
+        }
 
 
 async def alignment_session_message(

@@ -1,0 +1,7 @@
+#!/usr/bin/expect -f
+set timeout 30
+set password "eCTyD*R.94zTba"
+set host "103.74.92.72"
+
+spawn ssh -o StrictHostKeyChecking=no root@$host "journalctl -u avatar-backend -n 50 --no-pager"
+expect "*assword:*" { send "$password\r"; exp_continue } eof

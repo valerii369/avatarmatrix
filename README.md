@@ -111,6 +111,6 @@ make migrate-create  # Создать новую миграцию
 
 ## Деплой
 
-- **Backend**: Railway / Render (Dockerfile или Procfile)
+- **Backend**: Timeweb Cloud (Dockerfile)
 - **Frontend**: Vercel (`vercel --prod`)
 - **БД**: Supabase (уже настроен через DATABASE_URL)
