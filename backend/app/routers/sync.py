@@ -350,35 +350,42 @@ async def process_phase(
             "insights": analysis,
         }
 
-    # 3. Handle next narrative step
-    ai_content = await run_avatar_layer(
-        layer=next_layer,
-        archetype_id=session.archetype_id,
-        sphere=session.sphere,
-        previous_messages=transcript,
-        is_narrowing=(not should_move_deeper)
-    )
+    try:
+        # 3. Handle next narrative step
+        ai_content = await run_avatar_layer(
+            layer=next_layer,
+            archetype_id=session.archetype_id,
+            sphere=session.sphere,
+            previous_messages=transcript,
+            is_narrowing=(not should_move_deeper)
+        )
 
-    # Update session state
-    transcript.append({"role": "assistant", "content": str(ai_content)})
-    session.session_transcript = transcript
-    session.phase_data = {"current_layer": next_layer, "sub_phase": new_sub_phase}
-    session.current_phase = new_phase_val
-    
-    # Explicitly mark as modified for SQLAlchemy just in case
-    from sqlalchemy.orm.attributes import flag_modified
-    flag_modified(session, "phase_data")
-    flag_modified(session, "session_transcript")
-    
-    db.add(session)
-    await db.commit()
-    await db.refresh(session)
+        # Update session state: Ensure context is saved
+        transcript.append({"role": "assistant", "content": str(ai_content)})
+        session.session_transcript = transcript
+        session.phase_data = {"current_layer": next_layer, "sub_phase": new_sub_phase}
+        session.current_phase = new_phase_val
+        
+        # Explicitly mark as modified for SQLAlchemy just in case
+        from sqlalchemy.orm.attributes import flag_modified
+        flag_modified(session, "phase_data")
+        flag_modified(session, "session_transcript")
+        
+        db.add(session)
+        await db.commit()
+        await db.refresh(session)
 
-    return {
-        "session_id": session.id,
-        "current_phase": session.current_phase,
-        "is_complete": False,
-        "phase_content": ai_content,
-        "layer": next_layer,
-        "sub_phase": new_sub_phase
-    }
+        return {
+            "session_id": session.id,
+            "current_phase": session.current_phase,
+            "is_complete": False,
+            "phase_content": ai_content,
+            "layer": next_layer,
+            "sub_phase": new_sub_phase,
+            "transcript_len": len(transcript)
+        }
+    except Exception as e:
+        import logging
+        import traceback
+        logging.getLogger(__name__).error(f"Sync Phase Error: {e}\n{traceback.format_exc()}")
+        raise HTTPException(status_code=500, detail="Ошибка при генерации фазы синхронизации")

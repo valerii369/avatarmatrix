@@ -185,33 +185,46 @@ async def run_avatar_layer(
     previous_messages: list,
     is_narrowing: bool = False
 ) -> str:
-    """Call OpenAI for a narrative layer."""
+    """Call OpenAI for a narrative layer, ensuring robust history and alternating roles."""
     prompt = build_avatar_prompt(layer, archetype_id, sphere, {}, is_narrowing)
-    
     messages = [{"role": "system", "content": prompt}]
-    # For layers, we need history. 
-    # CRITICAL: OpenAI requires alternating roles: assistant -> user -> assistant...
-    # Since we use a SYSTEM prompt for instructions, the first message in 'messages' 
-    # after system usually should be 'user' OR we must ensure alternation.
-    if layer != "intro":
-        if previous_messages:
-            # Filter and ensure alternation/validity
-            valid_history = []
-            for m in previous_messages:
-                if isinstance(m, dict) and m.get("content") is not None:
-                    valid_history.append({
-                        "role": m.get("role", "user"),
-                        "content": str(m["content"])
-                    })
-            messages.extend(valid_history)
+    
+    if layer != "intro" and previous_messages:
+        valid_history = []
+        last_role = "system" # system is the first roll here conceptually
+        
+        for m in previous_messages:
+            if not isinstance(m, dict): continue
+            role = m.get("role", "user")
+            content = str(m.get("content", ""))
+            if not content.strip(): continue
+            
+            # OpenAI strictly forbids consecutive roles (e.g. user/user)
+            # If consecutive, we combine contents
+            if role == last_role:
+                if valid_history:
+                    valid_history[-1]["content"] += "\n\n" + content
+            else:
+                valid_history.append({"role": role, "content": content})
+                last_role = role
+        
+        # Ensure the conversation doesn't end with an assistant message if we expect a response
+        # or start with an assistant message after system if it causes issues for some models.
+        # But for Sync, we usually want system -> assistant (intro) -> user (enter) -> assistant (layer 1) -> user (answer)
+        messages.extend(valid_history)
 
-    response = await client.chat.completions.create(
-        model=settings.OPENAI_MODEL,
-        messages=messages,
-        max_tokens=400 if layer == "intro" else 300,
-        temperature=0.85 if layer != "mirror" else 0.2,
-    )
-    return response.choices[0].message.content
+    try:
+        response = await client.chat.completions.create(
+            model=settings.OPENAI_MODEL,
+            messages=messages,
+            max_tokens=500, # Increased for better narrative depth
+            temperature=0.85 if layer != "mirror" else 0.2,
+        )
+        return response.choices[0].message.content or "..."
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error(f"Sync OpenAI Error: {e}")
+        return "Произошла ошибка при генерации ответа. Попробуйте нажать кнопку 'Далее' ещё раз."
 
 
 async def run_mirror_analysis(
