@@ -648,5 +648,58 @@ async def run_alignment_expert_analysis(
             "dominant_emotion": "не определено",
             "transformation_depth": 1,
             "final_state_summary": "Анализ не удался",
-            "is_shadow_integrated": false
+            "is_shadow_integrated": False
+        }
+
+async def analyze_reflection(text: str) -> dict:
+    """
+    Deep analysis of user reflection (diary entry / daily check-in).
+    Extracts vibration (Hawkins), Sphere, and Archetypal resonance.
+    """
+    if not text:
+        return {}
+
+    prompt = f"""Ты — ИИ-аналитик системы AVATAR. Твоя задача — проанализировать ежедневную рефлексию пользователя.
+Определи его текущий уровень по шкале Хокинса, выдели сферу жизни, о которой он пишет, и наиболее резонирующий архетип.
+
+ТЕКСТ РЕФЛЕКСИИ:
+"{text}"
+
+СПИСОК СФЕР: IDENTITY, MONEY, RELATIONS, FAMILY, MISSION, HEALTH, SOCIETY, SPIRIT.
+СПИСОК АРХЕТИПОВ: {[{'id': a['id'], 'name': a['name']} for a in ARCHETYPES.values()]}
+
+ИНСТРУКЦИЯ:
+1. Оцени вибрационный уровень (20-1000).
+2. Выбери наиболее подходящую сферу из списка. Если неясно — IDENTITY.
+3. Выбери ID архетипа, который наиболее проявлен в тексте (теневой или светлый).
+4. Напиши "ai_analysis" — короткий (2-3 предложения), глубокий инсайт или поддержку.
+
+Отвечай строго в JSON:
+{{
+  "hawkins_score": int,
+  "hawkins_level": "название уровня",
+  "sphere": "CODE",
+  "archetype_id": int,
+  "dominant_emotion": "эмоция",
+  "ai_analysis": "текст анализа"
+}}"""
+
+    response = await client.chat.completions.create(
+        model=settings.OPENAI_MODEL,
+        messages=[{"role": "system", "content": "Система анализа рефлексий AVATAR."},
+                  {"role": "user", "content": prompt}],
+        temperature=0.4,
+        response_format={"type": "json_object"},
+    )
+
+    try:
+        return json.loads(response.choices[0].message.content)
+    except Exception:
+        return {
+            "hawkins_score": 200,
+            "hawkins_level": "Ок",
+            "sphere": "IDENTITY",
+            "archetype_id": 0,
+            "dominant_emotion": "нейтральность",
+            "ai_analysis": "Спасибо за вашу рефлексию."
         }

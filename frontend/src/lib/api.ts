@@ -54,8 +54,8 @@ export const syncAPI = {
 
 export const diaryAPI = {
     create: (data: Record<string, unknown>) => api.post("/api/diary", data),
-    getAll: (userId: number, sphere?: string) =>
-        api.get(`/api/diary/${userId}`, { params: { sphere } }),
+    getAll: (userId: number, sphere?: string, entryType?: string, excludeType?: string) =>
+        api.get(`/api/diary/${userId}`, { params: { sphere, entry_type: entryType, exclude_type: excludeType } }),
     updateIntegration: (userId: number, entryId: number, done: boolean, partial = false) =>
         api.post("/api/diary/integration", { user_id: userId, entry_id: entryId, done, partial }),
 };
@@ -70,8 +70,8 @@ export const profileAPI = {
 };
 
 export const reflectAPI = {
-    submit: (userId: number, currentEmotion: string, integrationDone: string, focusSphere: string) =>
-        api.post("/api/reflect", { user_id: userId, current_emotion: currentEmotion, integration_done: integrationDone, focus_sphere: focusSphere }),
+    submit: (userId: number, content: string, isVoice = false) =>
+        api.post("/api/reflect", { user_id: userId, content, is_voice: isVoice }),
 };
 
 export const retro = {
