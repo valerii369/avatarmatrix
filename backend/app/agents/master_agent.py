@@ -51,6 +51,13 @@ LEVEL_METHODOLOGIES = {
     10: {"range": "700+", "style": "зеркало, пространство", "focus": "фиксация состояния", "avoid": ""},
 }
 
+# Quantum Alignment: Hawkins-Adaptive Goals
+LEVEL_GOALS = {
+    "SURVIVAL": {"range": (20, 199), "goal": "Безопасность и Разрешение: Фокус на выдерживании эмоции и телесном присутствии. Не требуй быстрых решений."},
+    "GROWTH": {"range": (200, 499), "goal": "Ответственность и Выбор: Фокус на идентификации паттерна и активном выборе новой реакции."},
+    "PRESENCE": {"range": (500, 1000), "goal": "Наблюдение и Единство: Фокус на разотождествлении с паттерном и расширении сознания."},
+}
+
 
 def get_hawkins_agent_level(hawkins_score: int) -> int:
     """Determine which level agent to use based on Hawkins score."""
@@ -322,51 +329,73 @@ async def alignment_session_message(
     shadow_pattern: str = "",
     history_context: str = "",
     token_budget: int = 2000,
+    is_deepening: bool = False
 ) -> str:
-    """Generate AI response for an alignment session stage."""
+    """Generate AI response for an alignment session stage using Quantum Logic."""
     archetype = ARCHETYPES.get(archetype_id, {})
     sphere_data = SPHERES.get(sphere, {})
     agent_level = get_hawkins_agent_level(hawkins_score)
     methodology = LEVEL_METHODOLOGIES.get(agent_level, LEVEL_METHODOLOGIES[1])
     sphere_style = SPHERE_AGENT_STYLES.get(sphere, "мудрый проводник")
+    
+    # Identify overarching goal based on Hawkins range
+    goal_key = "SURVIVAL"
+    if 200 <= hawkins_score < 500: goal_key = "GROWTH"
+    elif hawkins_score >= 500: goal_key = "PRESENCE"
+    current_goal = LEVEL_GOALS[goal_key]["goal"]
+
+    # Sphere specific data
+    techniques = ", ".join(sphere_data.get("techniques", []))
+    patterns = ", ".join(sphere_data.get("patterns", []))
+    
+    # Archetype components for Stage 4
+    matrix = MATRIX_DATA.get(str(archetype_id), {}).get(sphere, {})
+    arch_light = matrix.get("light", archetype.get('light', ''))
+    arch_name = archetype.get('name', 'Архетип')
 
     stages = {
-        1: "КОНТАКТ С ПАТТЕРНОМ: Вернись к исходному паттерну. Активируй эмоциональный заряд через текстовую визуализацию ситуации. Спроси какую эмоцию вызывает это прямо сейчас.",
-        2: "ОСОЗНАНИЕ: Подсвети механизм как паттерн работает, что защищает, какую функцию выполняет. 'Заметьте что происходит когда вы [реакция]...' Цель: человек ВИДИТ свой автоматизм.",
-        3: "ПЕРЕЖИВАНИЕ: Проведи через эмоцию не избегая её. Текстовая визуализация — человек проживает ситуацию с новым углом зрения. Цель: эмоциональная разрядка.",
-        4: "ПЕРЕЗАПИСЬ: Та же ситуация — новая реакция. 'А если в этой ситуации вы бы [новая реакция]?' Текстовая визуализация альтернативы. Цель: создать новый нейронный путь.",
-        5: "ЗАКРЕПЛЕНИЕ: Помоги сформулировать новое убеждение. Проживание ресурсного состояния. 'Как это ощущается в теле?' Цель: якорение нового состояния.",
-        6: "МОСТ В РЕАЛЬНОСТЬ: 'В какой конкретной ситуации на этой неделе вы можете применить это?' Конкретный план. Сформулируй 1-2 действия для интеграции.",
+        1: f"КОНТАКТ: Вернись к образу из синхронизации. Активируй заряд через сенсорику. Техники сферы: {techniques}.",
+        2: f"ОСОЗНАНИЕ: Подсвети механизм защиты. Паттерны сферы: {patterns}. Цель: человек ВИДИТ свой автопилот.",
+        3: "ПЕРЕЖИВАНИЕ: Глубокое погружение в эмоцию. Текстовая визуализация. Не давай решений, только сопереживание и присутствие.",
+        4: f"КВАНТОВЫЙ СДВИГ (ПЕРЕЗАПИСЬ): Используй энергию Света Архетипа ({arch_name}: {arch_light}). Предложи прожить ту же ситуацию из этого состояния. Это момент ключевого выбора.",
+        5: "ЗАКРЕПЛЕНИЕ: Формулировка нового убеждения. Якорение в телесных ощущениях (грудь, живот, солнечное сплетение).",
+        6: "МОСТ В РЕАЛЬНОСТЬ: Перевод в конкретные 1-2 действия на неделю. Интеграция нового состояния в быт.",
     }
 
-    system_prompt = f"""Ты — агент выравнивания в системе AVATAR. Стиль ведения: {sphere_style}.
+    deepening_prompt = ""
+    if is_deepening:
+        deepening_prompt = "\nВНИМАНИЕ: Ответ пользователя был поверхностным или абстрактным. НЕ переходи к следующему этапу. Углуби текущий этап, попроси больше деталей или телесного отклика.\n"
 
-Архетип: {archetype.get('name', '')} | Сфера: {sphere_data.get('name_ru', sphere)}
-Уровень Хокинса: {hawkins_score} | Ведёшь по методологии уровня {agent_level} ({methodology['range']})
+    system_prompt = f"""Ты — агент ВЫРАВНИВАНИЯ системы AVATAR. Твой стиль: {sphere_style}.
+Архетип: {arch_name} | Сфера: {sphere_data.get('name_ru', sphere)}
+Уровень Хокинса: {hawkins_score} | Методология: {methodology['style']}
 
-Стиль: {methodology['style']}
-Фокус перезаписи: {methodology['focus']}
+ГЛОБАЛЬНАЯ ЦЕЛЬ СЕССИИ (Хокинс-адаптация): {current_goal}
+
+Стиль ответов: {methodology['style']}
+Фокус: {methodology['focus']}
 ИЗБЕГАЙ: {methodology['avoid']}
 
-Ядро-убеждение пользователя: {core_belief or 'не определено'}
+Ядро-убеждение: {core_belief or 'не определено'}
 Паттерн тени: {shadow_pattern or 'не определён'}
 
 ---
-ИСТОРИЯ (КОНТЕКСТ):
-{history_context or 'История сессий отсутствует.'}
+КОНТЕКСТ ПРОШЛЫХ СЕССИЙ:
+{history_context or 'История отсутствует.'}
 ---
 
 ТЕКУЩИЙ ЭТАП {stage}/6: {stages.get(stage, '')}
+{deepening_prompt}
 
 ПРАВИЛА:
-- Короткие ответы (3-6 предложений) если не нужен длинный текст
-- Один вопрос в конце (не несколько)
-- Живой язык, без психологических терминов
-- Полное присутствие в процессе
-- НЕ торопи к следующему этапу пока текущий не завершён"""
+- Короткие, точные ответы (3-6 предложений)
+- Один открытый вопрос в конце
+- Только сенсорный, живой язык (без психоанализа)
+- Если это этап 4, используй Светлую сторону Архетипа: {arch_light}
+"""
 
     messages = [{"role": "system", "content": system_prompt}]
-    messages.extend(chat_history[-20:])  # Last 20 messages for context
+    messages.extend(chat_history[-20:])
     messages.append({"role": "user", "content": user_message})
 
     response = await client.chat.completions.create(
@@ -513,6 +542,39 @@ async def generate_alignment_summary(
             "integration_plan": "Продолжать наблюдение за собой.",
             "final_insight": ""
         }
+
+async def check_alignment_depth(text: str) -> dict:
+    """
+    Evaluate the depth of a user's response to decide on stage transition.
+    Returns: {"is_sufficient": bool, "reason": str}
+    """
+    if not text:
+        return {"is_sufficient": False, "reason": "empty"}
+    
+    text_lower = text.lower()
+    words = text.split()
+    
+    # Body parts keywords (Russian)
+    body_parts = ["грудь", "живот", "горло", "рук", "ног", "спин", "плеч", "голов", "солнечн", "дыхани", "сердц", "тело", "мышц", "колен", "таз"]
+    has_body = any(bp in text_lower for bp in body_parts)
+    
+    # Emotional keywords (Russian) - broadly negative for shift logic
+    emotions = ["страх", "боль", "гнев", "стыд", "вино", "тяжесть", "ком", "сжати", "пустота", "холод", "жар", "дрожь"]
+    has_emotion = any(e in text_lower for e in emotions)
+
+    # Criteria for sufficiency:
+    # 1. At least 5 words long
+    # 2. Mentions body parts OR deep emotions
+    
+    is_sufficient = len(words) >= 5 and (has_body or has_emotion)
+    
+    # Relax criteria for very high levels (they might be concise)
+    # But for now, we want depth.
+    
+    return {
+        "is_sufficient": is_sufficient,
+        "reason": "depth_check_passed" if is_sufficient else "too_abstract_or_short"
+    }
 
 async def run_alignment_expert_analysis(
     chat_history: list[dict],

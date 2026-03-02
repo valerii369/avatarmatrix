@@ -13,7 +13,8 @@ from app.agents.master_agent import (
     alignment_session_message, 
     evaluate_hawkins, 
     generate_alignment_summary,
-    run_alignment_expert_analysis
+    run_alignment_expert_analysis,
+    check_alignment_depth
 )
 from app.core.economy import award_energy, spend_energy, hawkins_to_rank, process_card_rank_up
 from app.config import settings
@@ -122,6 +123,7 @@ async def alignment_session(
         current_stage = 1
         hawkins_min = hawkins_entry
         hawkins_peak = hawkins_entry
+        current_hawkins = hawkins_entry
 
         # Send opening message
         opening = await alignment_session_message(
@@ -144,48 +146,64 @@ async def alignment_session(
         })
 
         try:
+            stage_attempts = 0
             while True:
                 data = await websocket.receive_json()
                 msg_type = data.get("type", "message")
                 user_content = data.get("content", "")
-                requested_stage = data.get("stage", current_stage)
-
+                
                 if msg_type == "close":
                     break
 
-                # Evaluate Hawkins from user message (only if not empty)
-                current_hawkins = hawkins_entry
                 is_manual_transition = (msg_type == "complete_stage")
+                is_deepening = False
                 
+                # Check depth if there is content
                 if user_content.strip():
+                    depth_result = await check_alignment_depth(user_content)
+                    is_sufficient = depth_result.get("is_sufficient", False)
+                    
+                    # Add to history
+                    chat_history.append({"role": "user", "content": user_content})
+
+                    # Evaluate Hawkins
                     hawkins_eval = await evaluate_hawkins(user_content)
-                    current_hawkins = hawkins_eval.get("score", hawkins_entry)
+                    current_hawkins = hawkins_eval.get("score", current_hawkins)
                     hawkins_min = min(hawkins_min, current_hawkins)
                     hawkins_peak = max(hawkins_peak, current_hawkins)
-                    # Add to chat history
-                    chat_history.append({"role": "user", "content": user_content})
-                
-                # Auto-increment stage if user provided content or requested transition
-                if (user_content.strip() or is_manual_transition) and current_stage < 6:
-                    current_stage += 1
-                
-                # If it was a transition with no content, use placeholder for AI context
-                effective_user_content = user_content if user_content.strip() else "[Переход к следующему этапу]"
 
-                # Generate AI response for the NEW current_stage
+                    # Stage transition logic
+                    if is_sufficient or stage_attempts >= 1 or is_manual_transition:
+                        if current_stage < 6:
+                            current_stage += 1
+                            stage_attempts = 0
+                    else:
+                        is_deepening = True
+                        stage_attempts += 1
+                elif is_manual_transition:
+                    if current_stage < 6:
+                        current_stage += 1
+                        stage_attempts = 0
+                
+                effective_user_content = user_content if user_content.strip() else "[Переход к следующему этапу]"
+                
+                # Check if session is complete (after possible increment)
+                is_complete = current_stage >= 6 and (user_content.strip() or is_manual_transition) and not is_deepening
+
+                # Generate AI response
                 ai_response = await alignment_session_message(
                     stage=current_stage,
                     archetype_id=card.archetype_id,
                     sphere=card.sphere,
-                    hawkins_score=current_hawkins,
+                    hawkins_score=int(current_hawkins),
                     chat_history=chat_history,
                     user_message=effective_user_content,
                     core_belief=core_belief,
                     shadow_pattern=shadow_pattern,
                     history_context=history_context,
                     token_budget=settings.TOKEN_BUDGET_DEEP_SESSION,
+                    is_deepening=is_deepening
                 )
-
                 chat_history.append({"role": "assistant", "content": ai_response})
 
                 # Expert analysis for final stage
@@ -205,11 +223,11 @@ async def alignment_session(
                     "hawkins_min": hawkins_min,
                     "hawkins_peak": hawkins_peak,
                     "is_complete": is_complete,
+                    "is_deepening": is_deepening,
                     "expert_results": expert_results if is_complete else None
                 })
 
                 if is_complete:
-                    # Store expert results for DB saving after loop
                     session_expert_results = expert_results
                     break
 

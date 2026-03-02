@@ -36,6 +36,7 @@ export default function SessionPage() {
     const [isAiTyping, setIsAiTyping] = useState(true);
     const [error, setError] = useState("");
     const [expertResults, setExpertResults] = useState<any>(null);
+    const [isDeepening, setIsDeepening] = useState(false);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     // Voice recording state
@@ -79,6 +80,7 @@ export default function SessionPage() {
                 if (data.hawkins_peak) setHawkinsPeak(data.hawkins_peak);
                 if (data.expert_results) setExpertResults(data.expert_results);
                 if (data.is_complete) setIsComplete(true);
+                setIsDeepening(data.is_deepening || false);
             } catch (e) {
                 console.error("WS parse error", e);
             }
@@ -247,7 +249,17 @@ export default function SessionPage() {
                             <div className="phase-bar-fill" style={{ width: `${progress}%` }} />
                         </div>
                         <div className="flex justify-between text-xs" style={{ color: "var(--text-muted)" }}>
-                            <span>Этап {stage}/6: {STAGE_NAMES[stage]}</span>
+                            <span className="flex items-center gap-2">
+                                Этап {stage}/6: {STAGE_NAMES[stage]}
+                                {isDeepening && (
+                                    <motion.span
+                                        initial={{ opacity: 0, x: -5 }} animate={{ opacity: 1, x: 0 }}
+                                        className="text-[9px] px-1.5 py-0.5 bg-violet-500/20 text-violet-300 rounded-md border border-violet-500/30 animate-pulse uppercase tracking-tighter font-black"
+                                    >
+                                        углубление
+                                    </motion.span>
+                                )}
+                            </span>
                             {hawkins > 0 && <span>Хокинс: {hawkins}</span>}
                         </div>
                     </>
