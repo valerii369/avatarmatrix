@@ -352,6 +352,9 @@ async def alignment_session_message(
     matrix = MATRIX_DATA.get(str(archetype_id), {}).get(sphere, {})
     arch_light = matrix.get("light", archetype.get('light', ''))
     arch_name = archetype.get('name', 'Архетип')
+    arch_description = archetype.get('description', '')
+    arch_base_shadow = archetype.get('shadow', '')
+    arch_base_light = archetype.get('light', '')
 
     stages = {
         1: f"ВХОД (СОМАТИЧЕСКОЕ КАРТИРОВАНИЕ): Найди конкретный 'узел' или напряжение в теле, связанное с образом из синхронизации. Где именно в теле живет этот блок? Техники сферы: {techniques}.",
@@ -378,6 +381,11 @@ async def alignment_session_message(
 
 Ядро-убеждение: {core_belief or 'не определено'}
 Паттерн тени: {shadow_pattern or 'не определён'}
+
+ОБЩАЯ СУТЬ АРХЕТИПА:
+{arch_description}
+Базовая Тень Архетипа: {arch_base_shadow}
+Базовый Свет Архетипа: {arch_base_light}
 
 ---
 КОНТЕКСТ ПРОШЛЫХ СЕССИЙ:
