@@ -349,10 +349,16 @@ async def alignment_session_message(
     patterns = ", ".join(sphere_data.get("patterns", []))
     
     # Archetype components for Stage 4
+    # Archetype components from Matrix (Sphere-Specific)
     matrix = MATRIX_DATA.get(str(archetype_id), {}).get(sphere, {})
-    arch_light = matrix.get("light", archetype.get('light', ''))
+    
+    # Prioritize Matrix data, fallback to general Archetype data
     arch_name = archetype.get('name', 'Архетип')
-    arch_description = archetype.get('description', '')
+    arch_description = matrix.get('description', archetype.get('description', ''))
+    arch_shadow = matrix.get('shadow', archetype.get('shadow', ''))
+    arch_light = matrix.get('light', archetype.get('light', ''))
+    
+    # We still keep base values for broader context if we want, but matrix is primary here
     arch_base_shadow = archetype.get('shadow', '')
     arch_base_light = archetype.get('light', '')
 
@@ -382,10 +388,13 @@ async def alignment_session_message(
 Ядро-убеждение: {core_belief or 'не определено'}
 Паттерн тени: {shadow_pattern or 'не определён'}
 
-ОБЩАЯ СУТЬ АРХЕТИПА:
+ОБЩАЯ СУТЬ АРХЕТИПА В СФЕРЕ {sphere_data.get('name_ru', sphere).upper()}:
 {arch_description}
-Базовая Тень Архетипа: {arch_base_shadow}
-Базовый Свет Архетипа: {arch_base_light}
+Теневой аспект (в этой сфере): {arch_shadow}
+Светлый аспект (в этой сфере): {arch_light}
+
+(Для справки) Базовая Тень Архетипа: {arch_base_shadow}
+(Для справки) Базовый Свет Архетипа: {arch_base_light}
 
 ---
 КОНТЕКСТ ПРОШЛЫХ СЕССИЙ:
