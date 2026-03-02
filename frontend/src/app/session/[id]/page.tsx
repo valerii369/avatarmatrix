@@ -44,17 +44,24 @@ export default function SessionPage() {
     const [isTranscribing, setIsTranscribing] = useState(false);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const chunksRef = useRef<Blob[]>([]);
+    const retryCountRef = useRef(0);
 
-    useEffect(() => {
+    const connectWS = useCallback(() => {
         if (!userId || !params.id) return;
         const cardId = Number(params.id);
 
-        cardsAPI.getOne(userId, cardId).then(r => setCard(r.data));
+        if (wsRef.current) {
+            wsRef.current.close();
+        }
 
         const ws = createSessionWS(userId, cardId);
         wsRef.current = ws;
 
-        ws.onopen = () => setIsConnected(true);
+        ws.onopen = () => {
+            setIsConnected(true);
+            setError("");
+            retryCountRef.current = 0;
+        };
 
         ws.onmessage = (event) => {
             try {
@@ -62,7 +69,8 @@ export default function SessionPage() {
 
                 if (data.type === "error") {
                     setError(data.content);
-                    ws.close();
+                    // Don't close here, allow user to decide or wait
+                    setIsAiTyping(false);
                     return;
                 }
 
@@ -86,11 +94,31 @@ export default function SessionPage() {
             }
         };
 
-        ws.onerror = () => setError("Соединение потеряно");
-        ws.onclose = () => setIsConnected(false);
+        ws.onerror = () => {
+            setError("Ошибка соединения");
+        };
 
-        return () => ws.close();
-    }, [userId, params.id]);
+        ws.onclose = () => {
+            setIsConnected(false);
+            if (retryCountRef.current < 3 && !isComplete) {
+                retryCountRef.current += 1;
+                console.log(`Attempting reconnect ${retryCountRef.current}...`);
+                setTimeout(connectWS, 2000);
+            }
+        };
+    }, [userId, params.id, isComplete]);
+
+    useEffect(() => {
+        if (!userId || !params.id) return;
+        const cardId = Number(params.id);
+        cardsAPI.getOne(userId, cardId).then(r => setCard(r.data));
+
+        connectWS();
+
+        return () => {
+            wsRef.current?.close();
+        };
+    }, [userId, params.id, connectWS]);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -367,6 +395,21 @@ export default function SessionPage() {
                     style={{ background: "linear-gradient(0deg, var(--bg-deep) 80%, transparent)" }}>
 
                     <div className="flex flex-col gap-3">
+                        {!isConnected && !isComplete && (
+                            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                                className="flex items-center justify-between gap-3 p-3 rounded-2xl bg-red-500/10 border border-red-500/20 backdrop-blur-xl">
+                                <div className="flex items-center gap-2 text-red-400 text-xs font-medium">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                                    Связь прервана
+                                </div>
+                                <button
+                                    onClick={() => connectWS()}
+                                    className="px-4 py-1.5 rounded-xl bg-red-500/20 text-red-400 text-xs font-bold hover:bg-red-500/30 transition-colors"
+                                >
+                                    Переподключиться
+                                </button>
+                            </motion.div>
+                        )}
                         <div style={{
                             display: "flex",
                             alignItems: "center",

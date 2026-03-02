@@ -148,88 +148,96 @@ async def alignment_session(
         try:
             stage_attempts = 0
             while True:
-                data = await websocket.receive_json()
-                msg_type = data.get("type", "message")
-                user_content = data.get("content", "")
-                
-                if msg_type == "close":
-                    break
-
-                is_manual_transition = (msg_type == "complete_stage")
-                is_deepening = False
-                
-                # Check depth if there is content
-                if user_content.strip():
-                    depth_result = await check_alignment_depth(user_content)
-                    is_sufficient = depth_result.get("is_sufficient", False)
+                try:
+                    data = await websocket.receive_json()
+                    msg_type = data.get("type", "message")
+                    user_content = data.get("content", "")
                     
-                    # Add to history
-                    chat_history.append({"role": "user", "content": user_content})
+                    if msg_type == "close":
+                        break
 
-                    # Evaluate Hawkins
-                    hawkins_eval = await evaluate_hawkins(user_content)
-                    current_hawkins = hawkins_eval.get("score", current_hawkins)
-                    hawkins_min = min(hawkins_min, current_hawkins)
-                    hawkins_peak = max(hawkins_peak, current_hawkins)
+                    is_manual_transition = (msg_type == "complete_stage")
+                    is_deepening = False
+                    
+                    # Check depth if there is content
+                    if user_content.strip():
+                        depth_result = await check_alignment_depth(user_content)
+                        is_sufficient = depth_result.get("is_sufficient", False)
+                        
+                        # Add to history
+                        chat_history.append({"role": "user", "content": user_content})
 
-                    # Stage transition logic
-                    if is_sufficient or stage_attempts >= 1 or is_manual_transition:
+                        # Evaluate Hawkins
+                        hawkins_eval = await evaluate_hawkins(user_content)
+                        current_hawkins = hawkins_eval.get("score", current_hawkins)
+                        hawkins_min = min(hawkins_min, current_hawkins)
+                        hawkins_peak = max(hawkins_peak, current_hawkins)
+
+                        # Stage transition logic
+                        if is_sufficient or stage_attempts >= 1 or is_manual_transition:
+                            if current_stage < 6:
+                                current_stage += 1
+                                stage_attempts = 0
+                        else:
+                            is_deepening = True
+                            stage_attempts += 1
+                    elif is_manual_transition:
                         if current_stage < 6:
                             current_stage += 1
                             stage_attempts = 0
-                    else:
-                        is_deepening = True
-                        stage_attempts += 1
-                elif is_manual_transition:
-                    if current_stage < 6:
-                        current_stage += 1
-                        stage_attempts = 0
-                
-                effective_user_content = user_content if user_content.strip() else "[Переход к следующему этапу]"
-                
-                # Check if session is complete (after possible increment)
-                is_complete = current_stage >= 6 and (user_content.strip() or is_manual_transition) and not is_deepening
+                    
+                    effective_user_content = user_content if user_content.strip() else "[Переход к следующему этапу]"
+                    
+                    # Check if session is complete (after possible increment)
+                    is_complete = current_stage >= 6 and (user_content.strip() or is_manual_transition) and not is_deepening
 
-                # Generate AI response
-                ai_response = await alignment_session_message(
-                    stage=current_stage,
-                    archetype_id=card.archetype_id,
-                    sphere=card.sphere,
-                    hawkins_score=int(current_hawkins),
-                    chat_history=chat_history,
-                    user_message=effective_user_content,
-                    core_belief=core_belief,
-                    shadow_pattern=shadow_pattern,
-                    history_context=history_context,
-                    token_budget=settings.TOKEN_BUDGET_DEEP_SESSION,
-                    is_deepening=is_deepening
-                )
-                chat_history.append({"role": "assistant", "content": ai_response})
-
-                # Expert analysis for final stage
-                expert_results = {}
-                if is_complete:
-                    expert_results = await run_alignment_expert_analysis(
-                        chat_history=chat_history,
+                    # Generate AI response
+                    ai_response = await alignment_session_message(
+                        stage=current_stage,
                         archetype_id=card.archetype_id,
-                        sphere=card.sphere
+                        sphere=card.sphere,
+                        hawkins_score=int(current_hawkins),
+                        chat_history=chat_history,
+                        user_message=effective_user_content,
+                        core_belief=core_belief,
+                        shadow_pattern=shadow_pattern,
+                        history_context=history_context,
+                        token_budget=settings.TOKEN_BUDGET_DEEP_SESSION,
+                        is_deepening=is_deepening
                     )
+                    chat_history.append({"role": "assistant", "content": ai_response})
 
-                await websocket.send_json({
-                    "type": "response",
-                    "content": ai_response,
-                    "stage": current_stage,
-                    "hawkins_current": expert_results.get("hawkins_score") if is_complete else current_hawkins,
-                    "hawkins_min": hawkins_min,
-                    "hawkins_peak": hawkins_peak,
-                    "is_complete": is_complete,
-                    "is_deepening": is_deepening,
-                    "expert_results": expert_results if is_complete else None
-                })
+                    # Expert analysis for final stage
+                    expert_results = {}
+                    if is_complete:
+                        expert_results = await run_alignment_expert_analysis(
+                            chat_history=chat_history,
+                            archetype_id=card.archetype_id,
+                            sphere=card.sphere
+                        )
 
-                if is_complete:
-                    session_expert_results = expert_results
-                    break
+                    await websocket.send_json({
+                        "type": "response",
+                        "content": ai_response,
+                        "stage": current_stage,
+                        "hawkins_current": expert_results.get("hawkins_score") if is_complete else current_hawkins,
+                        "hawkins_min": hawkins_min,
+                        "hawkins_peak": hawkins_peak,
+                        "is_complete": is_complete,
+                        "is_deepening": is_deepening,
+                        "expert_results": expert_results if is_complete else None
+                    })
+
+                    if is_complete:
+                        session_expert_results = expert_results
+                        break
+                except Exception as e:
+                    print(f"Error in alignment loop: {e}")
+                    await websocket.send_json({
+                        "type": "error",
+                        "content": "Произошла ошибка при обработке сообщения. Пожалуйста, попробуйте еще раз."
+                    })
+                    # We don't break here, allowing user to retry unless it's a critical failure
 
         except WebSocketDisconnect:
             pass
