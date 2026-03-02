@@ -197,7 +197,7 @@ export default function SyncPage() {
                                 fontSize: 11, padding: "4px 12px", borderRadius: 20,
                                 background: "rgba(139,92,246,0.15)", color: "var(--violet-l)", fontWeight: 600,
                             }}>
-                                {currentPhase}/6
+                                {currentPhase > 0 ? `${currentPhase}/5` : "Вступление"}
                             </span>
                         )}
                     </div>
@@ -207,7 +207,7 @@ export default function SyncPage() {
                 {card && hasStarted && !isComplete && (
                     <div style={{ height: 3, background: "rgba(255,255,255,0.07)", borderRadius: 2, overflow: "hidden" }}>
                         <motion.div
-                            animate={{ width: `${progress}%` }}
+                            animate={{ width: `${Math.min((currentPhase / 5) * 100, 100)}%` }}
                             transition={{ duration: 0.5 }}
                             style={{ height: "100%", background: "linear-gradient(90deg, var(--violet), #6366f1)", borderRadius: 2 }}
                         />
@@ -477,14 +477,14 @@ export default function SyncPage() {
                             Сессия выравнивания · 40 ✦
                         </motion.button>
                         <button
-                            onClick={() => router.push("/")}
+                            onClick={() => router.push(`/card/${params.id}`)}
                             style={{
                                 width: "100%", padding: "12px", background: "none",
                                 border: "none", cursor: "pointer", fontSize: 14,
                                 color: "var(--text-muted)",
                             }}
                         >
-                            На главную
+                            Вернуться к карточке
                         </button>
                     </div>
                 )}

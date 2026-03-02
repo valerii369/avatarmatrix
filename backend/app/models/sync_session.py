@@ -49,4 +49,4 @@ class SyncSession(Base, TimestampMixin):
 
     # Hawkins tracking
     hawkins_score: Mapped[int] = mapped_column(Integer, default=0)
-    hawkins_level: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)
+    hawkins_level: Mapped[Optional[str]] = mapped_column(Text, nullable=True)

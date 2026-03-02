@@ -16,7 +16,7 @@ from app.agents.master_agent import (
     is_abstract_response, 
     evaluate_hawkins
 )
-from app.core.economy import award_energy, spend_energy, hawkins_to_rank, RANK_NAMES, calculate_xp_for_level
+from app.core.economy import award_energy, spend_energy, hawkins_to_rank, RANK_NAMES, award_xp, process_card_rank_up, XP_VALUES
 from app.core.portrait_builder import build_portrait_for_sphere
 from app.database import AsyncSessionLocal
 from sqlalchemy import func
@@ -335,20 +335,26 @@ async def process_phase(
         )
         card = card_result.scalar_one_or_none()
         if card:
+            old_rank = card.rank
             card.status = CardStatus.SYNCED
             card.hawkins_current = session.hawkins_score
             if session.hawkins_score > card.hawkins_peak:
                 card.hawkins_peak = session.hawkins_score
-            card.rank = hawkins_to_rank(card.hawkins_peak)
+            
+            new_rank = hawkins_to_rank(card.hawkins_peak)
+            card.rank = new_rank
+            
+            # XP Awarding
+            if user:
+                # 1. Opening bonus
+                if card.sync_sessions_count == 0:
+                    await award_xp(db, user, XP_VALUES["card_opened"])
+                
+                # 2. Rank up XP
+                await process_card_rank_up(db, user, old_rank, new_rank, session.hawkins_score)
+                
             card.sync_sessions_count += 1
             db.add(card)
-
-        # Award XP
-        if user:
-            user.xp = (user.xp or 0) + session.hawkins_score
-            while user.evolution_level < 100 and user.xp >= calculate_xp_for_level(user.evolution_level + 1):
-                user.evolution_level += 1
-            db.add(user)
 
         await db.commit()
 

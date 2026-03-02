@@ -4,6 +4,7 @@ from sqlalchemy import select
 
 from app.database import get_db
 from app.models import User, CardProgress, NatalChart, Pattern
+from app.core.economy import calculate_xp_for_level, get_level_title
 
 router = APIRouter()
 
@@ -50,6 +51,16 @@ async def get_profile(user_id: int, db: AsyncSession = Depends(get_db)):
         "matching_available": len(strong_spheres) > 0,
     }
 
+    # Ensure title is synced with level
+    expected_title = get_level_title(user.evolution_level)
+    if user.title != expected_title:
+        user.title = expected_title
+        db.add(user)
+        # We don't necessarily need a commit here if we assume it's just a sync, 
+        # but let's do it to persist the fix.
+        await db.commit()
+        await db.refresh(user)
+
     return {
         "user_id": user.id,
         "first_name": user.first_name,
@@ -59,6 +70,9 @@ async def get_profile(user_id: int, db: AsyncSession = Depends(get_db)):
         "streak": user.streak,
         "evolution_level": user.evolution_level,
         "title": user.title,
+        "xp": user.xp,
+        "xp_current": calculate_xp_for_level(user.evolution_level),
+        "xp_next": calculate_xp_for_level(user.evolution_level + 1),
         "fingerprint": fingerprint,
     }
 

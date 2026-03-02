@@ -11,6 +11,9 @@ interface UserState {
     evolutionLevel: number;
     title: string;
     onboardingDone: boolean;
+    xp: number;
+    xpCurrent: number;
+    xpNext: number;
     setUser: (data: Partial<UserState>) => void;
     reset: () => void;
 }
@@ -27,10 +30,14 @@ export const useUserStore = create<UserState>()(
             evolutionLevel: 1,
             title: "Искатель",
             onboardingDone: false,
+            xp: 0,
+            xpCurrent: 0,
+            xpNext: 0,
             setUser: (data) => set((state) => ({ ...state, ...data })),
             reset: () => set({
                 userId: null, tgId: null, firstName: "", token: null,
                 energy: 0, streak: 0, evolutionLevel: 1, title: "Искатель", onboardingDone: false,
+                xp: 0, xpCurrent: 0, xpNext: 0,
             }),
         }),
         { name: "avatar-user" }

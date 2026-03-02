@@ -22,6 +22,7 @@ scp_file "/Users/valeriiguro/Desktop/AVATARv1.0/backend/app/routers/sync.py" "/r
 scp_file "/Users/valeriiguro/Desktop/AVATARv1.0/backend/app/routers/session.py" "/root/avatar/backend/app/routers/session.py"
 scp_file "/Users/valeriiguro/Desktop/AVATARv1.0/backend/app/core/economy.py" "/root/avatar/backend/app/core/economy.py"
 scp_file "/Users/valeriiguro/Desktop/AVATARv1.0/backend/app/agents/master_agent.py" "/root/avatar/backend/app/agents/master_agent.py"
+scp_file "/Users/valeriiguro/Desktop/AVATARv1.0/backend/app/main.py" "/root/avatar/backend/app/main.py"
 
 spawn ssh -o StrictHostKeyChecking=no root@103.74.92.72 "systemctl restart avatar-backend && sleep 2 && systemctl status avatar-backend --no-pager | tail -5"
 expect {

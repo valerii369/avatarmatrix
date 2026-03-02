@@ -8,6 +8,8 @@
     "dev:backend": "make dev",
     "dev:bot": "make bot",
     "dev:frontend": "make frontend",
+    "deploy:frontend": "cd frontend && vercel deploy --prod",
+    "deploy:backend": "expect deploy_vps.exp",
     "test": "make test",
     "run:all": "./run.sh"
   },

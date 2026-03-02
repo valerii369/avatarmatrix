@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     TOKEN_BUDGET_REFLECTION: int = 800
     TOKEN_BUDGET_MINI_SESSION: int = 2500
     TOKEN_BUDGET_SYNC: int = 12000
-    TOKEN_BUDGET_DEEP_SESSION: int = 25000
+    TOKEN_BUDGET_DEEP_SESSION: int = 4000
 
     # Energy costs
     ENERGY_COST_MINI_SESSION: int = 10

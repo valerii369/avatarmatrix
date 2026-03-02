@@ -29,10 +29,13 @@ export default function SessionPage() {
     const [input, setInput] = useState("");
     const [stage, setStage] = useState(1);
     const [hawkins, setHawkins] = useState(0);
+    const [hawkinsMin, setHawkinsMin] = useState(1000);
+    const [hawkinsPeak, setHawkinsPeak] = useState(0);
     const [isComplete, setIsComplete] = useState(false);
     const [isConnected, setIsConnected] = useState(false);
-    const [isAiTyping, setIsAiTyping] = useState(false);
+    const [isAiTyping, setIsAiTyping] = useState(true);
     const [error, setError] = useState("");
+    const [expertResults, setExpertResults] = useState<any>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     // Voice recording state
@@ -72,6 +75,9 @@ export default function SessionPage() {
 
                 if (data.stage) setStage(data.stage);
                 if (data.hawkins_current) setHawkins(data.hawkins_current);
+                if (data.hawkins_min) setHawkinsMin(data.hawkins_min);
+                if (data.hawkins_peak) setHawkinsPeak(data.hawkins_peak);
+                if (data.expert_results) setExpertResults(data.expert_results);
                 if (data.is_complete) setIsComplete(true);
             } catch (e) {
                 console.error("WS parse error", e);
@@ -133,45 +139,64 @@ export default function SessionPage() {
 
     // Voice recording handlers
     const startRecording = useCallback(async () => {
+        if (isRecording || isTranscribing) return;
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            const recorder = new MediaRecorder(stream, {
-                mimeType: MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm" : "audio/mp4",
-            });
+            const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+                ? "audio/webm;codecs=opus"
+                : MediaRecorder.isTypeSupported("audio/webm")
+                    ? "audio/webm"
+                    : "audio/mp4";
+            const recorder = new MediaRecorder(stream, { mimeType });
             chunksRef.current = [];
             recorder.ondataavailable = e => { if (e.data.size > 0) chunksRef.current.push(e.data); };
             recorder.onstop = async () => {
                 stream.getTracks().forEach(t => t.stop());
-                const blob = new Blob(chunksRef.current, { type: recorder.mimeType });
+                if (chunksRef.current.length === 0) return;
+                const blob = new Blob(chunksRef.current, { type: mimeType });
                 setIsTranscribing(true);
                 try {
                     const res = await voiceAPI.transcribe(userId!, blob, "session");
-                    setInput(prev => prev ? prev + " " + res.data.transcript : res.data.transcript);
-                } catch {
-                    alert("Ошибка транскрибации");
+                    const transcript = res.data.transcript?.trim();
+                    if (transcript) {
+                        setInput(prev => prev ? prev + " " + transcript : transcript);
+                    }
+                } catch (err: any) {
+                    console.error("Transcription error:", err);
+                    alert("Ошибка транскрибации. Попробуйте еще раз.");
                 } finally {
                     setIsTranscribing(false);
                 }
             };
-            recorder.start();
+            recorder.start(100);
             mediaRecorderRef.current = recorder;
             setIsRecording(true);
         } catch {
             alert("Нет доступа к микрофону");
         }
-    }, [userId]);
+    }, [userId, isRecording, isTranscribing]);
 
     const stopRecording = useCallback(() => {
-        mediaRecorderRef.current?.stop();
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+            mediaRecorderRef.current.stop();
+        }
         setIsRecording(false);
     }, []);
 
+    const toggleRecording = () => {
+        if (isRecording) {
+            stopRecording();
+        } else {
+            startRecording();
+        }
+    };
+
     const progress = (stage / 6) * 100;
     const lastMessage = messages[messages.length - 1];
-    const showStageButton = !isAiTyping && lastMessage?.role === "ai" && !isComplete;
+    const canSendMessage = input.trim() && !isAiTyping && !isTranscribing;
 
     if (error) return (
-        <div className="flex flex-col items-center justify-center min-h-screen px-6 gap-4">
+        <div className="flex flex-col items-center justify-center min-h-screen px-6 gap-4" style={{ background: "var(--bg-deep)" }}>
             <div className="text-4xl">⚠️</div>
             <p className="text-center text-sm" style={{ color: "#fc8181" }}>{error}</p>
             <button onClick={() => router.back()} className="px-6 py-3 rounded-xl text-sm"
@@ -182,7 +207,7 @@ export default function SessionPage() {
     );
 
     if (!isConnected) return (
-        <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+        <div className="flex flex-col items-center justify-center min-h-screen gap-4" style={{ background: "var(--bg-deep)" }}>
             <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                 className="w-10 h-10 border-2 border-violet-500 border-t-transparent rounded-full" />
             <p style={{ color: "var(--text-muted)" }}>Подключение к агенту...</p>
@@ -190,7 +215,7 @@ export default function SessionPage() {
     );
 
     return (
-        <div className="flex flex-col min-h-screen max-h-screen">
+        <div className="flex flex-col min-h-screen max-h-screen" style={{ background: "var(--bg-deep)" }}>
             {/* Header */}
             <div className="px-4 pt-4 pb-3 flex-none"
                 style={{ background: "linear-gradient(180deg, var(--bg-deep) 80%, transparent)" }}>
@@ -273,16 +298,50 @@ export default function SessionPage() {
 
                 {isComplete && (
                     <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-                        className="glass-strong p-6 text-center mt-4">
-                        <div className="text-4xl mb-3">🌟</div>
-                        <h2 className="text-lg font-bold gradient-text mb-2">Сессия завершена</h2>
-                        <p className="text-sm mb-4" style={{ color: "var(--text-muted)" }}>
-                            Пик Хокинса: {hawkins} · Все 6 этапов пройдены
-                        </p>
+                        className="glass-strong p-6 text-center mt-4 rounded-3xl border border-white/10">
+                        <div className="text-4xl mb-4">✨</div>
+                        <h2 className="text-2xl font-bold gradient-text mb-2">Выравнивание завершено</h2>
+
+                        <div className="mb-6 space-y-4">
+                            <div className="bg-white/5 rounded-2xl p-4">
+                                <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">Финальный уровень</p>
+                                <div className="text-4xl font-black mb-1" style={{ color: "var(--gold)" }}>
+                                    {hawkins}
+                                </div>
+                                <p className="text-sm font-bold uppercase tracking-wide text-white/80">
+                                    {expertResults?.hawkins_level || "..."}
+                                </p>
+                            </div>
+
+                            {expertResults && (
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div className="bg-white/5 rounded-xl p-3 text-left">
+                                        <p className="text-[9px] uppercase tracking-widest text-white/40 mb-1">Глубина</p>
+                                        <p className="text-lg font-bold text-white/90">{expertResults.transformation_depth}/10</p>
+                                    </div>
+                                    <div className="bg-white/5 rounded-xl p-3 text-left">
+                                        <p className="text-[9px] uppercase tracking-widest text-white/40 mb-1">Тень</p>
+                                        <p className="text-sm font-bold text-white/90">
+                                            {expertResults.is_shadow_integrated ? "Интегрирована" : "В процессе"}
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {expertResults?.final_state_summary && (
+                                <div className="bg-white/5 rounded-xl p-4 text-left border-l-4 border-violet-500">
+                                    <p className="text-[9px] uppercase tracking-widest text-white/40 mb-2">Итог трансформации</p>
+                                    <p className="text-sm italic leading-relaxed text-white/70">
+                                        «{expertResults.final_state_summary}»
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+
                         <button onClick={() => router.push(`/diary`)}
-                            className="w-full py-3 rounded-xl font-semibold"
-                            style={{ background: "linear-gradient(135deg, var(--violet), var(--gold))", color: "#fff", fontSize: "16px" }}>
-                            Записи в дневнике →
+                            className="w-full py-4 rounded-2xl font-bold shadow-lg shadow-violet-500/20"
+                            style={{ background: "linear-gradient(135deg, var(--violet), #6366f1)", color: "#fff", fontSize: "16px" }}>
+                            Открыть записи в дневнике
                         </button>
                     </motion.div>
                 )}
@@ -292,64 +351,115 @@ export default function SessionPage() {
 
             {/* Input */}
             {!isComplete && (
-                <div className="flex-none px-4 pb-6 pt-2"
+                <div className="flex-none px-4 pb-10 pt-2"
                     style={{ background: "linear-gradient(0deg, var(--bg-deep) 80%, transparent)" }}>
-                    {/* Stage advance button */}
-                    {showStageButton && (
-                        <button onClick={completeStage} className="w-full text-xs py-2 mb-2 rounded-lg transition-all"
-                            style={{ background: "rgba(139,92,246,0.12)", color: "var(--violet-l)", border: "1px solid rgba(139,92,246,0.2)", fontSize: "14px" }}>
-                            {stage < 6
-                                ? `→ Перейти к этапу ${stage + 1}: ${STAGE_NAMES[stage + 1]}`
-                                : "✅ Завершить сессию"
-                            }
-                        </button>
-                    )}
 
-                    <div className="flex gap-2 items-end">
-                        <textarea
-                            ref={textareaRef}
-                            value={isTranscribing ? "🎤 Обработка голоса..." : input}
-                            onChange={(e) => {
-                                setInput(e.target.value);
-                            }}
-                            onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
-                            placeholder="Ваш ответ..."
-                            rows={1}
-                            readOnly={isTranscribing}
-                            className="flex-1 px-4 py-3 rounded-xl outline-none resize-none"
+                    <div className="flex flex-col gap-3">
+                        <div style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 10,
+                            background: "rgba(255,255,255,0.05)",
+                            border: isRecording
+                                ? "1px solid rgba(236,72,153,0.5)"
+                                : "1px solid var(--border)",
+                            borderRadius: 18,
+                            padding: "12px 12px 12px 16px",
+                            transition: "border-color 0.2s",
+                        }}>
+                            <textarea
+                                ref={textareaRef}
+                                value={isTranscribing ? "🎤 Обрабатываю голос..." : input}
+                                onChange={(e) => {
+                                    setInput(e.target.value);
+                                }}
+                                onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
+                                placeholder="Ваш ответ..."
+                                rows={1}
+                                readOnly={isTranscribing}
+                                style={{
+                                    flex: 1,
+                                    background: "transparent",
+                                    border: "none",
+                                    outline: "none",
+                                    resize: "none",
+                                    fontSize: 16,
+                                    color: "var(--text-primary)",
+                                    lineHeight: 1.5,
+                                    maxHeight: 200,
+                                    fontFamily: "'Inter', sans-serif",
+                                    padding: 0,
+                                }}
+                            />
+                            {/* Mic button */}
+                            <button
+                                onClick={toggleRecording}
+                                disabled={isTranscribing || isAiTyping}
+                                style={{
+                                    flexShrink: 0,
+                                    width: 38,
+                                    height: 38,
+                                    borderRadius: 12,
+                                    border: "none",
+                                    cursor: isTranscribing ? "default" : "pointer",
+                                    background: isRecording
+                                        ? "rgba(236,72,153,0.25)"
+                                        : "rgba(255,255,255,0.07)",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    fontSize: 18,
+                                    transition: "all 0.2s",
+                                    color: isRecording ? "#EC4899" : "var(--text-muted)",
+                                }}
+                            >
+                                {isTranscribing ? (
+                                    <motion.span
+                                        animate={{ opacity: [1, 0.3, 1] }}
+                                        transition={{ duration: 1, repeat: Infinity }}
+                                    >⏳</motion.span>
+                                ) : isRecording ? "⏹" : "🎤"}
+                            </button>
+                        </div>
+
+                        {isRecording && (
+                            <motion.p
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                style={{ fontSize: 11, color: "#EC4899", marginTop: -6, paddingLeft: 4 }}
+                            >
+                                ● Запись... нажмите ⏹ чтобы остановить
+                            </motion.p>
+                        )}
+
+                        <motion.button
+                            whileTap={{ scale: 0.97 }}
+                            onClick={sendMessage}
+                            disabled={isAiTyping || isTranscribing || !input.trim()}
                             style={{
-                                background: "rgba(255,255,255,0.06)",
-                                border: "1px solid var(--border)",
-                                color: "var(--text-primary)",
-                                maxHeight: "180px",
-                                fontSize: "16px",   // Prevents mobile auto-zoom
-                                lineHeight: "1.5",
-                            }}
-                        />
-                        {/* Mic button */}
-                        <button
-                            onPointerDown={startRecording}
-                            onPointerUp={stopRecording}
-                            onPointerLeave={isRecording ? stopRecording : undefined}
-                            disabled={isTranscribing || isAiTyping}
-                            className="flex-none w-11 h-11 rounded-xl flex items-center justify-center text-xl transition-all select-none"
-                            style={{
-                                background: isRecording ? "rgba(236,72,153,0.3)" : "rgba(255,255,255,0.06)",
-                                border: isRecording ? "1px solid rgba(236,72,153,0.6)" : "1px solid var(--border)",
-                                color: isTranscribing ? "var(--text-muted)" : isRecording ? "#EC4899" : "var(--text-muted)",
+                                width: "100%",
+                                padding: "16px",
+                                borderRadius: 18,
+                                border: "none",
+                                cursor: "pointer",
+                                fontSize: 16,
+                                fontWeight: 700,
+                                fontFamily: "'Outfit', sans-serif",
+                                letterSpacing: "0.03em",
+                                transition: "all 0.2s",
+                                background: (isAiTyping || !input.trim())
+                                    ? "rgba(255,255,255,0.06)"
+                                    : "linear-gradient(135deg, var(--violet), #6366f1)",
+                                color: (isAiTyping || !input.trim())
+                                    ? "var(--text-muted)"
+                                    : "#fff",
+                                boxShadow: (isAiTyping || !input.trim())
+                                    ? "none"
+                                    : "0 8px 24px rgba(139,92,246,0.3)",
                             }}
                         >
-                            {isTranscribing ? "⏳" : isRecording ? "⏹" : "🎤"}
-                        </button>
-                        {/* Send button */}
-                        <button onClick={sendMessage} disabled={!input.trim() || isAiTyping}
-                            className="flex-none w-11 h-11 rounded-xl flex items-center justify-center text-lg transition-all"
-                            style={{
-                                background: input.trim() && !isAiTyping ? "var(--violet)" : "rgba(255,255,255,0.06)",
-                                color: input.trim() && !isAiTyping ? "#fff" : "var(--text-muted)",
-                            }}>
-                            →
-                        </button>
+                            {isAiTyping ? "···" : "Далее →"}
+                        </motion.button>
                     </div>
                 </div>
             )}

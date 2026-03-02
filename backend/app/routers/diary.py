@@ -6,7 +6,7 @@ from sqlalchemy import select, desc
 
 from app.database import get_db
 from app.models import DiaryEntry, User
-from app.core.economy import award_energy
+from app.core.economy import award_energy, award_xp, XP_VALUES
 
 router = APIRouter()
 
@@ -50,6 +50,7 @@ async def create_entry(request: DiaryCreateRequest, db: AsyncSession = Depends(g
     )
     db.add(entry)
     await award_energy(db, user, "diary_entry")
+    await award_xp(db, user, XP_VALUES["diary_entry"])
     await db.commit()
     await db.refresh(entry)
     return {"id": entry.id, "message": "+10 ✦ за запись в дневник"}
@@ -96,6 +97,13 @@ async def update_integration(request: IntegrationUpdateRequest, db: AsyncSession
         user = user_result.scalar_one_or_none()
         if user:
             await award_energy(db, user, "integration_done")
+            await award_xp(db, user, XP_VALUES["integration_success"])
+    else:
+        # User explicitly marked as NOT done (failure/partial)
+        user_result = await db.execute(select(User).where(User.id == request.user_id))
+        user = user_result.scalar_one_or_none()
+        if user:
+            await award_xp(db, user, XP_VALUES["integration_failure"])
 
     await db.commit()
     return {"message": "+20 ✦ за интеграцию" if request.done else "Отмечено частично"}

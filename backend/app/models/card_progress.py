@@ -38,6 +38,7 @@ class CardProgress(Base, TimestampMixin):
     # Hawkins tracking
     hawkins_current: Mapped[int] = mapped_column(Integer, default=0)
     hawkins_peak: Mapped[int] = mapped_column(Integer, default=0)
+    hawkins_min: Mapped[int] = mapped_column(Integer, default=1000)
     hawkins_entry: Mapped[int] = mapped_column(Integer, default=0)
 
     # Rank: 0=Спящий, 1=Пробуждающийся, 2=Осознающий, 3=Мастер, 4=Мудрец, 5=Просветлённый

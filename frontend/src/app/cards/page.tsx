@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useUserStore, useCardsStore, type CardProgress } from "@/lib/store";
 import { authAPI, cardsAPI } from "@/lib/api";
+import { EnergyIcon } from "@/components/EnergyIcon";
 import { BottomNav } from "@/app/page";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -41,7 +42,7 @@ const TOTAL_CARDS = 176;
 
 export default function CardsPage() {
     const router = useRouter();
-    const { userId, firstName, setUser } = useUserStore();
+    const { userId, firstName, setUser, energy } = useUserStore();
     const { cards, setCards, setLoading, filterTab, sphereFilter, setFilters } = useCardsStore();
     const [initialized, setInitialized] = useState(false);
 
@@ -148,9 +149,15 @@ export default function CardsPage() {
                     >
                         👤
                     </div>
-                    <span className="font-semibold text-base" style={{ color: "var(--text-primary)" }}>
-                        {firstName || "Пользователь"}
-                    </span>
+                    <div className="flex-1 flex justify-between items-center">
+                        <span className="font-semibold text-base" style={{ color: "var(--text-primary)" }}>
+                            {firstName || "Пользователь"}
+                        </span>
+                        <span className="font-semibold text-base flex items-center gap-0.5" style={{ color: "#F59E0B" }}>
+                            <EnergyIcon size={20} color="#F59E0B" />
+                            {energy}
+                        </span>
+                    </div>
                 </div>
             </div>
 

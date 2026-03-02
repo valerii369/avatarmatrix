@@ -21,7 +21,10 @@ async def transcribe_voice(
     db: AsyncSession = Depends(get_db),
 ):
     """Transcribe voice audio using OpenAI Whisper."""
+    print(f"DEBUG VOICE: Transcribe request from user {user_id}, type {session_type}")
+    print(f"DEBUG VOICE: File: {audio.filename}, Content-Type: {audio.content_type}")
     audio_bytes = await audio.read()
+    print(f"DEBUG VOICE: Bytes read: {len(audio_bytes)}")
 
     try:
         transcript = await client.audio.transcriptions.create(
@@ -30,18 +33,25 @@ async def transcribe_voice(
             language="ru",
         )
         text = transcript.text
+        print(f"DEBUG VOICE: Transcript: {text[:50]}...")
     except Exception as e:
+        print(f"ERROR VOICE: Whisper error: {e}")
         raise HTTPException(status_code=500, detail=f"Whisper error: {e}")
 
     # Save record
-    record = VoiceRecord(
-        user_id=user_id,
-        transcript=text,
-        session_type=session_type,
-        session_id=session_id,
-    )
-    db.add(record)
-    await db.commit()
-    await db.refresh(record)
+    try:
+        record = VoiceRecord(
+            user_id=user_id,
+            transcript=text,
+            session_type=session_type,
+            session_id=session_id,
+        )
+        db.add(record)
+        await db.commit()
+        await db.refresh(record)
+        print(f"DEBUG VOICE: Record saved with ID {record.id}")
+    except Exception as e:
+        print(f"ERROR VOICE: DB error: {e}")
+        raise HTTPException(status_code=500, detail=f"DB error: {e}")
 
     return {"id": record.id, "transcript": text}

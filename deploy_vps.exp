@@ -1,0 +1,51 @@
+#!/usr/bin/expect -f
+# Unified Deployment Script for AVATAR Backend & Bot
+set timeout -1
+set password "eCTyD*R.94zTba"
+set host "103.74.92.72"
+set remote_dir "/root/avatar"
+set local_root "/Users/valeriiguro/Desktop/AVATARv1.0"
+
+proc scp_dir {src dst} {
+    global password host
+    puts "🚀 Deploying $src to $dst..."
+    spawn scp -o StrictHostKeyChecking=no -r $src root@$host:$dst
+    expect {
+        "*assword:*" {
+            send "$password\r"
+            exp_continue
+        }
+        eof
+    }
+}
+
+proc remote_cmd {cmd} {
+    global password host
+    puts "⚡ Running: $cmd"
+    spawn ssh -o StrictHostKeyChecking=no root@$host $cmd
+    expect {
+        "*assword:*" {
+            send "$password\r"
+            exp_continue
+        }
+        eof
+    }
+}
+
+# 1. Deploy Core Components
+scp_dir "$local_root/backend/app" "$remote_dir/backend/"
+scp_dir "$local_root/backend/data" "$remote_dir/backend/"
+scp_dir "$local_root/backend/migrations" "$remote_dir/backend/"
+scp_dir "$local_root/bot" "$remote_dir/"
+
+# 2. Sync Configuration and Requirements
+# scp_dir "$local_root/backend/requirements.txt" "$remote_dir/backend/requirements.txt"
+# scp_dir "$local_root/backend/alembic.ini" "$remote_dir/backend/alembic.ini"
+
+# 3. Restart Services
+remote_cmd "systemctl restart avatar-backend && systemctl restart avatar-bot"
+
+# 4. Verify Status
+remote_cmd "systemctl status avatar-backend avatar-bot --no-pager | grep 'Active:'"
+
+puts "✅ Deployment Complete!"

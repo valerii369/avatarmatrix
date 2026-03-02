@@ -1,0 +1,22 @@
+#!/usr/bin/expect -f
+set timeout 30
+set password "eCTyD*R.94zTba"
+spawn ssh -o StrictHostKeyChecking=no root@103.74.92.72 "cd /root/avatar/backend && source venv/bin/activate && python3 -c \"
+import asyncio
+from sqlalchemy import text
+from app.database import AsyncSessionLocal
+
+async def run():
+    async with AsyncSessionLocal() as db:
+        res = await db.execute(text('SELECT id, first_name FROM users WHERE first_name ILIKE \\'%Валерий%\\''))
+        print(res.all())
+
+asyncio.run(run())
+\""
+expect {
+    "*assword:*" {
+        send "$password\r"
+        exp_continue
+    }
+    eof
+}

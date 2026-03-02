@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useUserStore, useCardsStore } from "@/lib/store";
 import { authAPI, cardsAPI, profileAPI } from "@/lib/api";
+import { EnergyIcon } from "@/components/EnergyIcon";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -23,6 +24,7 @@ export default function HomePage() {
   const router = useRouter();
   const {
     userId, tgId, setUser, energy, evolutionLevel, title, firstName, onboardingDone,
+    xp, xpCurrent, xpNext,
   } = useUserStore();
   const { cards, setCards, setLoading } = useCardsStore();
   const [status, setStatus] = useState<"loading" | "redirecting" | "ready" | "error">("loading");
@@ -56,6 +58,7 @@ export default function HomePage() {
         token: d.token, energy: d.energy, streak: d.streak,
         evolutionLevel: d.evolution_level, title: d.title,
         onboardingDone: d.onboarding_done,
+        xp: d.xp, xpCurrent: d.xp_current, xpNext: d.xp_next,
       });
 
       if (typeof window !== "undefined")
@@ -77,6 +80,16 @@ export default function HomePage() {
           setStatus("redirecting");
           router.push("/onboarding");
           return;
+        }
+        // Sync XP data from profile if needed
+        if (profileRes.data.xp !== undefined) {
+          setUser({
+            xp: profileRes.data.xp,
+            xpCurrent: profileRes.data.xp_current,
+            xpNext: profileRes.data.xp_next,
+            evolutionLevel: profileRes.data.evolution_level,
+            title: profileRes.data.title,
+          });
         }
       } catch (err) {
         console.error("DEBUG: Profile check failed", err);
@@ -119,8 +132,10 @@ export default function HomePage() {
   // Total score: sum of all hawkins peaks
   const totalScore = cards.reduce((sum, c) => sum + (c.hawkins_peak || 0), 0);
 
-  // Level progress 0..1
-  const levelProgress = Math.min(evolutionLevel / MAX_LEVEL, 1);
+  // Level progress 0..1 (within current level)
+  const levelRange = Math.max(xpNext - xpCurrent, 1);
+  const xpCollectedInLevel = Math.max(xp - xpCurrent, 0);
+  const levelProgress = Math.min(xpCollectedInLevel / levelRange, 1);
 
   const activeCards = cards.filter((c) => ["synced", "aligned", "aligning"].includes(c.status)).length;
 
@@ -205,9 +220,15 @@ export default function HomePage() {
           }}>
             👤
           </div>
-          <span className="font-semibold text-base" style={{ color: "var(--text-primary)" }}>
-            {firstName || "Пользователь"}
-          </span>
+          <div className="flex-1 flex justify-between items-center">
+            <span className="font-semibold text-base" style={{ color: "var(--text-primary)" }}>
+              {firstName || "Пользователь"}
+            </span>
+            <span className="font-semibold text-base flex items-center gap-0.5" style={{ color: "#F59E0B" }}>
+              <EnergyIcon size={20} color="#F59E0B" />
+              {energy}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -243,7 +264,10 @@ export default function HomePage() {
       <div className="px-4 mb-3">
         <div className="flex items-center justify-between mb-1">
           <span style={{ fontSize: 13, color: "var(--text-secondary)", fontWeight: 500 }}>
-            {title || "Новичек"}
+            {title || "Новичок"}{" "}
+            <span style={{ color: "var(--text-muted)", fontWeight: 400, fontSize: 12 }}>
+              ({formatScore(xpCollectedInLevel)} / {formatScore(levelRange)} XP)
+            </span>
           </span>
           <span style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 500 }}>
             Level <span style={{ color: "var(--text-primary)", fontWeight: 700 }}>{evolutionLevel}</span>/100
@@ -362,11 +386,11 @@ export function BottomNav({ active }: { active: string }) {
   const router = useRouter();
 
   const navItems = [
-    { key: "home", icon: "◈", label: "AVATAR", path: "/" },
-    { key: "cards", icon: "🃏", label: "Карточки", path: "/cards" },
-    { key: "diary", icon: "📖", label: "Дневник", path: "/diary" },
-    { key: "reflect", icon: "🌅", label: "Рефлексия", path: "/reflect" },
-    { key: "profile", icon: "◉", label: "Профиль", path: "/profile" },
+    { key: "home", icon: "/icons/home.svg", label: "AVATAR", path: "/" },
+    { key: "cards", icon: "/icons/cards.svg", label: "Карточки", path: "/cards" },
+    { key: "diary", icon: "/icons/diary.svg", label: "Дневник", path: "/diary" },
+    { key: "reflect", icon: "/icons/reflect.svg", label: "Рефлексия", path: "/reflect" },
+    { key: "profile", icon: "/icons/profile.svg", label: "Профиль", path: "/profile" },
   ];
 
   return (
@@ -407,14 +431,17 @@ export function BottomNav({ active }: { active: string }) {
               minWidth: 52,
             }}
           >
-            <span style={{
-              fontSize: 18,
-              color: isActive ? "var(--text-primary)" : "var(--text-muted)",
-              lineHeight: 1,
-              transition: "color 0.2s",
-            }}>
-              {item.icon}
-            </span>
+            <img
+              src={item.icon}
+              alt={item.label}
+              style={{
+                width: 24,
+                height: 24,
+                opacity: isActive ? 1 : 0.5,
+                filter: isActive ? "none" : "grayscale(100%) brightness(0.8)",
+                transition: "all 0.2s"
+              }}
+            />
             <span style={{
               fontSize: 10,
               fontWeight: 500,

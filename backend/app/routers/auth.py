@@ -14,7 +14,7 @@ from sqlalchemy import select
 from app.database import get_db
 from app.models import User, GameState
 from app.config import settings
-from app.core.economy import update_streak, award_energy
+from app.core.economy import update_streak, award_energy, award_xp, XP_VALUES, calculate_xp_for_level
 
 router = APIRouter()
 
@@ -33,6 +33,9 @@ class AuthResponse(BaseModel):
     streak: int
     evolution_level: int
     title: str
+    xp: int
+    xp_current: int
+    xp_next: int
     token: str  # simplified: tg_id as token (use JWT in production)
 
 
@@ -97,9 +100,10 @@ async def authenticate(
         is_new = True
 
     # Update streak on login
-    new_streak, bonus = await update_streak(db, user)
+    new_streak, bonus_xp = await update_streak(db, user)
     if not is_new:
         await award_energy(db, user, "daily_login")
+        await award_xp(db, user, XP_VALUES["daily_login"])
 
     await db.commit()
     await db.refresh(user)
@@ -113,5 +117,8 @@ async def authenticate(
         streak=user.streak,
         evolution_level=user.evolution_level,
         title=user.title,
+        xp=user.xp,
+        xp_current=calculate_xp_for_level(user.evolution_level),
+        xp_next=calculate_xp_for_level(user.evolution_level + 1),
         token=str(user.tg_id),
     )

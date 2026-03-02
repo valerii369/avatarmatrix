@@ -23,7 +23,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="AVATAR API",
     description="Платформа эволюции сознания",
-    version="1.0.0",
+    version="1.0.1",
     lifespan=lifespan,
 )
 
@@ -53,7 +53,7 @@ app.include_router(reflect.router,  prefix="/api/reflect",  tags=["Reflect"])
 
 @app.get("/health", tags=["Meta"])
 async def health():
-    return {"status": "ok", "version": "1.0.0", "env": settings.ENVIRONMENT}
+    return {"status": "ok", "version": app.version, "env": settings.ENVIRONMENT}
 
 
 if __name__ == "__main__":

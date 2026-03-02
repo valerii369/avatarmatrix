@@ -7,10 +7,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.database import AsyncSessionLocal
-from app.models import CardProgress, AlignSession, SyncSession, User
+from app.models import CardProgress, AlignSession, SyncSession, User, DiaryEntry
 from app.models.card_progress import CardStatus
-from app.agents.master_agent import alignment_session_message, evaluate_hawkins
-from app.core.economy import award_energy, spend_energy, hawkins_to_rank
+from app.agents.master_agent import (
+    alignment_session_message, 
+    evaluate_hawkins, 
+    generate_alignment_summary,
+    run_alignment_expert_analysis
+)
+from app.core.economy import award_energy, spend_energy, hawkins_to_rank, process_card_rank_up
 from app.config import settings
 
 router = APIRouter()
@@ -61,9 +66,40 @@ async def alignment_session(
         )
         last_sync = sync_result.scalar_one_or_none()
 
+        # Get all previous alignment sessions for this card
+        align_history_result = await db.execute(
+            select(AlignSession).where(
+                AlignSession.card_progress_id == card_progress_id,
+                AlignSession.is_complete == True
+            ).order_by(AlignSession.created_at.asc())
+        )
+        prev_aligns = align_history_result.scalars().all()
+
         core_belief = last_sync.extracted_core_belief if last_sync else ""
         shadow_pattern = last_sync.extracted_shadow_pattern if last_sync else ""
         hawkins_entry = card.hawkins_current or 100
+
+        # Build History Context
+        history_lines = []
+        if last_sync:
+            history_lines.append(f"--- СИНХРОНИЗАЦИЯ ({last_sync.created_at.strftime('%Y-%m-%d %H:%M')}) ---")
+            history_lines.append(f"Итог: Хокинс {last_sync.hawkins_score} ({last_sync.hawkins_level})")
+            history_lines.append(f"Ядро: {last_sync.extracted_core_belief}")
+            history_lines.append(f"Тень: {last_sync.extracted_shadow_pattern}")
+            if last_sync.session_transcript:
+                history_lines.append("Диалог:")
+                for m in last_sync.session_transcript[-6:]: # Last 6 messages for brevity
+                    history_lines.append(f"{m['role']}: {m['content']}")
+        
+        for idx, prev in enumerate(prev_aligns):
+            history_lines.append(f"\n--- СЕССИЯ ВЫРАВНИВАНИЯ #{idx+1} ({prev.created_at.strftime('%Y-%m-%d %H:%M')}) ---")
+            history_lines.append(f"Хокинс: вход {prev.hawkins_entry} -> пик {prev.hawkins_peak}")
+            if prev.messages_json:
+                history_lines.append("Диалог:")
+                for m in prev.messages_json[-4:]: # Last 4 messages
+                    history_lines.append(f"{m.get('role')}: {m.get('content')}")
+        
+        history_context = "\n".join(history_lines)
 
         # Create align session
         align_session = AlignSession(
@@ -97,6 +133,7 @@ async def alignment_session(
             user_message="Начало сессии",
             core_belief=core_belief,
             shadow_pattern=shadow_pattern,
+            history_context=history_context,
         )
 
         await websocket.send_json({
@@ -116,43 +153,64 @@ async def alignment_session(
                 if msg_type == "close":
                     break
 
-                # Evaluate Hawkins from user message
-                hawkins_eval = await evaluate_hawkins(user_content)
-                current_hawkins = hawkins_eval.get("score", hawkins_entry)
-                hawkins_min = min(hawkins_min, current_hawkins)
-                hawkins_peak = max(hawkins_peak, current_hawkins)
+                # Evaluate Hawkins from user message (only if not empty)
+                current_hawkins = hawkins_entry
+                is_manual_transition = (msg_type == "complete_stage")
+                
+                if user_content.strip():
+                    hawkins_eval = await evaluate_hawkins(user_content)
+                    current_hawkins = hawkins_eval.get("score", hawkins_entry)
+                    hawkins_min = min(hawkins_min, current_hawkins)
+                    hawkins_peak = max(hawkins_peak, current_hawkins)
+                    # Add to chat history
+                    chat_history.append({"role": "user", "content": user_content})
+                
+                # Auto-increment stage if user provided content or requested transition
+                if (user_content.strip() or is_manual_transition) and current_stage < 6:
+                    current_stage += 1
+                
+                # If it was a transition with no content, use placeholder for AI context
+                effective_user_content = user_content if user_content.strip() else "[Переход к следующему этапу]"
 
-                # Add to chat history
-                chat_history.append({"role": "user", "content": user_content})
-
-                # Generate AI response
+                # Generate AI response for the NEW current_stage
                 ai_response = await alignment_session_message(
-                    stage=requested_stage,
+                    stage=current_stage,
                     archetype_id=card.archetype_id,
                     sphere=card.sphere,
                     hawkins_score=current_hawkins,
                     chat_history=chat_history,
-                    user_message=user_content,
+                    user_message=effective_user_content,
                     core_belief=core_belief,
                     shadow_pattern=shadow_pattern,
+                    history_context=history_context,
                     token_budget=settings.TOKEN_BUDGET_DEEP_SESSION,
                 )
 
                 chat_history.append({"role": "assistant", "content": ai_response})
-                current_stage = requested_stage
 
-                # Check if session complete (stage 6 done)
-                is_complete = requested_stage >= 6 and msg_type == "complete_stage"
+                # Expert analysis for final stage
+                expert_results = {}
+                if is_complete:
+                    expert_results = await run_alignment_expert_analysis(
+                        chat_history=chat_history,
+                        archetype_id=card.archetype_id,
+                        sphere=card.sphere
+                    )
 
                 await websocket.send_json({
                     "type": "response",
                     "content": ai_response,
                     "stage": current_stage,
-                    "hawkins_current": current_hawkins,
+                    "hawkins_current": expert_results.get("hawkins_score") if is_complete else current_hawkins,
+                    "hawkins_min": hawkins_min,
+                    "hawkins_peak": hawkins_peak,
                     "is_complete": is_complete,
+                    "expert_results": expert_results if is_complete else None
                 })
 
                 if is_complete:
+                    # Store expert results for DB saving after loop
+                    session_expert_results = expert_results
                     break
 
         except WebSocketDisconnect:
@@ -160,27 +218,77 @@ async def alignment_session(
 
         # Save session results
         align_session.messages_json = chat_history
-        align_session.hawkins_min = hawkins_min
-        align_session.hawkins_peak = hawkins_peak
-        align_session.hawkins_exit = hawkins_peak
         align_session.stages_completed = current_stage
         align_session.is_complete = current_stage >= 6
+        
+        # 1. Use Expert Analysis results if available
+        expert_results = session_expert_results if 'session_expert_results' in locals() else {}
+
+        if align_session.is_complete and expert_results:
+            expert_score = expert_results.get("hawkins_score", hawkins_peak)
+            
+            # Update session with expert results
+            align_session.hawkins_min = min(hawkins_min, expert_score)
+            align_session.hawkins_peak = max(hawkins_peak, expert_score)
+            align_session.hawkins_exit = expert_score
+        else:
+            align_session.hawkins_min = hawkins_min
+            align_session.hawkins_peak = hawkins_peak
+            align_session.hawkins_exit = hawkins_peak
+            
         db.add(align_session)
 
-        # Update card progress
-        card.hawkins_current = hawkins_peak
-        if hawkins_peak > card.hawkins_peak:
-            card.hawkins_peak = hawkins_peak
+        # 2. Update card progress
+        # If expert analysis was run, use it, otherwise use session tracking
+        final_core_score = expert_results.get("hawkins_score", hawkins_min)
+        card.hawkins_current = final_core_score
+        
+        if final_core_score < card.hawkins_min:
+             card.hawkins_min = final_core_score
+             
+        # Peak is still tracked separately for record
+        current_session_peak = expert_results.get("hawkins_score", hawkins_peak)
+        if current_session_peak > card.hawkins_peak:
+            card.hawkins_peak = current_session_peak
+            
+        old_rank = card.rank
         new_rank = hawkins_to_rank(card.hawkins_peak)
-        if new_rank > card.rank:
-            card.rank = new_rank
-            # XP for rank up
-            user_result2 = await db.execute(select(User).where(User.id == user_id))
-            user2 = user_result2.scalar_one_or_none()
-            if user2:
-                user2.xp += hawkins_peak
-                await award_energy(db, user2, "card_rank_up")
+        card.rank = new_rank
+        
+        # XP and Energy for rank up
+        if user and new_rank > old_rank:
+            await process_card_rank_up(db, user, old_rank, new_rank, card.hawkins_peak)
         card.align_sessions_count += 1
         db.add(card)
         db.add(user)
+        
+        # Generation of Diary Entry
+        if align_session.is_complete:
+            try:
+                summary = await generate_alignment_summary(
+                    chat_history=chat_history,
+                    archetype_id=card.archetype_id,
+                    sphere=card.sphere
+                )
+                
+                # Save summary to session
+                align_session.new_belief = summary.get("new_belief")
+                align_session.integration_plan = summary.get("integration_plan")
+                db.add(align_session)
+                
+                # Create Diary Entry
+                diary = DiaryEntry(
+                    user_id=user_id,
+                    align_session_id=align_session.id,
+                    archetype_id=card.archetype_id,
+                    sphere=card.sphere,
+                    content=summary.get("final_insight") or "Итог сессии выравнивания",
+                    integration_plan=summary.get("integration_plan"),
+                    entry_type="session_result"
+                )
+                db.add(diary)
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).error(f"Diary generation error: {e}")
+
         await db.commit()

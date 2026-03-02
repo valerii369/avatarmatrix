@@ -111,6 +111,17 @@ make migrate-create  # Создать новую миграцию
 
 ## Деплой
 
-- **Backend**: Timeweb Cloud (Dockerfile)
-- **Frontend**: Vercel (`vercel --prod`)
-- **БД**: Supabase (уже настроен через DATABASE_URL)
+Для удобства и предотвращения дубликатов созданы стандартизированные команды:
+
+### Frontend (Vercel)
+- **Команда**: `npm run deploy:frontend` (из корня)
+- **Что делает**: Переходит в `/frontend` и запускает `vercel deploy --prod` в привязанный проект.
+
+### Backend & Bot (Timeweb / VPS)
+- **Команда**: `expect deploy_vps.exp` (из корня)
+- **Что делает**: 
+  1. Синхронизирует папки `backend/app`, `backend/data`, `bot`.
+  2. Перезапускает системные службы `avatar-backend` и `avatar-bot`.
+  3. Проверяет статус служб.
+
+*Примечание: Все старые скрипты деплоя перенесены в `scripts/deploy_archive`.*

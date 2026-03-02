@@ -1,5 +1,3 @@
-spawn ssh -o StrictHostKeyChecking=no root@103.74.92.72 cat /root/avatar/bot/main.py
-root@103.74.92.72's password: 
 """
 AVATAR Telegram Bot (aiogram 3.x)
 - /start   → shows Mini App button
@@ -22,7 +20,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-def _open_btn(label: str = "ð Открыть AVATAR") -> InlineKeyboardMarkup:
+def _open_btn(label: str = "✨ Открыть AVATAR") -> InlineKeyboardMarkup:
     """Reusable Mini App open button."""
     return InlineKeyboardMarkup(inline_keyboard=[[
         InlineKeyboardButton(text=label, web_app=WebAppInfo(url=MINI_APP_URL))
@@ -40,15 +38,15 @@ def build_router(bot: Bot) -> Dispatcher:
         await message.answer(
             "✨ <b>AVATAR</b> — платформа эволюции сознания\n\n"
             "Открой свою карту из 176 архетипов и начни путь трансформации через 8 сфер жизни.\n\n"
-            "ð <b>Что тебя ждёт:</b>\n"
+            "🌟 <b>Что тебя ждёт:</b>\n"
             "• Астрологический расчёт натальной карты\n"
             "• 176 карточек (22 архетипа × 8 сфер)\n"
             "• Синхронизация через 10 фаз погружения\n"
             "• Сессии выравнивания с AI-агентом\n"
             "• Шкала Хокинса от 20 до 1000\n"
             "• Геймификация: ✦ Энергия, XP, ранги\n\n"
-            "Нажми кнопку ниже чтобы начать ð",
-            reply_markup=_open_btn("ð Открыть AVATAR"),
+            "Нажми кнопку ниже чтобы начать 👇",
+            reply_markup=_open_btn("🚀 Открыть AVATAR"),
             parse_mode="HTML",
         )
 
@@ -68,17 +66,17 @@ def build_router(bot: Bot) -> Dispatcher:
                     "✅ <b>Профиль сброшен.</b>\n\n"
                     "Дата, время и место рождения удалены.\n"
                     "Все 176 карточек очищены.\n\n"
-                    "ð <b>Что делать дальше:</b>\n"
+                    "👇 <b>Что делать дальше:</b>\n"
                     "Нажми кнопку ниже — при входе в приложение "
                     "тебя встретит онбординг для повторного ввода данных.",
-                    reply_markup=_open_btn("ð Пройти онбординг заново"),
+                    reply_markup=_open_btn("📋 Пройти онбординг заново"),
                     parse_mode="HTML",
                 )
             elif resp.status_code == 404:
                 await message.answer(
                     "❌ Профиль не найден.\n\n"
                     "Сначала пройди регистрацию в приложении.",
-                    reply_markup=_open_btn("ð Открыть AVATAR"),
+                    reply_markup=_open_btn("🚀 Открыть AVATAR"),
                 )
             else:
                 await message.answer(
@@ -102,7 +100,7 @@ def build_router(bot: Bot) -> Dispatcher:
     async def cmd_restart(message: Message):
         """Handle /restart — force recalculate natal chart."""
         tg_id = message.from_user.id
-        await message.answer("ð Запускаю пересчёт натальной карты...")
+        await message.answer("🔄 Запускаю пересчёт натальной карты...")
 
         try:
             async with httpx.AsyncClient(timeout=60) as client:
@@ -111,7 +109,7 @@ def build_router(bot: Bot) -> Dispatcher:
                 if user_resp.status_code == 404:
                     await message.answer(
                         "❌ Профиль не найден.\n\nСначала пройди регистрацию.",
-                        reply_markup=_open_btn("ð Открыть AVATAR"),
+                        reply_markup=_open_btn("🚀 Открыть AVATAR"),
                     )
                     return
                 if user_resp.status_code != 200:
@@ -124,7 +122,7 @@ def build_router(bot: Bot) -> Dispatcher:
                     await message.answer(
                         "❌ Данные рождения не заполнены.\n\n"
                         "Пройди онбординг в приложении, затем используй /restart.",
-                        reply_markup=_open_btn("ð Ввести данные"),
+                        reply_markup=_open_btn("📋 Ввести данные"),
                     )
                     return
 
@@ -148,11 +146,11 @@ def build_router(bot: Bot) -> Dispatcher:
                     total = calc_data.get("total_cards", 176)
                     await message.answer(
                         f"✅ <b>Карта пересчитана!</b>\n\n"
-                        f"ð Открыто архетипов: <b>{total}</b>\n"
-                        f"ð Дата: <b>{birth_date}</b>\n"
-                        f"ð Место: <b>{user_data['birth_place']}</b>\n\n"
-                        "Открой приложение чтобы увидеть новые приоритеты ð",
-                        reply_markup=_open_btn("ð Открыть AVATAR"),
+                        f"📊 Открыто архетипов: <b>{total}</b>\n"
+                        f"📅 Дата: <b>{birth_date}</b>\n"
+                        f"📍 Место: <b>{user_data['birth_place']}</b>\n\n"
+                        "Открой приложение чтобы увидеть новые приоритеты 🌟",
+                        reply_markup=_open_btn("🌟 Открыть AVATAR"),
                         parse_mode="HTML",
                     )
                 else:
@@ -176,7 +174,7 @@ def build_router(bot: Bot) -> Dispatcher:
     @dp.message(F.voice)
     async def handle_voice(message: Message):
         """Handle voice messages — transcribe via Whisper API."""
-        await message.answer("ð Обрабатываю голосовое сообщение...")
+        await message.answer("🎙️ Обрабатываю голосовое сообщение...")
         try:
             file_info = await bot.get_file(message.voice.file_id)
             file_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_info.file_path}"
@@ -198,7 +196,7 @@ def build_router(bot: Bot) -> Dispatcher:
 
             if transcript:
                 await message.answer(
-                    f"ð <b>Распознано:</b>\n\n{transcript}",
+                    f"📍 <b>Распознано:</b>\n\n{transcript}",
                     parse_mode="HTML",
                 )
             else:
@@ -213,12 +211,12 @@ def build_router(bot: Bot) -> Dispatcher:
     async def handle_text(message: Message):
         """Handle plain text messages — redirect to Mini App."""
         await message.answer(
-            "ð¬ Все взаимодействия происходят в Mini App.\n\n"
+            "💬 Все взаимодействия происходят в Mini App.\n\n"
             "Доступные команды:\n"
             "/start — открыть приложение\n"
             "/restart — пересчитать карту\n"
             "/reset — сбросить профиль (тест)",
-            reply_markup=_open_btn("ð Открыть AVATAR"),
+            reply_markup=_open_btn("🚀 Открыть AVATAR"),
         )
 
     return dp
