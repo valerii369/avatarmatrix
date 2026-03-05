@@ -297,93 +297,159 @@ function AIFlow({ onBack }: { onBack: () => void }) {
 
     const isReadyForSync = messages.length >= 7; // User sent 3+ responses
 
+    // full-screen layout for AI flow
     return (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-[75vh] flex flex-col">
-            <p className="text-[9px] text-white/30 text-center mb-3 leading-tight px-4 italic">
-                Все данные зашифрованы. Чем подробнее расскажете о своих жизненных ситуациях, тем точнее мы сможем подобрать для вас карты архетипов.
-            </p>
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+                position: "fixed",
+                inset: 0,
+                display: "flex",
+                flexDirection: "column",
+                background: "#060818",
+                zIndex: 10,
+            }}
+        >
+            {/* Top bar */}
+            <div style={{ padding: "12px 16px 8px", borderBottom: "1px solid rgba(255,255,255,0.05)", flexShrink: 0 }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <button
+                        onClick={onBack}
+                        disabled={calcLoading}
+                        style={{ fontSize: 12, color: "rgba(255,255,255,0.3)", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", background: "none", border: "none", cursor: "pointer", padding: "4px 0" }}
+                    >
+                        ← Назад
+                    </button>
+                    <span style={{ fontSize: 10, color: "rgba(255,255,255,0.2)", letterSpacing: "0.1em", textTransform: "uppercase" }}>☼ ИИ-диагностика</span>
+                    <span style={{ fontSize: 10, color: "rgba(245,158,11,0.5)" }}>{Math.min(messages.length, 7)}/7</span>
+                </div>
+            </div>
+
+            {/* Chat messages – fills all available space */}
             <div
                 ref={scrollRef}
-                className="flex-1 overflow-y-auto mb-4 p-4 glass-strong rounded-2xl border border-white/5 space-y-4"
-                style={{
-                    scrollbarWidth: "none"
-                }}
+                style={{ flex: 1, overflowY: "auto", padding: "12px 16px", display: "flex", flexDirection: "column", gap: 10, scrollbarWidth: "none" }}
             >
                 {messages.filter(m => !(m.role === 'user' && m.content.startsWith('Привет! Я готов'))).map((msg, i) => (
-                    <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                        <div className={`p-3 rounded-2xl max-w-[85%] text-[13px] leading-relaxed ${msg.role === "user" ? "bg-amber-500/20 text-amber-50 rounded-tr-sm border border-amber-500/10" : "bg-white/5 text-white/90 rounded-tl-sm border border-white/10"}`}>
+                    <div key={i} style={{ display: "flex", justifyContent: msg.role === "user" ? "flex-end" : "flex-start" }}>
+                        <div style={{
+                            padding: "10px 14px",
+                            borderRadius: msg.role === "user" ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
+                            maxWidth: "85%",
+                            fontSize: 14,
+                            lineHeight: 1.5,
+                            background: msg.role === "user" ? "rgba(245,158,11,0.18)" : "rgba(255,255,255,0.06)",
+                            color: msg.role === "user" ? "#FEF3C7" : "rgba(255,255,255,0.9)",
+                            border: msg.role === "user" ? "1px solid rgba(245,158,11,0.15)" : "1px solid rgba(255,255,255,0.08)",
+                        }}>
                             {msg.content}
                         </div>
                     </div>
                 ))}
                 {loading && (
-                    <div className="flex justify-start">
-                        <div className="p-3 bg-white/5 text-white/50 rounded-2xl rounded-tl-sm text-[11px] animate-pulse">
+                    <div style={{ display: "flex", justifyContent: "flex-start" }}>
+                        <div style={{ padding: "10px 14px", borderRadius: "18px 18px 18px 4px", background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.4)", fontSize: 12 }} className="animate-pulse">
                             Анализ ответа...
                         </div>
                     </div>
                 )}
             </div>
 
-            <div className="relative mb-3 flex gap-2 items-center">
-                <div className="relative flex-1">
-                    <input
-                        type="text"
-                        value={isTranscribing ? "Слушаю..." : input}
-                        onChange={(e) => setInput(e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                        placeholder="Ваш ответ..."
-                        disabled={loading || calcLoading || isTranscribing}
-                        className="w-full bg-white/5 border border-white/10 rounded-2xl pl-4 pr-12 py-4 text-[16px] text-white placeholder:text-white/20 outline-none focus:border-amber-500/50 transition-all font-medium"
-                    />
+            {/* Bottom panel – always pinned to bottom */}
+            <div style={{ flexShrink: 0, padding: "10px 16px 20px", borderTop: "1px solid rgba(255,255,255,0.05)", display: "flex", flexDirection: "column", gap: 8 }}>
+                {/* Input row */}
+                <div style={{ display: "flex", gap: 8, alignItems: "center", position: "relative" }}>
+                    <div style={{ flex: 1, position: "relative" }}>
+                        <input
+                            type="text"
+                            value={isTranscribing ? "Слушаю..." : input}
+                            onChange={(e) => setInput(e.target.value)}
+                            onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                            placeholder="Ваш ответ..."
+                            disabled={loading || calcLoading || isTranscribing}
+                            style={{
+                                width: "100%",
+                                background: "rgba(255,255,255,0.06)",
+                                border: "1px solid rgba(255,255,255,0.1)",
+                                borderRadius: 16,
+                                padding: "14px 48px 14px 16px",
+                                fontSize: 16,
+                                color: "#fff",
+                                outline: "none",
+                                fontFamily: "inherit",
+                                boxSizing: "border-box",
+                            }}
+                            className="placeholder:text-white/20 focus:border-amber-500/50"
+                        />
+                        <button
+                            onClick={handleSend}
+                            disabled={!input.trim() || loading || calcLoading || isTranscribing}
+                            style={{
+                                position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)",
+                                width: 32, height: 32, borderRadius: 10, border: "none", cursor: "pointer",
+                                background: "rgba(245,158,11,0.2)", color: "#FCD34D",
+                                display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16,
+                                opacity: (!input.trim() || loading) ? 0.3 : 1,
+                            }}
+                        >
+                            ↑
+                        </button>
+                        <AnimatePresence>
+                            {isRecording && (
+                                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                                    style={{ position: "absolute", inset: 0, background: "rgba(245,158,11,0.1)", backdropFilter: "blur(8px)", borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid rgba(245,158,11,0.2)", pointerEvents: "none" }}>
+                                    <div style={{ display: "flex", gap: 4 }}>
+                                        {[0, 1, 2].map(i => (
+                                            <motion.div key={i} style={{ width: 4, height: 16, borderRadius: 4, background: "rgba(251,191,36,0.6)" }}
+                                                animate={{ scaleY: [1, 2, 1] }}
+                                                transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.1 }} />
+                                        ))}
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
                     <button
-                        onClick={handleSend}
-                        disabled={!input.trim() || loading || calcLoading || isTranscribing}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-amber-500/20 text-amber-300 rounded-xl disabled:opacity-30"
+                        onPointerDown={startRecording}
+                        onPointerUp={stopRecording}
+                        onPointerLeave={stopRecording}
+                        style={{
+                            flexShrink: 0, width: 52, height: 52, borderRadius: 16, border: "none", cursor: "pointer",
+                            background: isRecording ? "#EF4444" : "rgba(255,255,255,0.06)",
+                            border: isRecording ? "none" : "1px solid rgba(255,255,255,0.1)",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            transform: isRecording ? "scale(0.95)" : "scale(1)",
+                            transition: "all 0.15s",
+                        }}
                     >
-                        ↑
+                        {isRecording ? "🔴" : <MicIcon className="w-5 h-5 text-amber-500/60" />}
                     </button>
-                    <AnimatePresence>
-                        {isRecording && (
-                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                                className="absolute inset-0 bg-amber-500/10 backdrop-blur-md rounded-2xl flex items-center justify-center pointer-events-none border border-amber-500/20">
-                                <div className="flex gap-1">
-                                    {[0, 1, 2].map(i => (
-                                        <motion.div key={i} className="w-1 h-4 bg-amber-400/60 rounded-full"
-                                            animate={{ scaleY: [1, 2, 1] }}
-                                            transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.1 }} />
-                                    ))}
-                                </div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
                 </div>
 
-                <button
-                    onPointerDown={startRecording}
-                    onPointerUp={stopRecording}
-                    onPointerLeave={stopRecording}
-                    className={`flex-none w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${isRecording ? "bg-rose-500 scale-95 shadow-lg shadow-rose-500/20" : "bg-white/5 border border-white/10"}`}
-                >
-                    {isRecording ? "🔴" : <MicIcon className="w-6 h-6 text-amber-500/60" />}
-                </button>
+                {/* CTA or progress hint */}
+                {isReadyForSync ? (
+                    <button
+                        onClick={handleCalculate}
+                        disabled={calcLoading}
+                        style={{
+                            width: "100%", padding: "15px", borderRadius: 18, border: "none", cursor: "pointer",
+                            background: calcLoading ? "rgba(255,255,255,0.1)" : "linear-gradient(135deg, #F59E0B, #F97316)",
+                            color: "#fff", fontWeight: 900, fontSize: 15, letterSpacing: "0.02em",
+                            boxShadow: calcLoading ? "none" : "0 4px 24px rgba(245,158,11,0.35)",
+                            opacity: calcLoading ? 0.6 : 1,
+                            transition: "all 0.2s",
+                        }}
+                    >
+                        {calcLoading ? "Генерация..." : "Получить карты ✧"}
+                    </button>
+                ) : (
+                    <p style={{ textAlign: "center", fontSize: 10, color: "rgba(255,255,255,0.25)", textTransform: "uppercase", letterSpacing: "0.1em", margin: 0 }}>
+                        Ответьте ещё на несколько вопросов
+                    </p>
+                )}
             </div>
-
-            {isReadyForSync ? (
-                <button
-                    onClick={handleCalculate}
-                    disabled={calcLoading}
-                    className="w-full py-4 rounded-2xl font-black text-sm transition-all shadow-xl disabled:opacity-20 relative overflow-hidden group bg-gradient-to-r from-amber-500 to-orange-500 text-white"
-                >
-                    {calcLoading ? "Генерация..." : "Получить карты ✧"}
-                </button>
-            ) : (
-                <p className="text-[10px] text-center text-white/30 uppercase tracking-wider mb-2">Ответьте еще на несколько вопросов</p>
-            )}
-
-            <button onClick={onBack} disabled={calcLoading} className="w-full mt-2 text-[10px] font-bold text-white/20 uppercase tracking-widest hover:text-white/40 transition-colors pb-4">
-                ← Назад
-            </button>
         </motion.div>
     );
 }
@@ -402,7 +468,7 @@ export default function OnboardingPage() {
         })), []);
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center px-4 relative overflow-hidden bg-[#060818]">
+        <div className={`min-h-screen flex flex-col ${path === 'ai' ? '' : 'items-center justify-center'} px-4 relative overflow-hidden bg-[#060818]`}>
             <div className="absolute inset-0 pointer-events-none">
                 <div style={{
                     position: "absolute", top: "10%", left: "15%", width: 280, height: 280,
