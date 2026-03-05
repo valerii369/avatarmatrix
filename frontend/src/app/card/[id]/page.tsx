@@ -271,6 +271,9 @@ export default function CardPage() {
                         borderRadius: 14,
                         border: `1px solid ${sphereColor}25`,
                     }}>
+                        <p style={{ fontSize: 10, fontWeight: 700, color: sphereColor, margin: "0 0 4px", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+                            Вопрос сферы
+                        </p>
                         <p style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", margin: 0, lineHeight: 1.5, fontStyle: "italic" }}>
                             {card.sphere_main_question}
                         </p>

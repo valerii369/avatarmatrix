@@ -416,7 +416,7 @@ function AIFlow({ onBack }: { onBack: () => void }) {
                         onPointerUp={stopRecording}
                         onPointerLeave={stopRecording}
                         style={{
-                            flexShrink: 0, width: 52, height: 52, borderRadius: 16, border: "none", cursor: "pointer",
+                            flexShrink: 0, width: 52, height: 52, borderRadius: 16, cursor: "pointer",
                             background: isRecording ? "#EF4444" : "rgba(255,255,255,0.06)",
                             border: isRecording ? "none" : "1px solid rgba(255,255,255,0.1)",
                             display: "flex", alignItems: "center", justifyContent: "center",
