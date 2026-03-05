@@ -44,6 +44,8 @@ class CardSummary(BaseModel):
     hawkins_peak: int
     is_recommended_astro: bool
     is_recommended_portrait: bool
+    is_recommended_ai: bool
+    ai_score: float
     astro_priority: Optional[str]
     sync_sessions_count: int
     align_sessions_count: int
@@ -91,6 +93,8 @@ async def get_all_cards(
             hawkins_peak=card.hawkins_peak,
             is_recommended_astro=card.is_recommended_astro,
             is_recommended_portrait=card.is_recommended_portrait,
+            is_recommended_ai=card.is_recommended_ai,
+            ai_score=card.ai_score or 0.0,
             astro_priority=card.astro_priority,
             sync_sessions_count=card.sync_sessions_count,
             align_sessions_count=card.align_sessions_count,
@@ -135,6 +139,8 @@ async def get_card_detail(
         hawkins_peak=card.hawkins_peak,
         is_recommended_astro=card.is_recommended_astro,
         is_recommended_portrait=card.is_recommended_portrait,
+        is_recommended_ai=card.is_recommended_ai,
+        ai_score=card.ai_score or 0.0,
         astro_priority=card.astro_priority,
         sync_sessions_count=card.sync_sessions_count,
         align_sessions_count=card.align_sessions_count,

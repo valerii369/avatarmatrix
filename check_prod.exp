@@ -1,0 +1,36 @@
+#!/usr/bin/expect -f
+set timeout 60
+set password "eCTyD*R.94zTba"
+
+spawn ssh -o StrictHostKeyChecking=no root@103.74.92.72 "cd /root/avatar/backend && python3 -c \"
+import asyncio, sys
+sys.path.insert(0, '.')
+from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy import text
+import os
+
+DATABASE_URL = open('.env').read()
+for line in DATABASE_URL.split('\\\n'):
+    if line.startswith('DATABASE_URL'):
+        url = line.split('=', 1)[1].strip()
+        break
+
+engine = create_async_engine(url)
+
+async def check():
+    async with engine.connect() as conn:
+        r1 = await conn.execute(text('SELECT COUNT(*) FROM avatar_cards;'))
+        print(f'avatar_cards: {r1.scalar()}')
+        r2 = await conn.execute(text('SELECT COUNT(*) FROM avatar_cards WHERE embedding IS NOT NULL;'))
+        print(f'with embeddings: {r2.scalar()}')
+        r3 = await conn.execute(text('SELECT COUNT(*) FROM card_progress WHERE is_recommended_ai=true;'))
+        print(f'recommended AI cards: {r3.scalar()}')
+        r4 = await conn.execute(text('SELECT id, onboarding_done FROM users ORDER BY id DESC LIMIT 3;'))
+        for row in r4.fetchall():
+            print(f'user id={row[0]}, onboarding_done={row[1]}')
+        
+asyncio.run(check())
+\""
+expect "password:"
+send "$password\r"
+expect eof

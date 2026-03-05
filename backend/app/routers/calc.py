@@ -14,7 +14,11 @@ from app.core.astrology.natal_chart import (
     calculate_natal_chart, geocode_place, to_dict as chart_to_dict
 )
 from app.core.astrology.aspect_calculator import calculate_aspects, to_dict as aspects_to_dict
-from app.core.astrology.priority_engine import generate_recommended_cards, to_dict as cards_to_dict
+from app.core.astrology.llm_engine import synthesize_sphere_descriptions
+from app.core.astrology.vector_matcher import match_archetypes_to_spheres
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -51,36 +55,67 @@ async def calculate(
     5. Create/update 176 CardProgress rows
     6. Save NatalChart to DB
     """
+    logger.info(f"--- Astro Calculation Started for user {request.user_id} ---")
     # Get user
     user_result = await db.execute(select(User).where(User.id == request.user_id))
     user = user_result.scalar_one_or_none()
     if not user:
+        logger.error(f"User {request.user_id} not found")
         raise HTTPException(status_code=404, detail="User not found")
 
     try:
+        logger.info(f"Geocoding: {request.birth_place}")
         # Geocode
         lat, lon, tz_name = await geocode_place(request.birth_place)
+        logger.info(f"Geocoding result: {lat}, {lon}, {tz_name}")
     except ValueError as e:
+        logger.error(f"Geocoding failed for {request.birth_place}: {e}")
         raise HTTPException(status_code=400, detail=str(e))
 
     # Parse date
     birth_date = datetime.strptime(request.birth_date, "%Y-%m-%d")
+    logger.info(f"Parsed birth date: {birth_date}")
 
     try:
         # Calculate natal chart
+        logger.info("Calculating natal chart...")
         chart = calculate_natal_chart(birth_date, request.birth_time, lat, lon, tz_name)
+        logger.info("Chart calculated successfully.")
     except Exception as e:
+        logger.error(f"Chart calculation error: {e}")
         raise HTTPException(status_code=500, detail=f"Chart calculation error: {e}")
 
     chart_dict = chart_to_dict(chart)
 
     # Calculate aspects
+    logger.info("Calculating aspects...")
     aspects = calculate_aspects(chart_dict["planets"])
     aspects_dict = aspects_to_dict(aspects)
+    logger.info(f"Aspects calculated: {len(aspects)} found.")
 
-    # Generate recommended cards
-    recommended_astro = generate_recommended_cards(chart)
-    recommended_dict = cards_to_dict(recommended_astro)
+    # Generate Synthesized Description via LLM
+    logger.info("Synthesizing sphere descriptions via LLM...")
+    sphere_descriptions = await synthesize_sphere_descriptions(chart_dict, aspects_dict)
+    logger.info(f"LLM synthesis finished. Spheres: {list(sphere_descriptions.keys())}")
+    
+    # Generate recommended cards via Vector matching
+    logger.info("Matching archetypes to spheres (vector search)...")
+    recommended_astro = await match_archetypes_to_spheres(db, sphere_descriptions)
+    logger.info(f"Vector search finished. Recommended: {len(recommended_astro)}")
+    
+    # Helper to convert to dict
+    def to_dict(cards):
+        return [
+            {
+                "archetype_id": c.archetype_id,
+                "sphere": c.sphere,
+                "priority": c.priority,
+                "reason": c.reason,
+            }
+            for c in cards
+        ]
+        
+    recommended_dict = to_dict(recommended_astro)
 
     # Build set of recommended (archetype_id, sphere)
     recommended_set = {
@@ -132,6 +167,7 @@ async def calculate(
         natal.planets_json = chart_dict
         natal.aspects_json = aspects_dict
         natal.recommended_cards_json = recommended_dict
+        natal.sphere_descriptions_json = sphere_descriptions
         natal.ascendant_sign = chart.ascendant_sign
         natal.ascendant_ruler = chart.ascendant_ruler
     else:
@@ -140,6 +176,7 @@ async def calculate(
             planets_json=chart_dict,
             aspects_json=aspects_dict,
             recommended_cards_json=recommended_dict,
+            sphere_descriptions_json=sphere_descriptions,
             ascendant_sign=chart.ascendant_sign,
             ascendant_ruler=chart.ascendant_ruler,
         )
@@ -155,7 +192,9 @@ async def calculate(
     user.onboarding_done = True
     db.add(user)
 
+    logger.info(f"Committing Astro results for user {user.id}...")
     await db.commit()
+    logger.info("Commit successful.")
 
     return CalcResponse(
         success=True,

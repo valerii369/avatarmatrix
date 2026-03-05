@@ -7,29 +7,22 @@ from app.config import settings
 from app.database import init_db
 from app.routers import (
     auth, calc, cards, sync, session,
-    diary, profile, portrait, game, voice, retro, match, reflect
+    diary, profile, portrait, game, voice, retro, match, reflect, onboarding_ai
 )
-
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Startup/shutdown events via lifespan context manager."""
-    # Startup
     await init_db()
     yield
-    # Shutdown (cleanup if needed)
-
 
 app = FastAPI(
-    title="AVATAR API",
-    description="Платформа эволюции сознания",
+    title="AVATAR Платформа",
     version="1.0.1",
     lifespan=lifespan,
 )
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS if hasattr(settings, "CORS_ORIGINS") else ["*"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -38,6 +31,7 @@ app.add_middleware(
 # Routers
 app.include_router(auth.router,     prefix="/api/auth",     tags=["Auth"])
 app.include_router(calc.router,     prefix="/api/calc",     tags=["Calc"])
+app.include_router(onboarding_ai.router, prefix="/api/onboarding/ai", tags=["Onboarding"])
 app.include_router(cards.router,    prefix="/api/cards",    tags=["Cards"])
 app.include_router(sync.router,     prefix="/api/sync",     tags=["Sync"])
 app.include_router(session.router,  prefix="/api/session",  tags=["Session"])

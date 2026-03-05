@@ -34,6 +34,8 @@ class CardProgress(Base, TimestampMixin):
     status: Mapped[str] = mapped_column(String(32), default=CardStatus.LOCKED)
     is_recommended_astro: Mapped[bool] = mapped_column(Boolean, default=False)
     is_recommended_portrait: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_recommended_ai: Mapped[bool] = mapped_column(Boolean, default=False)
+    ai_score: Mapped[float] = mapped_column(Float, default=0.0)
 
     # Hawkins tracking
     hawkins_current: Mapped[int] = mapped_column(Integer, default=0)

@@ -17,6 +17,7 @@ class GameState(Base, TimestampMixin):
 
     titles_unlocked: Mapped[Optional[list]] = mapped_column(JSONB, default=[])
     badges_json: Mapped[Optional[list]] = mapped_column(JSONB, default=[])
+    milestones_awarded: Mapped[Optional[list]] = mapped_column(JSONB, default=[])
     current_title: Mapped[str] = mapped_column(String(64), default="Искатель")
 
     # Daily energy (burns at end of day)

@@ -24,9 +24,10 @@ class Settings(BaseSettings):
     TOKEN_BUDGET_DEEP_SESSION: int = 4000
 
     # Energy costs
-    ENERGY_COST_MINI_SESSION: int = 10
-    ENERGY_COST_SYNC: int = 25
-    ENERGY_COST_DEEP_SESSION: int = 40
+    ENERGY_COST_SYNC: int = 35
+    ENERGY_COST_ALIGNMENT: int = 20
+    ENERGY_COST_REFLECTION: int = 15
+    ENERGY_COST_DEEP_SESSION: int = 50
 
     class Config:
         env_file = ".env"

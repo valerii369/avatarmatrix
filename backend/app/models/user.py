@@ -25,7 +25,7 @@ class User(Base, TimestampMixin):
     birth_tz: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
 
     # Game state
-    energy: Mapped[int] = mapped_column(Integer, default=100)  # ✦
+    energy: Mapped[int] = mapped_column(Integer, default=10000)  # ✦
     streak: Mapped[int] = mapped_column(Integer, default=0)
     last_activity: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     evolution_level: Mapped[int] = mapped_column(Integer, default=1)
@@ -36,3 +36,11 @@ class User(Base, TimestampMixin):
     is_premium: Mapped[bool] = mapped_column(Boolean, default=False)
     onboarding_done: Mapped[bool] = mapped_column(Boolean, default=False)
     language: Mapped[str] = mapped_column(String(8), default="ru")
+
+    # Referrals
+    referral_code: Mapped[Optional[str]] = mapped_column(String(32), unique=True, index=True, nullable=True)
+    referred_by: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+
+    # UI
+    photo_url: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+

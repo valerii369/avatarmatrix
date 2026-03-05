@@ -5,7 +5,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://avatar.aiguro.pro";
 
 export const api = axios.create({
     baseURL: API_BASE,
-    timeout: 30000,
+    timeout: 60000,
 });
 
 export const voiceAxios = axios.create({

@@ -14,6 +14,8 @@ interface UserState {
     xp: number;
     xpCurrent: number;
     xpNext: number;
+    referralCode: string;
+    photoUrl: string;
     setUser: (data: Partial<UserState>) => void;
     reset: () => void;
 }
@@ -33,11 +35,13 @@ export const useUserStore = create<UserState>()(
             xp: 0,
             xpCurrent: 0,
             xpNext: 0,
+            referralCode: "",
+            photoUrl: "",
             setUser: (data) => set((state) => ({ ...state, ...data })),
             reset: () => set({
                 userId: null, tgId: null, firstName: "", token: null,
                 energy: 0, streak: 0, evolutionLevel: 1, title: "Искатель", onboardingDone: false,
-                xp: 0, xpCurrent: 0, xpNext: 0,
+                xp: 0, xpCurrent: 0, xpNext: 0, referralCode: "", photoUrl: "",
             }),
         }),
         { name: "avatar-user" }
@@ -69,6 +73,8 @@ export interface CardProgress {
     hawkins_peak: number;
     is_recommended_astro: boolean;
     is_recommended_portrait: boolean;
+    is_recommended_ai?: boolean;
+    ai_score?: number;
     astro_priority: string | null;
     sync_sessions_count: number;
     align_sessions_count: number;

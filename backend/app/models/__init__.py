@@ -8,22 +8,24 @@ from app.models.diary import DiaryEntry
 from app.models.portrait import UserPortrait, Pattern, Connection
 from app.models.game import GameState, Match, DailyReflect, VoiceRecord
 from app.models.knowledge import SphereKnowledge, UserWorldKnowledge
+from app.models.avatar_card import AvatarCard
+from app.models.ai_diagnostic import AIDiagnosticSession
 
 __all__ = [
     "User",
-    "NatalChart",
     "CardProgress",
     "CardStatus",
     "SyncSession",
     "AlignSession",
-    "DiaryEntry",
-    "UserPortrait",
+    "NatalChart",
     "Pattern",
-    "Connection",
+    "DiaryEntry",
+    "AvatarCard",
     "GameState",
     "Match",
     "DailyReflect",
     "VoiceRecord",
+    "AIDiagnosticSession",
     "SphereKnowledge",
     "UserWorldKnowledge",
 ]

@@ -29,3 +29,6 @@ class NatalChart(Base, TimestampMixin):
 
     # Stelliums detected
     stelliums_json: Mapped[Optional[list]] = mapped_column(JSONB, nullable=True)
+
+    # LLM synthesized energetic descriptions for each of the 8 spheres
+    sphere_descriptions_json: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)

@@ -2,10 +2,12 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import useSWR from "swr";
 import { useUserStore, useCardsStore, type CardProgress } from "@/lib/store";
 import { authAPI, cardsAPI } from "@/lib/api";
 import { EnergyIcon } from "@/components/EnergyIcon";
 import { BottomNav } from "@/app/page";
+import { Skeleton, MiniCardSkeleton } from "@/components/Skeleton";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -42,64 +44,73 @@ const TOTAL_CARDS = 176;
 
 export default function CardsPage() {
     const router = useRouter();
-    const { userId, firstName, setUser, energy } = useUserStore();
+    const { userId, firstName, setUser, energy, evolutionLevel, photoUrl } = useUserStore();
     const { cards, setCards, setLoading, filterTab, sphereFilter, setFilters } = useCardsStore();
-    const [initialized, setInitialized] = useState(false);
+    const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
 
-    // Init: authenticate + load cards if not already in store
+    // 1. Auth & Init
     useEffect(() => {
-        // Optimization: if we already have data, don't show the initial loading state
-        if (userId && cards.length > 0) {
-            setInitialized(true);
-        }
-
-        const init = async () => {
+        const initAuth = async () => {
             try {
-                if (!userId) {
-                    const tg = (window as any).Telegram?.WebApp;
-                    if (tg) { tg.ready(); tg.expand(); }
-                    const initData = tg?.initData || "";
-                    const isDev = process.env.NODE_ENV === "development";
-                    const authRes = await authAPI.login(initData, isDev);
-                    const d = authRes.data;
-                    setUser({
-                        userId: d.user_id, tgId: d.tg_id, firstName: d.first_name,
-                        token: d.token, energy: d.energy, streak: d.streak,
-                        evolutionLevel: d.evolution_level, title: d.title,
-                        onboardingDone: d.onboarding_done,
-                    });
-                    if (typeof window !== "undefined")
-                        localStorage.setItem("avatar_token", d.token);
+                const tg = (window as any).Telegram?.WebApp;
+                if (tg) { tg.ready(); tg.expand(); }
 
-                    const r = await cardsAPI.getAll(d.user_id);
-                    setCards(r.data);
-                } else {
-                    // Always re-fetch when page mounts to ensure fresh statuses
-                    setLoading(true);
-                    const r = await cardsAPI.getAll(userId);
-                    setCards(r.data);
-                    setLoading(false);
+                const initData = tg?.initData || "";
+                const isDev = process.env.NODE_ENV === "development";
+                const isDebug = new URLSearchParams(window.location.search).get("debug") === "true";
+
+                if (!initData && !isDev && !isDebug) {
+                    throw new Error("Telegram context missing. Please open via the bot or use ?debug=true for testing.");
                 }
-            } catch (e) {
-                console.error(e);
-            } finally {
-                setInitialized(true);
+
+                const authRes = await authAPI.login(initData, isDev);
+                const d = authRes.data;
+
+                setUser({
+                    userId: d.user_id, tgId: d.tg_id, firstName: d.first_name,
+                    token: d.token, energy: d.energy, streak: d.streak,
+                    evolutionLevel: d.evolution_level, title: d.title,
+                    onboardingDone: d.onboarding_done,
+                });
+
+                if (typeof window !== "undefined")
+                    localStorage.setItem("avatar_token", d.token);
+
+                setStatus("ready");
+            } catch (e: any) {
+                console.error("Init error", e);
+                setStatus("error");
             }
         };
-        init();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+        if (!userId) {
+            initAuth();
+        } else {
+            setStatus("ready");
+        }
+    }, [userId, setUser]);
+
+    // 2. Data Fetching via SWR
+    const { data: cardsData, isValidating: cardsLoading } = useSWR(
+        userId && status === "ready" ? ["cards", userId] : null,
+        () => cardsAPI.getAll(userId!).then(res => res.data),
+        {
+            onSuccess: (data) => setCards(data),
+            revalidateOnFocus: false,
+        }
+    );
+
+    const displayCards = cardsData || cards;
 
     // ── Derived stats ────────────────────────────────────────────────────────
     const openedSpheres = new Set(
-        cards.filter((c) => c.status !== "locked" && c.hawkins_peak > 0).map((c) => c.sphere)
+        displayCards.filter((c: any) => c.status !== "locked" && c.hawkins_peak > 0).map((c: any) => c.sphere)
     ).size;
-    const openedCards = cards.filter((c) => c.status !== "locked").length;
-    const recommended = cards.filter((c) => c.is_recommended_astro).length;
-    const activeCards = cards.filter((c) => ["synced", "aligned", "aligning"].includes(c.status)).length;
+    const openedCards = displayCards.filter((c: any) => c.status !== "locked").length;
+    const recommended = displayCards.filter((c: any) => c.is_recommended_astro || c.is_recommended_ai).length;
+    const activeCards = displayCards.filter((c: any) => ["synced", "aligned", "aligning"].includes(c.status)).length;
     // ── Tabs filter ──────────────────────────────────────────────────────────
     const byTab = (c: CardProgress) => {
-        if (filterTab === "recommended") return c.is_recommended_astro;
+        if (filterTab === "recommended") return c.is_recommended_astro || c.is_recommended_ai;
         if (filterTab === "active") return ["synced", "aligned", "aligning"].includes(c.status);
         return true;
     };
@@ -108,17 +119,14 @@ export default function CardsPage() {
     const bySphere = (c: CardProgress) =>
         sphereFilter === "ALL" || c.sphere === sphereFilter;
 
-    const visible = cards.filter((c) => byTab(c) && bySphere(c));
+    const visible = displayCards.filter((c: any) => byTab(c as any) && bySphere(c as any));
 
-    // ── Spinner while loading ────────────────────────────────────────────────
-    if (!initialized) {
+    // ── Loading/Error States ──────────────────────────────────────────────────
+    if (status === "loading" || !userId) {
         return (
-            <div className="flex items-center justify-center min-h-screen">
-                <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                    className="w-12 h-12 border-2 border-violet-500 border-t-transparent rounded-full"
-                />
+            <div className="flex flex-col items-center justify-center min-h-screen" style={{ background: "var(--bg-deep)" }}>
+                <div className="w-12 h-12 border-2 border-violet-500 border-t-transparent rounded-full mb-4 animate-spin" />
+                <p className="text-xs text-muted-foreground animate-pulse">Загрузка карточек...</p>
             </div>
         );
     }
@@ -145,14 +153,28 @@ export default function CardsPage() {
                             display: "flex", alignItems: "center", justifyContent: "center",
                             fontSize: 20, color: "var(--text-muted)",
                             flexShrink: 0,
+                            overflow: "hidden",
                         }}
                     >
-                        👤
+                        {photoUrl ? (
+                            <img
+                                src={photoUrl}
+                                alt={firstName}
+                                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                            />
+                        ) : (
+                            "👤"
+                        )}
                     </div>
                     <div className="flex-1 flex justify-between items-center">
-                        <span className="font-semibold text-base" style={{ color: "var(--text-primary)" }}>
-                            {firstName || "Пользователь"}
-                        </span>
+                        <div className="flex flex-col">
+                            <span className="font-semibold text-base" style={{ color: "var(--text-primary)" }}>
+                                {firstName || "Пользователь"}
+                            </span>
+                            <span style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 500, marginTop: -2 }}>
+                                Level <span style={{ color: "var(--text-primary)", fontWeight: 700 }}>{evolutionLevel}</span>/100
+                            </span>
+                        </div>
                         <span className="font-semibold text-base flex items-center gap-0.5" style={{ color: "#F59E0B" }}>
                             <EnergyIcon size={20} color="#F59E0B" />
                             {energy}
@@ -164,9 +186,19 @@ export default function CardsPage() {
             {/* ── Stats row ──────────────────────────────────────────────────── */}
             <div className="px-4 mb-4">
                 <div className="grid grid-cols-3 gap-2">
-                    <StatTile label="Сферы" value={`${openedSpheres}/8`} color="#F59E0B" />
-                    <StatTile label="Карточки" value={`${activeCards}/${TOTAL_CARDS}`} color="#10B981" />
-                    <StatTile label="Рекомендовано" value={String(recommended)} color="#60A5FA" />
+                    {cardsLoading && !cardsData ? (
+                        <>
+                            <Skeleton className="h-16 rounded-2xl" />
+                            <Skeleton className="h-16 rounded-2xl" />
+                            <Skeleton className="h-16 rounded-2xl" />
+                        </>
+                    ) : (
+                        <>
+                            <StatTile label="Сферы" value={`${openedSpheres}/8`} color="#F59E0B" />
+                            <StatTile label="Карточки" value={`${activeCards}/${TOTAL_CARDS}`} color="#10B981" />
+                            <StatTile label="Рекомендовано" value={String(recommended)} color="#60A5FA" />
+                        </>
+                    )}
                 </div>
             </div>
 
@@ -239,7 +271,11 @@ export default function CardsPage() {
 
             {/* ── 2-column card grid ─────────────────────────────────────────── */}
             <div className="px-4 grid grid-cols-2 gap-3">
-                {visible.length === 0 ? (
+                {cardsLoading && !cardsData ? (
+                    Array.from({ length: 6 }).map((_, i: number) => (
+                        <MiniCardSkeleton key={i} />
+                    ))
+                ) : visible.length === 0 ? (
                     <div
                         className="col-span-2 text-center py-12"
                         style={{ color: "var(--text-muted)", fontSize: 14 }}
@@ -247,7 +283,7 @@ export default function CardsPage() {
                         Нет карточек по выбранному фильтру
                     </div>
                 ) : (
-                    visible.map((card, i) => (
+                    visible.map((card: any, i: number) => (
                         <motion.div
                             key={card.id}
                             initial={{ opacity: 0, y: 8 }}
@@ -292,17 +328,27 @@ function StatTile({ label, value, color }: { label: string; value: string; color
 // Horizontal layout: square image left, text right, lvl|action bottom
 
 const getHawkinsColor = (score: number) => {
+    // New logic based on 10 levels with 200 and 500 thresholds
     if (score <= 200) {
+        // Red to Yellow: 0 to 200
         const ratio = score / 200;
-        const r = Math.round(239 + (245 - 239) * ratio);
-        const g = Math.round(68 + (158 - 68) * ratio);
-        const b = Math.round(68 + (11 - 68) * ratio);
+        const r = Math.round(239 + (245 - 239) * ratio); // 239 -> 245
+        const g = Math.round(68 + (158 - 68) * ratio);   // 68 -> 158
+        const b = Math.round(68 + (11 - 68) * ratio);    // 68 -> 11
         return `rgb(${r}, ${g}, ${b})`;
-    } else {
-        const ratio = Math.min(1, (score - 200) / 300);
+    } else if (score <= 500) {
+        // Yellow to Green/Blueish
+        const ratio = (score - 200) / 300;
         const r = Math.round(245 + (16 - 245) * ratio);
         const g = Math.round(158 + (185 - 158) * ratio);
         const b = Math.round(11 + (129 - 11) * ratio);
+        return `rgb(${r}, ${g}, ${b})`;
+    } else {
+        // Upper states to White/Light
+        const ratio = Math.min(1, (score - 500) / 500);
+        const r = Math.round(16 + (255 - 16) * ratio);
+        const g = Math.round(185 + (255 - 185) * ratio);
+        const b = Math.round(129 + (255 - 129) * ratio);
         return `rgb(${r}, ${g}, ${b})`;
     }
 };
@@ -310,6 +356,7 @@ const getHawkinsColor = (score: number) => {
 function MiniCard({ card, onClick }: { card: CardProgress; onClick: () => void }) {
     const cfg = STATUS_CONFIG[card.status] ?? STATUS_CONFIG.locked;
     const isActive = ["synced", "aligned", "aligning"].includes(card.status);
+    const isAiRecommended = card.is_recommended_ai && !isActive;
     const sphereColor = SPHERES.find((s) => s.key === card.sphere)?.color ?? "#ffffff";
     const actionText = isActive ? `Energy ${card.hawkins_peak}` : "Открыть";
     const actionColor = isActive ? getHawkinsColor(card.hawkins_peak || 0) : "#F59E0B";
@@ -317,10 +364,13 @@ function MiniCard({ card, onClick }: { card: CardProgress; onClick: () => void }
     return (
         <button
             onClick={onClick}
+            className={isAiRecommended ? "animate-pulse" : ""}
             style={{
                 width: "100%",
                 background: "rgba(255,255,255,0.04)",
-                border: "1px solid var(--border)",
+                border: "1px solid",
+                borderColor: isAiRecommended ? "#F59E0B" : "var(--border)",
+                boxShadow: isAiRecommended ? "0 0 15px rgba(245,158,11,0.4)" : "none",
                 borderRadius: 16,
                 overflow: "hidden",
                 textAlign: "left",
@@ -331,12 +381,14 @@ function MiniCard({ card, onClick }: { card: CardProgress; onClick: () => void }
                 transition: "border-color 0.2s, box-shadow 0.2s",
             }}
             onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.borderColor = `${sphereColor}55`;
-                (e.currentTarget as HTMLElement).style.boxShadow = `0 0 14px ${sphereColor}20`;
+                const el = e.currentTarget as HTMLElement;
+                el.style.borderColor = `${sphereColor}55`;
+                el.style.boxShadow = `0 0 14px ${sphereColor}20`;
             }}
             onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.borderColor = "var(--border)";
-                (e.currentTarget as HTMLElement).style.boxShadow = "none";
+                const el = e.currentTarget as HTMLElement;
+                el.style.borderColor = isAiRecommended ? "#F59E0B" : "var(--border)";
+                el.style.boxShadow = isAiRecommended ? "0 0 15px rgba(245,158,11,0.4)" : "none";
             }}
         >
             {/* ── Top row: image + text ── */}
@@ -405,6 +457,7 @@ function MiniCard({ card, onClick }: { card: CardProgress; onClick: () => void }
                         lineHeight: 1,
                     }}>
                         {cfg.label}
+                        {isAiRecommended && <span className="ml-1 opacity-80 text-amber-500">☼ AI</span>}
                     </p>
                 </div>
             </div>

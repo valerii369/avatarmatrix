@@ -1,19 +1,19 @@
 "use client";
-import { useEffect, useCallback, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import useSWR from "swr";
 import { useUserStore, useCardsStore } from "@/lib/store";
 import { authAPI, cardsAPI, profileAPI } from "@/lib/api";
 import { EnergyIcon } from "@/components/EnergyIcon";
+import { Skeleton } from "@/components/Skeleton";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const TOTAL_CARDS = 176;
-const MAX_LEVEL = 100;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-/** Format number with space separator: 131323 → "131 323" */
 function formatScore(n: number): string {
   return n.toLocaleString("ru-RU").replace(/,/g, " ");
 }
@@ -23,131 +23,110 @@ function formatScore(n: number): string {
 export default function HomePage() {
   const router = useRouter();
   const {
-    userId, tgId, setUser, energy, evolutionLevel, title, firstName, onboardingDone,
-    xp, xpCurrent, xpNext,
+    userId, tgId, setUser, energy, evolutionLevel, title, firstName,
+    xp, xpCurrent, xpNext, photoUrl,
   } = useUserStore();
-  const { cards, setCards, setLoading } = useCardsStore();
+  const { cards, setCards } = useCardsStore();
   const [status, setStatus] = useState<"loading" | "redirecting" | "ready" | "error">("loading");
   const [errorInfo, setErrorInfo] = useState<string>("");
 
-  const init = useCallback(async () => {
-    try {
-      const tg = (window as any).Telegram?.WebApp;
-      if (tg) { tg.ready(); tg.expand(); }
-
-      const initData = tg?.initData || "";
-      const isDev = process.env.NODE_ENV === "development";
-
-      console.log("DEBUG: Init started", { isDev, hasInitData: !!initData });
-
-      if (!initData && !isDev) {
-        throw new Error("Telegram initData missing. Please open the app from the bot.");
-      }
-
-      // 1. Auth & Get User Flag
-      const authRes = await authAPI.login(initData, isDev);
-      const d = authRes.data;
-
-      console.log("DEBUG: Auth success", {
-        userId: d.user_id,
-        onboardingDone: d.onboarding_done
-      });
-
-      setUser({
-        userId: d.user_id, tgId: d.tg_id, firstName: d.first_name,
-        token: d.token, energy: d.energy, streak: d.streak,
-        evolutionLevel: d.evolution_level, title: d.title,
-        onboardingDone: d.onboarding_done,
-        xp: d.xp, xpCurrent: d.xp_current, xpNext: d.xp_next,
-      });
-
-      if (typeof window !== "undefined")
-        localStorage.setItem("avatar_token", d.token);
-
-      // 2. Simple Logic: If NOT done -> redirect
-      if (!d.onboarding_done) {
-        console.log("DEBUG: Onboarding required, redirecting...");
-        setStatus("redirecting");
-        router.push("/onboarding");
-        return;
-      }
-
-      // 3. Robust Safety Net: If birth_date is missing, ALWAYS redirect
+  // 1. Auth & Init
+  useEffect(() => {
+    const initAuth = async () => {
       try {
-        const profileRes = await profileAPI.get(d.user_id);
-        if (!profileRes.data.birth_date) {
-          console.warn("DEBUG: Birth date missing, forcing onboarding redirect.");
+        const tg = (window as any).Telegram?.WebApp;
+        if (tg) { tg.ready(); tg.expand(); }
+
+        const initData = tg?.initData || "";
+        const isDev = process.env.NODE_ENV === "development";
+        const isDebug = new URLSearchParams(window.location.search).get("debug") === "true";
+
+        if (!initData && !isDev && !isDebug) {
+          throw new Error("Telegram context missing. Please open via the bot or use ?debug=true for testing.");
+        }
+
+        const authRes = await authAPI.login(initData, isDev);
+        const d = authRes.data;
+
+        setUser({
+          userId: d.user_id, tgId: d.tg_id, firstName: d.first_name,
+          token: d.token, energy: d.energy, streak: d.streak,
+          evolutionLevel: d.evolution_level, title: d.title,
+          onboardingDone: d.onboarding_done,
+          xp: d.xp, xpCurrent: d.xp_current, xpNext: d.xp_next,
+          referralCode: d.referral_code,
+          photoUrl: d.photo_url || "",
+        });
+
+        if (typeof window !== "undefined")
+          localStorage.setItem("avatar_token", d.token);
+
+        if (!d.onboarding_done) {
           setStatus("redirecting");
           router.push("/onboarding");
           return;
         }
-        // Sync XP data from profile if needed
-        if (profileRes.data.xp !== undefined) {
-          setUser({
-            xp: profileRes.data.xp,
-            xpCurrent: profileRes.data.xp_current,
-            xpNext: profileRes.data.xp_next,
-            evolutionLevel: profileRes.data.evolution_level,
-            title: profileRes.data.title,
-          });
-        }
-      } catch (err) {
-        console.error("DEBUG: Profile check failed", err);
+
+        setStatus("ready");
+      } catch (e: any) {
+        console.error("Init error", e);
+        setErrorInfo(e.message || "Unknown error");
+        setStatus("error");
       }
+    };
+    initAuth();
+  }, [router, setUser]);
 
-      // 4. Load App Data
-      setStatus("loading");
-      setLoading(true);
-      try {
-        const cardsRes = await cardsAPI.getAll(d.user_id);
-        setCards(cardsRes.data);
-      } catch (err) {
-        console.error("DEBUG: Failed to load cards", err);
-        throw new Error("Failed to load cards session data.");
-      } finally {
-        setLoading(false);
+  // 2. Data Fetching via SWR
+  const { data: profile } = useSWR(
+    userId && status === "ready" ? ["profile", userId] : null,
+    () => profileAPI.get(userId!).then(res => res.data),
+    {
+      onSuccess: (data) => {
+        // AI-path users have no birth_date but have onboarding_done=true — don't redirect them
+        if (!data.birth_date && !data.onboarding_done) router.push("/onboarding");
+        setUser({
+          xp: data.xp,
+          xpCurrent: data.xp_current,
+          xpNext: data.xp_next,
+          evolutionLevel: data.evolution_level,
+          title: data.title,
+          energy: data.energy,
+        });
       }
-
-      setStatus("ready");
-    } catch (e: any) {
-      console.error("DEBUG: Init error", e);
-      const msg = e.response?.data?.detail || e.message || "Unknown error";
-      setErrorInfo(msg);
-      setStatus("error");
-
-      const { reset } = useUserStore.getState();
-      reset();
     }
-  }, [router, setUser, setCards, setLoading]);
+  );
 
-  useEffect(() => { init(); }, [init]);
+  const { data: cardsData, isValidating: cardsLoading } = useSWR(
+    userId && status === "ready" ? ["cards", userId] : null,
+    () => cardsAPI.getAll(userId!).then(res => res.data),
+    {
+      onSuccess: (data) => setCards(data),
+      revalidateOnFocus: false,
+    }
+  );
+
+  const displayCards = cardsData || cards;
 
   // ── Derived stats ──────────────────────────────────────────────────────────
   const openedSpheres = new Set(
-    cards.filter((c) => c.status !== "locked" && c.hawkins_peak > 0).map((c) => c.sphere)
-  ).size;
-  const openedCards = cards.filter((c) => c.status !== "locked").length;
-  const recommended = cards.filter((c) => c.is_recommended_astro).length;
+    displayCards?.filter((c: any) => c.status !== "locked" && c.hawkins_peak > 0).map((c: any) => c.sphere)
+  ).size || 0;
+  const openedCards = displayCards?.filter((c: any) => c.status !== "locked").length || 0;
+  const recommended = displayCards?.filter((c: any) => c.is_recommended_astro || c.is_recommended_ai).length || 0;
+  const totalScore = displayCards?.reduce((sum: number, c: any) => sum + (c.hawkins_peak || 0), 0) || 0;
 
-  // Total score: sum of all hawkins peaks
-  const totalScore = cards.reduce((sum, c) => sum + (c.hawkins_peak || 0), 0);
-
-  // Level progress 0..1 (within current level)
   const levelRange = Math.max(xpNext - xpCurrent, 1);
   const xpCollectedInLevel = Math.max(xp - xpCurrent, 0);
   const levelProgress = Math.min(xpCollectedInLevel / levelRange, 1);
 
-  const activeCards = cards.filter((c) => ["synced", "aligned", "aligning"].includes(c.status)).length;
+  const activeCards = displayCards?.filter((c: any) => ["synced", "aligned", "aligning"].includes(c.status)).length || 0;
 
   // ── Loading/Error States ───────────────────────────────────────────────────
-  if (status === "loading" || status === "redirecting") {
+  if (status === "loading" || status === "redirecting" || !userId) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen" style={{ background: "var(--bg-deep)" }}>
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-          className="w-12 h-12 border-2 border-violet-500 border-t-transparent rounded-full mb-4"
-        />
+        <div className="w-12 h-12 border-2 border-violet-500 border-t-transparent rounded-full mb-4 animate-spin" />
         <p className="text-xs text-muted-foreground animate-pulse">
           {status === "redirecting" ? "Подготовка онбординга..." : "Инициализация..."}
         </p>
@@ -167,30 +146,6 @@ export default function HomePage() {
         >
           Попробовать снова
         </button>
-        {/* Debug Info & Reset (Testing only) */}
-        <div style={{ marginTop: 20, padding: 10, border: '1px dashed rgba(255,255,255,0.1)', borderRadius: 10, fontSize: 10, color: 'var(--text-muted)' }}>
-          <p>Debug ID: {userId}</p>
-          <button
-            onClick={async () => {
-              if (!tgId) {
-                alert("No TG ID found in store.");
-                return;
-              }
-              if (confirm("Reset all data?")) {
-                try {
-                  await profileAPI.reset(tgId);
-                  window.location.reload();
-                } catch (err) {
-                  console.error("Reset failed", err);
-                  alert("Reset failed. Check logs.");
-                }
-              }
-            }}
-            style={{ marginTop: 5, padding: '4px 8px', background: 'rgba(255,0,0,0.1)', color: 'red', border: '1px solid red', borderRadius: 4 }}
-          >
-            Force Reset Data (Testing)
-          </button>
-        </div>
       </div>
     );
   }
@@ -200,7 +155,6 @@ export default function HomePage() {
       className="min-h-screen flex flex-col"
       style={{ background: "var(--bg-deep)", paddingBottom: 96 }}
     >
-
       {/* ── Header ── */}
       <div className="px-4 pt-5 pb-3">
         <div
@@ -217,13 +171,27 @@ export default function HomePage() {
             border: "1px solid var(--border)",
             display: "flex", alignItems: "center", justifyContent: "center",
             fontSize: 20, color: "var(--text-muted)", flexShrink: 0,
+            overflow: "hidden",
           }}>
-            👤
+            {photoUrl ? (
+              <img
+                src={photoUrl}
+                alt={firstName}
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              />
+            ) : (
+              "👤"
+            )}
           </div>
           <div className="flex-1 flex justify-between items-center">
-            <span className="font-semibold text-base" style={{ color: "var(--text-primary)" }}>
-              {firstName || "Пользователь"}
-            </span>
+            <div className="flex flex-col">
+              <span className="font-semibold text-base" style={{ color: "var(--text-primary)" }}>
+                {firstName || "Пользователь"}
+              </span>
+              <span style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 500, marginTop: -2 }}>
+                Level <span style={{ color: "var(--text-primary)", fontWeight: 700 }}>{evolutionLevel}</span>/100
+              </span>
+            </div>
             <span className="font-semibold text-base flex items-center gap-0.5" style={{ color: "#F59E0B" }}>
               <EnergyIcon size={20} color="#F59E0B" />
               {energy}
@@ -235,9 +203,19 @@ export default function HomePage() {
       {/* ── Stats tiles ── */}
       <div className="px-4 mb-4">
         <div className="grid grid-cols-3 gap-2">
-          <StatTile label="Сферы" value={`${openedSpheres}/8`} color="#F59E0B" />
-          <StatTile label="Карточки" value={`${activeCards}/${TOTAL_CARDS}`} color="#10B981" />
-          <StatTile label="Рекомендовано" value={String(recommended)} color="#60A5FA" />
+          {cardsLoading && !cardsData ? (
+            <>
+              <Skeleton className="h-16 rounded-2xl" />
+              <Skeleton className="h-16 rounded-2xl" />
+              <Skeleton className="h-16 rounded-2xl" />
+            </>
+          ) : (
+            <>
+              <StatTile label="Сферы" value={`${openedSpheres}/8`} color="#F59E0B" />
+              <StatTile label="Карточки" value={`${activeCards}/${TOTAL_CARDS}`} color="#10B981" />
+              <StatTile label="Рекомендовано" value={String(recommended)} color="#60A5FA" />
+            </>
+          )}
         </div>
       </div>
 
@@ -256,24 +234,36 @@ export default function HomePage() {
             fontFamily: "'Outfit', sans-serif",
           }}
         >
-          {formatScore(totalScore || energy || 0)}
+          {formatScore(totalScore)}
         </motion.p>
+        <p style={{
+          fontSize: 12,
+          fontWeight: 600,
+          color: "rgba(255,255,255,0.3)",
+          textTransform: "uppercase",
+          letterSpacing: "0.1em",
+          marginTop: 4
+        }}>
+          Общий Индекс
+        </p>
       </div>
 
       {/* ── Rank + Level row ── */}
       <div className="px-4 mb-3">
         <div className="flex items-center justify-between mb-1">
           <span style={{ fontSize: 13, color: "var(--text-secondary)", fontWeight: 500 }}>
-            {title || "Новичок"}{" "}
-            <span style={{ color: "var(--text-muted)", fontWeight: 400, fontSize: 12 }}>
+            {title || "Новичок"}
+          </span>
+          <span style={{ fontSize: 12, fontWeight: 400 }}>
+            <span style={{ color: "var(--text-muted)" }}>
               ({formatScore(xpCollectedInLevel)} / {formatScore(levelRange)} XP)
             </span>
-          </span>
-          <span style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 500 }}>
-            Level <span style={{ color: "var(--text-primary)", fontWeight: 700 }}>{evolutionLevel}</span>/100
+            {" "}
+            <span style={{ color: "var(--text-secondary)", fontWeight: 500 }}>
+              {Math.round(levelProgress * 100)}%
+            </span>
           </span>
         </div>
-        {/* Progress bar */}
         <div style={{
           height: 3, background: "rgba(255,255,255,0.08)", borderRadius: 2, overflow: "hidden",
         }}>
@@ -293,8 +283,6 @@ export default function HomePage() {
       {/* ── Glowing Orb ── */}
       <div className="flex-1 flex items-center justify-center px-4">
         <div style={{ position: "relative", width: "85vw", maxWidth: 340, aspectRatio: "1/1" }}>
-
-          {/* Outer ambient glow */}
           <div style={{
             position: "absolute",
             inset: -20,
@@ -304,7 +292,6 @@ export default function HomePage() {
             pointerEvents: "none",
           }} />
 
-          {/* Animated ring */}
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
@@ -318,13 +305,11 @@ export default function HomePage() {
             }}
           />
 
-          {/* Static outer ring */}
           <div style={{
             position: "absolute", inset: 0, borderRadius: "50%",
             border: "3px solid rgba(255,255,255,0.05)",
           }} />
 
-          {/* Main orb */}
           <div style={{
             position: "absolute", inset: 4, borderRadius: "50%",
             background: "radial-gradient(circle at 35% 35%, rgba(16,185,129,0.15) 0%, rgba(6,182,212,0.08) 40%, rgba(13,18,38,0.95) 70%, #060818 100%)",
@@ -333,7 +318,6 @@ export default function HomePage() {
             boxShadow: "inset 0 0 60px rgba(6,182,212,0.08), 0 0 40px rgba(16,185,129,0.1)",
           }} />
 
-          {/* Inner glow dot */}
           <div style={{
             position: "absolute", inset: "30%",
             borderRadius: "50%",
@@ -341,7 +325,6 @@ export default function HomePage() {
             filter: "blur(20px)",
           }} />
 
-          {/* Pulsing ring animation */}
           <motion.div
             animate={{ scale: [1, 1.03, 1], opacity: [0.4, 0.7, 0.4] }}
             transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
@@ -353,13 +336,10 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* ── Island Bottom Nav ── */}
       <BottomNav active="home" />
     </div>
   );
 }
-
-// ─── StatTile ─────────────────────────────────────────────────────────────────
 
 function StatTile({ label, value, color }: { label: string; value: string; color: string }) {
   return (
@@ -380,11 +360,8 @@ function StatTile({ label, value, color }: { label: string; value: string; color
   );
 }
 
-// ─── Island Bottom Nav ────────────────────────────────────────────────────────
-
 export function BottomNav({ active }: { active: string }) {
   const router = useRouter();
-
   const navItems = [
     { key: "home", icon: "/icons/home.svg", label: "AVATAR", path: "/" },
     { key: "cards", icon: "/icons/cards.svg", label: "Карточки", path: "/cards" },

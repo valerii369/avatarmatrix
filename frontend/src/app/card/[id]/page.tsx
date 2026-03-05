@@ -18,17 +18,27 @@ const STATUS_CONFIG: Record<string, { label: string; statusLabel: string; color:
 };
 
 const getHawkinsColor = (score: number) => {
+    // New logic based on 10 levels with 200 and 500 thresholds
     if (score <= 200) {
+        // Red to Yellow: 0 to 200
         const ratio = score / 200;
-        const r = Math.round(239 + (245 - 239) * ratio);
-        const g = Math.round(68 + (158 - 68) * ratio);
-        const b = Math.round(68 + (11 - 68) * ratio);
+        const r = Math.round(239 + (245 - 239) * ratio); // 239 -> 245
+        const g = Math.round(68 + (158 - 68) * ratio);   // 68 -> 158
+        const b = Math.round(68 + (11 - 68) * ratio);    // 68 -> 11
         return `rgb(${r}, ${g}, ${b})`;
-    } else {
-        const ratio = Math.min(1, (score - 200) / 300);
+    } else if (score <= 500) {
+        // Yellow to Green/Blueish
+        const ratio = (score - 200) / 300;
         const r = Math.round(245 + (16 - 245) * ratio);
         const g = Math.round(158 + (185 - 158) * ratio);
         const b = Math.round(11 + (129 - 11) * ratio);
+        return `rgb(${r}, ${g}, ${b})`;
+    } else {
+        // Upper states to White/Light
+        const ratio = Math.min(1, (score - 500) / 500);
+        const r = Math.round(16 + (255 - 16) * ratio);
+        const g = Math.round(185 + (255 - 185) * ratio);
+        const b = Math.round(129 + (255 - 129) * ratio);
         return `rgb(${r}, ${g}, ${b})`;
     }
 };

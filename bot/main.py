@@ -120,9 +120,13 @@ def build_router(bot: Bot) -> Dispatcher:
 
                 if not user_data.get("birth_date") or not user_data.get("birth_place"):
                     await message.answer(
-                        "❌ Данные рождения не заполнены.\n\n"
-                        "Пройди онбординг в приложении, затем используй /restart.",
-                        reply_markup=_open_btn("📋 Ввести данные"),
+                        "❌ <b>Отсутствуют данные рождения.</b>\n\n"
+                        "Похоже, вы проходили ИИ-диагностику. Для повторной диагностики:\n"
+                        "1. В приложении перейдите в <b>Профиль</b>\n"
+                        "2. Нажмите <b>Сбросить профиль</b>\n"
+                        "3. Пройдите онбординг заново",
+                        reply_markup=_open_btn("🌟 Открыть AVATAR"),
+                        parse_mode="HTML"
                     )
                     return
 

@@ -6,7 +6,7 @@ from sqlalchemy import select, desc
 
 from app.database import get_db
 from app.models import DiaryEntry, User
-from app.core.economy import award_energy, award_xp, XP_VALUES
+from app.core.economy import award_xp, XP_VALUES
 from app.agents.master_agent import analyze_reflection, ARCHETYPES
 
 router = APIRouter()
@@ -76,8 +76,8 @@ async def create_entry(request: DiaryCreateRequest, db: AsyncSession = Depends(g
     if request.entry_type == "reflection":
         bonus = "daily_reflection"
         xp_bonus = 20 # custom for reflection
-        
-    await award_energy(db, user, bonus)
+    # Energy awards disabled per new tokenomics
+    # await award_energy(db, user, bonus)
     await award_xp(db, user, xp_bonus)
     
     await db.commit()
@@ -148,7 +148,7 @@ async def update_integration(request: IntegrationUpdateRequest, db: AsyncSession
         user_result = await db.execute(select(User).where(User.id == request.user_id))
         user = user_result.scalar_one_or_none()
         if user:
-            await award_energy(db, user, "integration_done")
+            # await award_energy(db, user, "integration_done") # Disabled
             await award_xp(db, user, XP_VALUES["integration_success"])
     else:
         # User explicitly marked as NOT done (failure/partial)
@@ -158,4 +158,4 @@ async def update_integration(request: IntegrationUpdateRequest, db: AsyncSession
             await award_xp(db, user, XP_VALUES["integration_failure"])
 
     await db.commit()
-    return {"message": "+20 ✦ за интеграцию" if request.done else "Отмечено частично"}
+    return {"message": "Запись об интеграции обновлена"}

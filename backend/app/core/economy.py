@@ -13,21 +13,18 @@ from app.config import settings
 XP_VALUES = {
     "card_opened": 100,
     "card_rank_bonus_10": 1000,
-    "card_rank_bonus_20": 2000,
     "diary_entry": 25,
     "integration_success": 50,
     "integration_failure": 10,
-    "daily_login": 15,
     "streak_7": 200,
     "streak_30": 1000,
     "sphere_opened": 1000,
     "sphere_mastered": 5000,
 }
 
-# XP per rank up (from N to N+1)
+# XP per rank up (from N to N+1) - 10 level curve
 CARD_RANK_UP_XP = {
-    1: 10, 2: 20, 3: 35, 4: 55, 5: 80, 6: 110, 7: 145, 8: 185, 9: 230,
-    10: 280, 11: 335, 12: 395, 13: 460, 14: 530, 15: 605, 16: 685, 17: 770, 18: 860, 19: 955
+    1: 20, 2: 50, 3: 100, 4: 200, 5: 350, 6: 500, 7: 700, 8: 900, 9: 1200
 }
 
 TITLES_BY_LEVEL = [
@@ -54,18 +51,14 @@ TITLES_BY_LEVEL = [
 ]
 
 ENERGY_ACTIONS = {
-    "daily_login": lambda streak: 5 + streak,  # max 35
-    "daily_reflection": 10,
-    "diary_entry": 10,
-    "integration_done": 20,
-    "card_rank_up": 25,
-    "sphere_milestone": 150,
-    "invite_friend": 50,
+    # Free energy awards are disabled based on the new tokenomics.
+    # Referral system will go here later: "invite_friend": 30
 }
 
 ENERGY_COSTS = {
-    "mini_session": settings.ENERGY_COST_MINI_SESSION,
     "sync": settings.ENERGY_COST_SYNC,
+    "alignment": settings.ENERGY_COST_ALIGNMENT,
+    "reflection": settings.ENERGY_COST_REFLECTION,
     "deep_session": settings.ENERGY_COST_DEEP_SESSION,
 }
 
@@ -119,16 +112,14 @@ async def process_card_rank_up(db: AsyncSession, user: User, old_rank: int, new_
         # Milestone bonuses
         if r + 1 == 10:
             total_xp += XP_VALUES["card_rank_bonus_10"]
-        if r + 1 == 20:
-            total_xp += XP_VALUES["card_rank_bonus_20"]
             
     await award_xp(db, user, total_xp)
-    await award_energy(db, user, "card_rank_up")
+    # await award_energy(db, user, "card_rank_up") # Disabled per new tokenomics
 
 
 async def check_sphere_milestones(db: AsyncSession, user: User, sphere: str):
     """Check if sphere is fully opened or mastered and award XP."""
-    from app.models import CardProgress
+    from app.models import CardProgress, GameState
     
     # Get all 22 cards for this sphere
     result = await db.execute(
@@ -142,29 +133,34 @@ async def check_sphere_milestones(db: AsyncSession, user: User, sphere: str):
     if len(cards) < 22:
         return # Not all cards even exist yet (natal chart not fully processed?)
 
-    # 1. Check fully opened
     all_opened = all(c.sync_sessions_count > 0 for c in cards)
-    # Use a flag in GameState or similar to avoid double-awarding?
-    # For now, we'll check if it was JUST reached (this isn't perfect without a flag)
-    # Alternative: check if XP for this milestone was already awarded.
-    # But let's keep it simple: if all are opened and sync_count of current was 1...
+    all_mastered = all(c.rank >= 10 for c in cards)
     
-    # 2. Check fully mastered
-    all_mastered = all(c.rank >= 20 for c in cards)
+    # Fetch user's GameState
+    stmt = select(GameState).where(GameState.user_id == user.id)
+    gs_result = await db.execute(stmt)
+    game_state = gs_result.scalar_one_or_none()
     
-    # NOTE: In a real production system, we'd have a 'achievements' table to track this.
-    # For this implementation, we will assume the caller handles the 'once-only' logic 
-    # or we just award it (risky for duplicates).
-    # Since I don't want to add a table now, I will just return the potential XP 
-    # and let the caller decide if it wants to add a 'sphere_bonus_awarded' field.
+    if not game_state:
+        # Create it if it somehow missing
+        game_state = GameState(user_id=user.id)
+        db.add(game_state)
+        
+    awarded = game_state.milestones_awarded or []
+    milestone_opened_key = f"{sphere}_opened"
+    milestone_mastered_key = f"{sphere}_mastered"
 
-    if all_opened:
-        # await award_xp(db, user, XP_VALUES["sphere_opened"])
-        pass # To be handled after adding persistence for milestones
+    if all_opened and milestone_opened_key not in awarded:
+        await award_xp(db, user, XP_VALUES["sphere_opened"])
+        # Avoid mutating JSON directly in SQLAlchemy, assign a new updated list
+        game_state.milestones_awarded = awarded + [milestone_opened_key]
+        awarded = game_state.milestones_awarded
+        db.add(game_state)
 
-    if all_mastered:
-        # await award_xp(db, user, XP_VALUES["sphere_mastered"])
-        pass
+    if all_mastered and milestone_mastered_key not in awarded:
+        await award_xp(db, user, XP_VALUES["sphere_mastered"])
+        game_state.milestones_awarded = awarded + [milestone_mastered_key]
+        db.add(game_state)
 
 async def award_energy(db: AsyncSession, user: User, action: str, amount: Optional[int] = None) -> int:
     """Award energy for an action. Returns actual amount awarded."""
@@ -175,11 +171,9 @@ async def award_energy(db: AsyncSession, user: User, action: str, amount: Option
         else:
             amount = action_val or 0
 
-    # Cap daily login bonus at 35
-    if action == "daily_login":
-        amount = min(amount, 35)
+    if amount <= 0:
+        return 0
 
-    # Premium: no limits (but keep energy for display)
     user.energy += amount
     db.add(user)
     return amount
@@ -202,22 +196,25 @@ async def spend_energy(db: AsyncSession, user: User, action: str) -> bool:
     return True
 
 
-async def update_streak(db: AsyncSession, user: User) -> tuple[int, int]:
+async def update_streak(db: AsyncSession, user: User) -> tuple[int, int, bool]:
     """
     Update user streak on daily login.
-    Returns (new_streak, bonus_xp).
+    Returns (new_streak, bonus_xp, is_new_day).
     """
     today = date.today()
     last = user.last_activity.date() if user.last_activity else None
 
     bonus_xp = 0
+    is_new_day = False
 
     if last is None:
         user.streak = 1
+        is_new_day = True
     elif last == today:
-        pass  # Already logged in today
+        is_new_day = False
     elif (today - last).days == 1:
         user.streak += 1
+        is_new_day = True
         # Check for XP streak milestones
         if user.streak == 7:
             bonus_xp = XP_VALUES["streak_7"]
@@ -228,10 +225,11 @@ async def update_streak(db: AsyncSession, user: User) -> tuple[int, int]:
             await award_xp(db, user, bonus_xp)
     else:
         user.streak = 1  # Reset streak
+        is_new_day = True
 
     user.last_activity = datetime.utcnow()
     db.add(user)
-    return user.streak, bonus_xp
+    return user.streak, bonus_xp, is_new_day
 
 
 def calculate_xp_for_level(level: int) -> int:
@@ -250,27 +248,41 @@ def calculate_xp_for_level(level: int) -> int:
 
 def hawkins_to_rank(hawkins_peak: int) -> int:
     """
-    Convert peak Hawkins score to card level (1-20).
-    Logic: 1-50 -> 1, 51-100 -> 2, ..., 951-1000 -> 20.
+    Convert peak Hawkins score to card level (1-10) according to new logic.
+    LVL 1: 0-20
+    LVL 2: 21-50
+    LVL 3: 51-100
+    LVL 4: 101-175
+    LVL 5: 176-200 (Мужество)
+    LVL 6: 201-310
+    LVL 7: 311-400
+    LVL 8: 401-500
+    LVL 9: 501-600
+    LVL 10: 601-1000
     """
-    if hawkins_peak <= 0:
-        return 0
-    
-    # 50 points per level
-    level = (hawkins_peak + 49) // 50
-    return min(20, level)
+    if hawkins_peak <= 0: return 0
+    if hawkins_peak <= 20: return 1
+    if hawkins_peak <= 50: return 2
+    if hawkins_peak <= 100: return 3
+    if hawkins_peak <= 175: return 4
+    if hawkins_peak <= 200: return 5
+    if hawkins_peak <= 310: return 6
+    if hawkins_peak <= 400: return 7
+    if hawkins_peak <= 500: return 8
+    if hawkins_peak <= 600: return 9
+    return 10
 
 
-RANK_NAMES = {i: f"LVL {i}" for i in range(21)}
+RANK_NAMES = {i: f"LVL {i}" for i in range(11)}
 RANK_NAMES[0] = "☆ Спящий"
 
 SPHERE_AWARENESS_NAMES = {
     (0, 175): "В тени",
-    (175, 250): "Пробуждается",
-    (250, 400): "Осознана",
-    (400, 540): "Мастерство",
-    (540, 700): "Мудрость",
-    (700, 1001): "Просветлена",
+    (175, 200): "Пробуждается",
+    (200, 400): "Осознана",
+    (400, 500): "Мастерство",
+    (500, 600): "Мудрость",
+    (600, 1001): "Просветлена",
 }
 
 
