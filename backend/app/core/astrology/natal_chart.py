@@ -237,7 +237,7 @@ def calculate_natal_chart(
             sign_primary_archetype=south_sign_data.get("primary_archetype", 0),
             sign_secondary_archetype=south_sign_data.get("secondary_archetype", 0),
             decan_ruler=DECAN_MAP.get(south_sign_en, ["Sun", "Sun", "Sun"])[min(int((south_degree % 30) // 10), 2)],
-            decan_ruler_archetype=PLANET_ARCHETYPE_MAP.get(DECAN_MAP.get(south_sign_en, ["Sun"])[0], {}).get("archetype_id", 0),
+            decan_ruler_archetype=PLANET_ARCHETYPE_MAP.get(DECAN_MAP.get(south_sign_en, ["Sun", "Sun", "Sun"])[min(int((south_degree % 30) // 10), 2)], {}).get("archetype_id", 0),
             priority="additional",
         )
         result.planets.append(south_node)

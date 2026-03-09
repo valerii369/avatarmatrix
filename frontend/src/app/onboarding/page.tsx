@@ -319,11 +319,7 @@ function AIFlow({ onBack }: { onBack: () => void }) {
         }
     };
 
-    const [showVisual, setShowVisual] = useState(false);
 
-    if (showVisual) {
-        return <VisualFlow onBack={() => setShowVisual(false)} onComplete={handleCalculate} />;
-    }
 
     const isReadyForSync = messages.length >= 7; // User sent 3+ responses
 
@@ -472,7 +468,7 @@ function AIFlow({ onBack }: { onBack: () => void }) {
                 {/* CTA or progress hint */}
                 {ready ? (
                     <motion.button
-                        onClick={() => setShowVisual(true)}
+                        onClick={handleCalculate}
                         disabled={calcLoading}
                         animate={calcLoading ? {
                             boxShadow: ["0 4px 24px rgba(245,158,11,0.35)", "0 4px 32px rgba(245,158,11,0.6)", "0 4px 24px rgba(245,158,11,0.35)"],
@@ -488,7 +484,7 @@ function AIFlow({ onBack }: { onBack: () => void }) {
                             color: "#fff", fontWeight: 900, fontSize: 15, letterSpacing: "0.02em",
                         }}
                     >
-                        {calcLoading ? "Синхронизация..." : "Приступить к визуальной диагностике ✧"}
+                        {calcLoading ? "Расчет карт..." : "Получить карты"}
                     </motion.button>
                 ) : (
                     <p style={{ textAlign: "center", fontSize: 10, color: "rgba(255,255,255,0.25)", textTransform: "uppercase", letterSpacing: "0.1em", margin: 0 }}>

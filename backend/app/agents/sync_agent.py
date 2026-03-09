@@ -257,10 +257,10 @@ async def run_avatar_layer(
         
         if not scene_set:
             # Need to know sphere_id for selection
-            sphere_id = 0
-            for s_id, s_data in SPHERES.items():
-                if s_data.get('key') == sphere:
-                    sphere_id = s_id
+            sphere_id = 1 # Fallback
+            for s in SPHERES.values():
+                if s.get('key') == sphere:
+                    sphere_id = s.get('id', 1)
                     break
             await select_scene_set(db, session_id, sphere_id, archetype_id)
             set_res = await db.execute(select(SceneSet).where(SceneSet.session_id == session_id))

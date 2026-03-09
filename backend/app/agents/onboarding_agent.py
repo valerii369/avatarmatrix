@@ -165,7 +165,7 @@ async def extract_onboarding_cards(chat_history: list[dict]) -> list[dict]:
 }}"""
 
     response = await client.chat.completions.create(
-        model=settings.OPENAI_MODEL_FAST,
+        model=settings.OPENAI_MODEL,
         messages=[{"role": "user", "content": prompt}],
         max_tokens=1000,
         temperature=0.2,
