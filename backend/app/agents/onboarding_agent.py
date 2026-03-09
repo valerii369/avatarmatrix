@@ -35,19 +35,21 @@ async def generate_onboarding_response(chat_history: list[dict]) -> str:
     chat_history should include previous user/assistant messages.
     """
     system_prompt = """Ты — ИИ-диагност системы AVATAR.
-Твоя цель — провести короткое (3-5 шагов) глубокое интервью с пользователем, чтобы понять его текущую жизненную ситуацию, боли, стремления и точки роста.
-Ты помогаешь человеку выявить те Сферы жизни и Архетипы, которые сейчас требуют внимания или активированы.
+Твоя цель — провести интенсивное, глубокое интервью с пользователем (максимум 3-5 вопросов), чтобы максимально быстро и точно понять его текущую жизненную ситуацию, боли, стремления и точки роста.
+Ты помогаешь системе выявить те Сферы жизни (отношения, деньги, миссия и т.д.) и Архетипы (тень/свет), которые сейчас требуют наибольшего внимания.
 
-МЕТОДОЛОГИЯ:
-1. Задавай по одному глубокому, открытому вопросу за раз.
-2. Не давай советов. Твоя роль — зеркало и аналитик.
-3. Копай глубже: если человек отвечает поверхностно, спроси, что стоит за этим.
-4. Фокусируйся на чувствах, текущих конфликтах или главных мечтах.
-5. Стиль общения: эмпатичный, проницательный, в сеттинге системы AVATAR (как проводник в подсознание).
+МЕТОДОЛОГИЯ СВЕРХБЫСТРОЙ ДИАГНОСТИКИ:
+1. Задавай глубокие, СДВОЕННЫЕ вопросы, чтобы за один ответ собрать максимум информации. (Например: "Какая ситуация сейчас отнимает у вас больше всего энергии, и к какому состоянию вы бы хотели прийти в идеале?")
+2. Не веди долгих светских бесед. Сразу переходи к сути. Не давай советов. Твоя роль — зеркало и аналитик.
+3. Анализируй ГЛУБИНУ и ПОЛНОТУ ответов. Если пользователь в первом или втором сообщении дал развернутый ответ о своих болях и истинных желаниях, НЕ ИСКУССТВЕННО ЗАТЯГИВАЙ ДИАЛОГ. Сразу переходи к завершению.
+4. Стиль общения: эмпатичный, проницательный, без воды (как мудрый проводник в систему).
 
-Если пользователь только начал диалог, твой первый вопрос должен быть широким, например: «С какой мыслью или состоянием ты проснулся сегодня?» или «Что сейчас в твоей жизни требует наибольшего внимания, но ты откладываешь это?».
-
-Если диалог длится уже 4-5 обменов репликами, плавно подведи итог и скажи, что ты готов синхронизировать его карты.
+ТРЕБОВАНИЯ К ЗАВЕРШЕНИЮ (ОЧЕНЬ ВАЖНО):
+- Как только ты понял основные боли и векторы развития человека (даже если прошел 1 или 2 вопроса), ты ОБЯЗАН завершить сессию.
+- Сообщи, что первичный слепок состояния собран и ты готов запустить протоколы синхронизации.
+- В финальном сообщении КАТЕГОРИЧЕСКИ ЗАПРЕЩАЕТСЯ называть, перечислять или выдавать предположения о конкретных архетипах. Карты рассчитает ядро системы.
+- В самом конце этого финального сообщения ОБЯЗАТЕЛЬНО добавь техническую метку [[READY]].
+- ПРИМЕР завершения: "Благодарю за искренность. Я вижу ваши ключевые запросы и точки напряжения. Первичный слепок вашего состояния готов. Запускаю протокол создания ваших Архетипических Карт. [[READY]]"
 """
     
     messages = [{"role": "system", "content": system_prompt}] + chat_history
@@ -144,13 +146,13 @@ async def extract_onboarding_cards(chat_history: list[dict]) -> list[dict]:
 {numbered_list}
 
 ЗАДАЧА:
-1. Выбери 3-5 карт, которые НАИБОЛЕЕ ТОЧНО отражают ситуацию пользователя.
-2. Для каждой карты дай score от 0.6 до 1.0 (1.0 = идеальное совпадение).
-3. Напиши 1 предложение reason на русском — почему именно эта карта.
+1. Выбери ровно от 3 до 5 карт, которые НАИБОЛЕЕ ТОЧНО отражают ситуацию пользователя. (Минимум 3, максимум 5).
+2. Для каждой выбранной карты дай score от 0.6 до 1.0 (1.0 = идеальное совпадение).
+3. Напиши 1 предложение (reason) на русском — почему именно эта карта подходит.
 
-ВАЖНО: В ответе используй ТОЧНЫЕ значения archetype_id и sphere из списка выше, не придумывай новые!
+ВАЖНО: В ответе используй ТОЧНЫЕ значения archetype_id (от 0 до 21) и sphere из предложенного списка. Выбирай только те карты, которые реально присутствуют в ТОП-15!
 
-Отвечай только в формате JSON:
+Отвечай СТРОГО в формате JSON без каких-либо оберток markdown, только голый JSON:
 {{
   "cards": [
     {{
@@ -163,7 +165,7 @@ async def extract_onboarding_cards(chat_history: list[dict]) -> list[dict]:
 }}"""
 
     response = await client.chat.completions.create(
-        model=settings.OPENAI_MODEL,
+        model=settings.OPENAI_MODEL_FAST,
         messages=[{"role": "user", "content": prompt}],
         max_tokens=1000,
         temperature=0.2,
@@ -171,7 +173,14 @@ async def extract_onboarding_cards(chat_history: list[dict]) -> list[dict]:
     )
     
     try:
-        data = json.loads(response.choices[0].message.content)
+        raw_content = response.choices[0].message.content
+        # Remove any markdown code block wrappers if they slip through
+        if raw_content.startswith("```"):
+            raw_content = raw_content.split("\n", 1)[-1]
+            if raw_content.endswith("```"):
+                raw_content = raw_content[:-3]
+        
+        data = json.loads(raw_content)
         cards = data.get("cards", [])
         
         # Validate that returned archetype_ids and spheres exist in context
@@ -188,26 +197,34 @@ async def extract_onboarding_cards(chat_history: list[dict]) -> list[dict]:
                     "reason": card.get("reason", ""),
                 })
         
-        # If LLM hallucinated and we have 0 valid, fall back to top-3 from vector search directly
-        if not validated:
-            for c in context_cards[:3]:
-                validated.append({
-                    "archetype_id": c["archetype_id"],
-                    "sphere": c["sphere"],
-                    "score": 0.7,
-                    "reason": "Семантическое совпадение с портретом пользователя.",
-                })
+        # Guarantee we return at least 3 cards if possible
+        if len(validated) < 3:
+            used_combos = {(v["archetype_id"], v["sphere"]) for v in validated}
+            for c in context_cards:
+                if len(validated) >= 3:
+                    break
+                combo = (c["archetype_id"], c["sphere"])
+                if combo not in used_combos:
+                    validated.append({
+                        "archetype_id": c["archetype_id"],
+                        "sphere": c["sphere"],
+                        "score": 0.7,
+                        "reason": "Семантическое совпадение с портретом пользователя по векторной базе.",
+                    })
+                    used_combos.add(combo)
         
         return validated
         
     except Exception as e:
-        # Fallback: use top-3 from vector search directly
+        import logging
+        logging.error(f"Error parsing LLM card extraction, falling back to vector search: {e}")
+        # Fallback: use top-5 from vector search directly to ensure cards activate
         return [
             {
                 "archetype_id": c["archetype_id"],
                 "sphere": c["sphere"],
                 "score": 0.7,
-                "reason": "Семантическое совпадение с портретом пользователя.",
+                "reason": "Прямое семантическое совпадение с запросом.",
             }
-            for c in context_cards[:3]
+            for c in context_cards[:5]
         ]

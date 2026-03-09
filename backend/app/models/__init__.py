@@ -10,6 +10,10 @@ from app.models.game import GameState, Match, DailyReflect, VoiceRecord
 from app.models.knowledge import SphereKnowledge, UserWorldKnowledge
 from app.models.avatar_card import AvatarCard
 from app.models.ai_diagnostic import AIDiagnosticSession
+from app.models.data_architecture import Event, SessionFeatures, UserBehaviorProfileV2
+from app.models.text_diagnostics import (
+    Sphere, Archetype, TextScene, SceneInteraction, SceneStats, SceneSet, SceneSetItem
+)
 
 __all__ = [
     "User",
@@ -28,4 +32,14 @@ __all__ = [
     "AIDiagnosticSession",
     "SphereKnowledge",
     "UserWorldKnowledge",
+    "Event",
+    "SessionFeatures",
+    "UserBehaviorProfileV2",
+    "Sphere",
+    "Archetype",
+    "TextScene",
+    "SceneInteraction",
+    "SceneStats",
+    "SceneSet",
+    "SceneSetItem",
 ]

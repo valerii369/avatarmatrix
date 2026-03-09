@@ -23,7 +23,7 @@ async def check_db():
         # Check card_progress for user 4
         result3 = await conn.execute(text("SELECT archetype_id, sphere, status, is_recommended_ai, ai_score FROM card_progress WHERE user_id=4 AND is_recommended_ai=true LIMIT 10;"))
         rows3 = result3.fetchall()
-        print(f"\n=== RECOMMENDED AI CARDS for user 4 ===")
+        print("\n=== RECOMMENDED AI CARDS for user 4 ===")
         for r in rows3:
             print(f"  archetype_id={r[0]}, sphere={r[1]}, status={r[2]}, is_rec_ai={r[3]}, ai_score={r[4]}")
         

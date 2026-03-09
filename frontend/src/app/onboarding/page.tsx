@@ -2,7 +2,7 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { calcAPI, api, voiceAPI } from "@/lib/api";
+import { calcAPI, api, voiceAPI, visualAPI } from "@/lib/api";
 import { useUserStore } from "@/lib/store";
 
 const MicIcon = ({ className }: { className?: string }) => (
@@ -248,8 +248,10 @@ function AIFlow({ onBack }: { onBack: () => void }) {
     const [messages, setMessages] = useState<{ role: string, content: string }[]>([]);
     const [input, setInput] = useState("");
     const [loading, setLoading] = useState(false);
+    const [ready, setReady] = useState(false);
     const [calcLoading, setCalcLoading] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
     const { isRecording, isTranscribing, startRecording, stopRecording } = useVoiceRecorder(userId, setInput);
 
     // Initial message
@@ -267,6 +269,9 @@ function AIFlow({ onBack }: { onBack: () => void }) {
         try {
             const res = await api.post("/api/onboarding/ai/chat", { user_id: userId, chat_history: hist });
             setMessages([...hist, { role: "assistant", content: res.data.text }]);
+            if (res.data.ready) {
+                setReady(true);
+            }
         } catch (e: any) {
             console.error(e);
             setMessages([...hist, { role: "assistant", content: "Ошибка связи с ядром. Попробуйте еще раз." }]);
@@ -279,8 +284,27 @@ function AIFlow({ onBack }: { onBack: () => void }) {
         if (!input.trim() || loading || calcLoading) return;
         const newHistory = [...messages, { role: "user", content: input }];
         setInput("");
+        if (textareaRef.current) {
+            textareaRef.current.style.height = "auto";
+        }
         sendChat(newHistory);
     };
+
+    const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        setInput(e.target.value);
+        if (textareaRef.current) {
+            textareaRef.current.style.height = "auto";
+            textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, window.innerHeight * 0.5)}px`;
+        }
+    };
+
+    // Auto-adjust on transcript arrival
+    useEffect(() => {
+        if (textareaRef.current) {
+            textareaRef.current.style.height = "auto";
+            textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, window.innerHeight * 0.5)}px`;
+        }
+    }, [input]);
 
     const handleCalculate = async () => {
         setCalcLoading(true);
@@ -294,6 +318,12 @@ function AIFlow({ onBack }: { onBack: () => void }) {
             setCalcLoading(false);
         }
     };
+
+    const [showVisual, setShowVisual] = useState(false);
+
+    if (showVisual) {
+        return <VisualFlow onBack={() => setShowVisual(false)} onComplete={handleCalculate} />;
+    }
 
     const isReadyForSync = messages.length >= 7; // User sent 3+ responses
 
@@ -362,11 +392,17 @@ function AIFlow({ onBack }: { onBack: () => void }) {
                 {/* Input row */}
                 <div style={{ display: "flex", gap: 8, alignItems: "center", position: "relative" }}>
                     <div style={{ flex: 1, position: "relative" }}>
-                        <input
-                            type="text"
-                            value={isTranscribing ? "Слушаю..." : input}
-                            onChange={(e) => setInput(e.target.value)}
-                            onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                        <textarea
+                            ref={textareaRef}
+                            rows={1}
+                            value={isTranscribing ? "Транскрибирую в текст..." : input}
+                            onChange={handleTextChange}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter" && !e.shiftKey) {
+                                    e.preventDefault();
+                                    handleSend();
+                                }
+                            }}
                             placeholder="Ваш ответ..."
                             disabled={loading || calcLoading || isTranscribing}
                             style={{
@@ -375,11 +411,16 @@ function AIFlow({ onBack }: { onBack: () => void }) {
                                 border: "1px solid rgba(255,255,255,0.1)",
                                 borderRadius: 16,
                                 padding: "14px 48px 14px 16px",
-                                fontSize: 16,
+                                fontSize: 14,
                                 color: "#fff",
                                 outline: "none",
                                 fontFamily: "inherit",
                                 boxSizing: "border-box",
+                                resize: "none",
+                                overflowY: "auto",
+                                maxHeight: "50vh",
+                                lineHeight: "1.5",
+                                display: "block",
                             }}
                             className="placeholder:text-white/20 focus:border-amber-500/50"
                         />
@@ -429,30 +470,37 @@ function AIFlow({ onBack }: { onBack: () => void }) {
                 </div>
 
                 {/* CTA or progress hint */}
-                {isReadyForSync ? (
-                    <button
-                        onClick={handleCalculate}
+                {ready ? (
+                    <motion.button
+                        onClick={() => setShowVisual(true)}
                         disabled={calcLoading}
+                        animate={calcLoading ? {
+                            boxShadow: ["0 4px 24px rgba(245,158,11,0.35)", "0 4px 32px rgba(245,158,11,0.6)", "0 4px 24px rgba(245,158,11,0.35)"],
+                            opacity: [1, 0.8, 1]
+                        } : {
+                            boxShadow: "0 4px 24px rgba(245,158,11,0.35)",
+                            opacity: 1
+                        }}
+                        transition={calcLoading ? { duration: 1.5, repeat: Infinity, ease: "easeInOut" } : {}}
                         style={{
                             width: "100%", padding: "15px", borderRadius: 18, border: "none", cursor: "pointer",
-                            background: calcLoading ? "rgba(255,255,255,0.1)" : "linear-gradient(135deg, #F59E0B, #F97316)",
+                            background: "linear-gradient(135deg, #F59E0B, #F97316)",
                             color: "#fff", fontWeight: 900, fontSize: 15, letterSpacing: "0.02em",
-                            boxShadow: calcLoading ? "none" : "0 4px 24px rgba(245,158,11,0.35)",
-                            opacity: calcLoading ? 0.6 : 1,
-                            transition: "all 0.2s",
                         }}
                     >
-                        {calcLoading ? "Генерация..." : "Получить карты ✧"}
-                    </button>
+                        {calcLoading ? "Синхронизация..." : "Приступить к визуальной диагностике ✧"}
+                    </motion.button>
                 ) : (
                     <p style={{ textAlign: "center", fontSize: 10, color: "rgba(255,255,255,0.25)", textTransform: "uppercase", letterSpacing: "0.1em", margin: 0 }}>
-                        Ответьте ещё на несколько вопросов
+                        {loading ? "Анализирую..." : "☼ Идет диагностика состояния"}
                     </p>
                 )}
             </div>
         </motion.div>
     );
 }
+
+import SacredGeometryLogo from "@/components/SacredGeometryLogo";
 
 export default function OnboardingPage() {
     const [path, setPath] = useState<"astro" | "ai" | null>(null);
@@ -493,20 +541,21 @@ export default function OnboardingPage() {
                 ))}
             </div>
 
-            <div className="relative z-10 w-full max-w-[360px]">
+            <div className="relative z-10 w-full max-w-[360px]" style={{ transform: path === null || path === 'astro' ? "translateY(-8vh)" : "none" }}>
                 {/* Logo & Header */}
                 {path !== "ai" && (
-                    <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-8">
-                        <div style={{
-                            width: 56, height: 56, margin: "0 auto 12px",
-                            background: "linear-gradient(135deg, rgba(139,92,246,0.25), rgba(245,158,11,0.15))",
-                            border: "1px solid var(--border-glow)",
-                            borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center",
-                            fontSize: 24, boxShadow: "0 8px 32px rgba(139,92,246,0.25)",
-                        }}>
-                            ✦
+                    <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
+                        <div style={{ marginBottom: 4 }}>
+                            <SacredGeometryLogo size={216} progress={0.9} />
                         </div>
-                        <h1 className="text-3xl font-bold gradient-text mb-1 tracking-tight">AVATAR</h1>
+                        <h1 className="text-[44px] font-bold tracking-tight" style={{
+                            marginBottom: -2,
+                            background: "linear-gradient(to right, #EF4444 5%, #F97316, #EAB308, #10B981, #3B82F6, #6366F1, #A855F7 95%)",
+                            WebkitBackgroundClip: "text",
+                            WebkitTextFillColor: "transparent",
+                            backgroundClip: "text",
+                            color: "transparent"
+                        }}>AVATAR</h1>
                         <p className="text-[10px] text-white/30 uppercase tracking-[0.2em]">Платформа эволюции</p>
                     </motion.div>
                 )}
@@ -545,5 +594,154 @@ export default function OnboardingPage() {
                 {path === 'ai' && <AIFlow onBack={() => setPath(null)} />}
             </div>
         </div>
+    );
+}
+
+function VisualFlow({ onBack, onComplete }: { onBack: () => void, onComplete: () => void }) {
+    const { userId } = useUserStore();
+    const [stimuli, setStimuli] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [startTime, setStartTime] = useState<number>(0);
+    const [step, setStep] = useState(0);
+    const totalSteps = 3;
+
+    // Telemetry state
+    const interactionsRef = useRef<Record<number, any>>({});
+    const [sessionId, setSessionId] = useState<number | null>(null);
+
+    useEffect(() => {
+        visualAPI.logEvent({ user_id: userId!, event_type: "SESSION_START", payload: { mode: "onboarding" } });
+        fetchSet();
+    }, []);
+
+    const fetchSet = async () => {
+        setLoading(true);
+        try {
+            const res = await visualAPI.getSet(userId!, 4);
+            setStimuli(res.data);
+            setStartTime(Date.now());
+
+            // Log IMAGES_SHOWN
+            visualAPI.logEvent({
+                user_id: userId!,
+                session_id: sessionId || undefined,
+                event_type: "IMAGES_SHOWN",
+                payload: { image_ids: res.data.map((s: any) => s.id) }
+            });
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleHover = (id: number, enter: boolean) => {
+        if (enter) {
+            visualAPI.logEvent({ user_id: userId!, session_id: sessionId || undefined, event_type: "IMAGE_HOVER", payload: { image_id: id } });
+            if (!interactionsRef.current[id]) {
+                interactionsRef.current[id] = { image_id: id, hover_time: 0, start: Date.now() };
+            } else {
+                interactionsRef.current[id].start = Date.now();
+            }
+        } else {
+            if (interactionsRef.current[id]?.start) {
+                const duration = Date.now() - interactionsRef.current[id].start;
+                interactionsRef.current[id].hover_time += duration;
+                interactionsRef.current[id].start = null;
+            }
+        }
+    };
+
+    const handleSelect = async (selectedId: number) => {
+        handleHover(selectedId, false);
+        const reactionTime = Date.now() - startTime;
+
+        const interactionList = Object.values(interactionsRef.current).map(inter => ({
+            image_id: inter.image_id,
+            hover_time: inter.hover_time,
+            selected: inter.image_id === selectedId,
+            reaction_time: inter.image_id === selectedId ? reactionTime : null
+        }));
+
+        try {
+            const res = await visualAPI.report({
+                user_id: userId!,
+                shown_ids: stimuli.map(s => s.id),
+                selected_id: selectedId,
+                reaction_time_ms: reactionTime,
+                interactions: interactionList
+            });
+
+            if (!sessionId) setSessionId(res.data.session_id);
+
+            visualAPI.logEvent({
+                user_id: userId!,
+                session_id: res.data.session_id,
+                event_type: "IMAGE_SELECTED",
+                payload: { image_id: selectedId, reaction_time: reactionTime }
+            });
+
+            if (step < totalSteps - 1) {
+                interactionsRef.current = {};
+                setStep(s => s + 1);
+                fetchSet();
+            } else {
+                visualAPI.logEvent({ user_id: userId!, session_id: res.data.session_id, event_type: "SESSION_END", payload: {} });
+                onComplete();
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+    return (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onMouseMove={(e) => {
+                // Throttle would be better, but for now simple logging
+                if (Math.random() > 0.98) {
+                    visualAPI.logEvent({ user_id: userId!, session_id: sessionId || undefined, event_type: "CURSOR_MOVE", payload: { x: e.clientX, y: e.clientY } });
+                }
+            }}
+            style={{ position: "fixed", inset: 0, background: "#060818", zIndex: 20, display: "flex", flexDirection: "column", padding: 20 }}>
+            <div style={{ textAlign: "center", marginBottom: 30, marginTop: 20 }}>
+                <p style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 8 }}>
+                    Визуальный Резонанс ({step + 1}/{totalSteps})
+                </p>
+                <h2 style={{ fontSize: 18, fontWeight: 700, color: "#fff" }}>Выберите образ, который откликается в моменте</h2>
+            </div>
+
+            {loading ? (
+                <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+                </div>
+            ) : (
+                <div style={{ flex: 1, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, alignContent: "center" }}>
+                    {stimuli.map((s) => (
+                        <motion.button
+                            key={s.id}
+                            whileTap={{ scale: 0.95 }}
+                            onMouseEnter={() => handleHover(s.id, true)}
+                            onMouseLeave={() => handleHover(s.id, false)}
+                            onClick={() => handleSelect(s.id)}
+                            style={{
+                                aspectRatio: "1/1",
+                                background: "rgba(255,255,255,0.03)",
+                                border: "1px solid rgba(255,255,255,0.08)",
+                                borderRadius: 24,
+                                overflow: "hidden",
+                                position: "relative"
+                            }}
+                        >
+                            <img src={s.image_url} alt="Stimulus" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.8 }} />
+                            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.4), transparent)" }} />
+                        </motion.button>
+                    ))}
+                </div>
+            )}
+
+            <p style={{ textAlign: "center", fontSize: 11, color: "rgba(255,255,255,0.2)", marginTop: 20 }}>
+                Не анализируйте — выбирайте импульсивно
+            </p>
+        </motion.div>
     );
 }

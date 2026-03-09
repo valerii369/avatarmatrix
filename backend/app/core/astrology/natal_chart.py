@@ -5,7 +5,6 @@ Computes planet positions, signs, houses, and retrograde status.
 import json
 import os
 from dataclasses import dataclass, field
-from typing import Optional
 import swisseph as swe
 from geopy.geocoders import Nominatim
 from timezonefinder import TimezoneFinder

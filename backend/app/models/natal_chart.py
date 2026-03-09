@@ -1,5 +1,5 @@
 from typing import Optional
-from sqlalchemy import Integer, ForeignKey, Text, Boolean, String, Float
+from sqlalchemy import Integer, ForeignKey, String
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 

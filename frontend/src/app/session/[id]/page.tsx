@@ -29,8 +29,6 @@ export default function SessionPage() {
     const [input, setInput] = useState("");
     const [stage, setStage] = useState(1);
     const [hawkins, setHawkins] = useState(0);
-    const [hawkinsMin, setHawkinsMin] = useState(1000);
-    const [hawkinsPeak, setHawkinsPeak] = useState(0);
     const [isComplete, setIsComplete] = useState(false);
     const [isConnected, setIsConnected] = useState(false);
     const [isAiTyping, setIsAiTyping] = useState(true);
@@ -69,7 +67,6 @@ export default function SessionPage() {
 
                 if (data.type === "error") {
                     setError(data.content);
-                    // Don't close here, allow user to decide or wait
                     setIsAiTyping(false);
                     return;
                 }
@@ -84,8 +81,6 @@ export default function SessionPage() {
 
                 if (data.stage) setStage(data.stage);
                 if (data.hawkins_current) setHawkins(data.hawkins_current);
-                if (data.hawkins_min) setHawkinsMin(data.hawkins_min);
-                if (data.hawkins_peak) setHawkinsPeak(data.hawkins_peak);
                 if (data.expert_results) setExpertResults(data.expert_results);
                 if (data.is_complete) setIsComplete(true);
                 setIsDeepening(data.is_deepening || false);
@@ -102,7 +97,6 @@ export default function SessionPage() {
             setIsConnected(false);
             if (retryCountRef.current < 3 && !isComplete) {
                 retryCountRef.current += 1;
-                console.log(`Attempting reconnect ${retryCountRef.current}...`);
                 setTimeout(connectWS, 2000);
             }
         };
@@ -112,9 +106,7 @@ export default function SessionPage() {
         if (!userId || !params.id) return;
         const cardId = Number(params.id);
         cardsAPI.getOne(userId, cardId).then(r => setCard(r.data));
-
         connectWS();
-
         return () => {
             wsRef.current?.close();
         };
@@ -124,7 +116,6 @@ export default function SessionPage() {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
-    // Auto-resize textarea when content changes
     useEffect(() => {
         if (textareaRef.current) {
             textareaRef.current.style.height = "auto";
@@ -147,36 +138,19 @@ export default function SessionPage() {
         }
     };
 
-    const completeStage = () => {
-        if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
-        setIsAiTyping(true);
-        wsRef.current.send(JSON.stringify({ type: "complete_stage", content: "", stage }));
-
-        if (stage < 6) {
-            setMessages(prev => [...prev, {
-                role: "system",
-                content: `→ Этап ${stage + 1}/6: ${STAGE_NAMES[stage + 1]}`,
-            }]);
-            setStage(s => s + 1);
-        }
-    };
-
     const closeSession = () => {
         wsRef.current?.send(JSON.stringify({ type: "close" }));
         wsRef.current?.close();
         router.push(`/card/${params.id}`);
     };
 
-    // Voice recording handlers
     const startRecording = useCallback(async () => {
         if (isRecording || isTranscribing) return;
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
                 ? "audio/webm;codecs=opus"
-                : MediaRecorder.isTypeSupported("audio/webm")
-                    ? "audio/webm"
-                    : "audio/mp4";
+                : "audio/webm";
             const recorder = new MediaRecorder(stream, { mimeType });
             chunksRef.current = [];
             recorder.ondataavailable = e => { if (e.data.size > 0) chunksRef.current.push(e.data); };
@@ -193,7 +167,6 @@ export default function SessionPage() {
                     }
                 } catch (err: any) {
                     console.error("Transcription error:", err);
-                    alert("Ошибка транскрибации. Попробуйте еще раз.");
                 } finally {
                     setIsTranscribing(false);
                 }
@@ -213,174 +186,202 @@ export default function SessionPage() {
         setIsRecording(false);
     }, []);
 
-    const toggleRecording = () => {
-        if (isRecording) {
-            stopRecording();
+    const progress = (stage / 6) * 100;
+
+    const getHawkinsColor = (score: number) => {
+        if (score <= 200) {
+            const ratio = score / 200;
+            const r = Math.round(239 + (245 - 239) * ratio);
+            const g = Math.round(68 + (158 - 68) * ratio);
+            const b = Math.round(68 + (11 - 68) * ratio);
+            return `rgb(${r}, ${g}, ${b})`;
         } else {
-            startRecording();
+            const ratio = Math.min(1, (score - 200) / 300);
+            const r = Math.round(245 + (16 - 245) * ratio);
+            const g = Math.round(158 + (185 - 158) * ratio);
+            const b = Math.round(11 + (129 - 11) * ratio);
+            return `rgb(${r}, ${g}, ${b})`;
         }
     };
 
-    const progress = (stage / 6) * 100;
-    const lastMessage = messages[messages.length - 1];
-    const canSendMessage = input.trim() && !isAiTyping && !isTranscribing;
-
     if (error) return (
-        <div className="flex flex-col items-center justify-center min-h-screen px-6 gap-4" style={{ background: "var(--bg-deep)" }}>
-            <div className="text-4xl">⚠️</div>
-            <p className="text-center text-sm" style={{ color: "#fc8181" }}>{error}</p>
-            <button onClick={() => router.back()} className="px-6 py-3 rounded-xl text-sm"
-                style={{ background: "var(--violet)", color: "#fff", fontSize: "16px" }}>
-                Назад
+        <div className="flex flex-col items-center justify-center min-h-screen px-6 gap-4" style={{ background: "#060818" }}>
+            <div className="text-4xl text-red-500">⚠️</div>
+            <p className="text-center text-sm" style={{ color: "rgba(255,255,255,0.6)" }}>{error}</p>
+            <button
+                onClick={() => router.back()}
+                style={{
+                    padding: "14px 28px", borderRadius: 16, background: "rgba(139,92,246,0.2)",
+                    color: "#fff", border: "1px solid rgba(139,92,246,0.3)", fontSize: 14, fontWeight: 700
+                }}
+            >
+                ← Назад
             </button>
         </div>
     );
 
     if (!isConnected) return (
-        <div className="flex flex-col items-center justify-center min-h-screen gap-4" style={{ background: "var(--bg-deep)" }}>
+        <div className="flex flex-col items-center justify-center min-h-screen gap-4" style={{ background: "#060818" }}>
             <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                 className="w-10 h-10 border-2 border-violet-500 border-t-transparent rounded-full" />
-            <p style={{ color: "var(--text-muted)" }}>Подключение к агенту...</p>
+            <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 14 }}>Установка связи...</p>
         </div>
     );
 
     return (
-        <div className="flex flex-col min-h-screen max-h-screen" style={{ background: "var(--bg-deep)" }}>
-            {/* Header */}
-            <div className="px-4 pt-4 pb-3 flex-none"
-                style={{ background: "linear-gradient(180deg, var(--bg-deep) 80%, transparent)" }}>
-                <div className="flex items-center justify-between mb-3">
-                    <div className="flex-1">
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+                position: "fixed", inset: 0, display: "flex", flexDirection: "column",
+                background: "#060818", zIndex: 10, overflow: "hidden"
+            }}
+        >
+            {/* Top bar */}
+            <div style={{ padding: "12px 16px 8px", borderBottom: "1px solid rgba(255,255,255,0.05)", flexShrink: 0, position: "relative", zIndex: 10 }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <button
+                        onClick={closeSession}
+                        style={{ fontSize: 12, color: "rgba(255,255,255,0.3)", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", background: "none", border: "none", cursor: "pointer", padding: "4px 0" }}
+                    >
+                        ← Выйти
+                    </button>
+                    <div style={{ textAlign: "center" }}>
+                        <p style={{ fontSize: 10, color: "rgba(255,255,255,0.2)", letterSpacing: "0.1em", textTransform: "uppercase", margin: 0 }}>☼ Выравнивание</p>
                         {card && (
-                            <>
-                                <p className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>{card.archetype_name}</p>
-                                <p className="text-xs" style={{ color: card.sphere_color || "var(--violet-l)" }}>{card.sphere_name_ru}</p>
-                            </>
+                            <p style={{ fontSize: 10, color: card.sphere_color || "#8B5CF6", fontWeight: 700, margin: 0 }}>
+                                {card.archetype_name}
+                            </p>
                         )}
                     </div>
-                    <div className="flex items-center gap-3">
-                        {hawkins > 0 && (
-                            <span className="text-xs font-semibold" style={{ color: "var(--gold)" }}>
-                                {hawkins} ↑
-                            </span>
-                        )}
-                        <button onClick={closeSession} className="text-xs px-3 py-1.5 rounded-lg"
-                            style={{ background: "rgba(255,255,255,0.06)", color: "var(--text-muted)", fontSize: "14px" }}>
-                            Завершить
-                        </button>
-                    </div>
+                    <span style={{ fontSize: 10, color: "rgba(139,92,246,0.5)", fontWeight: 700 }}>
+                        {!isComplete ? `${stage}/6` : "ГОТОВО"}
+                    </span>
                 </div>
-
-                {!isComplete && (
-                    <>
-                        <div className="phase-bar mb-1">
-                            <div className="phase-bar-fill" style={{ width: `${progress}%` }} />
-                        </div>
-                        <div className="flex justify-between text-xs" style={{ color: "var(--text-muted)" }}>
-                            <span className="flex items-center gap-2">
-                                Этап {stage}/6: {STAGE_NAMES[stage]}
-                                {isDeepening && (
-                                    <motion.span
-                                        initial={{ opacity: 0, x: -5 }} animate={{ opacity: 1, x: 0 }}
-                                        className="text-[9px] px-1.5 py-0.5 bg-violet-500/20 text-violet-300 rounded-md border border-violet-500/30 animate-pulse uppercase tracking-tighter font-black"
-                                    >
-                                        углубление
-                                    </motion.span>
-                                )}
-                            </span>
-                            {hawkins > 0 && <span>Хокинс: {hawkins}</span>}
-                        </div>
-                    </>
-                )}
             </div>
 
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto px-4 py-2 space-y-3">
+            {/* Progress bar */}
+            {!isComplete && (
+                <div style={{ width: "100%", height: 1, background: "rgba(255,255,255,0.03)" }}>
+                    <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${progress}%` }}
+                        style={{ height: "100%", background: "linear-gradient(90deg, #8B5CF6, #EC4899)" }}
+                    />
+                </div>
+            )}
+
+            {/* Messages area */}
+            <div
+                style={{ flex: 1, overflowY: "auto", padding: "16px", display: "flex", flexDirection: "column", gap: 10, scrollbarWidth: "none", position: "relative", zIndex: 5 }}
+            >
                 {messages.map((msg, i) => (
-                    <AnimatePresence key={i}>
-                        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                            className={msg.role === "system" ? "text-center" : ""}>
-                            {msg.role === "system" ? (
-                                <p className="text-xs py-1" style={{ color: "var(--violet-l)" }}>{msg.content}</p>
-                            ) : msg.role === "user" ? (
-                                <div className="bubble-user">
-                                    <p className="text-sm" style={{ color: "var(--text-primary)" }}>{msg.content}</p>
-                                </div>
-                            ) : (
-                                <div className="bubble-ai">
-                                    <p className="text-sm leading-relaxed" style={{ color: "var(--text-primary)", whiteSpace: "pre-line" }}>
-                                        {msg.content}
-                                    </p>
-                                    {msg.hawkins && msg.hawkins > 0 && (
-                                        <div className="mt-2 pt-2" style={{ borderTop: "1px solid var(--border)" }}>
-                                            <div className="hawkins-bar rounded-full h-1">
-                                                <div style={{ width: `${(msg.hawkins / 1000) * 100}%`, height: "100%" }} />
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        </motion.div>
-                    </AnimatePresence>
+                    <motion.div
+                        key={i}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        style={{ display: "flex", justifyContent: msg.role === "user" ? "flex-end" : msg.role === "system" ? "center" : "flex-start" }}
+                    >
+                        {msg.role === "system" ? (
+                            <div style={{ fontSize: 10, color: "rgba(139,92,246,0.5)", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.1em", margin: "8px 0" }}>
+                                {msg.content}
+                            </div>
+                        ) : (
+                            <div style={{
+                                padding: "10px 14px",
+                                borderRadius: msg.role === "user" ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
+                                maxWidth: "85%", fontSize: 14, lineHeight: 1.5,
+                                background: msg.role === "user" ? "rgba(245,158,11,0.18)" : "rgba(255,255,255,0.06)",
+                                color: msg.role === "user" ? "#FEF3C7" : "rgba(255,255,255,0.9)",
+                                border: msg.role === "user" ? "1px solid rgba(245,158,11,0.15)" : "1px solid rgba(255,255,255,0.08)",
+                                whiteSpace: "pre-line"
+                            }}>
+                                {msg.content}
+                            </div>
+                        )}
+                    </motion.div>
                 ))}
 
                 {isAiTyping && (
-                    <div className="bubble-ai">
-                        <div className="flex gap-1">
-                            {[0, 1, 2].map(i => (
-                                <motion.div key={i} className="w-2 h-2 rounded-full" style={{ background: "var(--violet-l)" }}
-                                    animate={{ opacity: [0.3, 1, 0.3] }}
-                                    transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }} />
-                            ))}
+                    <div style={{ display: "flex", justifyContent: "flex-start" }}>
+                        <div style={{ padding: "10px 14px", borderRadius: "18px 18px 18px 4px", background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.4)", fontSize: 12 }}>
+                            <div className="flex gap-1">
+                                {[0, 1, 2].map(i => (
+                                    <motion.div key={i} className="w-1.5 h-1.5 rounded-full" style={{ background: "rgba(139,92,246,0.5)" }}
+                                        animate={{ opacity: [0.3, 1, 0.3] }}
+                                        transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }} />
+                                ))}
+                            </div>
                         </div>
                     </div>
                 )}
 
                 {isComplete && (
-                    <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-                        className="glass-strong p-6 text-center mt-4 rounded-3xl border border-white/10">
-                        <div className="text-4xl mb-4">✨</div>
-                        <h2 className="text-2xl font-bold gradient-text mb-2">Выравнивание завершено</h2>
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ paddingBottom: 20 }}>
+                        <div style={{ textAlign: "center", marginBottom: 32 }}>
+                            <h2 style={{ fontSize: 24, fontWeight: 800, marginBottom: 8, color: "#fff" }}>
+                                Выравнивание завершено
+                            </h2>
+                            <p style={{ fontSize: 13, color: "rgba(255,255,255,0.4)" }}>Энергетический баланс восстановлен</p>
+                        </div>
 
-                        <div className="mb-6 space-y-4">
-                            <div className="bg-white/5 rounded-2xl p-4">
-                                <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">Финальный уровень</p>
-                                <div className="text-4xl font-black mb-1" style={{ color: "var(--gold)" }}>
+                        {hawkins > 0 && (
+                            <div style={{
+                                background: "rgba(255,255,255,0.03)", borderRadius: 28, padding: "32px 16px",
+                                marginBottom: 24, border: "1px solid rgba(255,255,255,0.05)", textAlign: "center"
+                            }}>
+                                <p style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", marginBottom: 8, fontWeight: 800, letterSpacing: "0.15em", textTransform: "uppercase" }}>ИТОГОВЫЙ УРОВЕНЬ</p>
+                                <div style={{
+                                    fontSize: 64, fontWeight: 900, color: getHawkinsColor(hawkins),
+                                    lineHeight: 1, fontFamily: "'Outfit', sans-serif", marginBottom: 8
+                                }}>
                                     {hawkins}
                                 </div>
-                                <p className="text-sm font-bold uppercase tracking-wide text-white/80">
+                                <p style={{
+                                    fontSize: 20, fontWeight: 800, color: getHawkinsColor(hawkins),
+                                    textTransform: "uppercase", letterSpacing: "0.1em"
+                                }}>
                                     {expertResults?.hawkins_level || "..."}
                                 </p>
                             </div>
+                        )}
 
-                            {expertResults && (
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div className="bg-white/5 rounded-xl p-3 text-left">
-                                        <p className="text-[9px] uppercase tracking-widest text-white/40 mb-1">Глубина</p>
-                                        <p className="text-lg font-bold text-white/90">{expertResults.transformation_depth}/10</p>
+                        {expertResults && (
+                            <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 24 }}>
+                                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                                    <div style={{ background: "rgba(255,255,255,0.04)", padding: 14, borderRadius: 20, border: "1px solid rgba(255,255,255,0.05)" }}>
+                                        <p style={{ fontSize: 9, color: "rgba(255,255,255,0.3)", fontWeight: 800, marginBottom: 4, textTransform: "uppercase" }}>ГЛУБИНА</p>
+                                        <p style={{ fontSize: 18, color: "#fff", margin: 0, fontWeight: 800 }}>{expertResults.transformation_depth}/10</p>
                                     </div>
-                                    <div className="bg-white/5 rounded-xl p-3 text-left">
-                                        <p className="text-[9px] uppercase tracking-widest text-white/40 mb-1">Тень</p>
-                                        <p className="text-sm font-bold text-white/90">
-                                            {expertResults.is_shadow_integrated ? "Интегрирована" : "В процессе"}
+                                    <div style={{ background: "rgba(255,255,255,0.04)", padding: 14, borderRadius: 20, border: "1px solid rgba(255,255,255,0.05)" }}>
+                                        <p style={{ fontSize: 9, color: "rgba(255,255,255,0.3)", fontWeight: 800, marginBottom: 4, textTransform: "uppercase" }}>ТЕНЬ</p>
+                                        <p style={{ fontSize: 13, color: "#fff", margin: 0, fontWeight: 800 }}>
+                                            {expertResults.is_shadow_integrated ? "ИНТЕГРИРОВАНА" : "В ПРОЦЕССЕ"}
                                         </p>
                                     </div>
                                 </div>
-                            )}
 
-                            {expertResults?.final_state_summary && (
-                                <div className="bg-white/5 rounded-xl p-4 text-left border-l-4 border-violet-500">
-                                    <p className="text-[9px] uppercase tracking-widest text-white/40 mb-2">Итог трансформации</p>
-                                    <p className="text-sm italic leading-relaxed text-white/70">
-                                        «{expertResults.final_state_summary}»
-                                    </p>
-                                </div>
-                            )}
-                        </div>
+                                {expertResults.final_state_summary && (
+                                    <div style={{ background: "rgba(139,92,246,0.08)", padding: 16, borderRadius: 20, borderLeft: "4px solid #8B5CF6" }}>
+                                        <p style={{ fontSize: 10, color: "#A78BFA", fontWeight: 800, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.1em" }}>ИТОГ ТРАНСФОРМАЦИИ</p>
+                                        <p style={{ fontSize: 14, color: "#fff", lineHeight: 1.6, margin: 0, fontStyle: "italic" }}>
+                                            «{expertResults.final_state_summary}»
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
 
-                        <button onClick={() => router.push(`/diary`)}
-                            className="w-full py-4 rounded-2xl font-bold shadow-lg shadow-violet-500/20"
-                            style={{ background: "linear-gradient(135deg, var(--violet), #6366f1)", color: "#fff", fontSize: "16px" }}>
+                        <button
+                            onClick={() => router.push("/diary")}
+                            style={{
+                                width: "100%", padding: "18px", borderRadius: 20, border: "none",
+                                cursor: "pointer", fontSize: 15, fontWeight: 800, textTransform: "uppercase",
+                                background: "linear-gradient(135deg, #8B5CF6, #6366F1)", color: "#fff",
+                                boxShadow: "0 8px 24px rgba(139,92,246,0.3)",
+                            }}
+                        >
                             Открыть записи в дневнике
                         </button>
                     </motion.div>
@@ -389,135 +390,93 @@ export default function SessionPage() {
                 <div ref={messagesEndRef} />
             </div>
 
-            {/* Input */}
+            {/* Input panel */}
             {!isComplete && (
-                <div className="flex-none px-4 pb-10 pt-2"
-                    style={{ background: "linear-gradient(0deg, var(--bg-deep) 80%, transparent)" }}>
-
-                    <div className="flex flex-col gap-3">
-                        {!isConnected && !isComplete && (
-                            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                                className="flex items-center justify-between gap-3 p-3 rounded-2xl bg-red-500/10 border border-red-500/20 backdrop-blur-xl">
-                                <div className="flex items-center gap-2 text-red-400 text-xs font-medium">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                                    Связь прервана
-                                </div>
+                <div style={{ flexShrink: 0, padding: "10px 16px 20px", borderTop: "1px solid rgba(255,255,255,0.05)", background: "#060818" }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                        <div style={{ display: "flex", gap: 8, alignItems: "center", position: "relative" }}>
+                            <div style={{ flex: 1, position: "relative" }}>
+                                <textarea
+                                    ref={textareaRef}
+                                    rows={1}
+                                    value={isTranscribing ? "Транскрибирую в текст..." : input}
+                                    onChange={(e) => setInput(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter" && !e.shiftKey) {
+                                            e.preventDefault();
+                                            sendMessage();
+                                        }
+                                    }}
+                                    placeholder="Ваш ответ..."
+                                    disabled={isAiTyping || isTranscribing}
+                                    style={{
+                                        width: "100%", background: "rgba(255,255,255,0.06)",
+                                        border: "1px solid rgba(255,255,255,0.1)", borderRadius: 16,
+                                        padding: "14px 48px 14px 16px", fontSize: 14, color: "#fff",
+                                        outline: "none", resize: "none", lineHeight: "1.5", display: "block",
+                                        maxHeight: "50vh", fontFamily: "inherit"
+                                    }}
+                                />
                                 <button
-                                    onClick={() => connectWS()}
-                                    className="px-4 py-1.5 rounded-xl bg-red-500/20 text-red-400 text-xs font-bold hover:bg-red-500/30 transition-colors"
+                                    onClick={sendMessage}
+                                    disabled={!input.trim() || isAiTyping || isTranscribing}
+                                    style={{
+                                        position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)",
+                                        width: 32, height: 32, borderRadius: 10, border: "none", cursor: "pointer",
+                                        background: "rgba(245,158,11,0.2)", color: "#FCD34D",
+                                        display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16,
+                                        opacity: (!input.trim() || isAiTyping) ? 0.3 : 1, transition: "all 0.2s"
+                                    }}
                                 >
-                                    Переподключиться
+                                    ↑
                                 </button>
-                            </motion.div>
-                        )}
-                        <div style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 10,
-                            background: "rgba(255,255,255,0.05)",
-                            border: isRecording
-                                ? "1px solid rgba(236,72,153,0.5)"
-                                : "1px solid var(--border)",
-                            borderRadius: 18,
-                            padding: "12px 12px 12px 16px",
-                            transition: "border-color 0.2s",
-                        }}>
-                            <textarea
-                                ref={textareaRef}
-                                value={isTranscribing ? "🎤 Обрабатываю голос..." : input}
-                                onChange={(e) => {
-                                    setInput(e.target.value);
-                                }}
-                                onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
-                                placeholder="Ваш ответ..."
-                                rows={1}
-                                readOnly={isTranscribing}
-                                style={{
-                                    flex: 1,
-                                    background: "transparent",
-                                    border: "none",
-                                    outline: "none",
-                                    resize: "none",
-                                    fontSize: 16,
-                                    color: "var(--text-primary)",
-                                    lineHeight: 1.5,
-                                    maxHeight: 200,
-                                    fontFamily: "'Inter', sans-serif",
-                                    padding: 0,
-                                }}
-                            />
-                            {/* Mic button */}
+                                <AnimatePresence>
+                                    {isRecording && (
+                                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                                            style={{ position: "absolute", inset: 0, background: "rgba(236,72,153,0.1)", backdropFilter: "blur(8px)", borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid rgba(236,72,153,0.2)", pointerEvents: "none" }}>
+                                            <div style={{ display: "flex", gap: 4 }}>
+                                                {[0, 1, 2].map(i => (
+                                                    <motion.div key={i} style={{ width: 4, height: 16, borderRadius: 4, background: "rgba(236,72,153,0.6)" }}
+                                                        animate={{ scaleY: [1, 2, 1] }}
+                                                        transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.1 }} />
+                                                ))}
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
                             <button
-                                onClick={toggleRecording}
-                                disabled={isTranscribing || isAiTyping}
+                                onPointerDown={startRecording}
+                                onPointerUp={stopRecording}
+                                onPointerLeave={stopRecording}
                                 style={{
-                                    flexShrink: 0,
-                                    width: 38,
-                                    height: 38,
-                                    borderRadius: 12,
-                                    border: "none",
-                                    cursor: isTranscribing ? "default" : "pointer",
-                                    background: isRecording
-                                        ? "rgba(236,72,153,0.25)"
-                                        : "rgba(255,255,255,0.07)",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    fontSize: 18,
-                                    transition: "all 0.2s",
-                                    color: isRecording ? "#EC4899" : "var(--text-muted)",
+                                    flexShrink: 0, width: 52, height: 52, borderRadius: 16, cursor: "pointer",
+                                    background: isRecording ? "#EF4444" : "rgba(255,255,255,0.06)",
+                                    border: isRecording ? "none" : "1px solid rgba(255,255,255,0.1)",
+                                    display: "flex", alignItems: "center", justifyContent: "center",
+                                    transition: "all 0.15s", transform: isRecording ? "scale(0.95)" : "scale(1)"
                                 }}
                             >
-                                {isTranscribing ? (
-                                    <motion.span
-                                        animate={{ opacity: [1, 0.3, 1] }}
-                                        transition={{ duration: 1, repeat: Infinity }}
-                                    >⏳</motion.span>
-                                ) : isRecording ? "⏹" : "🎤"}
+                                {isRecording ? "🔴" : (
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="rgba(245,158,11,0.6)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 20, height: 20 }}>
+                                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+                                        <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                                        <line x1="12" y1="19" x2="12" y2="23" />
+                                        <line x1="8" y1="23" x2="16" y2="23" />
+                                    </svg>
+                                )}
                             </button>
                         </div>
-
-                        {isRecording && (
-                            <motion.p
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                style={{ fontSize: 11, color: "#EC4899", marginTop: -6, paddingLeft: 4 }}
-                            >
-                                ● Запись... нажмите ⏹ чтобы остановить
-                            </motion.p>
-                        )}
-
-                        <motion.button
-                            whileTap={{ scale: 0.97 }}
-                            onClick={sendMessage}
-                            disabled={isAiTyping || isTranscribing || !input.trim()}
-                            style={{
-                                width: "100%",
-                                padding: "16px",
-                                borderRadius: 18,
-                                border: "none",
-                                cursor: "pointer",
-                                fontSize: 16,
-                                fontWeight: 700,
-                                fontFamily: "'Outfit', sans-serif",
-                                letterSpacing: "0.03em",
-                                transition: "all 0.2s",
-                                background: (isAiTyping || !input.trim())
-                                    ? "rgba(255,255,255,0.06)"
-                                    : "linear-gradient(135deg, var(--violet), #6366f1)",
-                                color: (isAiTyping || !input.trim())
-                                    ? "var(--text-muted)"
-                                    : "#fff",
-                                boxShadow: (isAiTyping || !input.trim())
-                                    ? "none"
-                                    : "0 8px 24px rgba(139,92,246,0.3)",
-                            }}
-                        >
-                            {isAiTyping ? "···" : "Далее →"}
-                        </motion.button>
+                        <div style={{ display: "flex", justifyContent: "center", gap: 8, marginTop: 4 }}>
+                            {stage < 6 && (
+                                <p style={{ fontSize: 10, color: "rgba(255,255,255,0.25)", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+                                    ☼ {STAGE_NAMES[stage]} {isDeepening && "· УГЛУБЛЕНИЕ"}
+                                </p>
+                            )}
+                        </div>
                     </div>
                 </div>
             )}
-        </div>
+        </motion.div>
     );
 }

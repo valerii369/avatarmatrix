@@ -1,22 +1,15 @@
 """
 Session router: WebSocket-based alignment sessions (6 stages).
 """
-import json
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from sqlalchemy import select
 
 from app.database import AsyncSessionLocal
 from app.models import CardProgress, AlignSession, SyncSession, User, DiaryEntry
-from app.models.card_progress import CardStatus
-from app.agents.master_agent import (
-    alignment_session_message, 
-    evaluate_hawkins, 
-    generate_alignment_summary,
-    run_alignment_expert_analysis,
-    check_alignment_depth
-)
-from app.core.economy import award_energy, spend_energy, hawkins_to_rank, process_card_rank_up
+from app.agents.align_agent import alignment_session_message, check_alignment_depth
+from app.agents.hawkins_agent import evaluate_hawkins
+from app.agents.analytic_agent import generate_alignment_summary, run_alignment_expert_analysis
+from app.core.economy import spend_energy, hawkins_to_rank, process_card_rank_up
 from app.config import settings
 
 router = APIRouter()
@@ -144,7 +137,7 @@ async def alignment_session(
     await websocket.send_json({
         "type": "opening",
         "content": opening,
-        "stage": 1,
+        "protocol": 1,
         "hawkins": hawkins_entry,
     })
 
@@ -167,25 +160,27 @@ async def alignment_session(
                     is_sufficient = depth_result.get("is_sufficient", False)
                     chat_history.append({"role": "user", "content": user_content})
 
-                    hawkins_eval = await evaluate_hawkins(user_content)
+                    # Provide full history as context for more accurate assessment
+                    history_str = "\n".join([f"{m['role']}: {m['content']}" for m in chat_history[:-1]])
+                    hawkins_eval = await evaluate_hawkins(user_content, context=history_str)
                     current_hawkins = hawkins_eval.get("score", current_hawkins)
                     hawkins_min = min(hawkins_min, current_hawkins)
                     hawkins_peak = max(hawkins_peak, current_hawkins)
 
                     if is_sufficient or stage_attempts >= 1 or is_manual_transition:
-                        if current_stage < 6:
+                        if current_stage < 3:
                             current_stage += 1
                             stage_attempts = 0
                     else:
                         is_deepening = True
                         stage_attempts += 1
                 elif is_manual_transition:
-                    if current_stage < 6:
+                    if current_stage < 3:
                         current_stage += 1
                         stage_attempts = 0
                 
-                effective_user_content = user_content if user_content.strip() else "[Переход к следующему этапу]"
-                is_complete = current_stage >= 6 and (user_content.strip() or is_manual_transition) and not is_deepening
+                effective_user_content = user_content if user_content.strip() else "[Переход к следующему протоколу]"
+                is_complete = current_stage >= 3 and (user_content.strip() or is_manual_transition) and not is_deepening
 
                 ai_response = await alignment_session_message(
                     stage=current_stage,
@@ -214,7 +209,7 @@ async def alignment_session(
                 await websocket.send_json({
                     "type": "response",
                     "content": ai_response,
-                    "stage": current_stage,
+                    "protocol": current_stage,
                     "hawkins_current": expert_results.get("hawkins_score") if is_complete else current_hawkins,
                     "hawkins_min": hawkins_min,
                     "hawkins_peak": hawkins_peak,
@@ -243,7 +238,7 @@ async def alignment_session(
 
         align_session.messages_json = chat_history
         align_session.stages_completed = current_stage
-        align_session.is_complete = current_stage >= 6
+        align_session.is_complete = current_stage >= 3
         
         expert_results = session_expert_results
         if align_session.is_complete and expert_results:

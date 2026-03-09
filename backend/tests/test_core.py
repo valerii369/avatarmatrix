@@ -98,7 +98,7 @@ class TestXPFormula:
 
 class TestAspectCalculator:
     def test_conjunction(self):
-        from app.core.astrology.aspect_calculator import angle_diff, calculate_aspects
+        from app.core.astrology.aspect_calculator import angle_diff
         # 0° diff = conjunction
         assert angle_diff(0, 0) == 0
         assert angle_diff(350, 10) == pytest.approx(20)

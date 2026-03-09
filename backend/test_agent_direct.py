@@ -1,8 +1,8 @@
 """Direct test of the onboarding agent without HTTP overhead."""
 import asyncio
 import traceback
-from sqlalchemy import select, text
-from app.database import AsyncSessionLocal, engine
+from sqlalchemy import select
+from app.database import AsyncSessionLocal
 from app.models import User
 from app.agents.onboarding_agent import extract_onboarding_cards
 
@@ -34,7 +34,7 @@ async def run_test():
         for c in cards:
             print(f"  archetype_id={c['archetype_id']}, sphere={c['sphere']}, score={c['score']}")
             print(f"    reason: {c['reason']}")
-    except Exception as e:
+    except Exception:
         print(f"\nERROR in extract_onboarding_cards:\n{traceback.format_exc()}")
         return
     
@@ -73,7 +73,7 @@ async def run_test():
             
             await db.commit()
             print(f"Written {written} card recommendations to DB!")
-    except Exception as e:
+    except Exception:
         print(f"\nERROR in DB write:\n{traceback.format_exc()}")
 
 if __name__ == "__main__":

@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.database import get_db
-from app.models import CardProgress, SyncSession, AlignSession
+from app.models import CardProgress, AlignSession, SyncSession
 from app.core.economy import hawkins_to_rank, RANK_NAMES
 
 router = APIRouter()
@@ -152,3 +152,76 @@ async def get_card_detail(
         astro_reason=card.astro_reason,
         sphere_color=sphere.get("color", "#ffffff"),
     )
+
+
+class StateHistoryItem(BaseModel):
+    date: str
+    score: int
+    type: str
+
+@router.get("/{user_id}/card/{card_id}/history", response_model=list[StateHistoryItem])
+async def get_card_history(
+    user_id: int,
+    card_id: int,
+    db: AsyncSession = Depends(get_db),
+):
+    """Get the history of Hawkins scores for a card (sync + all alignments)."""
+    # 1. Verify card belongs to user
+    card_result = await db.execute(
+        select(CardProgress).where(
+            CardProgress.id == card_id,
+            CardProgress.user_id == user_id,
+        )
+    )
+    if not card_result.scalar_one_or_none():
+        raise HTTPException(status_code=404, detail="Card not found")
+
+    history = []
+
+    # 2. Get Sync Session (Initial Activation)
+    sync_result = await db.execute(
+        select(SyncSession).where(
+            SyncSession.card_progress_id == card_id,
+            SyncSession.is_complete == True
+        ).order_by(SyncSession.created_at.asc())
+    )
+    syncs = sync_result.scalars().all()
+    for s in syncs:
+        if s.hawkins_score > 0:
+            history.append({
+                "date": s.created_at.isoformat(),
+                "score": s.hawkins_score,
+                "type": "sync"
+            })
+
+    # 3. Get Align Sessions
+    align_result = await db.execute(
+        select(AlignSession).where(
+            AlignSession.card_progress_id == card_id,
+            AlignSession.is_complete == True
+        ).order_by(AlignSession.created_at.asc())
+    )
+    aligns = align_result.scalars().all()
+    for a in aligns:
+        # We can add entry and peak/exit to make the graph more detailed
+        if a.hawkins_entry > 0:
+            # We add a slight negative time offset for the entry score so it renders before the exit
+            entry_time = a.created_at.isoformat() 
+            history.append({
+                "date": entry_time,
+                "score": a.hawkins_entry,
+                "type": "align_start"
+            })
+        if a.hawkins_exit > 0:
+            # The exit time is simulated as later
+            # (In a real app, AlignSession could store updated_at)
+            history.append({
+                "date": a.updated_at.isoformat() if hasattr(a, 'updated_at') and a.updated_at else a.created_at.isoformat(),
+                "score": a.hawkins_exit,
+                "type": "align_end"
+            })
+
+    # Sort chronological
+    history.sort(key=lambda x: x["date"])
+    
+    return history

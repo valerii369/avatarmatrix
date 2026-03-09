@@ -61,6 +61,15 @@ async def get_profile(user_id: int, db: AsyncSession = Depends(get_db)):
         await db.commit()
         await db.refresh(user)
 
+    # Referral stats
+    referral_count_result = await db.execute(select(User).where(User.referred_by == user.id))
+    referrals = referral_count_result.scalars().all()
+    referral_count = len(referrals)
+    
+    # Simple heuristic for bonus calculation: (count * 100) 
+    # In a real system, we'd have a separate ledge/history table
+    referral_energy_earned = referral_count * 100
+
     return {
         "user_id": user.id,
         "first_name": user.first_name,
@@ -75,6 +84,9 @@ async def get_profile(user_id: int, db: AsyncSession = Depends(get_db)):
         "xp_next": calculate_xp_for_level(user.evolution_level + 1),
         "fingerprint": fingerprint,
         "onboarding_done": user.onboarding_done,
+        "referral_code": user.referral_code,
+        "referral_count": referral_count,
+        "referral_energy_earned": referral_energy_earned,
     }
 
 

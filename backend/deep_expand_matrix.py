@@ -1,5 +1,4 @@
 import json
-import os
 
 # Paths
 MATRIX_PATH = "backend/data/archetype_sphere_matrix.json"

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import dynamic from "next/dynamic";
@@ -18,15 +18,6 @@ const SPHERE_NAMES: Record<string, string> = {
     FAMILY: "Род", MISSION: "Миссия", HEALTH: "Здоровье", SOCIETY: "Влияние", SPIRIT: "Духовность"
 };
 
-const MicIcon = ({ className }: { className?: string }) => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
-        <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-        <line x1="12" y1="19" x2="12" y2="23" />
-        <line x1="8" y1="23" x2="16" y2="23" />
-    </svg>
-);
-
 export default function ReflectPage() {
     const { userId, setUser, energy } = useUserStore();
     const router = useRouter();
@@ -36,59 +27,103 @@ export default function ReflectPage() {
     const [input, setInput] = useState("");
     const [result, setResult] = useState<any>(null);
     const [loading, setLoading] = useState(false);
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
     const SPHERES = ["all", "IDENTITY", "MONEY", "RELATIONS", "FAMILY", "MISSION", "HEALTH", "SOCIETY", "SPIRIT"];
 
     const { isRecording, isTranscribing, startRecording, stopRecording } = useVoiceRecorder(userId, setInput);
 
     // SWR for Reflection history
-    const { data: history, isValidating: loadingHistory } = useSWR(
+    const { data: history, mutate: mutateHistory, isValidating: loadingHistory } = useSWR(
         userId && (activeTab === "history" || activeTab === "graph") ? ["reflect_history", userId, activeFilter] : null,
         () => diaryAPI.getAll(userId!, activeFilter === "all" ? undefined : activeFilter, "reflection").then(res => res.data),
         { revalidateOnFocus: false, dedupingInterval: 5000 }
     );
 
-    const handleSubmit = async () => {
+    useEffect(() => {
+        if (textareaRef.current) {
+            textareaRef.current.style.height = "auto";
+            textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 300)}px`;
+        }
+    }, [input, isTranscribing]);
+
+    const handleSubmit = async (useAi: boolean) => {
         if (!userId || !input.trim()) return;
         setLoading(true);
         try {
-            const res = await reflectAPI.submit(userId, input.trim());
-            setResult(res.data);
+            const res = await reflectAPI.submit(userId, input.trim(), useAi);
+            setResult({ ...res.data, mode: useAi ? 'ai' : 'diary' });
             if (res.data.energy_awarded > 0) {
                 setUser({ energy: (energy || 0) + res.data.energy_awarded });
             }
+            mutateHistory();
         } catch (e: any) {
             if (e.response?.data?.detail?.includes("уже пройдена")) {
                 setResult({ message: "Рефлексия уже пройдена сегодня", energy_awarded: 0 });
+            } else {
+                alert(e.response?.data?.detail || "Ошибка сохранения");
             }
         } finally {
             setLoading(false);
         }
     };
 
-    if (result) return (
-        <div className="min-h-screen flex flex-col items-center justify-center px-6 pb-24" style={{ background: "var(--bg-deep)" }}>
-            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-                className="glass-strong p-8 text-center w-full max-w-sm rounded-[2rem] border border-white/10 shadow-2xl">
-                <div className="text-5xl mb-6">✨</div>
-                <h2 className="text-xl font-bold mb-4 gradient-text">{result.message}</h2>
+    const getHawkinsColor = (score: number) => {
+        if (score <= 200) {
+            const ratio = score / 200;
+            const r = Math.round(239 + (245 - 239) * ratio);
+            const g = Math.round(68 + (158 - 68) * ratio);
+            const b = Math.round(68 + (11 - 68) * ratio);
+            return `rgb(${r}, ${g}, ${b})`;
+        } else {
+            const ratio = Math.min(1, (score - 200) / 300);
+            const r = Math.round(245 + (16 - 245) * ratio);
+            const g = Math.round(158 + (185 - 158) * ratio);
+            const b = Math.round(11 + (129 - 11) * ratio);
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+    };
 
-                {result.analysis && (
+    if (result) return (
+        <div className="min-h-screen flex flex-col items-center justify-center px-4 pb-24" style={{ background: "#060818" }}>
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-sm">
+                <div style={{ textAlign: "center", marginBottom: 32 }}>
+                    <div style={{ fontSize: 48, marginBottom: 16 }}>{result.mode === 'ai' ? '✨' : '📝'}</div>
+                    <h2 style={{ fontSize: 24, fontWeight: 800, marginBottom: 8, color: "#fff" }}>
+                        {result.message}
+                    </h2>
+                    <p style={{ fontSize: 13, color: "rgba(255,255,255,0.4)" }}>
+                        {result.mode === 'ai' ? 'Ваш внутренний компас настроен' : 'Запись сохранена в ваш личный дневник'}
+                    </p>
+                </div>
+
+                {result.mode === 'ai' && result.analysis && (
                     <div className="mb-6 space-y-4">
-                        <div className="bg-white/5 rounded-2xl p-4">
-                            <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">Уровень сегодня</p>
-                            <div className="text-3xl font-black text-violet-400 mb-1">
+                        <div style={{
+                            background: "rgba(255,255,255,0.03)", borderRadius: 28, padding: "32px 16px",
+                            border: "1px solid rgba(255,255,255,0.05)", textAlign: "center"
+                        }}>
+                            <p style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", marginBottom: 8, fontWeight: 800, letterSpacing: "0.15em", textTransform: "uppercase" }}>ИТОГОВЫЙ УРОВЕНЬ</p>
+                            <div style={{
+                                fontSize: 64, fontWeight: 900, color: getHawkinsColor(result.analysis.hawkins_score),
+                                lineHeight: 1, fontFamily: "'Outfit', sans-serif", marginBottom: 8
+                            }}>
                                 {result.analysis.hawkins_score}
                             </div>
-                            <p className="text-sm font-bold text-white/80">{result.analysis.hawkins_level}</p>
+                            <p style={{
+                                fontSize: 20, fontWeight: 800, color: getHawkinsColor(result.analysis.hawkins_score),
+                                textTransform: "uppercase", letterSpacing: "0.1em"
+                            }}>
+                                {result.analysis.hawkins_level}
+                            </p>
                         </div>
 
-                        <div className="bg-white/5 rounded-2xl p-4 text-left border-l-4 border-violet-500">
-                            <p className="text-[10px] uppercase tracking-widest text-white/40 mb-2">Инсайт от ИИ</p>
-                            <p className="text-sm italic leading-relaxed text-white/70">
+                        <div style={{ background: "rgba(139,92,246,0.08)", padding: 16, borderRadius: 20, borderLeft: "4px solid #8B5CF6" }}>
+                            <p style={{ fontSize: 10, color: "#A78BFA", fontWeight: 800, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.1em" }}>ИНСАЙТ ОТ ИИ</p>
+                            <p style={{ fontSize: 14, color: "#fff", lineHeight: 1.6, margin: 0, fontStyle: "italic" }}>
                                 «{result.analysis.ai_analysis}»
                             </p>
                             <div className="mt-3 flex gap-2">
-                                <span className="text-[9px] px-2 py-0.5 rounded-full bg-violet-500/10 text-violet-300 border border-violet-500/20">
+                                <span style={{ fontSize: 9, padding: "2px 8px", borderRadius: 10, background: "rgba(139,92,246,0.1)", color: "#A78BFA", border: "1px solid rgba(139,92,246,0.2)", fontWeight: 800, textTransform: "uppercase" }}>
                                     СФЕРА: {SPHERE_NAMES[result.analysis.sphere] || result.analysis.sphere}
                                 </span>
                             </div>
@@ -96,45 +131,54 @@ export default function ReflectPage() {
                     </div>
                 )}
 
-                <button onClick={() => router.push("/")}
-                    className="w-full py-4 rounded-2xl font-bold shadow-lg shadow-violet-500/20 mb-3"
-                    style={{ background: "linear-gradient(135deg, var(--violet), #6366f1)", color: "#fff" }}>
-                    Продолжить путь
-                </button>
-                <button onClick={() => { setResult(null); setInput(""); setActiveTab("history"); }}
-                    className="w-full py-4 rounded-2xl font-bold border border-white/10 hover:bg-white/5 transition-colors text-white/60">
-                    Смотреть историю
-                </button>
+                <div className="space-y-3">
+                    <button onClick={() => router.push("/")}
+                        style={{
+                            width: "100%", padding: "18px", borderRadius: 20, border: "none",
+                            cursor: "pointer", fontSize: 15, fontWeight: 800, textTransform: "uppercase",
+                            background: "linear-gradient(135deg, #8B5CF6, #6366F1)", color: "#fff",
+                            boxShadow: "0 8px 24px rgba(139,92,246,0.3)",
+                        }}>
+                        Продолжить путь
+                    </button>
+                    <button onClick={() => { setResult(null); setInput(""); setActiveTab("history"); }}
+                        style={{
+                            width: "100%", padding: "16px", borderRadius: 20, border: "1px solid rgba(255,255,255,0.1)",
+                            background: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.4)", fontSize: 14, fontWeight: 700, cursor: "pointer"
+                        }}>
+                        Смотреть историю
+                    </button>
+                </div>
             </motion.div>
             <BottomNav active="reflect" />
         </div>
     );
 
     return (
-        <div className="min-h-screen pb-24">
-            {/* Header matches Diary styling */}
-            <div className="px-4 pt-6 pb-3">
-                <h1 className="text-xl font-bold gradient-text">Рефлексия</h1>
+        <div className="min-h-screen pb-24" style={{ background: "#060818" }}>
+            {/* Header normalized */}
+            <div className="px-4 pt-6 pb-2">
+                <h1 className="text-xl font-bold" style={{ color: "#fff" }}>Рефлексия</h1>
             </div>
 
-            {/* Tab Switcher */}
-            <div className="px-4 mb-3">
+            {/* Tab Switcher normalized */}
+            <div className="px-4 mb-4">
                 <div className="flex p-1 bg-white/5 rounded-2xl border border-white/5">
                     <button
                         onClick={() => setActiveTab("main")}
-                        className={`flex-1 py-2 rounded-xl text-[10px] uppercase tracking-widest font-bold transition-all ${activeTab === "main" ? "bg-white/10 text-white shadow-lg" : "text-white/30 hover:text-white/50"}`}
+                        className={`flex-1 py-2 rounded-xl text-[10px] uppercase tracking-widest font-bold transition-all ${activeTab === "main" ? "bg-white/10 text-white" : "text-white/30 hover:text-white/50"}`}
                     >
-                        Главная
+                        Основные
                     </button>
                     <button
                         onClick={() => setActiveTab("history")}
-                        className={`flex-1 py-2 rounded-xl text-[10px] uppercase tracking-widest font-bold transition-all ${activeTab === "history" ? "bg-white/10 text-white shadow-lg" : "text-white/30 hover:text-white/50"}`}
+                        className={`flex-1 py-2 rounded-xl text-[10px] uppercase tracking-widest font-bold transition-all ${activeTab === "history" ? "bg-white/10 text-white" : "text-white/30 hover:text-white/50"}`}
                     >
                         История
                     </button>
                     <button
                         onClick={() => setActiveTab("graph")}
-                        className={`flex-1 py-2 rounded-xl text-[10px] uppercase tracking-widest font-bold transition-all ${activeTab === "graph" ? "bg-white/10 text-white shadow-lg" : "text-white/30 hover:text-white/50"}`}
+                        className={`flex-1 py-2 rounded-xl text-[10px] uppercase tracking-widest font-bold transition-all ${activeTab === "graph" ? "bg-white/10 text-white" : "text-white/30 hover:text-white/50"}`}
                     >
                         График
                     </button>
@@ -150,9 +194,9 @@ export default function ReflectPage() {
                             <button key={s} onClick={() => setActiveFilter(s)}
                                 className="flex-none px-3 py-1.5 rounded-full text-[10px] font-bold uppercase transition-all whitespace-nowrap"
                                 style={{
-                                    background: activeFilter === s ? "var(--violet)" : "rgba(255,255,255,0.06)",
-                                    color: activeFilter === s ? "#fff" : "var(--text-muted)",
-                                    border: `1px solid ${activeFilter === s ? "var(--violet)" : "var(--border)"}`,
+                                    background: activeFilter === s ? "#8B5CF6" : "rgba(255,255,255,0.06)",
+                                    color: activeFilter === s ? "#fff" : "rgba(255,255,255,0.4)",
+                                    border: `1px solid ${activeFilter === s ? "#8B5CF6" : "rgba(255,255,255,0.05)"}`,
                                 }}>
                                 {s === "all" ? "Все" : SPHERE_NAMES[s]}
                             </button>
@@ -185,29 +229,29 @@ export default function ReflectPage() {
 
             {activeTab === "main" ? (
                 <div className="px-4 flex flex-col items-center">
-                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                        className="glass-strong p-6 w-full max-w-lg rounded-[2rem] border border-white/5 mb-6 shadow-2xl relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-violet-600/5 blur-[50px] -z-1" />
+                    <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }}
+                        className="p-5 w-full max-w-lg rounded-[2rem] border border-white/5 mb-4 relative overflow-hidden"
+                        style={{ background: "rgba(255,255,255,0.02)" }}>
 
-                        <h2 className="text-[12px] font-bold text-white/20 uppercase tracking-[0.2em] mb-4">О чем вы думаете сейчас?</h2>
-
-                        <div className="relative mb-4">
+                        <div className="relative mb-2">
                             <textarea
-                                value={isTranscribing ? "🎤 Обрабатываю голос..." : input}
+                                ref={textareaRef}
+                                value={isTranscribing ? "Транскрибирую в текст..." : input}
                                 onChange={(e) => setInput(e.target.value)}
-                                placeholder="О чем вы думаете сейчас? Расскажите о своих чувствах или инсайтах. ИИ проанализирует глубину..."
-                                className="w-full bg-transparent border-none outline-none text-white/90 text-[16px] leading-relaxed resize-none h-[160px] overflow-y-auto placeholder:text-white/20 font-medium custom-scrollbar"
+                                placeholder="О чем вы думаете сейчас? Расскажите о своих чувствах или инсайтах..."
+                                className="w-full bg-transparent border-none outline-none text-[16px] leading-relaxed resize-none min-h-[160px] overflow-y-auto placeholder:text-white/10 font-medium custom-scrollbar"
+                                style={{ color: "rgba(255,255,255,0.9)" }}
                                 readOnly={isTranscribing}
                             />
 
                             <AnimatePresence>
                                 {isRecording && (
                                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                                        className="absolute inset-0 bg-violet-900/10 backdrop-blur-md rounded-[1.5rem] flex items-center justify-center pointer-events-none border border-violet-500/20">
+                                        className="absolute inset-0 bg-violet-900/10 backdrop-blur-md rounded-2xl flex items-center justify-center pointer-events-none border border-violet-500/20">
                                         <div className="flex gap-2">
                                             {[0, 1, 2, 3, 4].map(i => (
-                                                <motion.div key={i} className="w-1 h-8 bg-violet-400/60 rounded-full"
-                                                    animate={{ scaleY: [1, 2.5, 1], opacity: [0.4, 1, 0.4] }}
+                                                <motion.div key={i} className="w-1.5 h-10 bg-violet-400 rounded-full"
+                                                    animate={{ scaleY: [1, 2.8, 1], opacity: [0.6, 1, 0.6] }}
                                                     transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.12 }} />
                                             ))}
                                         </div>
@@ -216,53 +260,71 @@ export default function ReflectPage() {
                             </AnimatePresence>
                         </div>
 
-                        <div className="flex items-center justify-between mt-3 pt-4 border-t border-white/5 flex-row-reverse">
+                        <div className="flex items-center justify-between pt-4 border-t border-white/5">
+                            <div className="text-left">
+                                <p style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 2 }}>
+                                    {isRecording ? "Запись..." : (isTranscribing ? "Обработка..." : "Голос")}
+                                </p>
+                                <p style={{ fontSize: 9, color: "rgba(255,255,255,0.15)", textTransform: "uppercase" }}>
+                                    {isRecording ? "Слушаю вас" : (isTranscribing ? "Транскрибирую" : "Удерживайте мик")}
+                                </p>
+                            </div>
+
                             <button
                                 onPointerDown={startRecording}
                                 onPointerUp={stopRecording}
                                 onPointerLeave={stopRecording}
-                                className={`group relative p-4 rounded-full transition-all duration-300 ${isRecording ? "bg-red-500 scale-110 shadow-[0_0_20px_rgba(239,68,68,0.4)]" : "bg-white/5 hover:bg-white/10"}`}
+                                style={{
+                                    width: 56, height: 56, borderRadius: 20, cursor: "pointer",
+                                    background: isRecording ? "#EF4444" : "rgba(255,255,255,0.06)",
+                                    border: isRecording ? "none" : "1px solid rgba(255,255,255,0.1)",
+                                    display: "flex", alignItems: "center", justifyContent: "center",
+                                    transition: "all 0.15s", transform: isRecording ? "scale(0.95)" : "scale(1)",
+                                    boxShadow: isRecording ? "0 0 20px rgba(239, 68, 68, 0.3)" : "none"
+                                }}
                             >
-                                <div className={`w-6 h-6 transition-transform duration-300 flex items-center justify-center ${isRecording ? "scale-110" : "group-hover:scale-110"}`}>
-                                    {isRecording ? "🔴" : (
-                                        <MicIcon className="w-full h-full text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]" />
-                                    )}
-                                </div>
-                                {isRecording && (
-                                    <motion.div
-                                        layoutId="pulse"
-                                        className="absolute inset-0 rounded-full border-2 border-red-500"
-                                        animate={{ scale: [1, 1.5], opacity: [0.5, 0] }}
-                                        transition={{ duration: 1.5, repeat: Infinity }}
-                                    />
+                                {isRecording ? "🔴" : (
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="#A78BFA" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: 24, height: 24 }}>
+                                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+                                        <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                                        <line x1="12" y1="19" x2="12" y2="23" />
+                                        <line x1="8" y1="23" x2="16" y2="23" />
+                                    </svg>
                                 )}
                             </button>
-
-                            <div className="text-left">
-                                <p className="text-[10px] text-white/20 uppercase tracking-[0.2em] font-bold mb-1">
-                                    {isRecording ? "Идет запись" : "Голосовой ввод"}
-                                </p>
-                                <p className="text-[9px] text-white/10 uppercase tracking-widest">
-                                    {isRecording ? "Слушаю вас..." : "Зажмите кнопку"}
-                                </p>
-                            </div>
                         </div>
                     </motion.div>
 
-                    <button
-                        onClick={handleSubmit}
-                        disabled={!input.trim() || loading || isRecording}
-                        className="w-full max-w-lg py-5 rounded-[2rem] font-black text-lg transition-all shadow-xl disabled:opacity-30"
-                        style={{
-                            background: input.trim() ? "linear-gradient(135deg, var(--gold), #fbbf24)" : "rgba(255,255,255,0.05)",
-                            color: input.trim() ? "#20124d" : "rgba(255,255,255,0.2)",
-                            transform: loading ? "scale(0.98)" : "scale(1)"
-                        }}>
-                        {loading ? "Анализирую..." : "Сохранить рефлексию +20✦"}
-                    </button>
+                    <div className="w-full max-w-lg space-y-3">
+                        <button
+                            onClick={() => handleSubmit(true)}
+                            disabled={!input.trim() || loading || isRecording}
+                            style={{
+                                width: "100%", padding: "20px", borderRadius: 24, border: "none",
+                                cursor: "pointer", fontSize: 16, fontWeight: 800, textTransform: "uppercase",
+                                background: !input.trim() || loading ? "rgba(255,255,255,0.05)" : "linear-gradient(135deg, #8B5CF6, #6366F1)",
+                                color: !input.trim() || loading ? "rgba(255,255,255,0.2)" : "#fff",
+                                boxShadow: !input.trim() || loading ? "none" : "0 8px 30px rgba(139,92,246,0.3)",
+                                transition: "all 0.2s"
+                            }}>
+                            {loading ? "Анализ..." : "Глубокая рефлексия (ИИ) -15 ✦"}
+                        </button>
 
-                    <p className="mt-6 text-center text-[10px] text-white/20 leading-relaxed uppercase tracking-[0.2em] max-w-[200px]">
-                        Ваша рефлексия поможет ИИ лучше понимать вашу динамику
+                        <button
+                            onClick={() => handleSubmit(false)}
+                            disabled={!input.trim() || loading || isRecording}
+                            style={{
+                                width: "100%", padding: "16px", borderRadius: 20, border: "1px solid rgba(255,255,255,0.1)",
+                                background: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.4)",
+                                cursor: "pointer", fontSize: 14, fontWeight: 700,
+                                transition: "all 0.2s"
+                            }}>
+                            Просто записать в дневник (0 ✦)
+                        </button>
+                    </div>
+
+                    <p style={{ marginTop: 24, padding: "0 40px", textAlign: "center", fontSize: 11, color: "rgba(255,255,255,0.15)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", lineHeight: 1.6 }}>
+                        Глубокая рефлексия с ИИ дает +25 XP и прогресс по картам архетипов
                     </p>
                 </div>
             ) : activeTab === "history" ? (
@@ -273,43 +335,40 @@ export default function ReflectPage() {
                             <CardSkeleton />
                         </div>
                     ) : (history && history.length === 0) ? (
-                        <div className="glass p-8 text-center mx-4">
-                            <p className="text-3xl mb-2 opacity-20">📜</p>
-                            <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-                                Здесь будут ваши прошлые рефлексии
-                            </p>
+                        <div className="p-12 text-center opacity-30">
+                            <p className="text-3xl mb-2">📜</p>
+                            <p className="text-sm">Здесь будут ваши прошлые рефлексии</p>
                         </div>
                     ) : (
                         history?.map((entry: any) => (
                             <motion.div key={entry.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                                className="glass-strong p-5 rounded-[2rem] border border-white/5 relative overflow-hidden">
-                                <div className="absolute top-0 right-0 w-32 h-32 bg-violet-600/5 blur-[40px] -z-1" />
+                                className="p-5 rounded-[2rem] border border-white/5 relative overflow-hidden"
+                                style={{ background: "rgba(255,255,255,0.02)" }}>
 
                                 <div className="flex justify-between items-start mb-3">
                                     <div className="flex flex-col gap-1">
-                                        <span className="text-[10px] text-white/30 font-bold uppercase tracking-widest text-xs">
+                                        <span style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.1em" }}>
                                             {new Date(entry.created_at).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}
                                         </span>
                                         {entry.hawkins_score && (
                                             <div className="flex items-center gap-2">
-                                                <span className="text-xl font-black text-violet-400">{entry.hawkins_score}</span>
-                                                <span className="text-[9px] text-white/20 uppercase font-bold tracking-tighter">Хокинс</span>
+                                                <span style={{ fontSize: 20, fontWeight: 900, color: getHawkinsColor(entry.hawkins_score) }}>{entry.hawkins_score}</span>
                                             </div>
                                         )}
                                     </div>
-                                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-violet-500/10 text-violet-300 border border-violet-500/20 uppercase font-black tracking-tighter">
+                                    <span style={{ fontSize: 9, padding: "2px 8px", borderRadius: 10, background: "rgba(139,92,246,0.1)", color: "#A78BFA", border: "1px solid rgba(139,92,246,0.2)", fontWeight: 800, textTransform: "uppercase" }}>
                                         {SPHERE_NAMES[entry.sphere] || entry.sphere || "Общее"}
                                     </span>
                                 </div>
 
-                                <p className="text-sm text-white/90 italic mb-4 leading-relaxed font-medium">
+                                <p style={{ fontSize: 14, color: "rgba(255,255,255,0.8)", lineHeight: 1.5, fontStyle: "italic", marginBottom: 16 }}>
                                     «{entry.content}»
                                 </p>
 
                                 {entry.ai_analysis && (
-                                    <div className="bg-violet-500/5 rounded-2xl p-4 border border-violet-500/10 backdrop-blur-sm">
-                                        <p className="text-[10px] uppercase tracking-[0.2em] text-violet-300/40 mb-2 font-black">Разбор ИИ</p>
-                                        <p className="text-[13px] text-white/70 leading-relaxed font-medium">
+                                    <div style={{ background: "rgba(255,255,255,0.03)", padding: 14, borderRadius: 16, border: "1px solid rgba(255,255,255,0.05)" }}>
+                                        <p style={{ fontSize: 10, color: "rgba(255,255,255,0.2)", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 6 }}>Разбор ИИ</p>
+                                        <p style={{ fontSize: 13, color: "rgba(255,255,255,0.6)", lineHeight: 1.5 }}>
                                             {entry.ai_analysis}
                                         </p>
                                     </div>
@@ -333,7 +392,6 @@ export default function ReflectPage() {
     );
 }
 
-// Keep startRecording and stopRecording as they are used in ReflectPage
 const useVoiceRecorder = (userId: number | null, setInput: React.Dispatch<React.SetStateAction<string>>) => {
     const [isRecording, setIsRecording] = useState(false);
     const [isTranscribing, setIsTranscribing] = useState(false);
@@ -372,6 +430,7 @@ const useVoiceRecorder = (userId: number | null, setInput: React.Dispatch<React.
             setIsRecording(true);
         } catch (err) {
             console.error("Microphone access error:", err);
+            alert("Нет доступа к микрофону");
         }
     }, [isRecording, isTranscribing, userId, setInput]);
 

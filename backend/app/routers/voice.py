@@ -4,9 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from openai import AsyncOpenAI
 
 from app.database import get_db
-from app.models import VoiceRecord, User
+from app.models import VoiceRecord
 from app.config import settings
-from sqlalchemy import select
 
 router = APIRouter()
 client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)

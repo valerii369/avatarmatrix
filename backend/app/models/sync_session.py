@@ -35,6 +35,18 @@ class SyncSession(Base, TimestampMixin):
     body_anchor: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     first_insight: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
+    # Granular Mental Cells
+    mental_thinking: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    mental_reactions: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    mental_patterns: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    mental_aspirations: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    recurring_symbol: Mapped[Optional[str]] = mapped_column(String(256), nullable=True)
+    
+    # NEW Diagnostic Fields
+    body_signal: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    reaction_pattern: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+    response_delay_info: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
+
     # Full transcript as a list of {role, content}
     session_transcript: Mapped[Optional[list]] = mapped_column(JSONB, nullable=True)
 

@@ -7,6 +7,7 @@ from app.database import get_db
 from app.models import User, CardProgress, AIDiagnosticSession
 from app.models.card_progress import CardStatus
 from app.agents.onboarding_agent import generate_onboarding_response, extract_onboarding_cards
+from app.core.economy import process_referral_reward
 
 router = APIRouter()
 
@@ -31,7 +32,18 @@ async def onboarding_chat(request: OnboardingChatRequest):
     history_dicts = [{"role": msg.role, "content": msg.content} for msg in request.chat_history]
     
     response_text = await generate_onboarding_response(history_dicts)
-    return {"text": response_text}
+    
+    # Detect and strip [[READY]] marker or similar
+    is_ready = "[[READY]]" in response_text or "[READY]" in response_text
+    clean_text = response_text.replace("[[READY]]", "").replace("[READY]", "").strip()
+    
+    # Fallback heuristic: if the AI forgot the marker but indicates readiness to synchronize
+    text_lower = clean_text.lower()
+    if not is_ready:
+        if "синхрониз" in text_lower and ("готов" in text_lower or "можем перейти" in text_lower or "приступим" in text_lower or "приступить" in text_lower or "начнем" in text_lower):
+            is_ready = True
+    
+    return {"text": clean_text, "ready": is_ready}
 
 @router.post("/calculate")
 async def calculate_cards(request: OnboardingCalculateRequest, db: AsyncSession = Depends(get_db)):
@@ -117,6 +129,9 @@ async def calculate_cards(request: OnboardingCalculateRequest, db: AsyncSession 
     # Mark onboarding as done
     user.onboarding_done = True
     db.add(user)
+    
+    # Process referral rewards
+    await process_referral_reward(db, user)
     
     await db.commit()
     return {"success": True, "cards_found": len(ai_recommendations)}

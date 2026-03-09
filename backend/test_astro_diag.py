@@ -1,9 +1,8 @@
 import asyncio
 import traceback
 from datetime import datetime
-from sqlalchemy import select
 from app.database import AsyncSessionLocal
-from app.models import User, NatalChart, CardProgress
+from app.models import User
 from app.core.astrology.natal_chart import calculate_natal_chart, geocode_place, to_dict as chart_to_dict
 from app.core.astrology.aspect_calculator import calculate_aspects, to_dict as aspects_to_dict
 from app.core.astrology.llm_engine import synthesize_sphere_descriptions
@@ -56,7 +55,7 @@ async def test_astro_calc():
             
             print("--- SUCCESS ---")
             
-        except Exception as e:
+        except Exception:
             print(f"\n!!! ERROR !!!\n{traceback.format_exc()}")
 
 if __name__ == "__main__":

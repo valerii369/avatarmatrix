@@ -3,7 +3,8 @@ CardProgress: tracks user's progress on each of the 176 cards.
 Status flow: locked → recommended → in_sync → synced → aligning → aligned
 """
 from typing import Optional
-from sqlalchemy import Integer, ForeignKey, String, Float, Boolean, Enum
+from sqlalchemy import Integer, ForeignKey, String, Float, Boolean
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 import enum
 
@@ -53,3 +54,7 @@ class CardProgress(Base, TimestampMixin):
     # Astrology priority: critical, high, medium, additional
     astro_priority: Mapped[Optional[str]] = mapped_column(String(16), nullable=True)
     astro_reason: Mapped[Optional[str]] = mapped_column(String(256), nullable=True)
+
+    # Level 3 Knowledge Cell (Current Imprint)
+    # Stores {thinking, reactions, patterns, aspirations}
+    mental_data: Mapped[Optional[dict]] = mapped_column(JSONB, default={})

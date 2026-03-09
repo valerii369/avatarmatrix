@@ -8,18 +8,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.database import get_db
-from app.models import CardProgress, SyncSession, User, SphereKnowledge, UserWorldKnowledge
+from app.models import CardProgress, SyncSession, User, SphereKnowledge, UserWorldKnowledge, UserPortrait
 from app.models.card_progress import CardStatus
-from app.agents.master_agent import (
-    run_avatar_layer, 
-    run_mirror_analysis, 
-    is_abstract_response, 
-    evaluate_hawkins
-)
-from app.core.economy import award_energy, spend_energy, hawkins_to_rank, RANK_NAMES, award_xp, process_card_rank_up, XP_VALUES
+from app.agents.sync_agent import run_avatar_layer, get_response_metrics
+from app.agents.analytic_agent import run_mirror_analysis, extract_response_features, update_user_portrait
+from app.core.feature_extractor import FeatureExtractor
+from app.core.economy import spend_energy, hawkins_to_rank, award_xp, process_card_rank_up, XP_VALUES
 from app.core.portrait_builder import build_portrait_for_sphere
 from app.database import AsyncSessionLocal
-from sqlalchemy import func
 
 router = APIRouter()
 
@@ -94,6 +90,31 @@ async def _aggregate_knowledge(user_id: int, sphere: str) -> None:
         except Exception as e:
             import logging
             logging.getLogger(__name__).error(f"Knowledge aggregation error: {e}")
+
+async def _get_portrait_context(db: AsyncSession, user_id: int, sphere: str) -> dict:
+    """Retrieves previous patterns and symbols for the AI prompt."""
+    res = await db.execute(
+        select(UserPortrait).where(UserPortrait.user_id == user_id, UserPortrait.sphere == sphere)
+    )
+    portrait = res.scalar_one_or_none()
+    if not portrait or not portrait.cards_data:
+        return {}
+    
+    # Collect unique symbols and patterns from all cards in this sphere
+    symbols = []
+    patterns = []
+    anchors = []
+    
+    for card in portrait.cards_data:
+        if card.get("recurring_symbol"): symbols.append(card["recurring_symbol"])
+        if card.get("core_pattern"): patterns.append(card["core_pattern"])
+        if card.get("body_anchor"): anchors.append(card["body_anchor"])
+    
+    return {
+        "symbols": ", ".join(list(set(symbols))[:5]),
+        "patterns": ", ".join(list(set(patterns))[:5]),
+        "body_anchors": ", ".join(list(set(anchors))[:5])
+    }
 
 
 class StartSyncRequest(BaseModel):
@@ -192,12 +213,18 @@ async def start_sync(
     await db.commit()
     await db.refresh(session)
 
+    # Get context from portrait
+    portrait_ctx = await _get_portrait_context(db, request.user_id, card.sphere)
+
     # 1. Generate Intro content
     ai_content = await run_avatar_layer(
+        db=db,
+        session_id=session.id,
         layer="intro",
         archetype_id=card.archetype_id,
         sphere=card.sphere,
         previous_messages=[],
+        portrait_context=portrait_ctx
     )
 
     # Store first AI message
@@ -256,7 +283,18 @@ async def process_phase(
         if not transcript:
              transcript.append({"role": "assistant", "content": "..."})
         
-        transcript.append({"role": "user", "content": str(user_response_text)})
+        import datetime
+        user_timestamp = datetime.datetime.utcnow().isoformat()
+        transcript.append({
+            "role": "user", 
+            "content": str(user_response_text),
+            "created_at": user_timestamp
+        })
+        
+        # Track timing in state for delay analysis
+        if "timing" not in state:
+            state["timing"] = {}
+        state["timing"][f"{current_layer}_{sub_phase}_user"] = user_timestamp
 
     # 1. Determine next move
     if current_layer == "intro":
@@ -264,8 +302,16 @@ async def process_phase(
         next_layer = "1"
         should_move_deeper = True
         is_abstract = False
+        metrics = {"length": 0, "has_body": False, "has_objects": False}
     else:
-        is_abstract = is_abstract_response(user_response_text)
+        metrics = get_response_metrics(user_response_text)
+        # Store metrics in session state per phase
+        if "metrics" not in state:
+            state["metrics"] = {}
+        state["metrics"][current_layer] = metrics
+        
+        # Heuristic for abstraction: too short or no body/objects
+        is_abstract = metrics["length"] < 10 or (not metrics["has_body"] and not metrics["has_objects"])
         should_move_deeper = not is_abstract or sub_phase >= 2
     
     if should_move_deeper:
@@ -306,8 +352,11 @@ async def process_phase(
 
     # 2. Handle Mirror Analysis (Final)
     if next_layer == "mirror":
+        # Get context from portrait for continuity in analysis
+        portrait_ctx = await _get_portrait_context(db, request.user_id, session.sphere)
+        
         analysis = await run_mirror_analysis(
-            session.archetype_id, session.sphere, transcript
+            session.archetype_id, session.sphere, transcript, session.phase_data, portrait_context=portrait_ctx
         )
         
         # Save results (Level 3 Knowledge Cell)
@@ -321,6 +370,17 @@ async def process_phase(
         session.first_insight = analysis.get("first_insight")
         session.hawkins_score = analysis.get("hawkins_score", 100)
         session.hawkins_level = analysis.get("hawkins_level", "Страх")
+        
+        # Save mental cells
+        session.mental_thinking = analysis.get("mental_thinking")
+        session.mental_reactions = analysis.get("mental_reactions")
+        session.mental_patterns = analysis.get("mental_patterns")
+        session.mental_aspirations = analysis.get("mental_aspirations")
+        session.recurring_symbol = analysis.get("recurring_symbol")
+        
+        # Save NEW diagnostic fields
+        session.body_signal = analysis.get("body_signal")
+        session.reaction_pattern = analysis.get("reaction_pattern")
         
         # Backward compatibility fields
         session.extracted_core_belief = session.core_pattern
@@ -338,6 +398,15 @@ async def process_phase(
             old_rank = card.rank
             card.status = CardStatus.SYNCED
             card.hawkins_current = session.hawkins_score
+            
+            # Update Knowledge Cell on Card
+            card.mental_data = {
+                "thinking": session.mental_thinking,
+                "reactions": session.mental_reactions,
+                "patterns": session.mental_patterns,
+                "aspirations": session.mental_aspirations
+            }
+
             if session.hawkins_score > card.hawkins_peak:
                 card.hawkins_peak = session.hawkins_score
             
@@ -358,8 +427,10 @@ async def process_phase(
 
         await db.commit()
 
-        # 3. Trigger context aggregation in background
+        # 3. Trigger context aggregation and behavioral analysis in background
         background_tasks.add_task(_aggregate_knowledge, request.user_id, session.sphere)
+        background_tasks.add_task(FeatureExtractor.process_sync_session, db, session.id, request.user_id)
+        background_tasks.add_task(update_user_portrait, db, request.user_id, session.id)
 
         return {
             "session_id": session.id,
@@ -370,19 +441,92 @@ async def process_phase(
         }
 
     try:
+        # Get context from portrait for continuity
+        portrait_ctx = await _get_portrait_context(db, request.user_id, session.sphere)
+
         # 3. Handle next narrative step
         ai_content = await run_avatar_layer(
+            db=db,
+            session_id=session.id,
             layer=next_layer,
             archetype_id=session.archetype_id,
             sphere=session.sphere,
             previous_messages=transcript,
-            is_narrowing=(not should_move_deeper)
+            is_narrowing=(not should_move_deeper),
+            portrait_context=portrait_ctx
         )
 
+        # 4. Log interaction (Self-Learning Layer 1)
+        if current_layer != "intro" and user_response_text:
+            try:
+                # Find the scene that was shown for the phase we just COMPLETED
+                # (current_layer is the layer the user just responded to)
+                set_res = await db.execute(select(SceneSet).where(SceneSet.session_id == session.id))
+                scene_set = set_res.scalar_one_or_none()
+                if scene_set:
+                    layer_int = int(current_layer)
+                    item_res = await db.execute(
+                        select(SceneSetItem).where(
+                            SceneSetItem.scene_set_id == scene_set.id,
+                            SceneSetItem.position == layer_int
+                        )
+                    )
+                    item = item_res.scalar_one_or_none()
+                    if item:
+                        # Calculate timing
+                        # We need the timestamp when the AI message was sent
+                        # state["timing"][f"{current_layer}_{sub_phase}"]
+                        ai_ts_str = state.get("timing", {}).get(f"{current_layer}_{sub_phase}")
+                        reading_time = 0
+                        if ai_ts_str:
+                            ai_ts = datetime.datetime.fromisoformat(ai_ts_str)
+                            user_ts = datetime.datetime.fromisoformat(user_timestamp)
+                            reading_time = (user_ts - ai_ts).total_seconds()
+
+                        from app.agents.sync_agent import get_embedding
+                        resp_emb = await get_embedding(user_response_text)
+
+                        # NEW: Extract structured features for research and future training
+                        extracted_feats = await extract_response_features(
+                            scene_text=item.scene.scene_text if hasattr(item, 'scene') else "",
+                            user_response=user_response_text,
+                            archetype_id=session.archetype_id,
+                            sphere=session.sphere
+                        )
+
+                        interaction = SceneInteraction(
+                            user_id=request.user_id,
+                            session_id=session.id,
+                            scene_id=item.scene_id,
+                            layer_index=layer_int,
+                            reading_time=reading_time,
+                            response_text=user_response_text,
+                            response_embedding=resp_emb,
+                            response_length=len(user_response_text),
+                            extracted_features=extracted_feats
+                        )
+                        db.add(interaction)
+            except Exception as ex:
+                import logging
+                logging.getLogger(__name__).error(f"SceneInteraction logging failed: {ex}")
+
         # Update session state: Ensure context is saved
-        transcript.append({"role": "assistant", "content": str(ai_content)})
+        timestamp = datetime.datetime.utcnow().isoformat()
+        transcript.append({
+            "role": "assistant", 
+            "content": str(ai_content),
+            "created_at": timestamp
+        })
         session.session_transcript = transcript
-        session.phase_data = {"current_layer": next_layer, "sub_phase": new_sub_phase}
+        
+        # Track timing for sub-phases to analyze delays
+        if "timing" not in state:
+            state["timing"] = {}
+        state["timing"][f"{next_layer}_{new_sub_phase}"] = timestamp
+        
+        state["current_layer"] = next_layer
+        state["sub_phase"] = new_sub_phase
+        session.phase_data = state
         session.current_phase = new_phase_val
         
         # Explicitly mark as modified for SQLAlchemy just in case

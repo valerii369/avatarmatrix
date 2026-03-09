@@ -6,8 +6,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.database import init_db
 from app.routers import (
-    auth, calc, cards, sync, session,
-    diary, profile, portrait, game, voice, retro, match, reflect, onboarding_ai
+    auth, profile, sync, reflect, session, onboarding_ai, 
+    diary, cards, calc, game, match, portrait, retro, 
+    voice, visual_diagnostic, payments
 )
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -43,6 +44,8 @@ app.include_router(voice.router,    prefix="/api/voice",    tags=["Voice"])
 app.include_router(retro.router,    prefix="/api/retro",    tags=["Retro"])
 app.include_router(match.router,    prefix="/api/match",    tags=["Match"])
 app.include_router(reflect.router,  prefix="/api/reflect",  tags=["Reflect"])
+app.include_router(visual_diagnostic.router, prefix="/api/visual-diagnostic", tags=["Visual Diagnostic"])
+app.include_router(payments.router, prefix="/api/payments", tags=["Payments"])
 
 
 @app.get("/health", tags=["Meta"])

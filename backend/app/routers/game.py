@@ -4,7 +4,7 @@ from sqlalchemy import select
 
 from app.database import get_db
 from app.models import User, CardProgress, GameState
-from app.core.economy import hawkins_to_rank, RANK_NAMES, get_sphere_awareness, calculate_xp_for_level
+from app.core.economy import get_sphere_awareness, calculate_xp_for_level
 
 router = APIRouter()
 

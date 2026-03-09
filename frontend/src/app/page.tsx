@@ -7,6 +7,7 @@ import { useUserStore, useCardsStore } from "@/lib/store";
 import { authAPI, cardsAPI, profileAPI } from "@/lib/api";
 import { EnergyIcon } from "@/components/EnergyIcon";
 import { Skeleton } from "@/components/Skeleton";
+import ConsciousnessVisualization from "@/components/ConsciousnessVisualization";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -219,35 +220,6 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* ── Score ── */}
-      <div className="px-4 text-center mb-1">
-        <motion.p
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          style={{
-            fontSize: 48,
-            fontWeight: 800,
-            color: "var(--text-primary)",
-            letterSpacing: "-1px",
-            lineHeight: 1,
-            fontFamily: "'Outfit', sans-serif",
-          }}
-        >
-          {formatScore(totalScore)}
-        </motion.p>
-        <p style={{
-          fontSize: 12,
-          fontWeight: 600,
-          color: "rgba(255,255,255,0.3)",
-          textTransform: "uppercase",
-          letterSpacing: "0.1em",
-          marginTop: 4
-        }}>
-          Общий Индекс
-        </p>
-      </div>
-
       {/* ── Rank + Level row ── */}
       <div className="px-4 mb-3">
         <div className="flex items-center justify-between mb-1">
@@ -280,60 +252,38 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* ── Glowing Orb ── */}
-      <div className="flex-1 flex items-center justify-center px-4">
-        <div style={{ position: "relative", width: "85vw", maxWidth: 340, aspectRatio: "1/1" }}>
-          <div style={{
-            position: "absolute",
-            inset: -20,
-            borderRadius: "50%",
-            background: "radial-gradient(circle at 50% 50%, rgba(16,185,129,0.15) 0%, transparent 70%)",
-            filter: "blur(16px)",
-            pointerEvents: "none",
-          }} />
+      {/* ── Score ── */}
+      <div className="px-4 text-center mb-1">
+        <motion.p
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          style={{
+            fontSize: 48,
+            fontWeight: 800,
+            color: "var(--text-primary)",
+            letterSpacing: "-1px",
+            lineHeight: 1,
+            fontFamily: "'Outfit', sans-serif",
+          }}
+        >
+          {formatScore(totalScore)}
+        </motion.p>
+        <p style={{
+          fontSize: 12,
+          fontWeight: 600,
+          color: "rgba(255,255,255,0.3)",
+          textTransform: "uppercase",
+          letterSpacing: "0.1em",
+          marginTop: 4
+        }}>
+          Общий Индекс Сознания
+        </p>
+      </div>
 
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-            style={{
-              position: "absolute", inset: 0,
-              borderRadius: "50%",
-              border: "3px solid transparent",
-              backgroundImage: "conic-gradient(from 0deg, #10B981 0%, #06B6D4 40%, transparent 60%)",
-              WebkitMask: "radial-gradient(circle, transparent calc(100% - 3px), white calc(100% - 3px))",
-              mask: "radial-gradient(circle, transparent calc(100% - 3px), white calc(100% - 3px))",
-            }}
-          />
-
-          <div style={{
-            position: "absolute", inset: 0, borderRadius: "50%",
-            border: "3px solid rgba(255,255,255,0.05)",
-          }} />
-
-          <div style={{
-            position: "absolute", inset: 4, borderRadius: "50%",
-            background: "radial-gradient(circle at 35% 35%, rgba(16,185,129,0.15) 0%, rgba(6,182,212,0.08) 40%, rgba(13,18,38,0.95) 70%, #060818 100%)",
-            backdropFilter: "blur(4px)",
-            border: "1px solid rgba(16,185,129,0.2)",
-            boxShadow: "inset 0 0 60px rgba(6,182,212,0.08), 0 0 40px rgba(16,185,129,0.1)",
-          }} />
-
-          <div style={{
-            position: "absolute", inset: "30%",
-            borderRadius: "50%",
-            background: "radial-gradient(circle at 40% 40%, rgba(6,182,212,0.2) 0%, transparent 70%)",
-            filter: "blur(20px)",
-          }} />
-
-          <motion.div
-            animate={{ scale: [1, 1.03, 1], opacity: [0.4, 0.7, 0.4] }}
-            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-            style={{
-              position: "absolute", inset: -3, borderRadius: "50%",
-              border: "1.5px solid rgba(16,185,129,0.3)",
-            }}
-          />
-        </div>
+      {/* ── Main Visualization ── */}
+      <div className="flex-1 flex flex-col items-center justify-center relative min-h-[400px]">
+        <ConsciousnessVisualization cards={displayCards || []} />
       </div>
 
       <BottomNav active="home" />

@@ -6,6 +6,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str
     BOT_TOKEN: str
     OPENAI_API_KEY: str
+    OWNER_TG_ID: int = 0  # TG ID for 1000 starting energy
     MINI_APP_URL: str = "https://your-app.vercel.app"
     API_BASE_URL: str = "http://localhost:8000"
     ENVIRONMENT: str = "development"

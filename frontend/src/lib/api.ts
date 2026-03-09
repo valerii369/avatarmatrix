@@ -43,6 +43,7 @@ export const calcAPI = {
 export const cardsAPI = {
     getAll: (userId: number) => api.get(`/api/cards/${userId}`),
     getOne: (userId: number, cardId: number) => api.get(`/api/cards/${userId}/card/${cardId}`),
+    getHistory: (userId: number, cardId: number) => api.get(`/api/cards/${userId}/card/${cardId}/history`),
 };
 
 export const syncAPI = {
@@ -70,8 +71,8 @@ export const profileAPI = {
 };
 
 export const reflectAPI = {
-    submit: (userId: number, content: string, isVoice = false) =>
-        api.post("/api/reflect", { user_id: userId, content, is_voice: isVoice }),
+    submit: (userId: number, content: string, useAi = true, isVoice = false) =>
+        api.post("/api/reflect", { user_id: userId, content, use_ai: useAi, is_voice: isVoice }),
 };
 
 export const retro = {
@@ -89,6 +90,20 @@ export const voiceAPI = {
         form.append("audio", audioBlob, `voice.${ext}`);
         return voiceAxios.post("/api/voice", form);
     },
+};
+
+export const visualAPI = {
+    getSet: (userId: number, count = 4) => api.get("/api/visual/set", { params: { user_id: userId, count } }),
+    report: (data: {
+        user_id: number;
+        shown_ids: number[];
+        selected_id: number | null;
+        reaction_time_ms: number;
+        context_tag?: string;
+        interactions?: any[];
+    }) => api.post("/api/visual/report", data),
+    logEvent: (data: { user_id: number; session_id?: number; event_type: string; payload: any }) =>
+        api.post("/api/visual/event", data),
 };
 
 // WebSocket helper

@@ -3,17 +3,13 @@ Portrait Builder: aggregates data from all completed sync sessions
 to build a user's psychological portrait per sphere.
 Used by the recommendation engine to suggest next cards.
 """
-import json
 from collections import Counter
-from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, delete
+from sqlalchemy import select
 
 from app.models import (
-    CardProgress, SyncSession, AlignSession,
-    UserPortrait, Pattern, Connection
+    CardProgress, SyncSession, UserPortrait, Pattern, Connection
 )
-from app.core.economy import hawkins_to_rank
 
 
 async def build_portrait_for_sphere(
@@ -64,6 +60,10 @@ async def build_portrait_for_sphere(
             "body_anchor": session.extracted_body_anchor or "",
             "dominant_emotion": session.extracted_dominant_emotion or "",
             "hawkins": session.hawkins_score,
+            "thinking": session.mental_thinking or "",
+            "reactions": session.mental_reactions or "",
+            "patterns": session.mental_patterns or "",
+            "aspirations": session.mental_aspirations or "",
         }
         cards_data.append(card_entry)
 
@@ -174,7 +174,7 @@ async def get_next_recommended_cards(
             "card_id": card.id,
             "archetype_id": card.archetype_id,
             "sphere": card.sphere,
-            "reason": f"🔴 Критически важная карта (астрология)",
+            "reason": "🔴 Критически важная карта (астрология)",
             "priority": 1,
         })
 

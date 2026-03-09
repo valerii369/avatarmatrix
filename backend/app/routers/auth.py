@@ -5,7 +5,7 @@ import hashlib
 import hmac
 import json
 import secrets
-from urllib.parse import unquote, parse_qsl
+from urllib.parse import parse_qsl
 
 from typing import Optional
 
@@ -17,7 +17,7 @@ from sqlalchemy import select
 from app.database import get_db
 from app.models import User, GameState
 from app.config import settings
-from app.core.economy import update_streak, award_energy, award_xp, XP_VALUES, calculate_xp_for_level
+from app.core.economy import update_streak, calculate_xp_for_level
 
 router = APIRouter()
 
@@ -102,12 +102,17 @@ async def authenticate(
             if referrer:
                 referred_by_id = referrer.id
 
+        # Set initial energy
+        initial_energy = 200
+        if tg_id == settings.OWNER_TG_ID:
+            initial_energy = 1000
+            
         user = User(
             tg_id=tg_id,
             first_name=tg_user.get("first_name", ""),
             last_name=tg_user.get("last_name", ""),
             tg_username=tg_user.get("username", ""),
-            energy=10000,
+            energy=initial_energy,
             streak=0,
             evolution_level=1,
             title="Искатель",

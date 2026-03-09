@@ -7,7 +7,7 @@ import os
 from dataclasses import dataclass
 from typing import Optional
 
-from app.core.astrology.natal_chart import NatalChartData, PlanetPosition
+from app.core.astrology.natal_chart import NatalChartData
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 DATA_DIR = os.path.join(BASE_DIR, "data")

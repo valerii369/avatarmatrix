@@ -319,13 +319,79 @@ function MainProfileView({ game, loadingGame, profile }: any) {
 }
 
 function SettingsView() {
+    const [lang, setLang] = useState("RU");
+    const [sounds, setSounds] = useState(true);
+
+    const toggleLang = () => setLang(l => l === "RU" ? "EN" : "RU");
+    const toggleSounds = () => setSounds(s => !s);
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-            className="px-4"
+            className="px-4 space-y-4"
         >
-            <div className="glass p-6 text-center">
-                <p className="text-sm text-white/50">Настройки будут доступны в ближайшем обновлении</p>
+            <div className="glass p-5 space-y-4">
+                <h3 className="text-sm font-bold text-white/40 uppercase tracking-widest mb-1">Основные</h3>
+
+                <div className="flex items-center justify-between p-3 bg-white/5 rounded-2xl border border-white/10">
+                    <div className="flex flex-col">
+                        <span className="text-sm font-semibold text-white">Язык приложения</span>
+                        <span className="text-[10px] text-white/30">Выберите удобный интерфейс</span>
+                    </div>
+                    <button
+                        onClick={toggleLang}
+                        className="px-4 py-2 bg-white/10 rounded-xl text-xs font-bold text-violet-300 border border-violet-500/20"
+                    >
+                        {lang}
+                    </button>
+                </div>
+
+                <div className="flex items-center justify-between p-3 bg-white/5 rounded-2xl border border-white/10">
+                    <div className="flex flex-col">
+                        <span className="text-sm font-semibold text-white">Звуковые эффекты</span>
+                        <span className="text-[10px] text-white/30">Обратная связь в интерфейсе</span>
+                    </div>
+                    <button
+                        onClick={toggleSounds}
+                        className={`w-12 h-6 rounded-full relative transition-colors ${sounds ? 'bg-emerald-500/40' : 'bg-white/10'}`}
+                    >
+                        <motion.div
+                            animate={{ x: sounds ? 26 : 4 }}
+                            className="absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm"
+                        />
+                    </button>
+                </div>
+            </div>
+
+            <div className="glass p-5 space-y-4">
+                <h3 className="text-sm font-bold text-white/40 uppercase tracking-widest mb-1">Обучение и поддержка</h3>
+
+                <a
+                    href="https://t.me/avatar_matrix_support"
+                    target="_blank"
+                    className="flex items-center justify-between p-3 bg-white/5 rounded-2xl border border-white/10 no-underline"
+                >
+                    <div className="flex items-center gap-3">
+                        <span className="text-lg">💬</span>
+                        <span className="text-sm font-semibold text-white">Связаться с поддержкой</span>
+                    </div>
+                    <span className="text-white/20">→</span>
+                </a>
+
+                <button
+                    onClick={() => alert("Инструкция будет добавлена в AVATAR v1.2")}
+                    className="w-full flex items-center justify-between p-3 bg-white/5 rounded-2xl border border-white/10"
+                >
+                    <div className="flex items-center gap-3">
+                        <span className="text-lg">📖</span>
+                        <span className="text-sm font-semibold text-white">Как это работает?</span>
+                    </div>
+                    <span className="text-white/20">→</span>
+                </button>
+            </div>
+
+            <div className="text-center py-4">
+                <p className="text-[10px] text-white/20 font-bold uppercase tracking-widest">AVATAR v1.1.2 — 2026</p>
             </div>
         </motion.div>
     );

@@ -4,7 +4,7 @@ Economy service: handles ✦ Energy credits, token budgets, and streak logic.
 from datetime import datetime, date
 from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update
+from sqlalchemy import select
 
 from app.models import User, GameState
 from app.config import settings
@@ -50,9 +50,14 @@ TITLES_BY_LEVEL = [
     (96, "Квантовый Архитектор"),
 ]
 
+REFERRAL_BONUS_JOINER = 200
+REFERRAL_BONUS_REFERRER = 100
+REFERRAL_PURCHASE_BONUS = 500
+
 ENERGY_ACTIONS = {
-    # Free energy awards are disabled based on the new tokenomics.
-    # Referral system will go here later: "invite_friend": 30
+    "referral_join": REFERRAL_BONUS_JOINER,
+    "referral_invite": REFERRAL_BONUS_REFERRER,
+    "referral_purchase": REFERRAL_PURCHASE_BONUS,
 }
 
 ENERGY_COSTS = {
@@ -114,12 +119,11 @@ async def process_card_rank_up(db: AsyncSession, user: User, old_rank: int, new_
             total_xp += XP_VALUES["card_rank_bonus_10"]
             
     await award_xp(db, user, total_xp)
-    # await award_energy(db, user, "card_rank_up") # Disabled per new tokenomics
 
 
 async def check_sphere_milestones(db: AsyncSession, user: User, sphere: str):
     """Check if sphere is fully opened or mastered and award XP."""
-    from app.models import CardProgress, GameState
+    from app.models import CardProgress
     
     # Get all 22 cards for this sphere
     result = await db.execute(
@@ -162,19 +166,32 @@ async def check_sphere_milestones(db: AsyncSession, user: User, sphere: str):
         game_state.milestones_awarded = awarded + [milestone_mastered_key]
         db.add(game_state)
 
+
+async def process_referral_reward(db: AsyncSession, user: User):
+    """
+    Award energy to new user and their referrer.
+    Called after onboarding is complete.
+    """
+    # 1. Award Joiner Bonus
+    if user.referred_by:
+        await award_energy(db, user, "referral_join")
+        
+        # 2. Award Referrer Bonus
+        referrer_result = await db.execute(select(User).where(User.id == user.referred_by))
+        referrer = referrer_result.scalar_one_or_none()
+        if referrer:
+            await award_energy(db, referrer, "referral_invite")
+
+
 async def award_energy(db: AsyncSession, user: User, action: str, amount: Optional[int] = None) -> int:
     """Award energy for an action. Returns actual amount awarded."""
     if amount is None:
-        action_val = ENERGY_ACTIONS.get(action)
-        if callable(action_val):
-            amount = action_val(user.streak)
-        else:
-            amount = action_val or 0
+        amount = ENERGY_ACTIONS.get(action, 0)
 
     if amount <= 0:
         return 0
 
-    user.energy += amount
+    user.energy = (user.energy or 0) + amount
     db.add(user)
     return amount
 
@@ -235,15 +252,11 @@ async def update_streak(db: AsyncSession, user: User) -> tuple[int, int, bool]:
 def calculate_xp_for_level(level: int) -> int:
     """
     Calculate total XP needed to reach a level (RPG curve).
-    Piecewise: N < 25 uses exponent 2.3, N >= 25 uses exponent 2.6.
+    Using a smooth, progressively harder curve: XP = 20 * (Level^2.3)
     """
     if level <= 1:
         return 0
-    
-    if level < 25:
-        return int(5 * level ** 2.3)
-    else:
-        return int(5 * level ** 2.6)
+    return int(20 * level ** 2.3)
 
 
 def hawkins_to_rank(hawkins_peak: int) -> int:

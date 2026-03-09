@@ -5,6 +5,15 @@ import { motion } from "framer-motion";
 import { cardsAPI } from "@/lib/api";
 import { useUserStore } from "@/lib/store";
 import { BottomNav } from "@/app/page";
+import StateGraph from "@/components/StateGraph";
+
+type TabKey = "desc" | "shadow" | "light" | "status";
+const TABS: { key: TabKey, label: string }[] = [
+    { key: "desc", label: "Описание" },
+    { key: "shadow", label: "Тень" },
+    { key: "light", label: "Свет" },
+    { key: "status", label: "Статус" }
+];
 
 // ─── Status config ────────────────────────────────────────────────────────────
 
@@ -51,6 +60,7 @@ export default function CardPage() {
     const { userId } = useUserStore();
     const [card, setCard] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState<TabKey>("desc");
 
     useEffect(() => {
         if (!userId || !params.id) return;
@@ -220,68 +230,8 @@ export default function CardPage() {
                     </p>
                 </div>
 
-                {/* Shadow */}
-                <div style={{ marginBottom: 16 }}>
-                    <p style={{
-                        fontSize: 12,
-                        fontWeight: 700,
-                        color: "var(--text-primary)",
-                        margin: "0 0 6px",
-                        letterSpacing: "0.06em",
-                    }}>
-                        ТЕНЬ:
-                    </p>
-                    <p style={{
-                        fontSize: 13,
-                        color: "rgba(255,255,255,0.55)",
-                        lineHeight: 1.55,
-                        margin: 0,
-                    }}>
-                        {card.archetype_shadow || "—"}
-                    </p>
-                </div>
-
-                {/* Light */}
-                <div style={{ marginBottom: 24 }}>
-                    <p style={{
-                        fontSize: 12,
-                        fontWeight: 700,
-                        color: "var(--text-primary)",
-                        margin: "0 0 6px",
-                        letterSpacing: "0.06em",
-                    }}>
-                        СВЕТ:
-                    </p>
-                    <p style={{
-                        fontSize: 13,
-                        color: "rgba(255,255,255,0.55)",
-                        lineHeight: 1.55,
-                        margin: 0,
-                    }}>
-                        {card.archetype_light || "—"}
-                    </p>
-                </div>
-
-                {/* Sphere main question */}
-                {card.sphere_main_question && (
-                    <div style={{
-                        marginBottom: 20,
-                        padding: "12px 14px",
-                        background: `${sphereColor}0d`,
-                        borderRadius: 14,
-                        border: `1px solid ${sphereColor}25`,
-                    }}>
-                        <p style={{ fontSize: 10, fontWeight: 700, color: sphereColor, margin: "0 0 4px", letterSpacing: "0.1em", textTransform: "uppercase" }}>
-                            Вопрос сферы
-                        </p>
-                        <p style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", margin: 0, lineHeight: 1.5, fontStyle: "italic" }}>
-                            {card.sphere_main_question}
-                        </p>
-                    </div>
-                )}
-
                 {/* ── Action buttons ── */}
-                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
 
                     {card.status === "locked" && (
                         <div style={{
@@ -342,6 +292,73 @@ export default function CardPage() {
                         >
                             Сессия выравнивания · 40 ✦
                         </motion.button>
+                    )}
+                </div>
+
+                {/* ── Tabs Navigation ── */}
+                <div style={{ paddingBottom: "20px" }}>
+                    <div
+                        className="grid gap-1 p-1"
+                        style={{
+                            gridTemplateColumns: `repeat(${card.hawkins_peak > 0 ? 4 : 3}, minmax(0, 1fr))`,
+                            background: "rgba(255,255,255,0.04)",
+                            border: "1px solid rgba(255,255,255,0.08)",
+                            borderRadius: 14,
+                        }}
+                    >
+                        {TABS.filter(t => t.key !== 'status' || card.hawkins_peak > 0).map((tab) => (
+                            <button
+                                key={tab.key}
+                                onClick={() => setActiveTab(tab.key)}
+                                style={{
+                                    padding: "8px 4px",
+                                    borderRadius: 10,
+                                    fontSize: 12,
+                                    fontWeight: 600,
+                                    transition: "all 0.2s",
+                                    background: activeTab === tab.key ? "rgba(255,255,255,0.1)" : "transparent",
+                                    color: activeTab === tab.key ? "#fff" : "rgba(255,255,255,0.4)",
+                                    border: "none",
+                                    cursor: "pointer",
+                                    textAlign: "center",
+                                }}
+                            >
+                                {tab.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* ── Tab Content ── */}
+                <div style={{ minHeight: "200px" }}>
+                    {activeTab === "desc" && (
+                        <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }}>
+                            <p style={{ fontSize: 13, color: "rgba(255,255,255,0.7)", lineHeight: 1.6, margin: 0 }}>
+                                {card.archetype_description || "Описание формируется..."}
+                            </p>
+                        </motion.div>
+                    )}
+
+                    {activeTab === "shadow" && (
+                        <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }}>
+                            <p style={{ fontSize: 13, color: "rgba(255,255,255,0.7)", lineHeight: 1.6, margin: 0 }}>
+                                {card.archetype_shadow || "—"}
+                            </p>
+                        </motion.div>
+                    )}
+
+                    {activeTab === "light" && (
+                        <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }}>
+                            <p style={{ fontSize: 13, color: "rgba(255,255,255,0.7)", lineHeight: 1.6, margin: 0 }}>
+                                {card.archetype_light || "—"}
+                            </p>
+                        </motion.div>
+                    )}
+
+                    {activeTab === "status" && card.hawkins_peak > 0 && (
+                        <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }}>
+                            <StateGraph userId={userId!} cardId={card.id} currentScore={card.hawkins_current || 0} />
+                        </motion.div>
                     )}
                 </div>
             </div>

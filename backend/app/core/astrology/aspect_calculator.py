@@ -3,7 +3,6 @@ Aspect calculator for natal charts.
 Calculates major aspects between planets and returns connection data.
 """
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass

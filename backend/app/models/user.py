@@ -1,6 +1,6 @@
 from typing import Optional
 from datetime import datetime
-from sqlalchemy import BigInteger, String, Date, Time, Float, Integer, Boolean, Text, DateTime, func
+from sqlalchemy import BigInteger, String, Float, Integer, Boolean, Text, DateTime
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import Base

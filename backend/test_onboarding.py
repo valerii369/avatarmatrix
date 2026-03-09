@@ -1,6 +1,5 @@
 import asyncio
 import httpx
-import json
 
 from app.database import AsyncSessionLocal
 from app.models import User

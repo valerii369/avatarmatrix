@@ -31,7 +31,7 @@ const SPHERE_EMOJI: Record<string, string> = {
 // Status labels & colors as shown on the screenshot
 const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
     locked: { label: "Не открыта", color: "rgba(255,255,255,0.35)" },
-    recommended: { label: "Рекомендована", color: "#F59E0B" },
+    recommended: { label: "Рекомендация", color: "#F59E0B" },
     in_sync: { label: "Синхронизация", color: "#06B6D4" },
     synced: { label: "Активна", color: "#10B981" },
     aligning: { label: "Активна", color: "#10B981" },
@@ -455,9 +455,15 @@ function MiniCard({ card, onClick }: { card: CardProgress; onClick: () => void }
                         fontWeight: 600,
                         color: cfg.color,
                         lineHeight: 1,
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis"
                     }}>
-                        {cfg.label}
-                        {isAiRecommended && <span className="ml-1 opacity-80 text-amber-500">☼ AI</span>}
+                        {isAiRecommended ? (
+                            <><span className="mr-1 opacity-80 text-amber-500">AI</span>{cfg.label}</>
+                        ) : (
+                            cfg.label
+                        )}
                     </p>
                 </div>
             </div>
