@@ -1,9 +1,9 @@
 import json
 import os
 
-MATRIX_PATH = "backend/data/archetype_sphere_matrix.json"
-BACKUP_PATH = "backend/data/archetype_sphere_matrix.json.bak"
-ARCHETYPES_PATH = "backend/data/archetypes.json"
+MATRIX_PATH = "data/archetype_sphere_matrix.json"
+BACKUP_PATH = "data/archetype_sphere_matrix.json.bak"
+ARCHETYPES_PATH = "data/archetypes.json"
 
 # Detailed Hawkins configuration (based on the provided .md file)
 HAWKINS_LEVELS = [
@@ -194,6 +194,9 @@ def generate():
                 }
             
             matrix[aid][sphere] = {
+                "shadow": core_shadow,
+                "light": core_light,
+                "description": core_desc,
                 "core_shadow": core_shadow,
                 "core_light": core_light,
                 "core_description": core_desc,
