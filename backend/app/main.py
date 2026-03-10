@@ -23,7 +23,13 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://avatar.aiguro.pro",
+        "https://frontend-omega-seven-47.vercel.app",
+        "https://frontend-4smscc1it-valerii369s-projects.vercel.app",
+        "http://localhost:3000",
+        "http://103.74.92.72.nip.io",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

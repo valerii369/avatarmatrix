@@ -73,6 +73,12 @@ export const profileAPI = {
 export const reflectAPI = {
     submit: (userId: number, content: string, useAi = true, isVoice = false) =>
         api.post("/api/reflect", { user_id: userId, content, use_ai: useAi, is_voice: isVoice }),
+    chatStart: (userId: number, content: string) =>
+        api.post("/api/reflect/chat/start", { user_id: userId, content }),
+    chatMessage: (userId: number, sessionId: number, message: string) =>
+        api.post("/api/reflect/chat/message", { user_id: userId, session_id: sessionId, message }),
+    chatFinish: (userId: number, sessionId: number) =>
+        api.post("/api/reflect/chat/finish", { user_id: userId, session_id: sessionId, message: "FINISH" }),
 };
 
 export const retro = {

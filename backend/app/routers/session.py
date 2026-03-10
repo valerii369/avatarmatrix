@@ -223,8 +223,7 @@ async def alignment_session(
 
             except WebSocketDisconnect:
                 break
-            except Exception as e:
-                print(f"Error in alignment loop: {e}")
+            except Exception:
                 await websocket.send_json({"type": "error", "content": "Ошибка обработки сообщения"})
 
     except Exception:
@@ -296,7 +295,7 @@ async def alignment_session(
                     entry_type="session_result"
                 )
                 db.add(diary)
-            except Exception as e:
-                print(f"Diary error: {e}")
+            except Exception:
+                pass
 
         await db.commit()

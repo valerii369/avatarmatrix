@@ -1,6 +1,8 @@
 """
 Master Agent: Facade for modular specialized agents.
 """
+import json
+from app.config import settings
 from .common import (
     client, ARCHETYPES, SPHERES, MATRIX_DATA, HAWKINS_SCALE,
     SPHERE_AGENT_STYLES, LEVEL_METHODOLOGIES, LEVEL_GOALS

@@ -214,7 +214,7 @@ export default function SyncPage() {
                         onClick={() => router.back()}
                         style={{ fontSize: 12, color: "rgba(255,255,255,0.3)", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", background: "none", border: "none", cursor: "pointer", padding: "4px 0" }}
                     >
-                        ← Назад
+                        Назад
                     </button>
                     <span style={{ fontSize: 10, color: "rgba(255,255,255,0.2)", letterSpacing: "0.1em", textTransform: "uppercase" }}>☼ Синхронизация</span>
                     <span style={{ fontSize: 10, color: "rgba(139,92,246,0.5)", fontWeight: 700 }}>
@@ -319,7 +319,7 @@ export default function SyncPage() {
                         {loading && (
                             <div style={{ display: "flex", justifyContent: "flex-start" }}>
                                 <div style={{ padding: "10px 14px", borderRadius: "18px 18px 18px 4px", background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.4)", fontSize: 12 }} className="animate-pulse">
-                                    Анализ ответа...
+                                    Печатаю...
                                 </div>
                             </div>
                         )}

@@ -215,7 +215,7 @@ export default function SessionPage() {
                     color: "#fff", border: "1px solid rgba(139,92,246,0.3)", fontSize: 14, fontWeight: 700
                 }}
             >
-                ← Назад
+                Назад
             </button>
         </div>
     );
@@ -245,7 +245,7 @@ export default function SessionPage() {
                         onClick={closeSession}
                         style={{ fontSize: 12, color: "rgba(255,255,255,0.3)", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", background: "none", border: "none", cursor: "pointer", padding: "4px 0" }}
                     >
-                        ← Выйти
+                        Выйти
                     </button>
                     <div style={{ textAlign: "center" }}>
                         <p style={{ fontSize: 10, color: "rgba(255,255,255,0.2)", letterSpacing: "0.1em", textTransform: "uppercase", margin: 0 }}>☼ Выравнивание</p>

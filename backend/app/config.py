@@ -27,7 +27,8 @@ class Settings(BaseSettings):
     # Energy costs
     ENERGY_COST_SYNC: int = 35
     ENERGY_COST_ALIGNMENT: int = 20
-    ENERGY_COST_REFLECTION: int = 15
+    ENERGY_COST_REFLECTION_AI: int = 20
+    ENERGY_COST_REFLECTION_SIMPLE: int = 5
     ENERGY_COST_DEEP_SESSION: int = 50
 
     class Config:

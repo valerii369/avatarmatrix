@@ -24,7 +24,7 @@ XP_VALUES = {
 
 # XP per rank up (from N to N+1) - 10 level curve
 CARD_RANK_UP_XP = {
-    1: 20, 2: 50, 3: 100, 4: 200, 5: 350, 6: 500, 7: 700, 8: 900, 9: 1200
+    1: 40, 2: 80, 3: 150, 4: 250, 5: 400, 6: 600, 7: 850, 8: 1100, 9: 1500
 }
 
 TITLES_BY_LEVEL = [
@@ -52,7 +52,7 @@ TITLES_BY_LEVEL = [
 
 REFERRAL_BONUS_JOINER = 200
 REFERRAL_BONUS_REFERRER = 100
-REFERRAL_PURCHASE_BONUS = 500
+REFERRAL_PURCHASE_BONUS = 100
 
 ENERGY_ACTIONS = {
     "referral_join": REFERRAL_BONUS_JOINER,
@@ -63,7 +63,8 @@ ENERGY_ACTIONS = {
 ENERGY_COSTS = {
     "sync": settings.ENERGY_COST_SYNC,
     "alignment": settings.ENERGY_COST_ALIGNMENT,
-    "reflection": settings.ENERGY_COST_REFLECTION,
+    "reflection_ai": settings.ENERGY_COST_REFLECTION_AI,
+    "reflection_simple": settings.ENERGY_COST_REFLECTION_SIMPLE,
     "deep_session": settings.ENERGY_COST_DEEP_SESSION,
 }
 
@@ -256,7 +257,7 @@ def calculate_xp_for_level(level: int) -> int:
     """
     if level <= 1:
         return 0
-    return int(20 * level ** 2.3)
+    return int(30 * level ** 2.3)
 
 
 def hawkins_to_rank(hawkins_peak: int) -> int:

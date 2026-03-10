@@ -7,6 +7,8 @@ __pycache__/
 venv/
 env/
 .env
+.env.local
+.env.*.local
 *.egg-info/
 .eggs/
 *.egg
@@ -14,20 +16,28 @@ dist/
 build/
 
 # Alembic
-migrations/versions/*.py
+# Note: Migrations are usually kept, but we exclude the sqlite db
+*.db
+*.sqlite
+*.sqlite3
 
 # Node / Next.js
-frontend/node_modules/
-frontend/.next/
-frontend/out/
-frontend/.vercel
+node_modules/
+.next/
+out/
+.vercel
+*.tsbuildinfo
 
-# IDE
+# Databases
+dump.rdb
+
+# IDE / OS
 .idea/
 .vscode/
 *.swp
 *.swo
 .DS_Store
+Thumbs.db
 
 # Misc
 *.log
@@ -38,6 +48,7 @@ frontend/.vercel
 htmlcov/
 .coverage
 
-# Secrets
+# Secrets / Certs
 *.pem
 *.key
+.ssh/

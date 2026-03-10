@@ -129,7 +129,12 @@ async def reset_profile_by_tg(tg_id: int, db: AsyncSession = Depends(get_db)):
     user.onboarding_done = False
     
     # Clear user progression fields
-    user.energy = 10000
+    initial_energy = 200
+    from app.config import settings
+    if user.tg_id == settings.OWNER_TG_ID:
+        initial_energy = 1000
+        
+    user.energy = initial_energy
     user.streak = 0
     user.evolution_level = 1
     user.xp = 0

@@ -134,6 +134,11 @@ async def authenticate(
         if new_photo and user.photo_url != new_photo:
             user.photo_url = new_photo
             db.add(user)
+        
+        # Ensure referral code exists for legacy users
+        if not user.referral_code:
+            user.referral_code = generate_referral_code()
+            db.add(user)
 
     # Update streak on login
     new_streak, bonus_xp, is_new_day = await update_streak(db, user)

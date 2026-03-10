@@ -33,8 +33,18 @@ def build_router(bot: Bot) -> Dispatcher:
 
     # ── /start ──────────────────────────────────────────────────────────────
     @dp.message(CommandStart())
-    async def cmd_start(message: Message):
-        """Handle /start command — show Mini App button."""
+    async def cmd_start(message: Message, command: CommandStart):
+        """Handle /start command — show Mini App button with referral param if exists."""
+        start_param = command.args
+        app_url = MINI_APP_URL
+        if start_param:
+            # Pass the referral code to the Mini App via startapp parameter
+            app_url = f"{MINI_APP_URL}?startapp={start_param}"
+
+        keyboard = InlineKeyboardMarkup(inline_keyboard=[[
+            InlineKeyboardButton(text="🚀 Открыть AVATAR", web_app=WebAppInfo(url=app_url))
+        ]])
+
         await message.answer(
             "✨ <b>AVATAR</b> — платформа эволюции сознания\n\n"
             "Открой свою карту из 176 архетипов и начни путь трансформации через 8 сфер жизни.\n\n"
@@ -46,7 +56,7 @@ def build_router(bot: Bot) -> Dispatcher:
             "• Шкала Хокинса от 20 до 1000\n"
             "• Геймификация: ✦ Энергия, XP, ранги\n\n"
             "Нажми кнопку ниже чтобы начать 👇",
-            reply_markup=_open_btn("🚀 Открыть AVATAR"),
+            reply_markup=keyboard,
             parse_mode="HTML",
         )
 

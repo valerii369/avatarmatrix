@@ -69,9 +69,6 @@ export default function CardPage() {
                 setCard(r.data);
                 setLoading(false);
                 // Removed auto-sync if recommended to let user see card details first
-                // if (r.data.status === "recommended") {
-                //     router.push(`/sync/${r.data.id}`);
-                // }
             })
             .catch(() => setLoading(false));
     }, [userId, params.id, router]);
@@ -169,7 +166,7 @@ export default function CardPage() {
             <div style={{ padding: "0 16px" }}>
                 <div style={{
                     width: "100%",
-                    aspectRatio: "4/5",
+                    aspectRatio: "1/1",
                     borderRadius: 20,
                     overflow: "hidden",
                     position: "relative",
@@ -266,7 +263,7 @@ export default function CardPage() {
                                 textTransform: "uppercase",
                             }}
                         >
-                            {isResuming ? "▶ Продолжить синхронизацию" : `Синхронизация · 25 ✦`}
+                            {isResuming ? "Продолжить синхронизацию" : `Синхронизация · 25 ✦`}
                         </motion.button>
                     )}
 

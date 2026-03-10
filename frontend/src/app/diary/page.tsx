@@ -15,11 +15,12 @@ const SPHERE_NAMES: Record<string, string> = {
 export default function DiaryPage() {
     const { userId } = useUserStore();
     const [activeFilter, setActiveFilter] = useState("all");
+    const [statusFilter, setStatusFilter] = useState("plan");
 
     const SPHERES = ["all", "IDENTITY", "MONEY", "RELATIONS", "FAMILY", "MISSION", "HEALTH", "SOCIETY", "SPIRIT"];
 
     // SWR Fetcher
-    const { data: entries, isValidating: loading } = useSWR(
+    const { data: rawEntries, isValidating: loading } = useSWR(
         userId ? ["diary", userId, activeFilter] : null,
         () => diaryAPI.getAll(userId!, activeFilter === "all" ? undefined : activeFilter, undefined, "reflection").then(res => res.data),
         {
@@ -27,6 +28,13 @@ export default function DiaryPage() {
             dedupingInterval: 5000,
         }
     );
+
+    // Client-side filtering based on status
+    const entries = rawEntries?.filter((entry: any) => {
+        if (statusFilter === "done") return entry.integration_done;
+        if (statusFilter === "deferred") return false; // Placeholder for now
+        return !entry.integration_done; // "plan"
+    });
 
     const handleIntegration = async (entryId: number, done: boolean) => {
         if (!userId) return;
@@ -45,17 +53,53 @@ export default function DiaryPage() {
                 <h1 className="text-xl font-bold gradient-text">Дневник</h1>
             </div>
 
+            {/* Status tabs (styled like cards page) */}
+            <div className="px-4 mb-4">
+                <div
+                    className="grid grid-cols-3 gap-1 p-1"
+                    style={{
+                        background: "rgba(255,255,255,0.04)",
+                        border: "1px solid var(--border)",
+                        borderRadius: 14,
+                    }}
+                >
+                    {[
+                        { key: "plan", label: "План" },
+                        { key: "deferred", label: "Отложенные" },
+                        { key: "done", label: "Завершенные" },
+                    ].map((t) => (
+                        <button
+                            key={t.key}
+                            onClick={() => setStatusFilter(t.key)}
+                            style={{
+                                padding: "8px 4px",
+                                borderRadius: 10,
+                                fontSize: 11,
+                                fontWeight: 500,
+                                transition: "all 0.2s",
+                                background: statusFilter === t.key ? "rgba(255,255,255,0.1)" : "transparent",
+                                color: statusFilter === t.key ? "var(--text-primary)" : "var(--text-muted)",
+                                border: "none",
+                                cursor: "pointer",
+                            }}
+                        >
+                            {t.label}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
             {/* Sphere filter */}
-            <div className="flex gap-2 px-4 overflow-x-auto pb-3" style={{ scrollbarWidth: "none" }}>
+            <div className="flex gap-2 px-4 overflow-x-auto pb-4" style={{ scrollbarWidth: "none" }}>
                 {SPHERES.map(s => (
                     <button key={s} onClick={() => setActiveFilter(s)}
-                        className="flex-none px-3 py-1.5 rounded-full text-xs transition-all whitespace-nowrap"
+                        className="flex-none px-3 py-1.5 rounded-full text-[11px] font-medium transition-all whitespace-nowrap"
                         style={{
-                            background: activeFilter === s ? "var(--violet)" : "rgba(255,255,255,0.06)",
-                            color: activeFilter === s ? "#fff" : "var(--text-muted)",
-                            border: `1px solid ${activeFilter === s ? "var(--violet)" : "var(--border)"}`,
+                            background: activeFilter === s ? "rgba(139,92,246,0.1)" : "transparent",
+                            color: activeFilter === s ? "var(--violet-l)" : "var(--text-muted)",
+                            border: `1px solid ${activeFilter === s ? "var(--violet-l)" : "var(--border)"}`,
                         }}>
-                        {s === "all" ? "Все" : SPHERE_NAMES[s]}
+                        {s === "all" ? "Все сферы" : SPHERE_NAMES[s]}
                     </button>
                 ))}
             </div>

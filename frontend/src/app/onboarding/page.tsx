@@ -229,14 +229,14 @@ function AstroFlow({ onBack }: { onBack: () => void }) {
                     color: "#fff"
                 }}
             >
-                <span className="relative z-10">{loading ? "Синхронизация..." : step < steps.length - 1 ? "Продолжить →" : "Построить Аватара ✨"}</span>
+                <span className="relative z-10">{loading ? "Синхронизация..." : step < steps.length - 1 ? "Продолжить" : "Построить Аватара ✨"}</span>
                 {!(currentStep.id === "place" && !form.birth_place) && !loading && (
                     <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500 skew-x-12" />
                 )}
             </button>
 
             <button onClick={() => step > 0 ? setStep(s => s - 1) : onBack()} className="w-full mt-4 text-[10px] font-bold text-white/20 uppercase tracking-widest hover:text-white/40 transition-colors">
-                ← Назад
+                Назад
             </button>
         </motion.div>
     );
@@ -377,7 +377,7 @@ function AIFlow({ onBack }: { onBack: () => void }) {
                 {loading && (
                     <div style={{ display: "flex", justifyContent: "flex-start" }}>
                         <div style={{ padding: "10px 14px", borderRadius: "18px 18px 18px 4px", background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.4)", fontSize: 12 }} className="animate-pulse">
-                            Анализ ответа...
+                            Печатаю...
                         </div>
                     </div>
                 )}

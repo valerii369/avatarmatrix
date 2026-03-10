@@ -398,8 +398,8 @@ function SettingsView() {
 }
 
 function ReferralView({ referralCode }: { referralCode: string }) {
-    const botUsername = "avatarMatrixBot"; // Fallback if not specified
-    const refLink = `https://t.me/${botUsername}?startapp=${referralCode}`;
+    const botUsername = "avatarmatrixtest_bot"; // Updated to match current bot
+    const refLink = `https://t.me/${botUsername}?start=${referralCode}`;
 
     const handleCopy = () => {
         navigator.clipboard.writeText(refLink);
@@ -416,14 +416,14 @@ function ReferralView({ referralCode }: { referralCode: string }) {
                 <div className="text-center">
                     <h3 className="text-lg font-bold text-white mb-1">Реферальная программа</h3>
                     <p className="text-xs text-white/60 mb-4">
-                        Приглашайте друзей и получайте ✦ Энергию за их первый Sync или покупку пакета
+                        Приглашайте друзей и получайте ✦ Энергию после того, как они пройдут диагностику (Onboarding)
                     </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 mb-2">
                     <div className="bg-white/5 rounded-2xl p-3 border border-white/10 text-center">
                         <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider mb-1">Ваш бонус</p>
-                        <p className="text-lg font-bold text-amber-400">+500 ✦</p>
+                        <p className="text-lg font-bold text-amber-400">+100 ✦</p>
                     </div>
                     <div className="bg-white/5 rounded-2xl p-3 border border-white/10 text-center">
                         <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider mb-1">Их бонус</p>
