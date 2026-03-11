@@ -213,6 +213,36 @@ async def start_sync(
     if not can_spend:
         raise HTTPException(status_code=402, detail="Недостаточно ✦ Энергии")
 
+    # Pre-fetch 5 scenes to eliminate DB lookups during the session
+    from app.models.text_diagnostics import TextScene
+    import random
+    from app.agents.common import SPHERES
+    
+    sphere_id = 1
+    for s in SPHERES.values():
+        if s.get('key') == card.sphere:
+            sphere_id = s.get('id', 1)
+            break
+            
+    scene_res = await db.execute(
+        select(TextScene).where(TextScene.sphere_id == sphere_id, TextScene.is_active == True)
+    )
+    scenes = scene_res.scalars().all()
+    if len(scenes) < 5:
+        scene_res = await db.execute(select(TextScene).where(TextScene.is_active == True).limit(20))
+        scenes = scene_res.scalars().all()
+    
+    selected_scenes = random.sample(scenes, min(len(scenes), 5)) if scenes else []
+    
+    scenes_data = {}
+    for i, sc in enumerate(selected_scenes):
+        layer_num = str(i + 1)
+        scenes_data[layer_num] = {
+            "id": sc.id, 
+            "text": sc.scene_text,
+            "meta_data": sc.meta_data
+        }
+
     # Create new sync session
     session = SyncSession(
         user_id=request.user_id,
@@ -220,7 +250,7 @@ async def start_sync(
         archetype_id=card.archetype_id,
         sphere=card.sphere,
         current_phase=0, # Intro
-        phase_data={"current_layer": "intro", "sub_phase": 0},
+        phase_data={"current_layer": "intro", "sub_phase": 0, "scenes": scenes_data},
         session_transcript=[]
     )
     db.add(session)
@@ -237,12 +267,11 @@ async def start_sync(
 
     # 1. Generate Intro content
     ai_content = await run_avatar_layer(
-        db=db,
-        session_id=session.id,
         layer="intro",
         archetype_id=card.archetype_id,
         sphere=card.sphere,
         previous_messages=[],
+        scene_text=None,
         portrait_context=portrait_ctx
     )
 
@@ -369,6 +398,13 @@ async def process_phase(
         new_sub_phase = sub_phase + 1
         new_phase_val = session.current_phase 
 
+    # FAST-FAIL: Skip LLM completely if the user response is too abstract
+    is_fast_fail = False
+    ai_content = ""
+    if not should_move_deeper and current_layer != "intro" and next_layer != "mirror":
+        is_fast_fail = True
+        ai_content = "Я слышу твои мысли. Но вернись в пространство. Что прямо сейчас происходит с твоим телом в ответ на это? Опиши ощущения или детали вокруг."
+
     # 2. Handle Mirror Analysis (Final)
     if next_layer == "mirror":
         # Get context from portrait for continuity in analysis
@@ -468,35 +504,28 @@ async def process_phase(
         portrait_ctx = await _get_portrait_context(db, request.user_id, session.sphere)
 
         # 3. Handle next narrative step
-        ai_content = await run_avatar_layer(
-            db=db,
-            session_id=session.id,
-            layer=next_layer,
-            archetype_id=session.archetype_id,
-            sphere=session.sphere,
-            previous_messages=transcript,
-            is_narrowing=(not should_move_deeper),
-            portrait_context=portrait_ctx
-        )
+        if not is_fast_fail and next_layer != "mirror":
+            scene_text = state.get("scenes", {}).get(next_layer, {}).get("text")
+            ai_content = await run_avatar_layer(
+                layer=next_layer,
+                archetype_id=session.archetype_id,
+                sphere=session.sphere,
+                previous_messages=transcript,
+                scene_text=scene_text,
+                is_narrowing=(not should_move_deeper),
+                portrait_context=portrait_ctx
+            )
 
         # 4. Log interaction (Self-Learning Layer 1)
         if current_layer != "intro" and user_response_text:
             try:
                 # Find the scene that was shown for the phase we just COMPLETED
-                # (current_layer is the layer the user just responded to)
-                set_res = await db.execute(select(SceneSet).where(SceneSet.session_id == session.id))
-                scene_set = set_res.scalar_one_or_none()
-                if scene_set:
-                    layer_int = int(current_layer)
-                    item_res = await db.execute(
-                        select(SceneSetItem).where(
-                            SceneSetItem.scene_set_id == scene_set.id,
-                            SceneSetItem.position == layer_int
-                        )
-                    )
-                    item = item_res.scalar_one_or_none()
-                    if item:
-                        # Calculate timing
+                scene_id = state.get("scenes", {}).get(current_layer, {}).get("id")
+                scene_text = state.get("scenes", {}).get(current_layer, {}).get("text")
+                layer_int = int(current_layer)
+                
+                if scene_id:
+                    # Calculate timing
                         # We need the timestamp when the AI message was sent
                         # state["timing"][f"{current_layer}_{sub_phase}"]
                         ai_ts_str = state.get("timing", {}).get(f"{current_layer}_{sub_phase}")
@@ -511,7 +540,7 @@ async def process_phase(
 
                         # NEW: Extract structured features for research and future training
                         extracted_feats = await extract_response_features(
-                            scene_text=item.scene.scene_text if hasattr(item, 'scene') else "",
+                            scene_text=scene_text or "",
                             user_response=user_response_text,
                             archetype_id=session.archetype_id,
                             sphere=session.sphere
@@ -520,7 +549,7 @@ async def process_phase(
                         interaction = SceneInteraction(
                             user_id=request.user_id,
                             session_id=session.id,
-                            scene_id=item.scene_id,
+                            scene_id=scene_id,
                             layer_index=layer_int,
                             reading_time=reading_time,
                             response_text=user_response_text,

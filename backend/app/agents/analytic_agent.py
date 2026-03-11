@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update
 from app.models.portrait import UserPortrait, Pattern
 from app.models.sync_session import SyncSession
+from app.agents.sync_agent import build_avatar_prompt
 
 async def run_mirror_analysis(
     archetype_id: int,
@@ -15,17 +16,34 @@ async def run_mirror_analysis(
     portrait_context: dict = None
 ) -> dict:
     """Run the final analytical 'Mirror' call."""
-    prompt = build_avatar_prompt("mirror", archetype_id, sphere, {}, False, None, portrait_context)
+    system_prompt, layer_prompt = build_avatar_prompt("mirror", archetype_id, sphere, {}, False, None, portrait_context)
     
-    messages = [{"role": "system", "content": prompt}]
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "system", "content": layer_prompt}
+    ]
     # Format transcript for the analyst
     transcript_text = "\n".join([f"{m['role']}: {m['content']}" for m in session_transcript])
     
     user_content = f"Транскрипт сессии:\n{transcript_text}"
-    if phase_data and "metrics" in phase_data:
-        metrics_json = json.dumps(phase_data["metrics"], ensure_ascii=False, indent=2)
-        user_content += f"\n\nМЕТРИКИ СЕССИИ (длина, тело, объекты):\n{metrics_json}"
+    if phase_data:
+        if "metrics" in phase_data:
+            metrics_json = json.dumps(phase_data["metrics"], ensure_ascii=False, indent=2)
+            user_content += f"\n\nМЕТРИКИ СЕССИИ (длина, тело, объекты):\n{metrics_json}"
+            
+        # Hook up the new Projective Scene metadata
+        scenes_data = phase_data.get("scenes", {})
+        meta_blocks = []
+        for layer, scene_info in scenes_data.items():
+            meta = scene_info.get("meta_data")
+            if meta:
+                projections = json.dumps(meta.get("projection_dictionary", []), ensure_ascii=False, indent=2)
+                focus = json.dumps(meta.get("diagnostic_focus", {}), ensure_ascii=False, indent=2)
+                meta_blocks.append(f"СЛОЙ {layer} - Словарь проекций:\n{projections}\nДиагностический фокус:\n{focus}")
         
+        if meta_blocks:
+            user_content += "\n\nМЕТАДАННЫЕ ПРОЕКТИВНЫХ СЦЕН (Для экспертного анализа):\n" + "\n---\n".join(meta_blocks)
+
     messages.append({"role": "user", "content": user_content})
 
     response = await client.chat.completions.create(
