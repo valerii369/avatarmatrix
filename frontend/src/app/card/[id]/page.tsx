@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { cardsAPI } from "@/lib/api";
 import { useUserStore } from "@/lib/store";
 import { BottomNav } from "@/app/page";
-import StateGraph from "@/components/StateGraph";
+import ArchetypeChart from "@/components/ArchetypeChart";
 
 type TabKey = "desc" | "shadow" | "light" | "status";
 const TABS: { key: TabKey, label: string }[] = [
@@ -354,7 +354,7 @@ export default function CardPage() {
 
                     {activeTab === "status" && card.hawkins_peak > 0 && (
                         <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }}>
-                            <StateGraph userId={userId!} cardId={card.id} currentScore={card.hawkins_current || 0} />
+                            <ArchetypeChart userId={userId!} cardId={card.id} />
                         </motion.div>
                     )}
                 </div>

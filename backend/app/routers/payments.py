@@ -20,6 +20,7 @@ OFFERS = [
     PaymentOffer(id="pack_1000", name="1000 ✦ Энергии", energy=1000, price_usd=1.9, stars=100),
     PaymentOffer(id="pack_2500", name="2500 ✦ Энергии", energy=2500, price_usd=3.9, stars=250),
     PaymentOffer(id="pack_5000", name="5000 ✦ Энергии", energy=5000, price_usd=6.9, stars=500),
+    PaymentOffer(id="pack_premium", name="AVATAR Premium", energy=0, price_usd=6.0, stars=330),
 ]
 
 class InvoiceRequest(BaseModel):
@@ -48,18 +49,22 @@ async def create_invoice(request: InvoiceRequest, db: AsyncSession = Depends(get
 
     payload = f"{user.id}:{offer.id}"
     
+    description = f"Пополнение баланса на {offer.energy} ✦ Энергии" if offer.energy > 0 else "Активация Premium доступа ко всем функциям"
+    
     async with httpx.AsyncClient() as client:
         url = f"https://api.telegram.org/bot{settings.BOT_TOKEN}/createInvoiceLink"
-        resp = await client.post(url, json={
+        req_data = {
             "title": offer.name,
-            "description": f"Пополнение баланса на {offer.energy} ✦ Энергии",
+            "description": description,
             "payload": payload,
             "currency": "XTR",
             "prices": [{"label": "Цена", "amount": offer.stars}]
-        })
+        }
+        resp = await client.post(url, json=req_data)
         
         data = resp.json()
         if not data.get("ok"):
+            print(f"TG PAYMENT ERROR: {data}")  # Basic log to console/journal
             raise HTTPException(status_code=500, detail=f"TG Error: {data.get('description')}")
             
         return {"invoice_link": data["result"]}

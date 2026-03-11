@@ -1,6 +1,7 @@
 import json
 from typing import Optional
 from .common import client, settings, ARCHETYPES, SPHERES, MATRIX_DATA
+from .sync_agent import build_avatar_prompt
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update
 from app.models.portrait import UserPortrait, Pattern
@@ -44,6 +45,10 @@ async def run_mirror_analysis(
             "shadow_active": "Не определен",
             "body_anchor": "Не определен",
             "first_insight": "Не определен",
+            "mental_thinking": [],
+            "mental_reactions": [],
+            "mental_patterns": [],
+            "mental_aspirations": [],
             "hawkins_score": 100,
             "hawkins_level": "Страх"
         }

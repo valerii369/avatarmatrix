@@ -235,7 +235,6 @@ def build_router(bot: Bot) -> Dispatcher:
 
     # ── Payments ─────────────────────────────────────────────────────────────
     from aiogram.types import PreCheckoutQuery, SuccessfulPayment
-    from aiogram import F
 
     @dp.pre_checkout_query()
     async def process_pre_checkout_query(pre_checkout_query: PreCheckoutQuery):

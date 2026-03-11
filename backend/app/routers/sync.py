@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.database import get_db
-from app.models import CardProgress, SyncSession, User, SphereKnowledge, UserWorldKnowledge, UserPortrait
+from app.models import CardProgress, SyncSession, User, SphereKnowledge, UserWorldKnowledge, UserPortrait, SceneSet, SceneSetItem, SceneInteraction
 from app.models.card_progress import CardStatus
 from app.agents.sync_agent import run_avatar_layer, get_response_metrics
 from app.agents.analytic_agent import run_mirror_analysis, extract_response_features, update_user_portrait
@@ -19,6 +19,25 @@ from app.database import AsyncSessionLocal
 
 router = APIRouter()
 
+
+async def _background_sync_processing(user_id: int, session_id: int, sphere: str) -> None:
+    """Wrapper for background tasks to use a fresh session."""
+    async with AsyncSessionLocal() as session:
+        try:
+            # 1. Aggregate knowledge
+            await _aggregate_knowledge(user_id, sphere) # This function already manages its own session
+            
+            # 2. Extract features
+            await FeatureExtractor.process_sync_session(session, session_id, user_id)
+            
+            # 3. Update portrait
+            await update_user_portrait(session, user_id, session_id)
+            
+            await session.commit()
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).error(f"Background Sync Processing Failed: {e}")
+            await session.rollback()
 
 async def _aggregate_knowledge(user_id: int, sphere: str) -> None:
     """Background task: Aggregate Level 3 -> Level 2 -> Level 1."""
@@ -371,11 +390,17 @@ async def process_phase(
         session.hawkins_score = analysis.get("hawkins_score", 100)
         session.hawkins_level = analysis.get("hawkins_level", "Страх")
         
+        # Helper to join lists/strings
+        def _to_str(val):
+            if isinstance(val, list):
+                return ", ".join(str(v) for v in val)
+            return str(val) if val is not None else None
+
         # Save mental cells
-        session.mental_thinking = analysis.get("mental_thinking")
-        session.mental_reactions = analysis.get("mental_reactions")
-        session.mental_patterns = analysis.get("mental_patterns")
-        session.mental_aspirations = analysis.get("mental_aspirations")
+        session.mental_thinking = _to_str(analysis.get("mental_thinking"))
+        session.mental_reactions = _to_str(analysis.get("mental_reactions"))
+        session.mental_patterns = _to_str(analysis.get("mental_patterns"))
+        session.mental_aspirations = _to_str(analysis.get("mental_aspirations"))
         session.recurring_symbol = analysis.get("recurring_symbol")
         
         # Save NEW diagnostic fields
@@ -428,9 +453,7 @@ async def process_phase(
         await db.commit()
 
         # 3. Trigger context aggregation and behavioral analysis in background
-        background_tasks.add_task(_aggregate_knowledge, request.user_id, session.sphere)
-        background_tasks.add_task(FeatureExtractor.process_sync_session, db, session.id, request.user_id)
-        background_tasks.add_task(update_user_portrait, db, request.user_id, session.id)
+        background_tasks.add_task(_background_sync_processing, request.user_id, session.id, session.sphere)
 
         return {
             "session_id": session.id,

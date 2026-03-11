@@ -278,6 +278,33 @@ export default function SyncPage() {
                                         <p style={{ fontSize: 14, color: "#fff", lineHeight: 1.5, margin: 0 }}>{insights.key_choice}</p>
                                     </div>
                                 )}
+
+                                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                                    {[
+                                        { title: "Мышление", data: insights.mental_thinking, color: "#60A5FA" },
+                                        { title: "Реакции", data: insights.mental_reactions, color: "#F87171" },
+                                        { title: "Паттерны", data: insights.mental_patterns, color: "#A78BFA" },
+                                        { title: "Стремления", data: insights.mental_aspirations, color: "#34D399" }
+                                    ].map((cell, idx) => (
+                                        <div key={idx} style={{
+                                            background: "rgba(255,255,255,0.03)",
+                                            padding: 12,
+                                            borderRadius: 16,
+                                            border: "1px solid rgba(255,255,255,0.05)"
+                                        }}>
+                                            <p style={{ fontSize: 9, color: cell.color, fontWeight: 800, marginBottom: 4, textTransform: "uppercase" }}>{cell.title}</p>
+                                            <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                                                {(Array.isArray(cell.data)
+                                                    ? cell.data
+                                                    : (typeof cell.data === 'string' ? cell.data.split(', ') : [])
+                                                ).filter(Boolean).map((item: string, i: number) => (
+                                                    <p key={i} style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", margin: 0 }}>• {item}</p>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
                                 {insights.first_insight && (
                                     <div style={{ background: "rgba(255,255,255,0.04)", padding: 16, borderRadius: 20, border: "1px solid rgba(255,255,255,0.05)" }}>
                                         <p style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", fontWeight: 800, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.1em" }}>ИНСАЙТ</p>

@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { authAPI, profileAPI, gameAPI, paymentsAPI } from "@/lib/api";
 import { useUserStore } from "@/lib/store";
+import { useAudio } from "@/lib/hooks/useAudio";
 import { BottomNav } from "@/app/page";
 import useSWR from "swr";
 import { Skeleton } from "@/components/Skeleton";
@@ -11,22 +12,13 @@ import { EnergyIcon } from "@/components/EnergyIcon";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const SPHERES = [
-    { key: "IDENTITY", name: "Личность", color: "#F59E0B" },
-    { key: "MONEY", name: "Деньги", color: "#10B981" },
-    { key: "RELATIONS", name: "Отношения", color: "#EC4899" },
-    { key: "FAMILY", name: "Род", color: "#F97316" },
-    { key: "MISSION", name: "Миссия", color: "#3B82F6" },
-    { key: "HEALTH", name: "Здоровье", color: "#22C55E" },
-    { key: "SOCIETY", name: "Влияние", color: "#8B5CF6" },
-    { key: "SPIRIT", name: "Духовность", color: "#A78BFA" },
-];
 
 
 // ─── Profile Page ─────────────────────────────────────────────────────────────
 
 export default function ProfilePage() {
     const router = useRouter();
+    const { play } = useAudio();
     const { userId, firstName, setUser, referralCode, energy, evolutionLevel, photoUrl } = useUserStore();
     const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
     const [activeTab, setActiveTab] = useState<"main" | "settings" | "referrals">("main");
@@ -208,7 +200,7 @@ export default function ProfilePage() {
             )}
 
             {showSubscription && (
-                <SubscriptionModal onClose={() => setShowSubscription(false)} />
+                <SubscriptionModal onClose={() => setShowSubscription(false)} userId={userId!} />
             )}
 
             <BottomNav active="profile" />
@@ -219,8 +211,7 @@ export default function ProfilePage() {
 // ─── Sub-Views ───────────────────────────────────────────────────────────────
 
 function MainProfileView({ game, loadingGame, profile, setShowShop, setShowSubscription }: any) {
-    const xpProgress = game ? Math.min(100, (game.xp_progress / Math.max(1, game.xp_needed)) * 100) : 0;
-
+    const { play } = useAudio();
     return (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
             {/* Stats grid */}
@@ -242,142 +233,68 @@ function MainProfileView({ game, loadingGame, profile, setShowShop, setShowSubsc
                 </div>
             </div>
 
-            {/* Quick Actions (Payments) */}
-            <div className="px-4 mb-6 space-y-2">
-                <button
-                    onClick={() => setShowShop(true)}
-                    className="w-full py-4 bg-gradient-to-r from-amber-500/20 to-amber-600/20 border border-amber-500/30 rounded-2xl flex items-center justify-between px-5 group active:scale-95 transition-all text-left"
-                >
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-xl">⚡</div>
-                        <div>
-                            <p className="text-sm font-bold text-amber-400">Пополнить Энергию</p>
-                            <p className="text-[10px] text-amber-500/60 uppercase font-bold tracking-wider">Магазин ✦ Энергии</p>
-                        </div>
-                    </div>
-                    <span className="text-amber-500/40 group-hover:translate-x-1 transition-transform">→</span>
-                </button>
 
-                <button
-                    onClick={() => setShowSubscription(true)}
-                    className="w-full py-4 bg-gradient-to-r from-violet-500/20 to-violet-600/20 border border-violet-500/30 rounded-2xl flex items-center justify-between px-5 group active:scale-95 transition-all text-left"
-                >
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center text-xl">💎</div>
-                        <div>
-                            <p className="text-sm font-bold text-violet-400">Купить Пакет (Подписка)</p>
-                            <p className="text-[10px] text-violet-500/60 uppercase font-bold tracking-wider">Доступ ко всем сферам</p>
-                        </div>
-                    </div>
-                    <span className="text-violet-500/40 group-hover:translate-x-1 transition-transform">→</span>
-                </button>
-            </div>
-
-            {/* Level & XP Progress */}
+            {/* Payments section redesigned as settings-style block */}
             <div className="px-4 mb-6">
-                <div className="glass p-4">
-                    <div className="flex items-center justify-between mb-3">
-                        <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text-primary)" }}>
-                            Уровень {game?.evolution_level}
-                        </span>
-                        <span style={{ fontSize: 12, color: "var(--text-muted)" }}>
-                            {game?.xp_progress} / {game?.xp_needed} XP
-                        </span>
-                    </div>
-                    <div style={{ height: 4, background: "rgba(255,255,255,0.08)", borderRadius: 2, overflow: "hidden" }}>
-                        <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${xpProgress}%` }}
-                            transition={{ duration: 1, ease: "easeOut" }}
-                            style={{
-                                height: "100%",
-                                background: "linear-gradient(90deg, #8B5CF6, #F59E0B)",
-                            }}
-                        />
-                    </div>
+                <div className="glass p-4 space-y-2">
+                    <h3 className="text-sm font-bold text-white/40 uppercase tracking-widest mb-1">Магазин и пополнение</h3>
+
+                    <button
+                        onClick={() => {
+                            play('click');
+                            setShowShop(true);
+                        }}
+                        className="w-full flex items-center justify-between p-3 bg-white/5 rounded-2xl border border-white/10 active:scale-[0.98] transition-all text-left group"
+                    >
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-xl">⚡</div>
+                            <div>
+                                <p className="text-sm font-semibold text-white">Пополнить Энергию</p>
+                                <p className="text-[10px] text-white/30">Магазин энергии</p>
+                            </div>
+                        </div>
+                        <span className="text-white/20 group-hover:translate-x-1 transition-transform">→</span>
+                    </button>
+
+                    <button
+                        onClick={() => {
+                            play('click');
+                            setShowSubscription(true);
+                        }}
+                        className="w-full flex items-center justify-between p-3 bg-white/5 rounded-2xl border border-white/10 active:scale-[0.98] transition-all text-left group"
+                    >
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center text-xl">💎</div>
+                            <div>
+                                <p className="text-sm font-semibold text-white">Купить Пакет (Подписка)</p>
+                                <p className="text-[10px] text-white/30">Доступ ко всем сферам</p>
+                            </div>
+                        </div>
+                        <span className="text-white/20 group-hover:translate-x-1 transition-transform">→</span>
+                    </button>
                 </div>
             </div>
 
-            {/* Sphere awareness list */}
-            <div className="px-4 mb-6">
-                <h3 className="text-sm font-bold mb-3 px-1" style={{ color: "var(--text-secondary)" }}>
-                    Осознанность по сферам
-                </h3>
-                <div className="space-y-3">
-                    {loadingGame && !game ? (
-                        Array.from({ length: 4 }).map((_, i: number) => (
-                            <Skeleton key={i} className="h-16 w-full rounded-2xl" />
-                        ))
-                    ) : (
-                        SPHERES.map((sphere, idx) => {
-                            const data = game?.sphere_data?.[sphere.key] || { awareness: 0, min_hawkins: 0 };
-                            const progress = Math.min(100, (data.min_hawkins / 1000) * 100);
 
-                            return (
-                                <motion.div
-                                    key={sphere.key}
-                                    initial={{ opacity: 0, x: -10 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: idx * 0.05 }}
-                                    className="glass p-3 flex flex-col gap-2"
-                                >
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2">
-                                            <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>{sphere.name}</span>
-                                        </div>
-                                        <span style={{ fontSize: 13, fontWeight: 700, color: sphere.color }}>
-                                            {data.awareness}
-                                        </span>
-                                    </div>
-                                    <div style={{ height: 3, background: "rgba(255,255,255,0.05)", borderRadius: 1.5, overflow: "hidden" }}>
-                                        <motion.div
-                                            initial={{ width: 0 }}
-                                            animate={{ width: `${progress}%` }}
-                                            transition={{ duration: 1, ease: "easeOut", delay: 0.2 + idx * 0.05 }}
-                                            style={{
-                                                height: "100%",
-                                                background: sphere.color,
-                                                boxShadow: `0 0 8px ${sphere.color}55`,
-                                            }}
-                                        />
-                                    </div>
-                                </motion.div>
-                            );
-                        })
-                    )}
-                </div>
-            </div>
-
-            {/* Fingerprint */}
-            {profile?.fingerprint && (
-                <div className="px-4 mb-6">
-                    <div className="glass p-4 border-dashed" style={{ borderColor: "rgba(255,255,255,0.1)" }}>
-                        <h3 className="text-sm font-bold mb-2" style={{ color: "var(--text-secondary)" }}>Отпечаток</h3>
-                        <p className="text-xs leading-relaxed" style={{ color: "var(--text-muted)" }}>
-                            {profile.fingerprint.matching_available
-                                ? "🟢 Матчинг доступен. Ваша энергоинформационная подпись полностью сформирована."
-                                : "🔒 Пройдите все 22 карты в любой сфере до уровня ≥500 для разблокировки глобального матчинга."}
-                        </p>
-                    </div>
-                </div>
-            )}
         </motion.div>
     );
 }
 
 function SettingsView() {
     const [lang, setLang] = useState("RU");
-    const [sounds, setSounds] = useState(true);
+    const { musicEnabled, sfxEnabled, toggleMusic, toggleSfx, play } = useAudio();
 
-    const toggleLang = () => setLang(l => l === "RU" ? "EN" : "RU");
-    const toggleSounds = () => setSounds(s => !s);
+    const toggleLang = () => {
+        play('click');
+        setLang(l => l === "RU" ? "EN" : "RU");
+    };
 
     return (
         <motion.div
             initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
             className="px-4 space-y-4"
         >
-            <div className="glass p-5 space-y-4">
+            <div className="glass p-4 space-y-2">
                 <h3 className="text-sm font-bold text-white/40 uppercase tracking-widest mb-1">Основные</h3>
 
                 <div className="flex items-center justify-between p-3 bg-white/5 rounded-2xl border border-white/10">
@@ -395,22 +312,38 @@ function SettingsView() {
 
                 <div className="flex items-center justify-between p-3 bg-white/5 rounded-2xl border border-white/10">
                     <div className="flex flex-col">
+                        <span className="text-sm font-semibold text-white">Фоновая музыка</span>
+                        <span className="text-[10px] text-white/30">Пространственное звучание</span>
+                    </div>
+                    <button
+                        onClick={toggleMusic}
+                        className={`w-12 h-6 rounded-full relative transition-colors ${musicEnabled ? 'bg-emerald-500/40' : 'bg-white/10'}`}
+                    >
+                        <motion.div
+                            animate={{ x: musicEnabled ? 26 : 4 }}
+                            className="absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm"
+                        />
+                    </button>
+                </div>
+
+                <div className="flex items-center justify-between p-3 bg-white/5 rounded-2xl border border-white/10">
+                    <div className="flex flex-col">
                         <span className="text-sm font-semibold text-white">Звуковые эффекты</span>
                         <span className="text-[10px] text-white/30">Обратная связь в интерфейсе</span>
                     </div>
                     <button
-                        onClick={toggleSounds}
-                        className={`w-12 h-6 rounded-full relative transition-colors ${sounds ? 'bg-emerald-500/40' : 'bg-white/10'}`}
+                        onClick={toggleSfx}
+                        className={`w-12 h-6 rounded-full relative transition-colors ${sfxEnabled ? 'bg-emerald-500/40' : 'bg-white/10'}`}
                     >
                         <motion.div
-                            animate={{ x: sounds ? 26 : 4 }}
+                            animate={{ x: sfxEnabled ? 26 : 4 }}
                             className="absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm"
                         />
                     </button>
                 </div>
             </div>
 
-            <div className="glass p-5 space-y-4">
+            <div className="glass p-4 space-y-2">
                 <h3 className="text-sm font-bold text-white/40 uppercase tracking-widest mb-1">Обучение и поддержка</h3>
 
                 <a
@@ -565,6 +498,7 @@ function StatTile({ label, value, color }: { label: string; value: string; color
 // ─── ShopModal ──────────────────────────────────────────────────────────────
 
 function ShopModal({ onClose, userId }: { onClose: () => void; userId: number }) {
+    const { play } = useAudio();
     const { data: offers, isLoading } = useSWR("payment_offers", () => paymentsAPI.getOffers().then(res => res.data));
     const [buyingId, setBuyingId] = useState<string | null>(null);
 
@@ -576,6 +510,7 @@ function ShopModal({ onClose, userId }: { onClose: () => void; userId: number })
             if ((window as any).Telegram?.WebApp) {
                 (window as any).Telegram.WebApp.openInvoice(invoice_link, (status: string) => {
                     if (status === "paid") {
+                        play('success');
                         onClose();
                     }
                     setBuyingId(null);
@@ -592,7 +527,7 @@ function ShopModal({ onClose, userId }: { onClose: () => void; userId: number })
     };
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-black/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[100] flex items-start justify-center px-4 pt-20 bg-black/60 backdrop-blur-sm">
             <motion.div
                 initial={{ y: "100%" }} animate={{ y: 0 }}
                 className="w-full max-w-md glass p-6 rounded-[32px] space-y-6"
@@ -637,9 +572,37 @@ function ShopModal({ onClose, userId }: { onClose: () => void; userId: number })
 
 // ─── SubscriptionModal ───────────────────────────────────────────────────────
 
-function SubscriptionModal({ onClose }: { onClose: () => void }) {
+function SubscriptionModal({ onClose, userId }: { onClose: () => void; userId: number }) {
+    const { play } = useAudio();
+    const [isBuying, setIsBuying] = useState(false);
+
+    const handleBuy = async () => {
+        setIsBuying(true);
+        try {
+            const res = await paymentsAPI.createInvoice(userId, "pack_premium");
+            const { invoice_link } = res.data;
+            if ((window as any).Telegram?.WebApp) {
+                (window as any).Telegram.WebApp.openInvoice(invoice_link, (status: string) => {
+                    if (status === "paid") {
+                        play('success');
+                        onClose();
+                    }
+                    setIsBuying(false);
+                });
+            } else {
+                window.open(invoice_link, "_blank");
+                setIsBuying(false);
+            }
+        } catch (e: any) {
+            console.error("Invoice error", e);
+            const msg = e.response?.data?.detail || "Ошибка создания инвойса";
+            alert(msg);
+            setIsBuying(false);
+        }
+    };
+
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-black/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[100] flex items-start justify-center px-4 pt-20 bg-black/60 backdrop-blur-sm">
             <motion.div
                 initial={{ y: "100%" }} animate={{ y: 0 }}
                 className="w-full max-w-md glass p-6 rounded-[32px] space-y-6 text-center"
@@ -671,9 +634,15 @@ function SubscriptionModal({ onClose }: { onClose: () => void }) {
                 </div>
 
                 <button
-                    className="w-full py-4 bg-violet-600 rounded-2xl font-bold text-white shadow-lg shadow-violet-600/30 active:scale-95 transition-all"
+                    disabled={isBuying}
+                    onClick={handleBuy}
+                    className="w-full py-4 bg-violet-600 rounded-2xl font-bold text-white shadow-lg shadow-violet-600/30 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                 >
-                    Скоро в продаже
+                    {isBuying ? (
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                        <>Купить за ⭐️ 330</>
+                    )}
                 </button>
             </motion.div>
         </div>
