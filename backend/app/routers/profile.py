@@ -163,3 +163,25 @@ async def reset_profile_by_tg(tg_id: int, db: AsyncSession = Depends(get_db)):
     await db.commit()
     
     return {"success": True, "message": "Профиль сброшен."}
+
+@router.get("/{user_id}/referrals")
+async def get_user_referrals(user_id: int, db: AsyncSession = Depends(get_db)):
+    """Fetch detailed list of referrals for a given user."""
+    result = await db.execute(
+        select(User)
+        .where(User.referred_by == user_id)
+        .order_by(User.created_at.desc())
+    )
+    referrals = result.scalars().all()
+    
+    return [
+        {
+            "id": r.id,
+            "first_name": r.first_name or r.tg_username or "Игрок",
+            "photo_url": r.photo_url,
+            "evolution_level": r.evolution_level,
+            "xp": r.xp,
+            "onboarding_done": r.onboarding_done,
+        }
+        for r in referrals
+    ]

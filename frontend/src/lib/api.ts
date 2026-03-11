@@ -67,6 +67,7 @@ export const gameAPI = {
 
 export const profileAPI = {
     get: (userId: number) => api.get(`/api/profile/${userId}`),
+    getReferrals: (userId: number) => api.get(`/api/profile/${userId}/referrals`),
     reset: (tgId: number) => api.post(`/api/profile/tg/${tgId}/reset`),
 };
 
