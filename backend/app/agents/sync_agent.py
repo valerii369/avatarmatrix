@@ -80,7 +80,7 @@ def build_avatar_prompt(
     is_narrowing: bool = False,
     scene_text: str = None,
     portrait_context: dict = None
-) -> str:
+) -> tuple[str, str]:
     """Build the prompt for a specific narrative layer (1-5) based on Narrative Scanner rules."""
     archetype = ARCHETYPES.get(archetype_id, {})
     sphere_data = SPHERES.get(sphere, {})
@@ -228,62 +228,28 @@ JSON:
 """
     }
 
-    prompt = base_context + layer_instructions.get(str(layer), "")
+    layer_prompt = layer_instructions.get(str(layer), "")
     
     if is_narrowing:
-        prompt += "\nВНИМАНИЕ: Предыдущий ответ пользователя был абстрактным. Используй СУЖАЮЩИЙ образ, чтобы добиться конкретики или телесного отклика.\n"
+        layer_prompt += "\nВНИМАНИЕ: Предыдущий ответ пользователя был абстрактным. Используй СУЖАЮЩИЙ образ, чтобы добиться конкретики или телесного отклика.\n"
 
-    return prompt
+    return base_context, layer_prompt
 
 async def run_avatar_layer(
-    db: AsyncSession,
-    session_id: int,
     layer: str,
     archetype_id: int,
     sphere: str,
     previous_messages: list,
+    scene_text: str = None,
     is_narrowing: bool = False,
     portrait_context: dict = None
 ) -> str:
     """
-    Call OpenAI for a narrative layer, using a pre-selected scene from the library.
+    Call OpenAI for a narrative layer, using the provided scene.
     """
-    # 1. Get or create SceneSet
-    scene_text = None
-    if layer != "intro" and layer != "mirror":
-        # Check if set exists
-        set_res = await db.execute(select(SceneSet).where(SceneSet.session_id == session_id))
-        scene_set = set_res.scalar_one_or_none()
-        
-        if not scene_set:
-            # Need to know sphere_id for selection
-            sphere_id = 1 # Fallback
-            for s in SPHERES.values():
-                if s.get('key') == sphere:
-                    sphere_id = s.get('id', 1)
-                    break
-            await select_scene_set(db, session_id, sphere_id, archetype_id)
-            set_res = await db.execute(select(SceneSet).where(SceneSet.session_id == session_id))
-            scene_set = set_res.scalar_one_or_none()
-
-        # Get scene for this layer
-        try:
-            layer_pos = int(layer)
-            item_res = await db.execute(
-                select(TextScene).join(SceneSetItem).where(
-                    SceneSetItem.scene_set_id == scene_set.id,
-                    SceneSetItem.position == layer_pos
-                )
-            )
-            scene = item_res.scalar_one_or_none()
-            if scene:
-                scene_text = scene.scene_text
-        except:
-            pass
-
-    # 2. Build prompt with scene and portrait context
-    prompt = build_avatar_prompt(layer, archetype_id, sphere, {}, is_narrowing, scene_text, portrait_context)
-    messages = [{"role": "system", "content": prompt}]
+    # 1. Build prompt with scene and portrait context
+    system_prompt, layer_prompt = build_avatar_prompt(layer, archetype_id, sphere, {}, is_narrowing, scene_text, portrait_context)
+    messages = [{"role": "system", "content": system_prompt}]
     
     if layer != "intro" and previous_messages:
         valid_history = []
@@ -302,11 +268,16 @@ async def run_avatar_layer(
                 valid_history.append({"role": role, "content": content})
                 last_role = role
         
+        
         messages.extend(valid_history)
 
+    messages.append({"role": "system", "content": layer_prompt})
+
     try:
+        model = "gpt-4o-mini" if layer != "mirror" else settings.OPENAI_MODEL
+        
         response = await client.chat.completions.create(
-            model=settings.OPENAI_MODEL,
+            model=model,
             messages=messages,
             max_tokens=500,
             temperature=0.85 if layer != "mirror" else 0.2,

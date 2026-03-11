@@ -37,6 +37,7 @@ class TextScene(Base):
 
     version = Column(Integer, default=1)
     is_active = Column(Boolean, default=True)
+    meta_data = Column(JSON) # Extended psychological data (projections, pennebaker focus, etc)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 # Scene Interaction logging
