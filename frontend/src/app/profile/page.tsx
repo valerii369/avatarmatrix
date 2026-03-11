@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { authAPI, profileAPI, gameAPI } from "@/lib/api";
+import { authAPI, profileAPI, gameAPI, paymentsAPI } from "@/lib/api";
 import { useUserStore } from "@/lib/store";
 import { BottomNav } from "@/app/page";
 import useSWR from "swr";
@@ -30,6 +30,8 @@ export default function ProfilePage() {
     const { userId, firstName, setUser, referralCode, energy, evolutionLevel, photoUrl } = useUserStore();
     const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
     const [activeTab, setActiveTab] = useState<"main" | "settings" | "referrals">("main");
+    const [showShop, setShowShop] = useState(false);
+    const [showSubscription, setShowSubscription] = useState(false);
 
     // 1. Auth & Init
     useEffect(() => {
@@ -185,7 +187,13 @@ export default function ProfilePage() {
             {/* ── Tab Content ── */}
             <div className="flex-1">
                 {activeTab === "main" && (
-                    <MainProfileView game={game} loadingGame={loadingGame} profile={profile} />
+                    <MainProfileView
+                        game={game}
+                        loadingGame={loadingGame}
+                        profile={profile}
+                        setShowShop={setShowShop}
+                        setShowSubscription={setShowSubscription}
+                    />
                 )}
                 {activeTab === "settings" && (
                     <SettingsView />
@@ -195,6 +203,14 @@ export default function ProfilePage() {
                 )}
             </div>
 
+            {showShop && (
+                <ShopModal onClose={() => setShowShop(false)} userId={userId!} />
+            )}
+
+            {showSubscription && (
+                <SubscriptionModal onClose={() => setShowSubscription(false)} />
+            )}
+
             <BottomNav active="profile" />
         </div>
     );
@@ -202,7 +218,7 @@ export default function ProfilePage() {
 
 // ─── Sub-Views ───────────────────────────────────────────────────────────────
 
-function MainProfileView({ game, loadingGame, profile }: any) {
+function MainProfileView({ game, loadingGame, profile, setShowShop, setShowSubscription }: any) {
     const xpProgress = game ? Math.min(100, (game.xp_progress / Math.max(1, game.xp_needed)) * 100) : 0;
 
     return (
@@ -224,6 +240,37 @@ function MainProfileView({ game, loadingGame, profile }: any) {
                         </>
                     )}
                 </div>
+            </div>
+
+            {/* Quick Actions (Payments) */}
+            <div className="px-4 mb-6 space-y-2">
+                <button
+                    onClick={() => setShowShop(true)}
+                    className="w-full py-4 bg-gradient-to-r from-amber-500/20 to-amber-600/20 border border-amber-500/30 rounded-2xl flex items-center justify-between px-5 group active:scale-95 transition-all text-left"
+                >
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-xl">⚡</div>
+                        <div>
+                            <p className="text-sm font-bold text-amber-400">Пополнить Энергию</p>
+                            <p className="text-[10px] text-amber-500/60 uppercase font-bold tracking-wider">Магазин ✦ Энергии</p>
+                        </div>
+                    </div>
+                    <span className="text-amber-500/40 group-hover:translate-x-1 transition-transform">→</span>
+                </button>
+
+                <button
+                    onClick={() => setShowSubscription(true)}
+                    className="w-full py-4 bg-gradient-to-r from-violet-500/20 to-violet-600/20 border border-violet-500/30 rounded-2xl flex items-center justify-between px-5 group active:scale-95 transition-all text-left"
+                >
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center text-xl">💎</div>
+                        <div>
+                            <p className="text-sm font-bold text-violet-400">Купить Пакет (Подписка)</p>
+                            <p className="text-[10px] text-violet-500/60 uppercase font-bold tracking-wider">Доступ ко всем сферам</p>
+                        </div>
+                    </div>
+                    <span className="text-violet-500/40 group-hover:translate-x-1 transition-transform">→</span>
+                </button>
             </div>
 
             {/* Level & XP Progress */}
@@ -511,6 +558,124 @@ function StatTile({ label, value, color }: { label: string; value: string; color
             <p style={{ fontSize: 18, fontWeight: 700, color: "var(--text-primary)", lineHeight: 1 }}>
                 {value}
             </p>
+        </div>
+    );
+}
+
+// ─── ShopModal ──────────────────────────────────────────────────────────────
+
+function ShopModal({ onClose, userId }: { onClose: () => void; userId: number }) {
+    const { data: offers, isLoading } = useSWR("payment_offers", () => paymentsAPI.getOffers().then(res => res.data));
+    const [buyingId, setBuyingId] = useState<string | null>(null);
+
+    const handleBuy = async (offerId: string) => {
+        setBuyingId(offerId);
+        try {
+            const res = await paymentsAPI.createInvoice(userId, offerId);
+            const { invoice_link } = res.data;
+            if ((window as any).Telegram?.WebApp) {
+                (window as any).Telegram.WebApp.openInvoice(invoice_link, (status: string) => {
+                    if (status === "paid") {
+                        onClose();
+                    }
+                    setBuyingId(null);
+                });
+            } else {
+                window.open(invoice_link, "_blank");
+                setBuyingId(null);
+            }
+        } catch (e) {
+            console.error("Invoice error", e);
+            alert("Ошибка создания инвойса");
+            setBuyingId(null);
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-black/60 backdrop-blur-sm">
+            <motion.div
+                initial={{ y: "100%" }} animate={{ y: 0 }}
+                className="w-full max-w-md glass p-6 rounded-[32px] space-y-6"
+            >
+                <div className="flex justify-between items-center">
+                    <h3 className="text-xl font-bold text-white">Магазин Энергии</h3>
+                    <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white/60">✕</button>
+                </div>
+
+                <div className="space-y-3">
+                    {isLoading ? (
+                        <div className="py-10 flex justify-center"><div className="w-6 h-6 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" /></div>
+                    ) : offers?.map((offer: any) => (
+                        <button
+                            key={offer.id}
+                            disabled={!!buyingId}
+                            onClick={() => handleBuy(offer.id)}
+                            className="w-full p-4 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-between group active:scale-[0.98] transition-all disabled:opacity-50"
+                        >
+                            <div className="flex items-center gap-3">
+                                <div className="text-2xl">⚡</div>
+                                <div className="text-left">
+                                    <p className="font-bold text-white">{offer.name}</p>
+                                    <p className="text-[11px] text-white/40">Начислится моментально</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2 bg-amber-500/20 px-3 py-1.5 rounded-xl border border-amber-500/30">
+                                <span className="text-xs font-bold text-amber-400">⭐️ {offer.stars}</span>
+                                {buyingId === offer.id && <div className="w-3 h-3 border border-amber-500 border-t-transparent rounded-full animate-spin" />}
+                            </div>
+                        </button>
+                    ))}
+                </div>
+
+                <p className="text-[10px] text-center text-white/30 uppercase font-bold tracking-widest">
+                    Оплата через Telegram Stars
+                </p>
+            </motion.div>
+        </div>
+    );
+}
+
+// ─── SubscriptionModal ───────────────────────────────────────────────────────
+
+function SubscriptionModal({ onClose }: { onClose: () => void }) {
+    return (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-black/60 backdrop-blur-sm">
+            <motion.div
+                initial={{ y: "100%" }} animate={{ y: 0 }}
+                className="w-full max-w-md glass p-6 rounded-[32px] space-y-6 text-center"
+            >
+                <div className="flex justify-between items-center">
+                    <h3 className="text-xl font-bold text-white">Активация Пакета</h3>
+                    <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white/60">✕</button>
+                </div>
+
+                <div className="w-20 h-20 bg-violet-500/20 rounded-3xl flex items-center justify-center text-4xl mx-auto shadow-lg shadow-violet-500/20">💎</div>
+
+                <div className="space-y-2">
+                    <h4 className="text-lg font-bold text-white">AVATAR Premium</h4>
+                    <p className="text-sm text-white/60">Откройте безграничные возможности вашей эволюции</p>
+                </div>
+
+                <div className="grid grid-cols-1 gap-3 text-left">
+                    {[
+                        "Доступ ко всем 8 сферам жизни",
+                        "Приоритетные сессии с ИИ",
+                        "Эксклюзивные архетипические отчеты",
+                        "Увеличенный лимит Энергии"
+                    ].map((feature, i) => (
+                        <div key={i} className="flex items-center gap-3 text-sm text-white/80 bg-white/5 p-3 rounded-xl border border-white/5">
+                            <span className="text-emerald-400 font-bold">✓</span>
+                            {feature}
+                        </div>
+                    ))}
+                </div>
+
+                <button
+                    className="w-full py-4 bg-violet-600 rounded-2xl font-bold text-white shadow-lg shadow-violet-600/30 active:scale-95 transition-all"
+                >
+                    Скоро в продаже
+                </button>
+            </motion.div>
         </div>
     );
 }

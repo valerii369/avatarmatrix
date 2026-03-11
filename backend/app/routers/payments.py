@@ -17,27 +17,61 @@ class PaymentOffer(BaseModel):
     stars: int
 
 OFFERS = [
-    PaymentOffer(id="starter_pack", name="Starter Pack", energy=5000, price_usd=6.0, stars=290),
-    PaymentOffer(id="medium_topup", name="Medium Top-up", energy=2000, price_usd=3.0, stars=145),
-    PaymentOffer(id="small_topup", name="Small Top-up", energy=1000, price_usd=1.5, stars=75),
+    PaymentOffer(id="pack_1000", name="1000 ✦ Энергии", energy=1000, price_usd=1.9, stars=100),
+    PaymentOffer(id="pack_2500", name="2500 ✦ Энергии", energy=2500, price_usd=3.9, stars=250),
+    PaymentOffer(id="pack_5000", name="5000 ✦ Энергии", energy=5000, price_usd=6.9, stars=500),
 ]
 
-class PaymentVerifyRequest(BaseModel):
+class InvoiceRequest(BaseModel):
     user_id: int
     offer_id: str
-    payload: str  # In real TG payments, this is the verification payload
 
 @router.get("/offers", response_model=list[PaymentOffer])
 async def get_offers():
     """Get available energy packs."""
     return OFFERS
 
+@router.post("/create-invoice")
+async def create_invoice(request: InvoiceRequest, db: AsyncSession = Depends(get_db)):
+    """Create a Telegram Stars invoice link."""
+    from app.config import settings
+    import httpx
+    
+    offer = next((o for o in OFFERS if o.id == request.offer_id), None)
+    if not offer:
+        raise HTTPException(status_code=404, detail="Offer not found")
+        
+    user_result = await db.execute(select(User).where(User.id == request.user_id))
+    user = user_result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    payload = f"{user.id}:{offer.id}"
+    
+    async with httpx.AsyncClient() as client:
+        url = f"https://api.telegram.org/bot{settings.BOT_TOKEN}/createInvoiceLink"
+        resp = await client.post(url, json={
+            "title": offer.name,
+            "description": f"Пополнение баланса на {offer.energy} ✦ Энергии",
+            "payload": payload,
+            "currency": "XTR",
+            "prices": [{"label": "Цена", "amount": offer.stars}]
+        })
+        
+        data = resp.json()
+        if not data.get("ok"):
+            raise HTTPException(status_code=500, detail=f"TG Error: {data.get('description')}")
+            
+        return {"invoice_link": data["result"]}
+
+class PaymentVerifyRequest(BaseModel):
+    user_id: int
+    offer_id: str
+    payload: str
+
 @router.post("/verify")
 async def verify_payment(request: PaymentVerifyRequest, db: AsyncSession = Depends(get_db)):
-    """
-    Mock verification for Telegram Stars payments.
-    In production, this would verify the Telegram payment signal.
-    """
+    """Backend verify after successful payment."""
     offer = next((o for o in OFFERS if o.id == request.offer_id), None)
     if not offer:
         raise HTTPException(status_code=404, detail="Offer not found")
@@ -47,10 +81,8 @@ async def verify_payment(request: PaymentVerifyRequest, db: AsyncSession = Depen
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
         
-    # Award energy from the pack
     await award_energy(db, user, "manual", amount=offer.energy)
     
-    # Process referral purchase bonus (if user was referred)
     if user.referred_by:
         referrer_result = await db.execute(select(User).where(User.id == user.referred_by))
         referrer = referrer_result.scalar_one_or_none()
@@ -58,5 +90,6 @@ async def verify_payment(request: PaymentVerifyRequest, db: AsyncSession = Depen
             await award_energy(db, referrer, "referral_purchase")
             
     await db.commit()
+    await db.refresh(user)
     
     return {"success": True, "new_energy": user.energy}

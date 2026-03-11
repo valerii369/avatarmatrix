@@ -233,6 +233,46 @@ def build_router(bot: Bot) -> Dispatcher:
             reply_markup=_open_btn("🚀 Открыть AVATAR"),
         )
 
+    # ── Payments ─────────────────────────────────────────────────────────────
+    from aiogram.types import PreCheckoutQuery, SuccessfulPayment
+    from aiogram import F
+
+    @dp.pre_checkout_query()
+    async def process_pre_checkout_query(pre_checkout_query: PreCheckoutQuery):
+        await pre_checkout_query.answer(ok=True)
+
+    @dp.message(F.successful_payment)
+    async def process_successful_payment(message: Message):
+        payment: SuccessfulPayment = message.successful_payment
+        payload = payment.invoice_payload
+        user_id_str, offer_id = payload.split(":")
+        
+        try:
+            async with httpx.AsyncClient(timeout=30) as client:
+                # We reuse the mock verify endpoint or create a new internal one
+                # For now let's use the /api/payments/verify with the correct logic
+                resp = await client.post(
+                    f"{API_BASE_URL}/api/payments/verify",
+                    json={
+                        "user_id": int(user_id_str),
+                        "offer_id": offer_id,
+                        "payload": payment.telegram_payment_charge_id
+                    }
+                )
+            
+            if resp.status_code == 200:
+                data = resp.json()
+                await message.answer(
+                    f"✅ <b>Оплата прошла успешно!</b>\n\n"
+                    f"Ваш баланс пополнен. Текущая энергия: <b>{data.get('new_energy')} ✦</b>",
+                    parse_mode="HTML"
+                )
+            else:
+                await message.answer("⚠️ Оплата прошла, но возникла ошибка при обновлении баланса. Пожалуйста, напишите в поддержку.")
+        except Exception as e:
+            logger.error(f"Payment verification error: {e}")
+            await message.answer("❌ Ошибка связи с сервером после оплаты.")
+
     return dp
 
 

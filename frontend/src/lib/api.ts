@@ -112,6 +112,11 @@ export const visualAPI = {
     logEvent: (data: { user_id: number; session_id?: number; event_type: string; payload: any }) =>
         api.post("/api/visual/event", data),
 };
+export const paymentsAPI = {
+    getOffers: () => api.get("/api/payments/offers"),
+    createInvoice: (userId: number, offerId: string) =>
+        api.post("/api/payments/create-invoice", { user_id: userId, offer_id: offerId }),
+};
 
 // WebSocket helper
 export function createSessionWS(userId: number, cardProgressId: number): WebSocket {
