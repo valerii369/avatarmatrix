@@ -1,0 +1,44 @@
+{
+  "scene_name": "The Echoing Vault",
+  "psychological_foundation": "The scene explores the complex relationship between money and personal beliefs, focusing on the archetype of the Tower. The emphasis is on how sudden insights can shatter existing illusions about wealth and personal value, potentially leading to profound transformation or destructive chaos.",
+  "immersion_architecture": {
+    "orientation": "The chamber is vast and echoing, with walls lined by towering shelves filled with ancient, dust-covered coins that glisten dimly in the ambient light. The air is heavy with an oppressive stillness, as if time itself has paused to reflect upon the secrets these coins hold. In the center of the room stands a cracked, yet majestic stone pedestal, upon which rests a single, shimmering diamond.",
+    "complication": "Suddenly, a deep rumble reverberates through the chamber, causing the shelves to tremble and coins to clatter to the ground, as the diamond atop the pedestal begins to glow with an intense, pulsing light."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Shelves of Coins",
+      "interpretation_broken": "If the shelves are seen as broken, it may suggest an underlying belief that one's financial foundations are unstable or unreliable.",
+      "interpretation_beautiful": "If the shelves are perceived as beautiful, it could indicate an appreciation for the history and potential of wealth, or a sense of security derived from financial resources.",
+      "interpretation_threatening": "If the shelves appear threatening, it might reflect anxiety about the responsibilities and burdens associated with managing wealth."
+    },
+    {
+      "object": "Stone Pedestal",
+      "interpretation_broken": "If the pedestal is seen as broken, it could symbolize a loss of status or support, questioning one's worth or the validity of their achievements.",
+      "interpretation_beautiful": "If the pedestal is viewed as beautiful, it may represent a strong sense of self-worth and pride in one's accomplishments.",
+      "interpretation_threatening": "If the pedestal seems threatening, it might indicate fear of being judged or the pressure to maintain one's current status."
+    },
+    {
+      "object": "Diamond",
+      "interpretation_broken": "If the diamond is seen as broken, it could indicate a shattered illusion of perfection or the realization that something once valued is now flawed.",
+      "interpretation_beautiful": "If the diamond is perceived as beautiful, it may symbolize clarity, truth, and the pursuit of purity in one's life.",
+      "interpretation_threatening": "If the diamond appears threatening, it might reflect fears about the destructive power of material desires or the dangers of valuing wealth above all else."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "anxiety",
+      "reflection",
+      "change"
+    ],
+    "mcadams_markers": [
+      "status",
+      "security",
+      "transformation"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What does the glowing diamond represent in your life, and how does its light change your perception of the surrounding coins?",
+    "action_prompt": "As the rumble shakes the room, what does your body instinctively do in response to the shifting environment?"
+  }
+}

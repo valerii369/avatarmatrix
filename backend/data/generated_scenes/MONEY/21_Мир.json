@@ -1,0 +1,44 @@
+{
+  "scene_name": "The Celestial Market",
+  "psychological_foundation": "The scene explores the tension between the desire for completion and the fear of the void it might bring, intertwined with the concept of money as both a means of achieving and an obstacle to true inner harmony.",
+  "immersion_architecture": {
+    "orientation": "In a surreal cosmic market, where the sky is an endless tapestry of shifting constellations, stalls made of shimmering stardust display goods that defy earthly logic. The air is filled with a soft, melodic hum, as if the universe itself is singing a lullaby of abundance and fulfillment. Coins of light drift lazily between the stalls, their glow illuminating the path to a hidden treasure.",
+    "complication": "Suddenly, a blinding flash occurs, and the coins of light scatter violently, disrupting the harmonious melody and casting the market into chaotic disarray."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Coins of Light",
+      "interpretation_broken": "If perceived as broken, this suggests a fear of losing control over one's financial security or the instability of one's value system.",
+      "interpretation_beautiful": "If perceived as beautiful, this indicates a harmonious relationship with financial resources and a sense of abundance.",
+      "interpretation_threatening": "If perceived as threatening, this reflects anxiety over financial matters or the potential for money to disrupt personal harmony."
+    },
+    {
+      "object": "Stardust Stalls",
+      "interpretation_broken": "If perceived as broken, it implies a sense of unfulfilled potential or the fear that one's efforts will not lead to completion.",
+      "interpretation_beautiful": "If perceived as beautiful, it represents the integration of past experiences into a cohesive whole, leading to a sense of achievement.",
+      "interpretation_threatening": "If perceived as threatening, it suggests apprehension about the finality of completing a personal journey or project."
+    },
+    {
+      "object": "Constellations",
+      "interpretation_broken": "If perceived as broken, this signifies a fragmented sense of identity or fear of disconnection from the larger whole.",
+      "interpretation_beautiful": "If perceived as beautiful, it embodies cosmic harmony and the feeling of being part of something greater.",
+      "interpretation_threatening": "If perceived as threatening, it indicates fear of losing oneself in the vastness or insignificance within the grand scheme."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "financial security",
+      "control",
+      "harmony"
+    ],
+    "mcadams_markers": [
+      "achievement",
+      "identity",
+      "cosmic connection"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "How does the concept of financial completion feel to you when imagined as a market that may never close?",
+    "action_prompt": "What does your body feel like doing in response to the scattered coins of light? How does it affect your movement through the market?"
+  }
+}

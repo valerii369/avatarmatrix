@@ -1,0 +1,46 @@
+{
+  "scene_name": "Celestial Treasury",
+  "psychological_foundation": "The scene explores the tension between financial aspirations and spiritual fulfillment, examining how the archetype of the Star can illuminate or obscure one's path to prosperity and inner peace.",
+  "immersion_architecture": {
+    "orientation": "In a vast, celestial vault, the walls shimmer with luminous constellations, each star a scintilla of hope and ambition. The floor is paved with translucent obsidian tiles that pulse with a soft, inviting glow, reminiscent of a galaxy swirling beneath your feet. A gentle hum, as if of distant cosmic winds, fills the air, creating a sense of both infinite possibility and serene isolation.",
+    "complication": "A sudden flicker disrupts the harmonious glow, casting long shadows that dance menacingly across the vault, as if the stars themselves are whispering secrets of forgotten dreams."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Constellations",
+      "interpretation_broken": "Perceiving the constellations as broken can indicate a sense of lost direction or the feeling that one's aspirations are fragmented and unattainable.",
+      "interpretation_beautiful": "Viewing the constellations as beautiful suggests a deep connection to one's dreams and a belief in the guiding power of hope and inspiration.",
+      "interpretation_threatening": "If the constellations appear threatening, it may reflect anxiety about the pressure of high expectations or the fear of unknown cosmic forces influencing one's fate."
+    },
+    {
+      "object": "Obsidian Tiles",
+      "interpretation_broken": "Seeing the tiles as broken could symbolize underlying fears of financial instability or the fragility of one's current life foundation.",
+      "interpretation_beautiful": "If the tiles are perceived as beautiful, it reflects a grounded sense of stability and the ability to find beauty and order in one's material and spiritual existence.",
+      "interpretation_threatening": "Viewing the tiles as threatening might suggest trepidation about the path one is on or concerns about the solidity of one's future."
+    },
+    {
+      "object": "Cosmic Hum",
+      "interpretation_broken": "If the hum is perceived as broken, it may indicate a disconnect from one's inner voice or intuition, leading to confusion and dissonance in decision-making.",
+      "interpretation_beautiful": "A beautiful hum signifies harmony with the universe and a sense of being in tune with one's higher purpose.",
+      "interpretation_threatening": "Finding the hum threatening could reflect an overwhelming sense of existential dread or fear of being engulfed by the vastness of one's ambitions."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "aspiration",
+      "inspiration",
+      "fear",
+      "stability"
+    ],
+    "mcadams_markers": [
+      "hope",
+      "cosmic connection",
+      "material grounding",
+      "existential exploration"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "How does the cosmic vault mirror your relationship with money and the pursuit of your dreams?",
+    "action_prompt": "What does your body feel as the shadows stretch across the floor?"
+  }
+}

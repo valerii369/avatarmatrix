@@ -31,19 +31,9 @@ async def onboarding_chat(request: OnboardingChatRequest):
     """
     history_dicts = [{"role": msg.role, "content": msg.content} for msg in request.chat_history]
     
-    response_text = await generate_onboarding_response(history_dicts)
+    response_text, is_ready = await generate_onboarding_response(history_dicts)
     
-    # Detect and strip [[READY]] marker or similar
-    is_ready = "[[READY]]" in response_text or "[READY]" in response_text
-    clean_text = response_text.replace("[[READY]]", "").replace("[READY]", "").strip()
-    
-    # Fallback heuristic: if the AI forgot the marker but indicates readiness to synchronize
-    text_lower = clean_text.lower()
-    if not is_ready:
-        if "синхрониз" in text_lower and ("готов" in text_lower or "можем перейти" in text_lower or "приступим" in text_lower or "приступить" in text_lower or "начнем" in text_lower):
-            is_ready = True
-    
-    return {"text": clean_text, "ready": is_ready}
+    return {"text": response_text, "ready": is_ready}
 
 @router.post("/calculate")
 async def calculate_cards(request: OnboardingCalculateRequest, db: AsyncSession = Depends(get_db)):

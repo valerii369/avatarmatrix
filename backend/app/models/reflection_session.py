@@ -14,6 +14,7 @@ class ReflectionSession(Base, TimestampMixin):
     
     sphere: Mapped[str] = mapped_column(String(32), default="IDENTITY")
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    current_phase: Mapped[int] = mapped_column(Integer, default=1) # 1: Entrance, 2: Descent, 3: Shift, 4: Integration
     
     # Full chat history: [{role, content, timestamp}]
     messages_json: Mapped[Optional[list]] = mapped_column(JSONB, default=[])

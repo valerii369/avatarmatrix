@@ -1,0 +1,45 @@
+{
+  "scene_name": "Garden of Abundance",
+  "psychological_foundation": "In this scene, the archetype of the Empress is explored, focusing on themes of nurturing, abundance, and the shadow aspects of overcontrol and material attachment. The scene probes the individual's perception of growth, generosity, and freedom.",
+  "immersion_architecture": {
+    "orientation": "In a lush, vibrant garden, the air is perfumed with the scent of blooming jasmine and ripe, succulent fruits hanging heavily from the branches. The ground is covered with a soft, green moss that cushions every step, and a gentle stream winds through the landscape, its surface reflecting the golden hue of the setting sun. Everywhere you look, life thrives in harmonious abundance, yet there's an underlying tension, as if the garden itself is holding its breath.",
+    "complication": "A sudden, fierce wind sweeps through the garden, causing the trees to sway violently and scattering petals and leaves into the air."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Jasmine flowers",
+      "interpretation_broken": "If the jasmine flowers are perceived as broken, it may suggest feelings of lost innocence or a disruption in one's ability to experience beauty and simplicity.",
+      "interpretation_beautiful": "If the jasmine flowers are perceived as beautiful, it indicates an appreciation for the delicate and ephemeral aspects of life, reflecting a connection to nature and inner peace.",
+      "interpretation_threatening": "If the jasmine flowers are perceived as threatening, it may reveal a fear of vulnerability or of being overwhelmed by emotions and sensory experiences."
+    },
+    {
+      "object": "Stream",
+      "interpretation_broken": "If the stream is perceived as broken or dry, it may symbolize a blockage in emotional flow or difficulties in expressing or processing feelings.",
+      "interpretation_beautiful": "If the stream is seen as beautiful, it suggests a harmonious emotional state and the ability to let feelings flow naturally and without resistance.",
+      "interpretation_threatening": "If the stream is perceived as threatening, it might indicate anxiety about being swept away by emotions or losing control."
+    },
+    {
+      "object": "Moss",
+      "interpretation_broken": "If the moss is seen as broken or patchy, it could signify feelings of instability or insecurity in one's foundations or support systems.",
+      "interpretation_beautiful": "If the moss is perceived as beautiful, it represents a sense of comfort and being grounded, an appreciation for the soft and nurturing aspects of life.",
+      "interpretation_threatening": "If the moss is perceived as threatening, it may indicate a fear of being smothered or trapped by comfort and routine."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "nature",
+      "growth",
+      "abundance",
+      "control"
+    ],
+    "mcadams_markers": [
+      "nurturance",
+      "generativity",
+      "intimacy"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "How does the garden reflect your current relationship with abundance and control?",
+    "action_prompt": "What does your body do as you feel the wind sweep through the garden?"
+  }
+}

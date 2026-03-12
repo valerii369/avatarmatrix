@@ -11,7 +11,7 @@ from app.core.economy import spend_energy, award_xp
 from app.agents.master_agent import analyze_reflection
 from app.agents.reflect_agent import reflection_chat_message
 from app.core.astrology.vector_matcher import match_text_to_archetypes
-from app.agents.hawkins_agent import evaluate_hawkins
+
 
 router = APIRouter()
 
@@ -127,10 +127,11 @@ async def start_reflection_chat(request: ReflectRequest, db: AsyncSession = Depe
     analysis = await analyze_reflection(request.content)
     sphere = analysis.get("sphere", "IDENTITY")
     
-    # Создание сессии
+    # Создание сессии (с начальной фазой 1 - Entrance)
     session = ReflectionSession(
         user_id=request.user_id,
         sphere=sphere,
+        current_phase=1,
         messages_json=[{"role": "user", "content": request.content}]
     )
     db.add(session)
@@ -138,7 +139,17 @@ async def start_reflection_chat(request: ReflectRequest, db: AsyncSession = Depe
     await db.refresh(session)
 
     # Первый ответ ИИ
-    ai_response, is_ready = await reflection_chat_message(session.messages_json, request.content, sphere)
+    ai_response, phase_complete, analysis_dict = await reflection_chat_message(
+        chat_history=[],
+        user_message=request.content,
+        sphere=sphere,
+        current_phase=session.current_phase
+    )
+    
+    # Продвижение по фазам, если ИИ считает, что цель фазы достигнута
+    if phase_complete:
+        session.current_phase += 1
+        
     session.messages_json.append({"role": "assistant", "content": ai_response})
     
     # Commit AI response
@@ -148,8 +159,10 @@ async def start_reflection_chat(request: ReflectRequest, db: AsyncSession = Depe
     return {
         "session_id": session.id,
         "sphere": sphere,
+        "current_phase": session.current_phase,
         "ai_response": ai_response,
-        "ready": is_ready
+        "emotion": analysis_dict.get("extracted_emotion", ""),
+        "ready": False # Start never triggers a full finish
     }
 
 @router.post("/chat/message")
@@ -168,14 +181,45 @@ async def send_reflection_message(request: ChatMessageRequest, db: AsyncSession 
     # Добавляем сообщение пользователя
     session.messages_json.append({"role": "user", "content": request.message})
     
-    # Генерируем ответ ИИ
-    ai_response, is_ready = await reflection_chat_message(session.messages_json, request.message, session.sphere)
+    # Предварительно сохраняем контекст для запроса (без нового сообщения юзера, мы передаем его отдельно)
+    chat_history = session.messages_json[:-1]
+    
+    # Генерируем ответ ИИ с учетом текущей фазы
+    ai_response, phase_complete, analysis_dict = await reflection_chat_message(
+        chat_history=chat_history,
+        user_message=request.message,
+        sphere=session.sphere,
+        current_phase=session.current_phase
+    )
+    
+    # Progress the state machine
+    if phase_complete:
+        session.current_phase += 1
+        
+    # Check if we moved past the final Phase 4
+    is_ready = session.current_phase > 4
+        
     session.messages_json.append({"role": "assistant", "content": ai_response})
+    
+    # Store interim analysis results (emotion/hawkins) safely for the finish endpoint
+    new_analysis = session.final_analysis.copy() if session.final_analysis else {}
+    new_analysis["last_emotion"] = analysis_dict.get("extracted_emotion", "")
+    
+    # Если мы прошли 4ю фазу (Интеграция), там сгенерировался шкала Хокинса! Сохраняем.
+    if analysis_dict.get("hawkins_score", 0) > 0:
+        new_analysis["hawkins_score"] = analysis_dict["hawkins_score"]
+        
+    session.final_analysis = new_analysis
     
     db.add(session)
     await db.commit()
 
-    return {"ai_response": ai_response, "ready": is_ready}
+    return {
+        "ai_response": ai_response, 
+        "current_phase": min(session.current_phase, 4), # Cap at 4 for UI
+        "emotion": analysis_dict.get("extracted_emotion", ""),
+        "ready": is_ready
+    }
 
 @router.post("/chat/finish")
 async def finish_reflection_chat(request: ChatMessageRequest, db: AsyncSession = Depends(get_db)):
@@ -194,6 +238,11 @@ async def finish_reflection_chat(request: ChatMessageRequest, db: AsyncSession =
     full_transcript = "\n".join([f"{m['role']}: {m['content']}" for m in session.messages_json])
     analysis = await analyze_reflection(full_transcript)
     
+    # Обогащаем финальный анализ тем Хокинсом, который мы вытащили на 4-й фазе прямо в агенте (если он там есть)
+    agent_hawkins = session.final_analysis.get("hawkins_score") if session.final_analysis else None
+    if agent_hawkins and agent_hawkins > 0:
+        analysis["hawkins_score"] = agent_hawkins
+        
     # Закрываем сессию
     session.is_active = False
     session.final_analysis = analysis

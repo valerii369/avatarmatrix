@@ -1,0 +1,46 @@
+{
+  "scene_name": "The Phoenix's Threshold",
+  "psychological_foundation": "This scene is designed to explore the archetypal theme of Death as a transformative force, focusing on the individual's mission or purpose in life. It draws on various psychological theories to guide the user through an imaginative and introspective experience.",
+  "immersion_architecture": {
+    "orientation": "In a vast, echoing cavern, the walls shimmer with phosphorescent lichen, casting an ethereal glow that dances like starlight on water. At the center, a massive, ancient tree stands, its roots sprawling across the cave floor like veins of the earth, its branches reaching towards the unseen sky. A river of liquid light flows around the tree, its gentle current whispering secrets of the past and future.",
+    "complication": "Suddenly, the ground trembles, and the tree begins to shed its leaves, each one turning to ash before touching the ground."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Tree",
+      "interpretation_broken": "Seeing the tree as broken may suggest feelings of disconnection from one's roots or a perceived loss of personal strength.",
+      "interpretation_beautiful": "Perceiving the tree as beautiful could indicate a recognition of inner resilience and the beauty of personal growth.",
+      "interpretation_threatening": "Viewing the tree as threatening may reflect fear of inevitable change or the unknown aspects of personal transformation."
+    },
+    {
+      "object": "River of Light",
+      "interpretation_broken": "If the river is seen as broken, it may symbolize a disruption in life's flow or a feeling of being stuck in one's journey.",
+      "interpretation_beautiful": "A beautiful river may represent the flow of inspiration and a sense of being guided by a greater purpose.",
+      "interpretation_threatening": "A threatening river could indicate anxiety about the future or the fear of being overwhelmed by life's changes."
+    },
+    {
+      "object": "Phosphorescent Lichen",
+      "interpretation_broken": "Broken lichen might symbolize a loss of hope or difficulty in finding one's way in the dark.",
+      "interpretation_beautiful": "Beautiful lichen may suggest a sense of wonder and the ability to find light in the darkest situations.",
+      "interpretation_threatening": "Threatening lichen could reflect a fear of being consumed by the past or hidden aspects of the self."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "change",
+      "transformation",
+      "fear",
+      "hope"
+    ],
+    "mcadams_markers": [
+      "agency",
+      "communion",
+      "redemption",
+      "contamination"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What does the tree shedding its leaves represent in your life right now?",
+    "action_prompt": "What does your body do as the ground trembles and the leaves turn to ash?"
+  }
+}

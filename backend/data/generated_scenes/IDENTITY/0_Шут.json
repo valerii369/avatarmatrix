@@ -1,0 +1,44 @@
+{
+  "scene_name": "The Infinite Carnival",
+  "psychological_foundation": "Exploration of identity through the lens of the Jester archetype, focusing on the potential for transformation and self-discovery through spontaneity and embracing the unknown.",
+  "immersion_architecture": {
+    "orientation": "The scene opens in a vast, surreal carnival that stretches infinitely in all directions, filled with vibrant colors that seem to breathe and shift under the gaze. The air is thick with the scent of cotton candy and popcorn, yet there is an underlying note of something unplaceable and mysterious, hinting at hidden depths. Laughter and playful music echo from unseen sources, creating an atmosphere that is both inviting and slightly disorienting.",
+    "complication": "A sudden shift in the light casts long, distorted shadows across the bright carnival tents, hinting at a change in the playful mood to something more enigmatic and challenging."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Ferris Wheel",
+      "interpretation_broken": "Perceiving the Ferris Wheel as broken may indicate a disruption in one's sense of adventure or a fear of change and the cyclical nature of life.",
+      "interpretation_beautiful": "Seeing the Ferris Wheel as beautiful suggests an appreciation for life's cycles, the ups and downs, and the joy in experiencing the world from different perspectives.",
+      "interpretation_threatening": "If the Ferris Wheel appears threatening, it may symbolize anxiety about losing control or fear of the heights one must reach to gain a new perspective."
+    },
+    {
+      "object": "Funhouse Mirrors",
+      "interpretation_broken": "Broken funhouse mirrors could reflect a fractured self-image or confusion about one's identity.",
+      "interpretation_beautiful": "Finding beauty in the funhouse mirrors indicates a playful acceptance of the multifaceted nature of identity and an ability to find joy in self-exploration.",
+      "interpretation_threatening": "If the funhouse mirrors are seen as threatening, it may suggest a fear of confronting one's true self or the distortion of reality."
+    },
+    {
+      "object": "Balloon Animals",
+      "interpretation_broken": "Broken balloon animals might represent lost innocence or the fragility of one's youthful aspirations.",
+      "interpretation_beautiful": "Seeing balloon animals as beautiful signifies a connection to one's inner child and a sense of joy in creativity and imagination.",
+      "interpretation_threatening": "If balloon animals are perceived as threatening, it could indicate a fear of vulnerability or the chaos of unrestrained creativity."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "identity",
+      "change",
+      "playfulness"
+    ],
+    "mcadams_markers": [
+      "exploration",
+      "transformation",
+      "self-discovery"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What part of yourself feels like it belongs in this infinite carnival, constantly changing and adapting?",
+    "action_prompt": "What does your body feel like doing in this vibrant, ever-shifting space?"
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "scene_name": "The Crystal Citadel",
+  "psychological_foundation": "Exploring the dynamics of authority and control in societal structures through the lens of the Emperor archetype.",
+  "immersion_architecture": {
+    "orientation": "A vast crystal citadel looms over the horizon, its sharp spires piercing the sky, casting prismatic reflections across the barren landscape. The air is thick with an ethereal mist that shimmers with every color of the spectrum, creating an illusion of a dreamlike sanctuary. The citadel stands isolated, surrounded by a deep chasm that seems to pulse with a life of its own, guarding the fortress from the outside world.",
+    "complication": "Suddenly, the ground trembles as fragments of the crystal walls begin to crack and shatter, threatening to collapse the entire structure."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Crystal Walls",
+      "interpretation_broken": "Broken crystal walls suggest a fear of losing control and the fragility of seemingly strong structures.",
+      "interpretation_beautiful": "Beautiful crystal walls indicate admiration for order and the allure of a well-structured system.",
+      "interpretation_threatening": "Threatening crystal walls reflect anxiety about oppressive authority and rigid, unyielding power."
+    },
+    {
+      "object": "Prismatic Reflections",
+      "interpretation_broken": "Broken reflections signify a distortion of reality and a fear of deception or illusion.",
+      "interpretation_beautiful": "Beautiful reflections symbolize clarity of vision and the harmonious merging of different perspectives.",
+      "interpretation_threatening": "Threatening reflections suggest confusion and the overwhelming nature of complexity."
+    },
+    {
+      "object": "Ethereal Mist",
+      "interpretation_broken": "Broken mist reveals vulnerability and a loss of protective barriers, exposing raw emotions.",
+      "interpretation_beautiful": "Beautiful mist represents mystery and the enchanting allure of the unknown.",
+      "interpretation_threatening": "Threatening mist indicates fear of obscured truths and the unknown dangers lurking within."
+    },
+    {
+      "object": "Deep Chasm",
+      "interpretation_broken": "A broken chasm implies a bridge to new ideas and the potential for change and innovation.",
+      "interpretation_beautiful": "A beautiful chasm signifies respect for boundaries and the balance between isolation and security.",
+      "interpretation_threatening": "A threatening chasm reflects fear of isolation and the insurmountable barriers that separate and divide."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "control",
+      "authority",
+      "power",
+      "fear"
+    ],
+    "mcadams_markers": [
+      "agency",
+      "power",
+      "order",
+      "vulnerability"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "How does the citadel represent your relationship with authority and control in your life?",
+    "action_prompt": "What does your body feel or do as the crystal walls begin to crack?"
+  }
+}

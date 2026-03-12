@@ -6,9 +6,7 @@ from sqlalchemy import select
 
 from app.database import AsyncSessionLocal
 from app.models import CardProgress, AlignSession, SyncSession, User, DiaryEntry
-from app.agents.align_agent import alignment_session_message, check_alignment_depth
-from app.agents.hawkins_agent import evaluate_hawkins
-from app.agents.analytic_agent import generate_alignment_summary, run_alignment_expert_analysis
+from app.agents.align_agent import alignment_session_message
 from app.core.economy import spend_energy, hawkins_to_rank, process_card_rank_up
 from app.config import settings
 
@@ -121,7 +119,7 @@ async def alignment_session(
     session_expert_results = {}
 
     # Initial AI message
-    opening = await alignment_session_message(
+    opening_dict = await alignment_session_message(
         stage=1,
         archetype_id=archetype_id,
         sphere=sphere,
@@ -132,6 +130,7 @@ async def alignment_session(
         shadow_pattern=shadow_pattern,
         history_context=history_context,
     )
+    opening = opening_dict.get("ai_response", "Дыши. Что ты чувствуешь?")
     chat_history.append({"role": "assistant", "content": opening})
 
     await websocket.send_json({
@@ -156,33 +155,12 @@ async def alignment_session(
                 is_deepening = False
                 
                 if user_content.strip():
-                    depth_result = await check_alignment_depth(user_content)
-                    is_sufficient = depth_result.get("is_sufficient", False)
                     chat_history.append({"role": "user", "content": user_content})
 
-                    # Provide full history as context for more accurate assessment
-                    history_str = "\n".join([f"{m['role']}: {m['content']}" for m in chat_history[:-1]])
-                    hawkins_eval = await evaluate_hawkins(user_content, context=history_str)
-                    current_hawkins = hawkins_eval.get("score", current_hawkins)
-                    hawkins_min = min(hawkins_min, current_hawkins)
-                    hawkins_peak = max(hawkins_peak, current_hawkins)
-
-                    if is_sufficient or stage_attempts >= 1 or is_manual_transition:
-                        if current_stage < 3:
-                            current_stage += 1
-                            stage_attempts = 0
-                    else:
-                        is_deepening = True
-                        stage_attempts += 1
-                elif is_manual_transition:
-                    if current_stage < 3:
-                        current_stage += 1
-                        stage_attempts = 0
-                
                 effective_user_content = user_content if user_content.strip() else "[Переход к следующему протоколу]"
-                is_complete = current_stage >= 3 and (user_content.strip() or is_manual_transition) and not is_deepening
 
-                ai_response = await alignment_session_message(
+                # Single LLM call per turn
+                ai_response_dict = await alignment_session_message(
                     stage=current_stage,
                     archetype_id=archetype_id,
                     sphere=sphere,
@@ -192,30 +170,50 @@ async def alignment_session(
                     core_belief=core_belief,
                     shadow_pattern=shadow_pattern,
                     history_context=history_context,
-                    token_budget=settings.TOKEN_BUDGET_DEEP_SESSION,
                     is_deepening=is_deepening
                 )
+                
+                ai_response = ai_response_dict.get("ai_response", "...")
+                is_sufficient = ai_response_dict.get("is_depth_sufficient", False)
+                
+                # Update Hawkins
+                if user_content.strip():
+                    current_hawkins = ai_response_dict.get("hawkins_score_estimation", current_hawkins)
+                    hawkins_min = min(hawkins_min, current_hawkins)
+                    hawkins_peak = max(hawkins_peak, current_hawkins)
+                
+                # State Machine Logic
+                if user_content.strip() or is_manual_transition:
+                    if is_sufficient or stage_attempts >= 1 or is_manual_transition:
+                        if current_stage < 3:
+                            current_stage += 1
+                            stage_attempts = 0
+                            is_deepening = False
+                    else:
+                        is_deepening = True
+                        stage_attempts += 1
+                        
+                is_complete = current_stage >= 3 and (user_content.strip() or is_manual_transition) and not is_deepening
+
                 chat_history.append({"role": "assistant", "content": ai_response})
 
-                expert_results = {}
                 if is_complete:
-                    expert_results = await run_alignment_expert_analysis(
-                        chat_history=chat_history,
-                        archetype_id=archetype_id,
-                        sphere=sphere
-                    )
-                    session_expert_results = expert_results
+                    session_expert_results = {
+                        "hawkins_score": current_hawkins,
+                        "final_insight": ai_response_dict.get("final_insight"),
+                        "integration_plan": ai_response_dict.get("integration_plan")
+                    }
 
                 await websocket.send_json({
                     "type": "response",
                     "content": ai_response,
                     "protocol": current_stage,
-                    "hawkins_current": expert_results.get("hawkins_score") if is_complete else current_hawkins,
+                    "hawkins_current": current_hawkins,
                     "hawkins_min": hawkins_min,
                     "hawkins_peak": hawkins_peak,
                     "is_complete": is_complete,
                     "is_deepening": is_deepening,
-                    "expert_results": expert_results if is_complete else None
+                    "expert_results": session_expert_results if is_complete else None
                 })
 
                 if is_complete:
@@ -277,25 +275,23 @@ async def alignment_session(
         # Diary entry
         if align_session.is_complete and card:
             try:
-                summary = await generate_alignment_summary(
-                    chat_history=chat_history,
-                    archetype_id=card.archetype_id,
-                    sphere=card.sphere
-                )
-                align_session.new_belief = summary.get("new_belief")
-                align_session.integration_plan = summary.get("integration_plan")
+                final_insight = session_expert_results.get("final_insight")
+                integration_plan = session_expert_results.get("integration_plan")
+                
+                align_session.new_belief = final_insight
+                align_session.integration_plan = integration_plan
                 
                 diary = DiaryEntry(
                     user_id=user_id,
                     align_session_id=align_session.id,
                     archetype_id=card.archetype_id,
                     sphere=card.sphere,
-                    content=summary.get("final_insight") or "Итог сессии выравнивания",
-                    integration_plan=summary.get("integration_plan"),
+                    content=final_insight or "Итог сессии выравнивания",
+                    integration_plan=integration_plan,
                     entry_type="session_result"
                 )
                 db.add(diary)
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"[Session Auto-Save Error] {e}")
 
         await db.commit()

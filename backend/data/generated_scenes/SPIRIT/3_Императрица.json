@@ -1,0 +1,45 @@
+{
+  "scene_name": "Garden of the Empress",
+  "psychological_foundation": "Exploration of spirituality through the archetype of the Empress, highlighting themes of nurturing, abundance, and the dualities of care and control.",
+  "immersion_architecture": {
+    "orientation": "The garden stretches infinitely, a lush tapestry woven from emerald leaves and vibrant blossoms that seem to hum with the energy of life itself. Golden sunlight filters through a canopy of ancient trees, casting ethereal patterns on the ground that shift and dance like whispers of forgotten secrets. The air is thick with the scent of blooming jasmine and the sound of a distant, melodious stream meandering through the foliage, inviting a sense of peace and timelessness.",
+    "complication": "A sudden rustle disturbs the tranquility, and a shadow flits across the path, leaving behind a trail of withered leaves."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Ancient Trees",
+      "interpretation_broken": "A perception of broken trees may indicate a disconnect from one's roots or a fear of losing foundational support.",
+      "interpretation_beautiful": "Beautiful trees suggest a deep connection with one's ancestry and a sense of grounding and stability in life.",
+      "interpretation_threatening": "Threatening trees might reflect a fear of being overshadowed or overwhelmed by one's heritage or past."
+    },
+    {
+      "object": "Blooming Flowers",
+      "interpretation_broken": "Broken flowers can symbolize a loss of innocence or beauty, or a fear that one's efforts will not come to fruition.",
+      "interpretation_beautiful": "Beautiful flowers indicate a feeling of being in harmony with nature and one's own creative processes.",
+      "interpretation_threatening": "Threatening flowers may represent a fear of being suffocated by one's own or others' expectations of growth and beauty."
+    },
+    {
+      "object": "Meandering Stream",
+      "interpretation_broken": "A broken stream suggests a disruption in one's emotional flow or spiritual journey.",
+      "interpretation_beautiful": "A beautiful stream denotes a sense of peace and the ability to navigate life's challenges with grace.",
+      "interpretation_threatening": "A threatening stream might indicate fear of being swept away by emotions or circumstances beyond one's control."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "nature",
+      "beauty",
+      "growth",
+      "control"
+    ],
+    "mcadams_markers": [
+      "nurturance",
+      "spirituality",
+      "legacy"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "How does the shadow within your garden manifest in your life?",
+    "action_prompt": "What does your body feel as it moves through this garden, encountering the shadow?"
+  }
+}

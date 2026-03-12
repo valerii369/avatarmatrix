@@ -1,0 +1,44 @@
+{
+  "scene_name": "The Ancestral Chapel",
+  "psychological_foundation": "The scene explores the dynamics of family traditions and the passing of wisdom across generations, highlighting the tension between genuine spiritual guidance and dogmatic rigidity.",
+  "immersion_architecture": {
+    "orientation": "The ancestral chapel stands in a dense, mist-covered forest, its ancient stone walls overgrown with ivy that seems to pulsate with a life of its own. Stained glass windows depict scenes of familial unity, casting fragmented, colorful shadows on the ground. Spirals of incense smoke rise from the altar, intertwining with the mist, creating an ethereal connection between the heavens and the earth.",
+    "complication": "A sudden, chilling breeze sweeps through the chapel, extinguishing the candles and plunging the room into an unsettling darkness."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Stained Glass Windows",
+      "interpretation_broken": "If the stained glass windows appear broken, it may suggest a perceived disruption in family unity or a struggle with maintaining familial traditions.",
+      "interpretation_beautiful": "If the stained glass windows are seen as beautiful, it reflects a harmonious relationship with family traditions and values, appreciating the richness they bring.",
+      "interpretation_threatening": "If the stained glass windows are perceived as threatening, it might indicate a fear of being judged or constrained by family expectations and traditional values."
+    },
+    {
+      "object": "Ivy",
+      "interpretation_broken": "If the ivy appears broken, it may symbolize a disconnection from one's roots or a feeling of being uprooted from family heritage.",
+      "interpretation_beautiful": "If the ivy is seen as beautiful, it represents a nurturing connection to ancestry and the strength drawn from one's lineage.",
+      "interpretation_threatening": "If the ivy is perceived as threatening, it could indicate a feeling of being suffocated or overwhelmed by family obligations or history."
+    },
+    {
+      "object": "Incense Smoke",
+      "interpretation_broken": "If the incense smoke seems broken or dissipated, it may reflect a loss of spiritual connection or guidance within the family.",
+      "interpretation_beautiful": "If the incense smoke is seen as beautiful, it signifies a deep spiritual bond and the comforting presence of ancestral wisdom.",
+      "interpretation_threatening": "If the incense smoke is perceived as threatening, it might suggest anxiety about spiritual beliefs or fear of the unknown aspects of one's heritage."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "tradition",
+      "spirituality",
+      "family"
+    ],
+    "mcadams_markers": [
+      "legacy",
+      "wisdom transmission",
+      "family roles"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "How does the presence of family traditions influence your everyday decisions?",
+    "action_prompt": "What does your body do when you imagine stepping into the chapel and feeling the cool, misty air enveloping you?"
+  }
+}

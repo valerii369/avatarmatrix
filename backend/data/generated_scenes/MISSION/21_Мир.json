@@ -1,0 +1,44 @@
+{
+  "scene_name": "Harmonious Convergence",
+  "psychological_foundation": "This scene explores the concept of 'World' as an archetype, focusing on the sense of completeness and integration of experiences. It challenges the participant to confront the fear of completion and the potential void that follows achievement.",
+  "immersion_architecture": {
+    "orientation": "The sky is a swirling tapestry of vivid colors, merging into one another as if painted by a cosmic hand. Below, an endless field of crystalline mirrors reflects the sky, each shard capturing a different hue of the celestial dance. A gentle breeze carries the scent of blooming stars, creating an atmosphere of otherworldly serenity.",
+    "complication": "Suddenly, one of the mirrors begins to crack, sending ripples of distortion through the reflected sky."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Mirrors",
+      "interpretation_broken": "Feeling of fragmentation, fear of losing one's sense of self or identity.",
+      "interpretation_beautiful": "A sense of harmony and balance, acceptance of all parts of oneself as beautiful.",
+      "interpretation_threatening": "Fear of being seen too clearly, anxiety about self-reflection and introspection."
+    },
+    {
+      "object": "Sky",
+      "interpretation_broken": "A loss of connection to the bigger picture, feeling isolated and insignificant.",
+      "interpretation_beautiful": "Sense of limitless potential and unity with the universe.",
+      "interpretation_threatening": "Overwhelming pressure of expectations or fear of the unknown expanses."
+    },
+    {
+      "object": "Breeze",
+      "interpretation_broken": "A lack of motivation or inspiration, feeling stagnant and unfulfilled.",
+      "interpretation_beautiful": "A gentle guidance and inspiration, feeling uplifted and motivated.",
+      "interpretation_threatening": "Fear of being swayed or influenced by external forces, losing control."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "identity",
+      "self-reflection",
+      "integration"
+    ],
+    "mcadams_markers": [
+      "unity",
+      "achievement",
+      "fear of completion"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "How does the fear of completion manifest in your life, and what name would you give to this fear?",
+    "action_prompt": "What does your body do as you approach the cracked mirror? How do you physically respond to the distortion of the sky?"
+  }
+}

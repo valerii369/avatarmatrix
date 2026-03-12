@@ -1,0 +1,46 @@
+{
+  "scene_name": "The Temple of Echoes",
+  "psychological_foundation": "This scene explores themes of spiritual authority and the transmission of wisdom, focusing on the balance between genuine mentorship and dogmatic control.",
+  "immersion_architecture": {
+    "orientation": "In a vast temple hall, echoes of ancient chants reverberate off the marble walls, creating an auditory tapestry that seems both comforting and overwhelming. Stained glass windows cast kaleidoscopic patterns of light on the floor, shifting as the sun moves across the sky. Incense smoke spirals upwards, weaving through the air as if carrying prayers to the heavens.",
+    "complication": "A sudden gust of wind flings open the temple doors, scattering sacred scrolls across the floor."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Stained Glass Windows",
+      "interpretation_broken": "Seeing the stained glass as broken might symbolize a perceived fracture in one's belief system or a loss of spiritual clarity.",
+      "interpretation_beautiful": "If the stained glass is perceived as beautiful, it may reflect an appreciation for the complexity and multifaceted nature of spiritual truths.",
+      "interpretation_threatening": "Finding the stained glass threatening could indicate a fear of being judged or scrutinized by higher powers."
+    },
+    {
+      "object": "Echoes of Chants",
+      "interpretation_broken": "If the echoes are perceived as broken, it might suggest a feeling of disconnection from one's spiritual community or tradition.",
+      "interpretation_beautiful": "Hearing the echoes as beautiful could represent a deep connection and resonance with spiritual teachings or practices.",
+      "interpretation_threatening": "If the echoes are threatening, it may denote an overwhelming pressure to conform to religious expectations or dogmas."
+    },
+    {
+      "object": "Incense Smoke",
+      "interpretation_broken": "Seeing the incense smoke as broken could symbolize a disruption in one's spiritual practice or a feeling that prayers are not being heard.",
+      "interpretation_beautiful": "If the incense smoke is seen as beautiful, it might indicate a sense of peace and transcendence in spiritual rituals.",
+      "interpretation_threatening": "Perceiving incense smoke as threatening may reflect anxiety about the impermanence of life or the unknown aspects of spirituality."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "spirituality",
+      "belief",
+      "community",
+      "tradition"
+    ],
+    "mcadams_markers": [
+      "mentor",
+      "authority",
+      "tradition",
+      "faith"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "In what ways do the echoes of past teachings influence your current spiritual path?",
+    "action_prompt": "What does your body do when you hear the sudden gust of wind in the temple?"
+  }
+}

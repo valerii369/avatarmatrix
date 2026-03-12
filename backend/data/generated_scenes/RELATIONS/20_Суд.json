@@ -1,0 +1,44 @@
+{
+  "scene_name": "The Celestial Courtroom",
+  "psychological_foundation": "This scene explores the archetype of 'Judgment' in the context of relationships, focusing on themes of spiritual awakening, forgiveness, and transformation from past burdens.",
+  "immersion_architecture": {
+    "orientation": "The scene unfolds in a vast, ethereal courtroom suspended amongst swirling galaxies and nebulous clouds. The floor is made of translucent crystal, reflecting the cosmos above, while celestial scales of justice hover in mid-air, shimmering with an inner light. The air hums with a chorus of distant, unseen voices, echoing the judgments and whispers of ancestors.",
+    "complication": "A sudden, blinding beam of light pierces through the courtroom, illuminating a shadowy figure who stands accused, representing the unresolved guilt and judgment held within."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Celestial Scales",
+      "interpretation_broken": "A perception of broken scales may indicate a feeling of imbalance and injustice in one's life, suggesting unresolved conflicts and a need for reconciliation.",
+      "interpretation_beautiful": "Seeing the scales as beautiful signifies harmony and alignment with one's moral and ethical values, suggesting a readiness for forgiveness and acceptance.",
+      "interpretation_threatening": "If the scales appear threatening, it reflects fear of judgment and the pressure of living up to expectations, indicating anxiety about one's actions being weighed."
+    },
+    {
+      "object": "Translucent Crystal Floor",
+      "interpretation_broken": "A cracked or shattered floor suggests a fragile foundation in one's beliefs or relationships, highlighting vulnerability and the need for healing and stability.",
+      "interpretation_beautiful": "Perceiving the floor as beautiful reflects transparency and clarity in one's path, indicating confidence and trust in one's direction and decisions.",
+      "interpretation_threatening": "If the floor feels threatening, it symbolizes the fear of unseen truths and instability, suggesting apprehension about facing one's inner realities."
+    },
+    {
+      "object": "Shadowy Figure",
+      "interpretation_broken": "A broken figure suggests a fragmented sense of self, representing internal conflict and the struggle to forgive oneself for past actions.",
+      "interpretation_beautiful": "Seeing the figure as beautiful indicates acceptance and integration of one's shadow aspects, symbolizing self-compassion and growth.",
+      "interpretation_threatening": "If the figure seems threatening, it represents unresolved guilt and fear of one's own potential for wrongdoing, highlighting the need for inner transformation."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "guilt",
+      "forgiveness",
+      "judgment"
+    ],
+    "mcadams_markers": [
+      "moral conflict",
+      "identity transformation",
+      "ancestral influence"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What does the shadowy figure represent in your life?",
+    "action_prompt": "What does your body feel as you stand on the translucent crystal floor of the cosmic courtroom?"
+  }
+}

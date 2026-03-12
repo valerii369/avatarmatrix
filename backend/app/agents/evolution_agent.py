@@ -4,10 +4,39 @@ from typing import List, Optional
 from sqlalchemy import select, update, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from pydantic import BaseModel, Field
 from app.database import Base
 from app.models.data_architecture import UserBehaviorProfileV2
 from app.models.text_diagnostics import TextScene, SceneStats, Sphere, Archetype, SceneInteraction
 from app.agents.common import client, settings
+from app.agents.sync_agent import get_embedding
+
+# --- Pydantic Models for Structured Output (High Standard) ---
+class Interpretation(BaseModel):
+    object: str = Field(description="Ключевой объект в сцене (например 'Зеркало')")
+    interpretation_broken: str = Field(description="Интерпретация, если объект сломан/разрушен")
+    interpretation_beautiful: str = Field(description="Интерпретация, если объект красивый/притягательный")
+    interpretation_threatening: str = Field(description="Интерпретация, если объект угрожающий/пугающий")
+
+class ImmersionArchitecture(BaseModel):
+    orientation: str = Field(description="Атмосферное описание стартовой среды (2-3 предложения)")
+    complication: str = Field(description="Событие-триггер внутри сцены, создающее давление (1 предложение)")
+
+class DiagnosticFocus(BaseModel):
+    pennebaker_markers: list[str] = Field(description="Маркеры Пеннебейкера")
+    mcadams_markers: list[str] = Field(description="Маркеры Макадамса")
+
+class TransformationMechanics(BaseModel):
+    externalization_question: str = Field(description="Вопрос для экстернализации проблемы по М. Уайту")
+    action_prompt: str = Field(description="Вопрос про телесную/пространственную реакцию (Что делает ваше тело...)")
+
+class SceneData(BaseModel):
+    scene_name: str
+    psychological_foundation: str
+    immersion_architecture: ImmersionArchitecture
+    projection_dictionary: list[Interpretation]
+    diagnostic_focus: DiagnosticFocus
+    transformation_mechanics: TransformationMechanics
 
 class EvolutionAgent:
     """
@@ -140,45 +169,56 @@ class DatasetBuilder:
         arch_res = await db.execute(select(Archetype).where(Archetype.id == archetype_id))
         archetype = arch_res.scalar_one()
 
-        prompt = f"""
-        Создай текстовую диагностическую сцену для системы AVATAR.
-        Сфера: {sphere.name_ru}
-        Архетип: {archetype.name}
-        Параметры:
+        system_prompt = f"""
+        Ты — старший системный архитектор и эксперт по нарративной психологии AVATAR.
+        Творчески соединяя Жака Лакана, Карла Юнга, Уильяма Лабова, Генри Мюррея, Джеймса Пеннебейкера, Майкла Уайта и Дэн Макадамса, создай УНИКАЛЬНУЮ проективную текстовую сцену.
+        
+        СФЕРА В ФОКУСЕ: {sphere.name_ru}
+        АРХЕТИП В ФОКУСЕ: {archetype.name} (Свет: {getattr(archetype, 'light', '')}, Тень: {getattr(archetype, 'shadow', '')})
+        
+        ИНСТРУКЦИЯ ПО АРХИТЕКТУРЕ (Лабов + Мюррей):
         - Сложность: {complexity} (0-1)
         - Напряжение: {tension} (0-1)
+        Orientation: Атмосферное описание стартовой среды. Оно должно быть сюрреалистичным, богатым проекциями и отсылать к архетипу и сфере. Без людей. 2-3 предложения.
+        Complication: Событие-триггер внутри сцены, создающее давление (Press). 1 предложение.
         
-        ТРЕБОВАНИЯ:
-        1. Длина: 60-120 слов.
-        2. МИНИМАЛЬНАЯ СЦЕНА: Только 1-2 элемента среды.
-        3. ОТКРЫТАЯ ИНТЕРПРЕТАЦИЯ: Никаких навязанных эмоций или выводов.
-        4. СЕНСОРНЫЙ ФОКУС: Описание пространства и положения тела.
+        ИНСТРУКЦИЯ ПО СИМВОЛАМ (Юнг):
+        Выберите 3-4 ключевых объекта среды и обоснуйте, что значит для анализа, если пользователь воспримет их как "сломанные", "красивые" или "угрожающие".
         
-        Формат ответа JSON:
-        {{
-            "scene_text": "текст сцены...",
-            "environment_type": "тип окружения (лес, комната, пустота...)",
-            "ambiguity_score": 0.5
-        }}
+        СТРОГИЙ ФОРМАТ ВЫВОДА — JSON.
         """
 
         response = await client.chat.completions.create(
-            model=settings.OPENAI_MODEL,
-            messages=[{"role": "system", "content": "Ты — AI-сценарист психологических диагностических систем."},
-                      {"role": "user", "content": prompt}],
-            response_format={"type": "json_object"}
+            model="gpt-4o",
+            messages=[{"role": "system", "content": system_prompt},
+                      {"role": "user", "content": "Сгенерируй эволюционную сцену в формате JSON."}],
+            response_format={
+                "type": "json_schema", 
+                "json_schema": {"name": "scene_schema", "schema": SceneData.model_json_schema()}
+            },
+            temperature=0.7
         )
         
-        data = json.loads(response.choices[0].message.content)
+        data_obj = SceneData.model_validate_json(response.choices[0].message.content)
+        data = data_obj.model_dump()
         
+        # Concatenate text as per standard
+        full_text = f"{data_obj.immersion_architecture.orientation} {data_obj.immersion_architecture.complication}"
+        if data_obj.transformation_mechanics.action_prompt:
+            full_text += f"\n\n[Системный хук]: {data_obj.transformation_mechanics.action_prompt}"
+
+        emb = await get_embedding(full_text)
+
         new_scene = TextScene(
             sphere_id=sphere_id,
             archetype_id=archetype_id,
-            scene_text=data["scene_text"],
+            scene_text=full_text,
+            scene_embedding=emb,
             complexity_score=complexity,
             tension_level=tension,
-            ambiguity_score=data.get("ambiguity_score", 0.5),
-            environment_type=data.get("environment_type", "unknown")
+            ambiguity_score=0.7,
+            environment_type="Projective Landscape (Evolved)",
+            meta_data=data
         )
         db.add(new_scene)
         await db.commit()

@@ -7,19 +7,17 @@ from .common import (
     client, ARCHETYPES, SPHERES, MATRIX_DATA, HAWKINS_SCALE,
     SPHERE_AGENT_STYLES, LEVEL_METHODOLOGIES, LEVEL_GOALS
 )
-from .sync_agent import (
-    is_abstract_response, build_avatar_prompt, run_avatar_layer
-)
-from .hawkins_agent import (
-    get_hawkins_agent_level, evaluate_hawkins
-)
-from .align_agent import (
-    alignment_session_message, check_alignment_depth
-)
-from .analytic_agent import (
-    run_mirror_analysis, run_alignment_expert_analysis,
-    extract_sync_insights, generate_alignment_summary
-)
+from .sync_agent import build_avatar_prompt
+from .align_agent import alignment_session_message
+from pydantic import BaseModel, Field
+
+class ReflectionAnalysis(BaseModel):
+    hawkins_score: int = Field(description="Вибрационный уровень (20-1000).")
+    hawkins_level: str = Field(description="Название уровня Хокинса.")
+    sphere: str = Field(description="Код сферы: IDENTITY, MONEY, RELATIONS, FAMILY, MISSION, HEALTH, SOCIETY, SPIRIT.")
+    archetype_id: int = Field(description="ID наиболее резонирующего архетипа.")
+    dominant_emotion: str = Field(description="Доминирующая эмоция в тексте.")
+    ai_analysis: str = Field(description="Короткий (2-3 предложения), глубокий инсайт или поддержка.")
 
 async def analyze_reflection(text: str) -> dict:
     """
@@ -29,41 +27,46 @@ async def analyze_reflection(text: str) -> dict:
     if not text:
         return {}
 
-    prompt = f"""Ты — ИИ-аналитик системы AVATAR. Твоя задача — проанализировать ежедневную рефлексию пользователя.
-Определи его текущий уровень по шкале Хокинса, выдели сферу жизни, о которой он пишет, и наиболее резонирующий архетип.
-
-ТЕКСТ РЕФЛЕКСИИ:
-"{text}"
-
-СПИСОК СФЕР: IDENTITY, MONEY, RELATIONS, FAMILY, MISSION, HEALTH, SOCIETY, SPIRIT.
-СПИСОК АРХЕТИПОВ: {[{'id': a['id'], 'name': a['name']} for a in ARCHETYPES.values()]}
-
-ИНСТРУКЦИЯ:
-1. Оцени вибрационный уровень (20-1000).
-2. Выбери наиболее подходящую сферу из списка. Если неясно — IDENTITY.
-3. Выбери ID архетипа, который наиболее проявлен в тексте (теневой или светлый).
-4. Напиши "ai_analysis" — короткий (2-3 предложения), глубокий инсайт или поддержку.
-
-Отвечай строго в JSON:
-{{
-  "hawkins_score": int,
-  "hawkins_level": "название уровня",
-  "sphere": "CODE",
-  "archetype_id": int,
-  "dominant_emotion": "эмоция",
-  "ai_analysis": "текст анализа"
-}}"""
+    prompt = f"""
+    ТЫ — диагностическое ядро AVATAR.
+    Твоя задача: Провести глубокий психологический анализ рефлексии пользователя.
+    
+    ТЕКСТ РЕФЛЕКСИИ:
+    "{text}"
+    
+    АЛГОРИТМ АНАЛИЗА:
+    1. КАНАЛ ТЕЛА: Извлеки упоминания телесных ощущений (сжатие, тепло, холод, напряжение). Тело — самый достоверный маркер.
+    2. КАНАЛ ОБРАЗОВ И ДЕЙСТВИЙ: Проанализируй динамику в тексте (статика/движение, открытость/замкнутость).
+    3. ТОЧНАЯ КАЛИБРОВКА (ШКАЛА ХОКИНСА): 
+       - Оцени балл (20-1000) по ХУДШЕМУ достоверному маркеру (диссоциация < 50, апатия 50, страх 100, гнев 150, разум 400).
+       - Если есть рационализация без чувств — балл НЕ выше 400.
+    4. КЛАССИФИКАЦИЯ: Определи сферу жизни (IDENTITY, MONEY, RELATIONS, FAMILY, MISSION, HEALTH, SOCIETY, SPIRIT) и резонирующий архетип.
+    5. ИНСАЙТ: Сформулируй короткий, глубокий инсайт (2-3 предложения), который возвращает человека к его силе или подсвечивает паттерн.
+    
+    Отвечай строго в JSON:
+    {{
+      "hawkins_score": int,
+      "hawkins_level": "название уровня",
+      "sphere": "CODE",
+      "archetype_id": int,
+      "dominant_emotion": "эмоция",
+      "ai_analysis": "текст анализа"
+    }}"""
 
     response = await client.chat.completions.create(
         model=settings.OPENAI_MODEL_FAST,
         messages=[{"role": "system", "content": "Система анализа рефлексий AVATAR."},
                   {"role": "user", "content": prompt}],
         temperature=0.4,
-        response_format={"type": "json_object"},
+        response_format={
+            "type": "json_schema", 
+            "json_schema": {"name": "reflection_analysis", "schema": ReflectionAnalysis.model_json_schema()}
+        }
     )
 
     try:
-        return json.loads(response.choices[0].message.content)
+        result_data = ReflectionAnalysis.model_validate_json(response.choices[0].message.content)
+        return result_data.model_dump()
     except Exception:
         return {
             "hawkins_score": 200,

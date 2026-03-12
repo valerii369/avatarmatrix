@@ -1,0 +1,45 @@
+{
+  "scene_name": "The Chaotic Market",
+  "psychological_foundation": "This scene explores the interplay between the archetype of the Fool and the concept of money, examining themes of potential, freedom, and chaos.",
+  "immersion_architecture": {
+    "orientation": "In the heart of an ancient city, a market sprawls chaotically across cobblestone streets, where stalls are piled high with shimmering coins, their origins as mysterious as their value. The sky above is a kaleidoscope of shifting colors, reflecting the ever-changing fortunes that dance through the air. A giant clock tower looms in the distance, its hands moving erratically, defying the logic of time.",
+    "complication": "Suddenly, the clock strikes an impossible hour, causing the coins to tumble from the stalls and scatter in all directions, as if driven by an unseen wind."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Coins",
+      "interpretation_broken": "Seeing broken or scattered coins may indicate a feeling of financial instability or a fear of losing control over one's resources.",
+      "interpretation_beautiful": "Beautiful coins suggest a healthy relationship with wealth and an appreciation for its potential to bring joy and freedom.",
+      "interpretation_threatening": "Threatening coins might reflect a fear of the power money holds over life decisions or the pressure it exerts."
+    },
+    {
+      "object": "Clock Tower",
+      "interpretation_broken": "A broken clock tower can symbolize a sense of timelessness or a disconnect from reality, reflecting a desire to escape responsibilities.",
+      "interpretation_beautiful": "A beautiful clock tower represents harmony with the flow of time and an ability to adapt to life's changes gracefully.",
+      "interpretation_threatening": "A threatening clock tower may indicate anxiety about the future or the relentless passage of time, pressuring one to make hasty decisions."
+    },
+    {
+      "object": "Kaleidoscope Sky",
+      "interpretation_broken": "A broken sky suggests a fear of chaos and unpredictability, potentially indicating a struggle with trusting life's flow.",
+      "interpretation_beautiful": "A beautiful sky represents an openness to new experiences and an appreciation for life's inherent unpredictability.",
+      "interpretation_threatening": "A threatening sky might reflect a fear of change or an overwhelming sense of instability in one's life."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "change",
+      "time",
+      "money",
+      "chaos"
+    ],
+    "mcadams_markers": [
+      "economic stress",
+      "freedom seeking",
+      "responsibility avoidance"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "How do the scattered coins and erratic clock reflect the way you perceive your financial situation?",
+    "action_prompt": "What does your body do as you watch the coins scatter and the clock strike an impossible hour?"
+  }
+}

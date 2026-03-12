@@ -1,0 +1,44 @@
+{
+  "scene_name": "The Celestial Garden",
+  "psychological_foundation": "Exploration of one's aspirations and inner guidance through the metaphor of a starry garden.",
+  "immersion_architecture": {
+    "orientation": "In the heart of a vast desert, there blooms an enchanted garden under a canopy of eternal twilight. The sky, ablaze with constellations, arches overhead like a celestial dome. Ethereal flowers, luminescent with stardust, sway gently in an unseen breeze, casting a soft glow over the landscape.",
+    "complication": "A sudden gust of wind sweeps through the garden, dimming the starlight and rustling the flower petals into a whispering frenzy."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Starlit Sky",
+      "interpretation_broken": "Feeling disconnected from one's aspirations or higher purpose.",
+      "interpretation_beautiful": "A sense of awe and inspiration, feeling guided by a higher power or intuition.",
+      "interpretation_threatening": "Fear of the unknown or feeling overwhelmed by possibilities."
+    },
+    {
+      "object": "Luminous Flowers",
+      "interpretation_broken": "Loss of hope or inspiration, feeling of emptiness.",
+      "interpretation_beautiful": "Renewed hope and inspiration, a reminder of inner beauty and potential.",
+      "interpretation_threatening": "Anxiety about the fragility of dreams and aspirations."
+    },
+    {
+      "object": "Unseen Breeze",
+      "interpretation_broken": "Lack of momentum or feeling stagnant in life.",
+      "interpretation_beautiful": "A gentle push towards change and embracing new opportunities.",
+      "interpretation_threatening": "Fear of change or losing control over one's life direction."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "aspiration",
+      "hope",
+      "guidance"
+    ],
+    "mcadams_markers": [
+      "spirituality",
+      "growth",
+      "transcendence"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What does the celestial garden represent in your life's journey?",
+    "action_prompt": "What does your body do as the breeze stirs the starlit garden?"
+  }
+}

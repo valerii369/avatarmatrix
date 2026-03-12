@@ -1,0 +1,44 @@
+{
+  "scene_name": "Alchemical Garden",
+  "psychological_foundation": "The scene explores the archetype of Temperance within the familial sphere, highlighting the delicate balance between harmony and stagnation.",
+  "immersion_architecture": {
+    "orientation": "In the heart of an ethereal garden, the air is imbued with the scent of blooming jasmine, while iridescent dragonflies dance gracefully above a tranquil pond. Beneath the surface, koi fish glide effortlessly, their scales shimmering like liquid gold. The garden is a surreal blend of vivid colors and serene silence, a place where the boundaries of reality and dream blur.",
+    "complication": "A sudden ripple disturbs the pond's surface, sending the koi into a frenzy and causing the dragonflies to scatter."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Pond",
+      "interpretation_broken": "A broken pond may indicate a disconnection within the family unit, where communication and emotional flow are disrupted.",
+      "interpretation_beautiful": "A beautiful pond suggests a harmonious family dynamic, where emotions and experiences flow seamlessly and are shared openly.",
+      "interpretation_threatening": "A threatening pond might reflect underlying tensions or secrets within the family that create an atmosphere of unease."
+    },
+    {
+      "object": "Dragonflies",
+      "interpretation_broken": "Broken dragonflies may symbolize lost opportunities for transformation and growth within familial relationships.",
+      "interpretation_beautiful": "Beautiful dragonflies represent the potential for change and the harmonious evolution of family bonds.",
+      "interpretation_threatening": "Threatening dragonflies could signify chaotic and unpredictable changes that disrupt familial harmony."
+    },
+    {
+      "object": "Koi Fish",
+      "interpretation_broken": "Broken koi fish could suggest the stagnation of personal goals or dreams within the family context.",
+      "interpretation_beautiful": "Beautiful koi fish symbolize prosperity and the achievement of personal and familial aspirations.",
+      "interpretation_threatening": "Threatening koi fish might indicate aggressive competition or conflict within the family hierarchy."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "emotion",
+      "family",
+      "balance"
+    ],
+    "mcadams_markers": [
+      "narrative identity",
+      "transformation",
+      "family dynamics"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What does the ripple in the pond represent in your family life?",
+    "action_prompt": "What does your body do as the dragonflies scatter and the koi frenzy?"
+  }
+}

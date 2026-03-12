@@ -1,8 +1,17 @@
+from typing import Optional
+from pydantic import BaseModel, Field
 from .common import (
     client, settings, ARCHETYPES, SPHERES, MATRIX_DATA,
     SPHERE_AGENT_STYLES, LEVEL_METHODOLOGIES, LEVEL_GOALS
 )
 from .hawkins_agent import get_hawkins_agent_level
+
+class AlignmentResponse(BaseModel):
+    ai_response: str = Field(description="Ответ пользователю согласно текущему протоколу (2-4 предложения).")
+    is_depth_sufficient: bool = Field(description="True, если пользователь показал проработку на уровне чувств/тела. False, если ответ формальный, 'от ума' (байпасинг), или слишком короткий.")
+    hawkins_score_estimation: int = Field(description="Оценка текущего состояния по шкале Хокинса (от 20 до 1000) на основе последней реплики.")
+    final_insight: Optional[str] = Field(default=None, description="ТОЛЬКО ДЛЯ 3-Й СТАДИИ ПРИ ЗАВЕРШЕНИИ: Главный инсайт сессии.")
+    integration_plan: Optional[str] = Field(default=None, description="ТОЛЬКО ДЛЯ 3-Й СТАДИИ ПРИ ЗАВЕРШЕНИИ: 1 конкретное микро-действие на неделю.")
 
 async def alignment_session_message(
     stage: int,
@@ -14,10 +23,9 @@ async def alignment_session_message(
     core_belief: str = "",
     shadow_pattern: str = "",
     history_context: str = "",
-    token_budget: int = 2000,
     is_deepening: bool = False
-) -> str:
-    """Generate AI response for an alignment session stage using Quantum Logic."""
+) -> dict:
+    """Generate AI response for an alignment session stage using Structured JSON Outputs."""
     archetype = ARCHETYPES.get(archetype_id, {})
     sphere_data = SPHERES.get(sphere, {})
     agent_level = get_hawkins_agent_level(hawkins_score)
@@ -75,47 +83,39 @@ async def alignment_session_message(
 4. КОРОТКО: Ответ 2-4 предложения. 
 5. ОДИН ВОПРОС: Всегда заканчивай одним открытым вопросом.
 6. ФИНАЛ: В 3-м протоколе обязательно доведи до конкретного микро-действия в реальности.
+6. МЕТРИКИ ОЦЕНКИ (JSON поля):
+   - **is_depth_sufficient**: Оцени ИСКРЕННОСТЬ. Если юзер пишет от головы ("я все понял") без включения чувств и тела — ставь false.
+   - **hawkins_score_estimation**: Замерь вибрацию. Скачок больше чем на 150 пунктов за раз невозможен без катарсиса.
+   - **final_insight / integration_plan**: Заполни только если это 3-й протокол и юзер дал готовность ДЕЙСТВОВАТЬ. Иначе null.
 """
 
     messages = [{"role": "system", "content": system_prompt}]
     messages.extend(chat_history[-15:])
-    messages.append({"role": "user", "content": user_message})
+    if user_message.strip():
+        messages.append({"role": "user", "content": user_message})
 
-    response = await client.chat.completions.create(
-        model=settings.OPENAI_MODEL_FAST,
-        messages=messages,
-        max_tokens=token_budget,
-        temperature=0.7,
-    )
-    
-    return response.choices[0].message.content or "..."
+    try:
+        response = await client.chat.completions.create(
+            model=settings.OPENAI_MODEL_FAST, # Идеально для частых JSON-ответов
+            messages=messages,
+            temperature=0.7,
+            response_format={
+                "type": "json_schema", 
+                "json_schema": {"name": "alignment_schema", "schema": AlignmentResponse.model_json_schema()}
+            }
+        )
+        
+        result_data = AlignmentResponse.model_validate_json(response.choices[0].message.content)
+        return result_data.model_dump()
+        
+    except Exception as e:
+        print(f"[Alignment Error] {e}")
+        return {
+            "ai_response": "Дыши. Что ты чувствуешь прямо сейчас?",
+            "is_depth_sufficient": False,
+            "hawkins_score_estimation": hawkins_score,
+            "final_insight": None,
+            "integration_plan": None
+        }
 
-async def check_alignment_depth(text: str) -> dict:
-    """
-    Evaluate the depth of a user's response to decide on stage transition.
-    Returns: {"is_sufficient": bool, "reason": str}
-    """
-    if not text:
-        return {"is_sufficient": False, "reason": "empty"}
-    
-    text_lower = text.lower()
-    words = text.split()
-    
-    # Body parts keywords (Russian)
-    body_parts = ["грудь", "живот", "горло", "рук", "ног", "спин", "плеч", "голов", "солнечн", "дыхани", "сердц", "тело", "мышц", "колен", "таз"]
-    has_body = any(bp in text_lower for bp in body_parts)
-    
-    # Emotional keywords (Russian) - broadly negative for shift logic
-    emotions = ["страх", "боль", "гнев", "стыд", "вино", "тяжесть", "ком", "сжати", "пустота", "холод", "жар", "дрожь"]
-    has_emotion = any(e in text_lower for e in emotions)
 
-    # Criteria for sufficiency:
-    # 1. At least 5 words long
-    # 2. Mentions body parts OR deep emotions
-    
-    is_sufficient = len(words) >= 5 and (has_body or has_emotion)
-    
-    return {
-        "is_sufficient": is_sufficient,
-        "reason": "depth_check_passed" if is_sufficient else "too_abstract_or_short"
-    }
