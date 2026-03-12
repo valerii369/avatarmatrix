@@ -53,21 +53,21 @@ async def analyze_reflection(text: str) -> dict:
       "ai_analysis": "текст анализа"
     }}"""
 
-    response = await client.chat.completions.create(
-        model=settings.OPENAI_MODEL_FAST,
-        messages=[{"role": "system", "content": "Система анализа рефлексий AVATAR."},
-                  {"role": "user", "content": prompt}],
-        temperature=0.4,
-        response_format={
-            "type": "json_schema", 
-            "json_schema": {"name": "reflection_analysis", "schema": ReflectionAnalysis.model_json_schema()}
-        }
-    )
-
     try:
+        response = await client.chat.completions.create(
+            model=settings.OPENAI_MODEL_FAST,
+            messages=[{"role": "system", "content": "Система анализа рефлексий AVATAR."},
+                      {"role": "user", "content": prompt}],
+            temperature=0.4,
+            response_format={
+                "type": "json_schema", 
+                "json_schema": {"name": "reflection_analysis", "schema": ReflectionAnalysis.model_json_schema()}
+            }
+        )
         result_data = ReflectionAnalysis.model_validate_json(response.choices[0].message.content)
         return result_data.model_dump()
-    except Exception:
+    except Exception as e:
+        print(f"Error in analyze_reflection: {e}")
         return {
             "hawkins_score": 200,
             "hawkins_level": "Ок",
