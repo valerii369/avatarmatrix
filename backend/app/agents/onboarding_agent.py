@@ -106,20 +106,28 @@ async def extract_onboarding_cards(chat_history: list[dict]) -> list[dict]:
 
 Пиши от 3-го лица. Фокус на внутренних состояниях, не на внешних событиях. Эта выжимка будет использована для семантического поиска по архетипам."""
 
-    summary_resp = await client.chat.completions.create(
-        model=settings.OPENAI_MODEL,
-        messages=[{"role": "user", "content": summary_prompt}],
-        max_tokens=400,
-        temperature=0.3,
-    )
-    user_summary = summary_resp.choices[0].message.content
+    try:
+        summary_resp = await client.chat.completions.create(
+            model=settings.OPENAI_MODEL,
+            messages=[{"role": "user", "content": summary_prompt}],
+            max_tokens=400,
+            temperature=0.3,
+        )
+        user_summary = summary_resp.choices[0].message.content
+    except Exception as e:
+        print(f"[Onboarding Summary Error] {e}")
+        user_summary = "Пользователь проходит диагностику для определения своих архетипических паттернов и целей."
 
     # 2. Get embedding for the summary
-    emb_resp = await client.embeddings.create(
-        input=user_summary,
-        model="text-embedding-3-small"
-    )
-    user_embedding = emb_resp.data[0].embedding
+    try:
+        emb_resp = await client.embeddings.create(
+            input=user_summary,
+            model="text-embedding-3-small"
+        )
+        user_embedding = emb_resp.data[0].embedding
+    except Exception as e:
+        print(f"[Onboarding Embedding Error] {e}")
+        user_embedding = [0.0] * 1536
 
     # 3. Vector search — returns AvatarCard objects with correct archetype_id (0-21) and sphere
     top_cards = []
@@ -185,16 +193,27 @@ async def extract_onboarding_cards(chat_history: list[dict]) -> list[dict]:
   ]
 }}"""
 
-    response = await client.chat.completions.create(
-        model=settings.OPENAI_MODEL,
-        messages=[{"role": "user", "content": prompt}],
-        max_tokens=1000,
-        temperature=0.2,
-        response_format={"type": "json_object"},
-    )
-    
     try:
+        response = await client.chat.completions.create(
+            model=settings.OPENAI_MODEL,
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=1000,
+            temperature=0.2,
+            response_format={"type": "json_object"},
+        )
         raw_content = response.choices[0].message.content
+    except Exception as e:
+        print(f"[Onboarding Card Ranking Error] {e}")
+        # Return top 5 from vector search directly if LLM fails
+        return [
+            {
+                "archetype_id": c["archetype_id"],
+                "sphere": c["sphere"],
+                "score": 0.7,
+                "reason": "Прямое семантическое совпадение с запросом.",
+            }
+            for c in context_cards[:5]
+        ]
         # Remove any markdown code block wrappers if they slip through
         if raw_content.startswith("```"):
             raw_content = raw_content.split("\n", 1)[-1]

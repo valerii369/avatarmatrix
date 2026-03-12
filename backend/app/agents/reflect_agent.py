@@ -74,18 +74,18 @@ async def reflection_chat_message(
         messages.append({"role": "user", "content": user_message})
 
     # Call LLM with Structured Outputs
-    response = await client.chat.completions.create(
-        model=settings.OPENAI_MODEL_FAST, # gpt-4o-mini is perfect for this
-        messages=messages,
-        temperature=0.6,
-        response_format={
-            "type": "json_schema", 
-            "json_schema": {"name": "reflection_schema", "schema": ReflectionResponse.model_json_schema()}
-        }
-    )
-    
-    # Parse output
     try:
+        response = await client.chat.completions.create(
+            model=settings.OPENAI_MODEL_FAST, # gpt-4o-mini is perfect for this
+            messages=messages,
+            temperature=0.6,
+            response_format={
+                "type": "json_schema", 
+                "json_schema": {"name": "reflection_schema", "schema": ReflectionResponse.model_json_schema()}
+            }
+        )
+        
+        # Parse output
         raw_content = response.choices[0].message.content
         result_data = ReflectionResponse.model_validate_json(raw_content)
         
@@ -96,6 +96,6 @@ async def reflection_chat_message(
         
         return result_data.ai_response, result_data.phase_complete, analysis_dict
     except Exception as e:
-        # Fallback in case of parsing error
-        print(f"[Reflection Error] Failed to parse structured output: {e}\nRaw={response.choices[0].message.content}")
-        return "Я слышу тебя. Попробуй погрузиться чуть глубже: что именно сейчас вызывает наибольшее сопротивление?", False, {"extracted_emotion": "Unknown", "hawkins_score": 200}
+        # Fallback in case of API or parsing error
+        print(f"[Reflection Error] AI agent failure: {e}")
+        return "Я слышу тебя и чувствую важность этих слов. Попробуй сейчас прислушаться к ощущениям в теле: какую эмоцию ты замечаешь в этот момент?", False, {"extracted_emotion": "Unknown", "hawkins_score": 200}
