@@ -42,5 +42,7 @@
   "transformation_mechanics": {
     "externalization_question": "What does the tree shedding its leaves represent in your life right now?",
     "action_prompt": "What does your body do as the ground trembles and the leaves turn to ash?"
-  }
+  },
+  "sphere_id": 5,
+  "sphere_key": "MISSION"
 }

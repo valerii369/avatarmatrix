@@ -42,5 +42,7 @@
   "transformation_mechanics": {
     "externalization_question": "What does the pendulum mirror reveal about your current state of health when it swings?",
     "action_prompt": "What does your body do as the mirror swings and the truth is revealed?"
-  }
+  },
+  "sphere_id": 6,
+  "sphere_key": "HEALTH"
 }

@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "Как вы можете описать свою 'тень' в этой сцене: что она символизирует для вас?",
     "action_prompt": "Что делает ваше тело, когда вы смотрите на тень, поднимающуюся из глубин озера?"
-  }
+  },
+  "sphere_id": 7,
+  "sphere_key": "SOCIETY"
 }

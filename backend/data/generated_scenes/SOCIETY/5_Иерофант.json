@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "Какой аспект традиции или веры вызывает у вас сомнения или страх?",
     "action_prompt": "Что делает ваше тело, когда вы замечаете, что купол начинает рушиться?"
-  }
+  },
+  "sphere_id": 7,
+  "sphere_key": "SOCIETY"
 }

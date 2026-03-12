@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "How does the presence of this ancient wisdom influence your current path or purpose?",
     "action_prompt": "What does your body feel compelled to do as the moonlight reveals the path deeper into the temple?"
-  }
+  },
+  "sphere_id": 5,
+  "sphere_key": "MISSION"
 }

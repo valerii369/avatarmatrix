@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "Какое зеркало в вашей жизни кажется вам наиболее пульсирующим и почему?",
     "action_prompt": "Как ваше тело реагирует на яркий свет, исходящий от зеркала?"
-  }
+  },
+  "sphere_id": 4,
+  "sphere_key": "FAMILY"
 }

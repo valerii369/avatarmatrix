@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "What does the crumbling archway represent in your life's journey?",
     "action_prompt": "What does your body feel as the ground trembles and the passage becomes blocked?"
-  }
+  },
+  "sphere_id": 5,
+  "sphere_key": "MISSION"
 }

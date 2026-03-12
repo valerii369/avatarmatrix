@@ -42,5 +42,7 @@
   "transformation_mechanics": {
     "externalization_question": "Как вы представляете себе взаимодействие с изменениями в жизни?",
     "action_prompt": "Что делает ваше тело, когда вы наблюдаете за течением песка в часах?"
-  }
+  },
+  "sphere_id": 8,
+  "sphere_key": "SPIRIT"
 }

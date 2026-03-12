@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "What does the observatory represent in your own life journey towards understanding?",
     "action_prompt": "What does your body do when the door locks shut and you find yourself alone with the stars?"
-  }
+  },
+  "sphere_id": 7,
+  "sphere_key": "SOCIETY"
 }

@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "Какую роль играют справедливость и честность в вашем восприятии себя и других?",
     "action_prompt": "Что делает ваше тело, когда вы видите, как отражения в зеркалах искажаются?"
-  }
+  },
+  "sphere_id": 3,
+  "sphere_key": "RELATIONS"
 }

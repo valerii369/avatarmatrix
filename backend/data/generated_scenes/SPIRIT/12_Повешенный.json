@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "Какой свет в вашей жизни вы боитесь увидеть?",
     "action_prompt": "Что делает ваше тело, когда вы сталкиваетесь с внезапным озарением или новой истиной?"
-  }
+  },
+  "sphere_id": 8,
+  "sphere_key": "SPIRIT"
 }

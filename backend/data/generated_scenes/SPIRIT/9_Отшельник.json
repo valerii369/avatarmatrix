@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "Какой свет вы ищете в своем внутреннем маяке?",
     "action_prompt": "Что делает ваше тело, когда вы представляете себе мерцающий свет?"
-  }
+  },
+  "sphere_id": 8,
+  "sphere_key": "SPIRIT"
 }

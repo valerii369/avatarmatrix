@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "How does the chariot represent your journey towards health and balance?",
     "action_prompt": "What does your body feel as the chariot stands at the edge of the swirling sands?"
-  }
+  },
+  "sphere_id": 6,
+  "sphere_key": "HEALTH"
 }

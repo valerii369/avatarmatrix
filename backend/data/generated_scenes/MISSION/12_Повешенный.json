@@ -42,5 +42,7 @@
   "transformation_mechanics": {
     "externalization_question": "What part of your life feels suspended, waiting for a change?",
     "action_prompt": "What does your body do in response to the swaying plants and the chiming clock?"
-  }
+  },
+  "sphere_id": 5,
+  "sphere_key": "MISSION"
 }

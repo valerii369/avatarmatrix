@@ -34,5 +34,7 @@
   "transformation_mechanics": {
     "externalization_question": "Что говорят вам эти зеркала о вашей способности прощать себя за прошлые ошибки?",
     "action_prompt": "Что делает ваше тело в ответ на звук трескающегося зеркала?"
-  }
+  },
+  "sphere_id": 6,
+  "sphere_key": "HEALTH"
 }

@@ -1,0 +1,46 @@
+{
+  "scene_name": "The Gilded Stalemate",
+  "psychological_foundation": "The scene draws upon the archetype of the Hanged Man, exploring themes of sacrifice, altered perspectives, and the paradoxical nature of wealth and value.",
+  "immersion_architecture": {
+    "orientation": "In a vast, echoing chamber filled with the golden glimmer of suspended coins, the air seems to hum with an unseen energy. The walls are lined with ornate mirrors reflecting countless shifting images, each trapped in a moment of hesitation. Above, a grand clock hangs motionless, its hands frozen in a perpetual pause, casting elongated shadows that intertwine like serpents.",
+    "complication": "As the room quivers under the weight of silence, a single coin falls from the ceiling, triggering a cascade of metallic echoes."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Suspended Coins",
+      "interpretation_broken": "If perceived as broken, this may indicate a feeling of disillusionment with material wealth or a belief that financial security is precarious or unreliable.",
+      "interpretation_beautiful": "If seen as beautiful, it suggests an admiration for the potential of wealth to create opportunities and transform situations positively.",
+      "interpretation_threatening": "If viewed as threatening, this might reflect anxiety about financial instability or the overwhelming nature of monetary pressures."
+    },
+    {
+      "object": "Ornate Mirrors",
+      "interpretation_broken": "Seeing them as broken could represent a fractured self-image or an inability to see one's true potential and value beyond material possessions.",
+      "interpretation_beautiful": "If considered beautiful, it may symbolize self-reflection and the appreciation of one's multifaceted identity and life experiences.",
+      "interpretation_threatening": "Perceiving them as threatening could suggest fear of self-examination or the exposure of one's vulnerabilities."
+    },
+    {
+      "object": "Motionless Clock",
+      "interpretation_broken": "A broken clock might indicate feelings of being stuck in time or an inability to progress in life or financial matters.",
+      "interpretation_beautiful": "If seen as beautiful, it represents peace with the present moment and the understanding that time is a construct that can be transcended.",
+      "interpretation_threatening": "If threatening, it could symbolize a fear of wasted time or missed opportunities, especially in financial contexts."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "stuck",
+      "time",
+      "value"
+    ],
+    "mcadams_markers": [
+      "sacrifice",
+      "reflection",
+      "paradox"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What aspect of your financial life feels suspended, like the weight of these coins, and how might you view it differently?",
+    "action_prompt": "Consider rearranging a financial plan or goal, allowing yourself to pause and gain perspective before moving forward."
+  },
+  "sphere_id": 2,
+  "sphere_key": "MONEY"
+}

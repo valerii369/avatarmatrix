@@ -38,5 +38,7 @@
   "transformation_mechanics": {
     "externalization_question": "How does the balance between nurturing and control manifest in your relationships?",
     "action_prompt": "What does your body do as you imagine yourself walking through this garden when the breeze occurs?"
-  }
+  },
+  "sphere_id": 3,
+  "sphere_key": "RELATIONS"
 }

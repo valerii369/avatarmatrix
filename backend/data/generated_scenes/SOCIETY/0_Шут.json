@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "How does the shattered mirror reflect your current sense of self or potential?",
     "action_prompt": "What does your body want to do in response to the sound of shattering glass? Is it to move towards the shards or away from them?"
-  }
+  },
+  "sphere_id": 7,
+  "sphere_key": "SOCIETY"
 }

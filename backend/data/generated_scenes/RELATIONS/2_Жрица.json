@@ -38,5 +38,7 @@
   "transformation_mechanics": {
     "externalization_question": "Какие тайны скрывает ваш внутренний лес?",
     "action_prompt": "Что делает ваше тело, когда вы представляете себя на этой поляне, окруженной светлячками?"
-  }
+  },
+  "sphere_id": 3,
+  "sphere_key": "RELATIONS"
 }

@@ -39,5 +39,7 @@
   "transformation_mechanics": {
     "externalization_question": "What do the whispers from the mirror tell you about your own desires and fears?",
     "action_prompt": "How does your body respond to the pulsing energy of the mirror?"
-  }
+  },
+  "sphere_id": 8,
+  "sphere_key": "SPIRIT"
 }

@@ -41,5 +41,7 @@
   "transformation_mechanics": {
     "externalization_question": "How does the shadow within your garden manifest in your life?",
     "action_prompt": "What does your body feel as it moves through this garden, encountering the shadow?"
-  }
+  },
+  "sphere_id": 8,
+  "sphere_key": "SPIRIT"
 }

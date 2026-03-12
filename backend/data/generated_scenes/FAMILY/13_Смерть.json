@@ -42,5 +42,7 @@
   "transformation_mechanics": {
     "externalization_question": "What stories do the shadows of your ancestors tell, and how do they influence your current path?",
     "action_prompt": "What does your body do as the river of change approaches the ancient relics?"
-  }
+  },
+  "sphere_id": 4,
+  "sphere_key": "FAMILY"
 }

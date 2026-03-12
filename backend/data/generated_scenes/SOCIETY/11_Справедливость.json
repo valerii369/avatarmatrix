@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "Какой аспект вашей жизни требует восстановления справедливости или баланса?",
     "action_prompt": "Что делает ваше тело, когда вы думаете о времени и необходимости принятия решений?"
-  }
+  },
+  "sphere_id": 7,
+  "sphere_key": "SOCIETY"
 }

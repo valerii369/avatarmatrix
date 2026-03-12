@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "Какое отражение вы видите в зеркале?",
     "action_prompt": "Что делает ваше тело, когда вы смотрите в зеркало и видите это отражение?"
-  }
+  },
+  "sphere_id": 5,
+  "sphere_key": "MISSION"
 }

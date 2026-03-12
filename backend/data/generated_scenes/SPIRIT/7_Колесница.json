@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "Как вы описали бы силу, которая заставляет вашу колесницу терять равновесие?",
     "action_prompt": "Что делает ваше тело, когда вы слышите звук колокола, зовущий к действию?"
-  }
+  },
+  "sphere_id": 8,
+  "sphere_key": "SPIRIT"
 }

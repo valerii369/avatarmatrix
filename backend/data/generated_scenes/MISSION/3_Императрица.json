@@ -41,5 +41,7 @@
   "transformation_mechanics": {
     "externalization_question": "How does the garden reflect your current relationship with abundance and control?",
     "action_prompt": "What does your body do as you feel the wind sweep through the garden?"
-  }
+  },
+  "sphere_id": 5,
+  "sphere_key": "MISSION"
 }

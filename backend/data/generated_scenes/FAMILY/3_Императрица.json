@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "How do you perceive the balance between nurturing and controlling aspects in your family?",
     "action_prompt": "What does your body do as you imagine walking through this orchard?"
-  }
+  },
+  "sphere_id": 4,
+  "sphere_key": "FAMILY"
 }

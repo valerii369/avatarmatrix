@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "What internal forces are pulling you in different directions, and how do they affect your path forward?",
     "action_prompt": "What does your body do as the chariot begins to pull apart? How do you respond to the tension in the air?"
-  }
+  },
+  "sphere_id": 5,
+  "sphere_key": "MISSION"
 }

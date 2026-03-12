@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "How does the fear of completion manifest in your life, and what name would you give to this fear?",
     "action_prompt": "What does your body do as you approach the cracked mirror? How do you physically respond to the distortion of the sky?"
-  }
+  },
+  "sphere_id": 5,
+  "sphere_key": "MISSION"
 }

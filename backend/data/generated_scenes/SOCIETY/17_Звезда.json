@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "Какой свет вы ищете в своей жизни, когда смотрите на звезды?",
     "action_prompt": "Что делает ваше тело, когда вы наблюдаете, как комета пересекает небо?"
-  }
+  },
+  "sphere_id": 7,
+  "sphere_key": "SOCIETY"
 }

@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "How does the tremor in the palace mirror any internal conflicts you are experiencing with control and authority?",
     "action_prompt": "What does your body do as the hum reverberates through the labyrinth? Do you feel the urge to stabilize, escape, or confront the source?"
-  }
+  },
+  "sphere_id": 8,
+  "sphere_key": "SPIRIT"
 }

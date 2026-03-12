@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "Какой образ прошлого или предка вызывает у вас чувство вины или стыда?",
     "action_prompt": "Что делает ваше тело, когда портрет начинает сползать со стены?"
-  }
+  },
+  "sphere_id": 4,
+  "sphere_key": "FAMILY"
 }

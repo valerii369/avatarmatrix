@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "What does the path beneath the pool represent in your journey of change and renewal?",
     "action_prompt": "What does your body feel as you step closer to the pool and consider the hidden path beneath its surface?"
-  }
+  },
+  "sphere_id": 6,
+  "sphere_key": "HEALTH"
 }

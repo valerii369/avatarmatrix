@@ -38,5 +38,7 @@
   "transformation_mechanics": {
     "externalization_question": "What does the trembling in the grove represent in your life?",
     "action_prompt": "What does your body do when the auroras flicker and the river darkens?"
-  }
+  },
+  "sphere_id": 8,
+  "sphere_key": "SPIRIT"
 }

@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "Какое явление в вашей жизни напоминает вам эту карусель?",
     "action_prompt": "Что делает ваше тело, когда вы представляете себя на этой карусели?"
-  }
+  },
+  "sphere_id": 4,
+  "sphere_key": "FAMILY"
 }

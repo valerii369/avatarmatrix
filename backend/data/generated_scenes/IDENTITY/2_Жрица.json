@@ -1,0 +1,46 @@
+{
+  "scene_name": "The Silent Sanctuary",
+  "psychological_foundation": "The scene explores the juxtaposition of the High Priestess archetype's light and shadow aspects within the sphere of Identity, examining the tension between passive wisdom and active disengagement.",
+  "immersion_architecture": {
+    "orientation": "The mist-laden forest whispers through the silvered leaves, where time seems suspended and every shadow conceals a secret. Ancient stone pillars, carved with cryptic symbols, encircle a still pool that mirrors the moon's serene glow. A faint, ethereal music wafts through the air, as if the forest itself is breathing in a forgotten language.",
+    "complication": "A sudden gust of wind disturbs the tranquil pool, rippling the moon's reflection and obscuring the cryptic symbols on the pillars."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Mist-laden forest",
+      "interpretation_broken": "A broken perception of the forest suggests a disconnection from one's intuitive self, indicating confusion and a lack of clarity in personal identity.",
+      "interpretation_beautiful": "A beautiful perception indicates a deep connection with the unconscious, representing inner peace and acceptance of one's intuitive nature.",
+      "interpretation_threatening": "A threatening perception suggests fear of the unknown aspects of oneself, possibly indicating unresolved inner conflicts or repressed emotions."
+    },
+    {
+      "object": "Ancient stone pillars",
+      "interpretation_broken": "If perceived as broken, it reflects a loss of connection to one's personal history or sense of tradition, leading to an identity crisis.",
+      "interpretation_beautiful": "Seen as beautiful, it symbolizes a strong foundation in one's personal beliefs and a harmonious integration of past experiences into the present identity.",
+      "interpretation_threatening": "A threatening view implies an oppressive or restrictive influence from past beliefs or traditions, causing anxiety or resistance to personal growth."
+    },
+    {
+      "object": "Still pool",
+      "interpretation_broken": "A broken view indicates emotional turmoil and an inability to reflect upon one's true self, suggesting a fractured identity.",
+      "interpretation_beautiful": "Perceived as beautiful, it represents emotional clarity and self-awareness, allowing for a peaceful and cohesive sense of identity.",
+      "interpretation_threatening": "Threatening perception suggests fear of self-reflection and confrontation with one's true feelings, leading to avoidance and escapism."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "reflection",
+      "silence",
+      "mystery"
+    ],
+    "mcadams_markers": [
+      "self-exploration",
+      "inner conflict",
+      "tradition"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What secrets does the forest keep that you are afraid to uncover?",
+    "action_prompt": "Approach the pool and gaze into its depths. What do you see beneath the surface?"
+  },
+  "sphere_id": 1,
+  "sphere_key": "IDENTITY"
+}

@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "How do these reflections and symbols represent the current state of your relationships?",
     "action_prompt": "What does your body do as you walk across the liquid mercury ground? How do you respond to the shifting reflections?"
-  }
+  },
+  "sphere_id": 3,
+  "sphere_key": "RELATIONS"
 }

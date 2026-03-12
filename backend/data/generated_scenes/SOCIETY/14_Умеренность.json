@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "What aspect of your life feels like it requires the most delicate balance?",
     "action_prompt": "What does your body do as you imagine finding harmony among the opposing forces in your life?"
-  }
+  },
+  "sphere_id": 7,
+  "sphere_key": "SOCIETY"
 }

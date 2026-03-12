@@ -38,5 +38,7 @@
   "transformation_mechanics": {
     "externalization_question": "How do the melting coins reflect your relationship with change and security?",
     "action_prompt": "What does your body feel as the golden coins transform around you?"
-  }
+  },
+  "sphere_id": 2,
+  "sphere_key": "MONEY"
 }

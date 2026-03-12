@@ -41,5 +41,7 @@
   "transformation_mechanics": {
     "externalization_question": "How does the shattering of mirrors in your life reflect the dualities you face within?",
     "action_prompt": "What does your body do as the mirrors fall, and how does it react to the garden's shifting landscape?"
-  }
+  },
+  "sphere_id": 5,
+  "sphere_key": "MISSION"
 }

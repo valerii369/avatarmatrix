@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "What does the ripple in the pond represent in your family life?",
     "action_prompt": "What does your body do as the dragonflies scatter and the koi frenzy?"
-  }
+  },
+  "sphere_id": 4,
+  "sphere_key": "FAMILY"
 }

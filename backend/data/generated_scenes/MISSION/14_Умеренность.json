@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "What elements in your life feel impossible to reconcile, and how might they coexist to create something new?",
     "action_prompt": "What does your body sense as you imagine the streams bubbling over, and how do you physically react to the potential chaos?"
-  }
+  },
+  "sphere_id": 5,
+  "sphere_key": "MISSION"
 }

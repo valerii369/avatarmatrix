@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "What does the ripple in the pond represent in your life journey?",
     "action_prompt": "What does your body do when you feel the ripple in the air?"
-  }
+  },
+  "sphere_id": 7,
+  "sphere_key": "SOCIETY"
 }

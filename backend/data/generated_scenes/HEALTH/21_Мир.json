@@ -39,5 +39,7 @@
   "transformation_mechanics": {
     "externalization_question": "What does the maze of reflections tell you about your journey towards wholeness?",
     "action_prompt": "What does your body do as you navigate the labyrinth and encounter the shifting reflections?"
-  }
+  },
+  "sphere_id": 6,
+  "sphere_key": "HEALTH"
 }

@@ -39,5 +39,7 @@
   "transformation_mechanics": {
     "externalization_question": "Какое отражение в зеркале кажется вам самым правдивым и почему?",
     "action_prompt": "Что делает ваше тело, когда вы смотрите в треснувшее зеркало?"
-  }
+  },
+  "sphere_id": 6,
+  "sphere_key": "HEALTH"
 }

@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "Какой голос из прошлого вы слышите и что он пытается вам сказать?",
     "action_prompt": "Что делает ваше тело, когда вы слышите зовущий вас голос из глубины поместья?"
-  }
+  },
+  "sphere_id": 4,
+  "sphere_key": "FAMILY"
 }

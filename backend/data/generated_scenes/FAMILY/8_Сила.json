@@ -42,5 +42,7 @@
   "transformation_mechanics": {
     "externalization_question": "What does the mirror reveal about your relationship with your family's expectations?",
     "action_prompt": "How do you physically react to the sudden gust of wind and the sight of the mirror?"
-  }
+  },
+  "sphere_id": 4,
+  "sphere_key": "FAMILY"
 }

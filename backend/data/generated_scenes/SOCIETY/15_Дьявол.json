@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "Какое отражение в зеркале кажется вам наиболее пугающим?",
     "action_prompt": "Что делает ваше тело, когда люстра начинает раскачиваться?"
-  }
+  },
+  "sphere_id": 7,
+  "sphere_key": "SOCIETY"
 }

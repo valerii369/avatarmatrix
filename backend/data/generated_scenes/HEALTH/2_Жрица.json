@@ -39,5 +39,7 @@
   "transformation_mechanics": {
     "externalization_question": "What does the ripple in the pond symbolize in your life right now?",
     "action_prompt": "What does your body feel as you imagine standing by the pond, witnessing the ripple?"
-  }
+  },
+  "sphere_id": 6,
+  "sphere_key": "HEALTH"
 }

@@ -39,5 +39,7 @@
   "transformation_mechanics": {
     "externalization_question": "How does the energy from the fractured stone mirror challenges in your life or health?",
     "action_prompt": "What does your body instinctively want to do in response to the energy released by the stone?"
-  }
+  },
+  "sphere_id": 6,
+  "sphere_key": "HEALTH"
 }

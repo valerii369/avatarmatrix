@@ -38,5 +38,7 @@
   "transformation_mechanics": {
     "externalization_question": "What role does the 'tower' play in your perception of family dynamics?",
     "action_prompt": "What does your body do when you imagine approaching the tower in the forest?"
-  }
+  },
+  "sphere_id": 4,
+  "sphere_key": "FAMILY"
 }

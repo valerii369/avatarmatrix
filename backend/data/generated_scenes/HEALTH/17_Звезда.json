@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "How does the turbulence in the oasis mirror any current disturbances in your life?",
     "action_prompt": "What does your body do when faced with the sudden chill in the oasis?"
-  }
+  },
+  "sphere_id": 6,
+  "sphere_key": "HEALTH"
 }

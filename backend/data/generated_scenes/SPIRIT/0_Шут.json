@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "Какой аспект вашей жизни напоминает этот вихрь света и звука?",
     "action_prompt": "Что делает ваше тело, когда вы ощущаете кружащийся свет и звук вокруг себя?"
-  }
+  },
+  "sphere_id": 8,
+  "sphere_key": "SPIRIT"
 }

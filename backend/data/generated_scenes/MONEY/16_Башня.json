@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "What does the glowing diamond represent in your life, and how does its light change your perception of the surrounding coins?",
     "action_prompt": "As the rumble shakes the room, what does your body instinctively do in response to the shifting environment?"
-  }
+  },
+  "sphere_id": 2,
+  "sphere_key": "MONEY"
 }

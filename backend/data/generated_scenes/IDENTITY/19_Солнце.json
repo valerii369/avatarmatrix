@@ -1,0 +1,46 @@
+{
+  "scene_name": "The Sunlit Garden",
+  "psychological_foundation": "Exploring the dual nature of the Sun archetype, this scene delves into the balance between genuine self-expression and the pitfalls of egoism, examining how one's identity is illuminated or shadowed by their internal light.",
+  "immersion_architecture": {
+    "orientation": "In a surreal garden where the sun never sets, golden light filters through the leaves of enormous trees, casting intricate patterns on the ground. The air is filled with a symphony of whispers, as if the garden itself is alive, sharing secrets of the universe. In the center, a grand fountain spills crystal-clear water, its droplets catching the sunlight, creating tiny rainbows.",
+    "complication": "Suddenly, the fountain's water begins to overflow, threatening to flood the garden."
+  },
+  "projection_dictionary": [
+    {
+      "object": "The Sunlight",
+      "interpretation_broken": "Seeing sunlight as broken may indicate a struggle with the concept of unconditional love or joy, possibly reflecting feelings of unworthiness or a fear of exposure.",
+      "interpretation_beautiful": "If the sunlight is perceived as beautiful, it signifies an embrace of one's own vitality and authenticity, suggesting a harmonious relationship with self-expression.",
+      "interpretation_threatening": "Perceiving sunlight as threatening could suggest discomfort with being in the spotlight or an underlying fear of vulnerability and inadequacy."
+    },
+    {
+      "object": "The Fountain",
+      "interpretation_broken": "A broken fountain might symbolize a disruption in emotional flow or creativity, possibly indicating feelings of stagnation or blocked self-expression.",
+      "interpretation_beautiful": "A beautiful fountain may represent a wellspring of emotions and creativity, suggesting a robust connection to one's inner resources and a sense of abundance.",
+      "interpretation_threatening": "If the fountain seems threatening, it could imply overwhelming emotions or fears of being consumed by one's own feelings."
+    },
+    {
+      "object": "The Trees",
+      "interpretation_broken": "Broken trees may reflect a perceived instability in one's support systems or a fear of losing touch with one's roots or foundational beliefs.",
+      "interpretation_beautiful": "Beautiful trees might symbolize a strong, supportive network and a deep connection to one's heritage or core values.",
+      "interpretation_threatening": "Threatening trees could indicate a fear of being overshadowed or a sense of oppression by external expectations or authority figures."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "joy",
+      "fear",
+      "vulnerability"
+    ],
+    "mcadams_markers": [
+      "self-expression",
+      "authenticity",
+      "ego"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What part of your identity feels most illuminated by the sunlight in this garden?",
+    "action_prompt": "Reflect on a moment when you felt truly seen and allowed your genuine self to shine. How can you recreate that experience in your daily life?"
+  },
+  "sphere_id": 1,
+  "sphere_key": "IDENTITY"
+}

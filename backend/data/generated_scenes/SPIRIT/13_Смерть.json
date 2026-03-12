@@ -41,5 +41,7 @@
   "transformation_mechanics": {
     "externalization_question": "In what ways does the thought of change manifest in your life as a labyrinth?",
     "action_prompt": "What does your body feel as you navigate the shifting sands and towering walls of this scene?"
-  }
+  },
+  "sphere_id": 8,
+  "sphere_key": "SPIRIT"
 }

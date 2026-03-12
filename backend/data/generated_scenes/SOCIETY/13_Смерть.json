@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "What past elements are holding you back from moving through the arch into new beginnings?",
     "action_prompt": "What does your body feel as you stand before the ancient stone arch, ready to step through?"
-  }
+  },
+  "sphere_id": 7,
+  "sphere_key": "SOCIETY"
 }

@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "How do the vines in the garden relate to the connections you feel with your family?",
     "action_prompt": "What does your body do as the breeze sways the statues and the vines tighten?"
-  }
+  },
+  "sphere_id": 4,
+  "sphere_key": "FAMILY"
 }

@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "Какой аспект вашей жизни нуждается в гармонии между духовным и материальным?",
     "action_prompt": "Что делает ваше тело, когда вы слышите мелодичный звук колокольчика?"
-  }
+  },
+  "sphere_id": 8,
+  "sphere_key": "SPIRIT"
 }

@@ -39,5 +39,7 @@
   "transformation_mechanics": {
     "externalization_question": "What unseen forces do you feel are swirling around you, challenging or guiding your path?",
     "action_prompt": "What does your body do as the mist swirls around you? Do you feel drawn to the altar, or do you hesitate?"
-  }
+  },
+  "sphere_id": 8,
+  "sphere_key": "SPIRIT"
 }

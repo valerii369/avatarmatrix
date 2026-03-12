@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "Что воплощает для вас этот туман и как он влияет на ваше восприятие себя?",
     "action_prompt": "Что делает ваше тело, когда вы видите, как туман принимает человеческие очертания?"
-  }
+  },
+  "sphere_id": 6,
+  "sphere_key": "HEALTH"
 }

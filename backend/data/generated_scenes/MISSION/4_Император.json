@@ -42,5 +42,7 @@
   "transformation_mechanics": {
     "externalization_question": "How does the disruption in the garden mirror any disruptions or pressures in your current life?",
     "action_prompt": "What does your body feel as you witness the silver droplets disrupting the garden's order?"
-  }
+  },
+  "sphere_id": 5,
+  "sphere_key": "MISSION"
 }

@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "Какое место в вашем внутреннем мире занимает это озеро?",
     "action_prompt": "Что делает ваше тело, когда вы смотрите на искажающиеся отражения на воде?"
-  }
+  },
+  "sphere_id": 2,
+  "sphere_key": "MONEY"
 }

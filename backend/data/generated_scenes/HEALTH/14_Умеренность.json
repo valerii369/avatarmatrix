@@ -41,5 +41,7 @@
   "transformation_mechanics": {
     "externalization_question": "Какое влияние оказывает треснувшая сфера на вашу жизнь и внутренний мир?",
     "action_prompt": "Что делает ваше тело, когда вы слышите звук трескающейся сферы?"
-  }
+  },
+  "sphere_id": 6,
+  "sphere_key": "HEALTH"
 }

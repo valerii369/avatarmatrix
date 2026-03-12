@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "How might the shattered orb represent a challenge in your life where you feel your vision or plans have been disrupted?",
     "action_prompt": "What does your body feel like in this chamber? Are you drawn to fix the orb, or do you feel compelled to leave the room?"
-  }
+  },
+  "sphere_id": 7,
+  "sphere_key": "SOCIETY"
 }

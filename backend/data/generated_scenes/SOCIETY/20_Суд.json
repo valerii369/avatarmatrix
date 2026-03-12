@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "Как бы выглядели ваши внутренние страхи, если бы они были туманом в этом лесу?",
     "action_prompt": "Что делает ваше тело, когда вы стоите перед аркой в тумане?"
-  }
+  },
+  "sphere_id": 7,
+  "sphere_key": "SOCIETY"
 }

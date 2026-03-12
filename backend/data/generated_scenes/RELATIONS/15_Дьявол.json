@@ -39,5 +39,7 @@
   "transformation_mechanics": {
     "externalization_question": "Как бы вы описали голос, который шепчет вам из стен лабиринта?",
     "action_prompt": "Что делает ваше тело, когда вы слышите шепот из стен?"
-  }
+  },
+  "sphere_id": 3,
+  "sphere_key": "RELATIONS"
 }

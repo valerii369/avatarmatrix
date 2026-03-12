@@ -41,5 +41,7 @@
   "transformation_mechanics": {
     "externalization_question": "How do the scattered coins and erratic clock reflect the way you perceive your financial situation?",
     "action_prompt": "What does your body do as you watch the coins scatter and the clock strike an impossible hour?"
-  }
+  },
+  "sphere_id": 2,
+  "sphere_key": "MONEY"
 }

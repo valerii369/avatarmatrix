@@ -41,5 +41,7 @@
   "transformation_mechanics": {
     "externalization_question": "How does the chaos in the bazaar reflect the conflicts in your own life regarding balance and resources?",
     "action_prompt": "What does your body do as the coins scatter and the vials overturn? How might you restore balance?"
-  }
+  },
+  "sphere_id": 2,
+  "sphere_key": "MONEY"
 }

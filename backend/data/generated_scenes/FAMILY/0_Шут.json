@@ -38,5 +38,7 @@
   "transformation_mechanics": {
     "externalization_question": "Как вы взаимодействуете с семейными традициями и обязательствами?",
     "action_prompt": "Что делает ваше тело, когда вы слышите громкий смех в лесу?"
-  }
+  },
+  "sphere_id": 4,
+  "sphere_key": "FAMILY"
 }

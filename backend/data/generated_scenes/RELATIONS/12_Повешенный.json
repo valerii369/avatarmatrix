@@ -38,5 +38,7 @@
   "transformation_mechanics": {
     "externalization_question": "Каким образом светящиеся сферы могут отражать ваши отношения с другими?",
     "action_prompt": "Что делает ваше тело, когда вы слышите вибрирующий звук от арки?"
-  }
+  },
+  "sphere_id": 3,
+  "sphere_key": "RELATIONS"
 }

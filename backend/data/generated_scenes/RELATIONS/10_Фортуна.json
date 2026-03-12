@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "What role does the concept of 'fortune' play in shaping your relationships and how do you perceive its influence?",
     "action_prompt": "What does your body instinctively do when faced with an unexpected halt in the flow of time or change?"
-  }
+  },
+  "sphere_id": 3,
+  "sphere_key": "RELATIONS"
 }

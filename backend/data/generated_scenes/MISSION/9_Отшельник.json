@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "What does the light in the tower represent in your life?",
     "action_prompt": "What does your body do when you think about approaching the tower and its mysterious light?"
-  }
+  },
+  "sphere_id": 5,
+  "sphere_key": "MISSION"
 }

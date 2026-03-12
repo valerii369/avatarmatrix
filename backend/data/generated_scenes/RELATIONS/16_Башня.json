@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "What does the tower symbolize in your current relationship dynamics?",
     "action_prompt": "What does your body want to do in response to the vibrating mirrors?"
-  }
+  },
+  "sphere_id": 3,
+  "sphere_key": "RELATIONS"
 }

@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "What do the chariots represent in your journey through family traditions and personal ambitions?",
     "action_prompt": "What does your body feel as the wind threatens to topple the chariots?"
-  }
+  },
+  "sphere_id": 4,
+  "sphere_key": "FAMILY"
 }

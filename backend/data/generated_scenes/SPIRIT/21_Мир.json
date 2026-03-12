@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "Как вы воспринимаете завершение в своей жизни? Какие чувства это вызывает?",
     "action_prompt": "Что делает ваше тело, когда вы думаете о завершении и целостности в своей жизни?"
-  }
+  },
+  "sphere_id": 8,
+  "sphere_key": "SPIRIT"
 }

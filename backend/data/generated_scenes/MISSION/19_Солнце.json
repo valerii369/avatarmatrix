@@ -43,5 +43,7 @@
   "transformation_mechanics": {
     "externalization_question": "Какое послание может нести тёмная туча, заслоняющая солнце?",
     "action_prompt": "Как ваше тело реагирует на внезапное исчезновение солнечного света?"
-  }
+  },
+  "sphere_id": 5,
+  "sphere_key": "MISSION"
 }

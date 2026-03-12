@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "What does the mirror reveal about your current state of self-reflection and identity?",
     "action_prompt": "What does your body do as you approach the shattered mirror?"
-  }
+  },
+  "sphere_id": 4,
+  "sphere_key": "FAMILY"
 }

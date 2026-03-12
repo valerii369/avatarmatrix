@@ -38,5 +38,7 @@
   "transformation_mechanics": {
     "externalization_question": "How does the disturbance in the garden reflect conflicts in your own life?",
     "action_prompt": "What is your body doing as you observe the transformation in the garden?"
-  }
+  },
+  "sphere_id": 8,
+  "sphere_key": "SPIRIT"
 }

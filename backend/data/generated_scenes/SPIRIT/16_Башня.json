@@ -38,5 +38,7 @@
   "transformation_mechanics": {
     "externalization_question": "Что в вашей жизни сейчас ощущается как башня, готовая рухнуть?",
     "action_prompt": "Что делает ваше тело, когда вы представляете трещину, проходящую через эту башню?"
-  }
+  },
+  "sphere_id": 8,
+  "sphere_key": "SPIRIT"
 }

@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "Какой свет вы излучаете в мир и как это влияет на окружающих?",
     "action_prompt": "Что делает ваше тело, когда свет становится слишком ярким?"
-  }
+  },
+  "sphere_id": 6,
+  "sphere_key": "HEALTH"
 }

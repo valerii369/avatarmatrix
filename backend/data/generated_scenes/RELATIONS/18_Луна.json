@@ -38,5 +38,7 @@
   "transformation_mechanics": {
     "externalization_question": "What whispers from the shadows seem to call to you in moments of uncertainty?",
     "action_prompt": "What does your body do as you follow the path deeper into the garden?"
-  }
+  },
+  "sphere_id": 3,
+  "sphere_key": "RELATIONS"
 }

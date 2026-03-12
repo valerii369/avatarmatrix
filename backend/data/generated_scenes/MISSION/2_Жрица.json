@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "Какой символ вашей жизни сейчас требует вашего внимания и почему?",
     "action_prompt": "Что делает ваше тело, когда вы ощущаете зов этого символа?"
-  }
+  },
+  "sphere_id": 5,
+  "sphere_key": "MISSION"
 }

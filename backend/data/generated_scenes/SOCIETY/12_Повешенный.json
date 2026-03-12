@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "What role does the feeling of sacrifice or stagnation play in your current life story?",
     "action_prompt": "What does your body want to do in this upside-down world that challenges gravity and perspective?"
-  }
+  },
+  "sphere_id": 7,
+  "sphere_key": "SOCIETY"
 }

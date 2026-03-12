@@ -43,5 +43,7 @@
   "transformation_mechanics": {
     "externalization_question": "Как вы воспринимаете изменения в вашем жизненном цикле?",
     "action_prompt": "Что делает ваше тело, когда вы наблюдаете за течением песка в песочных часах?"
-  }
+  },
+  "sphere_id": 6,
+  "sphere_key": "HEALTH"
 }

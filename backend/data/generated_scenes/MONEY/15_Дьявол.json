@@ -41,5 +41,7 @@
   "transformation_mechanics": {
     "externalization_question": "Какое сокровенное желание или страх прячется за этими монетами?",
     "action_prompt": "Что делает ваше тело, когда вы приближаетесь к алтарю и видите, как монеты оживают?"
-  }
+  },
+  "sphere_id": 2,
+  "sphere_key": "MONEY"
 }

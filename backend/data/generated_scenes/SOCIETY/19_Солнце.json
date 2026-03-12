@@ -42,5 +42,7 @@
   "transformation_mechanics": {
     "externalization_question": "Как бы вы описали свой внутренний источник света и радости?",
     "action_prompt": "Что делает ваше тело, когда свет вокруг начинает мерцать?"
-  }
+  },
+  "sphere_id": 7,
+  "sphere_key": "SOCIETY"
 }

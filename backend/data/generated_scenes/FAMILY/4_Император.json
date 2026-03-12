@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "Какая часть вашей семейной жизни кажется вам статуей, готовой треснуть?",
     "action_prompt": "Что делает ваше тело, когда вы ощущаете давление ответственности в семье?"
-  }
+  },
+  "sphere_id": 4,
+  "sphere_key": "FAMILY"
 }

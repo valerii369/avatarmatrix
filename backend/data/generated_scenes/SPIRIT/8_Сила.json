@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "Что за зверь внутри вас требует вашего внимания и принятия?",
     "action_prompt": "Как ваше тело реагирует на звук из глубины леса? Чувствуете ли вы напряжение или желание двигаться?"
-  }
+  },
+  "sphere_id": 8,
+  "sphere_key": "SPIRIT"
 }

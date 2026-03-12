@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "Как вы воспринимаете свою внутреннюю силу в этом лабиринте?",
     "action_prompt": "Что делает ваше тело, когда вы стоите перед зеркалом в центре лабиринта?"
-  }
+  },
+  "sphere_id": 5,
+  "sphere_key": "MISSION"
 }

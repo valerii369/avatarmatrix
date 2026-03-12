@@ -42,5 +42,7 @@
   "transformation_mechanics": {
     "externalization_question": "In what ways do the echoes of past teachings influence your current spiritual path?",
     "action_prompt": "What does your body do when you hear the sudden gust of wind in the temple?"
-  }
+  },
+  "sphere_id": 8,
+  "sphere_key": "SPIRIT"
 }

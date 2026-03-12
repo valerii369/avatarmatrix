@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "Как вы взаимодействуете с необычными растениями в вашем внутреннем саду?",
     "action_prompt": "Что делает ваше тело, когда вы наблюдаете за изменениями в растениях?"
-  }
+  },
+  "sphere_id": 1,
+  "sphere_key": "IDENTITY"
 }

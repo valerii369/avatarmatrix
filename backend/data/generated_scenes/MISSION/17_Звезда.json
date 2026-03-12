@@ -39,5 +39,7 @@
   "transformation_mechanics": {
     "externalization_question": "What does the falling star represent in your life?",
     "action_prompt": "What does your body do as you witness the star's descent and its impact on the garden?"
-  }
+  },
+  "sphere_id": 5,
+  "sphere_key": "MISSION"
 }

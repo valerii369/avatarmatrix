@@ -43,5 +43,7 @@
   "transformation_mechanics": {
     "externalization_question": "In what ways do the whispers of judgement about money manifest in your life, and how do they influence your present decisions?",
     "action_prompt": "What does your body do when confronted with the rusted coin that reveals the void beneath the mirror?"
-  }
+  },
+  "sphere_id": 2,
+  "sphere_key": "MONEY"
 }

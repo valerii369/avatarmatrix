@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "What part of yourself feels like it belongs in this infinite carnival, constantly changing and adapting?",
     "action_prompt": "What does your body feel like doing in this vibrant, ever-shifting space?"
-  }
+  },
+  "sphere_id": 1,
+  "sphere_key": "IDENTITY"
 }

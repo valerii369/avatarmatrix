@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "What aspect of your life feels like this tower, standing tall yet vulnerable to sudden change?",
     "action_prompt": "What does your body do when you imagine standing at the base of this tower, witnessing the lightning strike?"
-  }
+  },
+  "sphere_id": 7,
+  "sphere_key": "SOCIETY"
 }

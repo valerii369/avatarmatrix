@@ -1,0 +1,46 @@
+{
+  "scene_name": "The Hall of Mirrors",
+  "psychological_foundation": "Exploration of Identity through the Archetype of Justice",
+  "immersion_architecture": {
+    "orientation": "In the dimly lit hall, mirrors of various shapes and sizes line the walls, casting distorted reflections that blur the line between reality and illusion. The floor is a polished black marble, reflecting the mirage of mirrors above, creating a labyrinth of reflections. A pendulum, suspended from the ceiling, swings silently, its shadow slicing through the mirrored images, evoking the delicate balance of justice.",
+    "complication": "A sudden shattering sound echoes through the hall as one of the mirrors cracks, disrupting the perfect symmetry and drawing attention to the vulnerability of perception."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Mirrors",
+      "interpretation_broken": "If perceived as broken, mirrors suggest a fractured self-image or the struggle with acknowledging truth and reality.",
+      "interpretation_beautiful": "If perceived as beautiful, mirrors reflect a harmonious acceptance of self and the multifaceted nature of identity.",
+      "interpretation_threatening": "If perceived as threatening, mirrors indicate the fear of exposure or judgment, a confrontation with one's own hidden truths."
+    },
+    {
+      "object": "Pendulum",
+      "interpretation_broken": "If perceived as broken, the pendulum points to a disruption in moral balance or a loss of personal equilibrium.",
+      "interpretation_beautiful": "If perceived as beautiful, the pendulum signifies a serene acceptance of life's natural rhythms and the justice of time.",
+      "interpretation_threatening": "If perceived as threatening, the pendulum suggests an impending consequence or the relentless march of time towards judgment."
+    },
+    {
+      "object": "Black Marble Floor",
+      "interpretation_broken": "If perceived as broken, the floor indicates an unstable foundation in one's sense of identity or values.",
+      "interpretation_beautiful": "If perceived as beautiful, the floor represents a solid, reflective foundation, suggesting depth and clarity in self-awareness.",
+      "interpretation_threatening": "If perceived as threatening, the floor symbolizes a fear of the unknown depths of the self or the potential for moral downfall."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "self-awareness",
+      "reflection",
+      "balance"
+    ],
+    "mcadams_markers": [
+      "moral compass",
+      "identity exploration",
+      "self-confrontation"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "How do the reflections in the mirrors compare to your internal perception of yourself?",
+    "action_prompt": "Consider one aspect of yourself that feels distorted in the reflections. What steps can you take to bring it into clearer focus?"
+  },
+  "sphere_id": 1,
+  "sphere_key": "IDENTITY"
+}

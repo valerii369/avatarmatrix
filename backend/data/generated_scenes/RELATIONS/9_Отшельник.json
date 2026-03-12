@@ -42,5 +42,7 @@
   "transformation_mechanics": {
     "externalization_question": "How do you perceive the solitude of the Hermit in your own life? Is it a source of strength or a barrier?",
     "action_prompt": "What does your body feel as you stand in this sacred glade, surrounded by the symbols of solitude and wisdom?"
-  }
+  },
+  "sphere_id": 3,
+  "sphere_key": "RELATIONS"
 }

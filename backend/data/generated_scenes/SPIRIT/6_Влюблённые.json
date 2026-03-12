@@ -39,5 +39,7 @@
   "transformation_mechanics": {
     "externalization_question": "How does love and connection manifest in your life, and how does it influence your sense of self?",
     "action_prompt": "What does your body do when you feel the push and pull of love and independence?"
-  }
+  },
+  "sphere_id": 8,
+  "sphere_key": "SPIRIT"
 }

@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "Какой семейный секрет может быть скрыт за треснувшим зеркалом?",
     "action_prompt": "Что делает ваше тело, когда вы слышите шепот тени в этом старом поместье?"
-  }
+  },
+  "sphere_id": 4,
+  "sphere_key": "FAMILY"
 }

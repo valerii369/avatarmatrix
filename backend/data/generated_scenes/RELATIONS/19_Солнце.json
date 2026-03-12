@@ -38,5 +38,7 @@
   "transformation_mechanics": {
     "externalization_question": "Как вы взаимодействуете с этой сферой и светлячками?",
     "action_prompt": "Что делает ваше тело, когда свет сферы становится ослепляющим?"
-  }
+  },
+  "sphere_id": 3,
+  "sphere_key": "RELATIONS"
 }

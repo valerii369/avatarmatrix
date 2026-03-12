@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "Какой аспект вашей жизни представлен этим храмом и его витражами?",
     "action_prompt": "Что делает ваше тело, когда вы видите трескающийся витраж?"
-  }
+  },
+  "sphere_id": 3,
+  "sphere_key": "RELATIONS"
 }

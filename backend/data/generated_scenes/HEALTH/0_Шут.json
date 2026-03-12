@@ -38,5 +38,7 @@
   "transformation_mechanics": {
     "externalization_question": "What role does uncertainty play in your current approach to health?",
     "action_prompt": "What does your body feel as you contemplate stepping onto the hidden path?"
-  }
+  },
+  "sphere_id": 6,
+  "sphere_key": "HEALTH"
 }

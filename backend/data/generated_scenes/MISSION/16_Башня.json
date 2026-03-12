@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "Какой аспект вашей жизни напоминает эту Башню, и какие изменения он требует?",
     "action_prompt": "Что делает ваше тело в ответ на удар молнии в сцене?"
-  }
+  },
+  "sphere_id": 5,
+  "sphere_key": "MISSION"
 }

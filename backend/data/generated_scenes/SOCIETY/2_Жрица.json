@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "Какие скрытые истины вы боитесь открыть в своем подсознании?",
     "action_prompt": "Что делает ваше тело, когда вы приближаетесь к кругу камней?"
-  }
+  },
+  "sphere_id": 7,
+  "sphere_key": "SOCIETY"
 }

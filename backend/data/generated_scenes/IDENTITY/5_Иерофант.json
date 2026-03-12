@@ -1,0 +1,45 @@
+{
+  "scene_name": "Sanctuary of Echoes",
+  "psychological_foundation": "This scene explores the dualities of wisdom and dogmatism, guidance and authoritarianism, through the lens of the Hierophant archetype and identity formation.",
+  "immersion_architecture": {
+    "orientation": "In the heart of an ancient forest, where towering trees form a cathedral-like canopy, the air is filled with a gentle luminescence as if time itself has paused. The ground is covered with a mosaic of fallen leaves, each one inscribed with cryptic symbols that whisper forgotten secrets when the wind stirs. A solitary stone altar stands at the center, surrounded by flickering shadows that dance to an unseen rhythm.",
+    "complication": "A sudden gust of wind scatters the leaf-mosaic, revealing a hidden path leading deeper into the forest, beckoning with an unspoken promise of revelation."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Stone Altar",
+      "interpretation_broken": "If perceived as broken, it may suggest a fractured belief system or a crisis in spiritual identity.",
+      "interpretation_beautiful": "Seen as beautiful, it represents a harmonious connection to tradition and a balanced understanding of spiritual truths.",
+      "interpretation_threatening": "If threatening, it may symbolize the oppressive weight of dogmatic beliefs or authoritarian spiritual control."
+    },
+    {
+      "object": "Cryptic Symbols",
+      "interpretation_broken": "Viewed as broken, they could indicate a loss of personal meaning or an inability to decipher one's own life narrative.",
+      "interpretation_beautiful": "As beautiful, they reflect the allure of mystery and the richness of personal and collective unconscious knowledge.",
+      "interpretation_threatening": "If threatening, they might represent overwhelming confusion or fear of the unknown."
+    },
+    {
+      "object": "Path Revealed",
+      "interpretation_broken": "Seen as broken, it may suggest a fear of change or reluctance to explore new aspects of identity.",
+      "interpretation_beautiful": "If beautiful, it signifies a welcoming journey towards self-discovery and personal growth.",
+      "interpretation_threatening": "Perceived as threatening, it might denote anxiety about the future or resistance to transformative experiences."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "insight",
+      "causation",
+      "certainty"
+    ],
+    "mcadams_markers": [
+      "narrative coherence",
+      "autobiographical reasoning"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What does the path that has been revealed in your life symbolize for you?",
+    "action_prompt": "Identify one belief or tradition in your life that feels either liberating or constraining, and explore how it shapes your identity."
+  },
+  "sphere_id": 1,
+  "sphere_key": "IDENTITY"
+}

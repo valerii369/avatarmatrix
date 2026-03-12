@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "How does the presence of family traditions influence your everyday decisions?",
     "action_prompt": "What does your body do when you imagine stepping into the chapel and feeling the cool, misty air enveloping you?"
-  }
+  },
+  "sphere_id": 4,
+  "sphere_key": "FAMILY"
 }

@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "What part of your life feels like it's on the verge of breaking free or collapsing?",
     "action_prompt": "What does your body do when you imagine standing at the base of this cracking tower?"
-  }
+  },
+  "sphere_id": 6,
+  "sphere_key": "HEALTH"
 }

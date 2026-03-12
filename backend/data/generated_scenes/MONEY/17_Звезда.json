@@ -42,5 +42,7 @@
   "transformation_mechanics": {
     "externalization_question": "How does the cosmic vault mirror your relationship with money and the pursuit of your dreams?",
     "action_prompt": "What does your body feel as the shadows stretch across the floor?"
-  }
+  },
+  "sphere_id": 2,
+  "sphere_key": "MONEY"
 }

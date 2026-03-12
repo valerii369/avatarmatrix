@@ -48,5 +48,7 @@
   "transformation_mechanics": {
     "externalization_question": "How does the citadel represent your relationship with authority and control in your life?",
     "action_prompt": "What does your body feel or do as the crystal walls begin to crack?"
-  }
+  },
+  "sphere_id": 7,
+  "sphere_key": "SOCIETY"
 }

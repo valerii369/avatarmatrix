@@ -1,0 +1,50 @@
+{
+  "scene_name": "The Phoenix's Passage",
+  "psychological_foundation": "Exploration of identity through the lens of death as a transformative archetype, focusing on the ability to let go of the past and embrace new beginnings.",
+  "immersion_architecture": {
+    "orientation": "The landscape is a surreal desert, with sand dunes that glow with an ethereal blue light, reflecting the vastness of the cosmos above. Shadows of ancient ruins, half-buried and forgotten, dot the horizon, whispering secrets of civilizations long gone. A solitary, gnarled tree stands defiantly amidst the dunes, its branches reaching skyward, as if yearning for rebirth.",
+    "complication": "A sudden, fierce wind sweeps across the desert, uncovering a hidden doorway at the base of the tree, inviting exploration."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Gnarled Tree",
+      "interpretation_broken": "Perceiving the tree as broken suggests a sense of lost vitality and a struggle with accepting change, reflecting internal stagnation.",
+      "interpretation_beautiful": "Seeing the tree as beautiful indicates a connection with resilience and the potential for renewal, symbolizing strength in embracing transformation.",
+      "interpretation_threatening": "Viewing the tree as threatening reveals fears surrounding inevitable change and the unknown, embodying anxiety about personal evolution."
+    },
+    {
+      "object": "Ancient Ruins",
+      "interpretation_broken": "Viewing the ruins as broken highlights feelings of decay and the inability to move beyond past failures, representing a fixation on what is lost.",
+      "interpretation_beautiful": "Seeing the ruins as beautiful suggests an appreciation for history and the lessons it holds, indicating a readiness to learn from the past.",
+      "interpretation_threatening": "Perceiving the ruins as threatening suggests fear of past mistakes haunting the present, indicating unresolved issues that hinder progress."
+    },
+    {
+      "object": "Hidden Doorway",
+      "interpretation_broken": "If the doorway is seen as broken, it reflects a perceived barrier to new opportunities, signifying fear of stepping into the unknown.",
+      "interpretation_beautiful": "Seeing the doorway as beautiful indicates hope and excitement for new beginnings, symbolizing a willingness to embrace change.",
+      "interpretation_threatening": "Viewing the doorway as threatening reveals apprehension about what lies ahead, suggesting anxiety about taking the next step."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "change",
+      "past",
+      "future",
+      "fear",
+      "hope"
+    ],
+    "mcadams_markers": [
+      "transformation",
+      "journey",
+      "rebirth",
+      "identity",
+      "resilience"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What past elements are you holding onto that might be hindering your growth?",
+    "action_prompt": "Imagine stepping through the hidden doorway. What awaits you on the other side, and how does it reflect your true desires for transformation?"
+  },
+  "sphere_id": 1,
+  "sphere_key": "IDENTITY"
+}

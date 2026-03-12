@@ -1,0 +1,46 @@
+{
+  "scene_name": "The Devil's Domain",
+  "psychological_foundation": "The scene explores the archetype of the Devil, focusing on the integration of the shadow self and the latent power within. It is a journey through the psyche, confronting hidden fears and desires that are often suppressed due to societal norms and personal inhibitions.",
+  "immersion_architecture": {
+    "orientation": "A vast, dimly lit hall stretches out, its walls adorned with intricate, swirling patterns that seem to shift and writhe as if alive. The floor is a checkerboard of obsidian and ivory, reflecting a pale, eerie luminescence from an unseen source above. In the center stands a grand, ornate mirror, its surface shimmering with a silver light that beckons and repels in equal measure.",
+    "complication": "The mirror suddenly emits a pulsating, rhythmic hum that resonates through the hall, drawing the observer inexorably closer."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Mirror",
+      "interpretation_broken": "If the mirror appears broken, it may indicate a fractured self-image or an internal struggle with one's identity, reflecting a fear of confronting one's true self.",
+      "interpretation_beautiful": "If the mirror seems beautiful, it could symbolize self-acceptance and the recognition of one's inner and outer beauty, suggesting harmony with one's identity.",
+      "interpretation_threatening": "If the mirror feels threatening, it may represent the fear of self-exposure and the anxiety of confronting hidden aspects of the self."
+    },
+    {
+      "object": "Checkerboard Floor",
+      "interpretation_broken": "A broken pattern might suggest a loss of balance or a disruption in the moral or ethical framework guiding the individual.",
+      "interpretation_beautiful": "If the floor is perceived as beautiful, it could indicate an appreciation for complexity and the ability to navigate life's dualities with grace.",
+      "interpretation_threatening": "If the floor seems threatening, it may reflect a fear of making wrong choices or being trapped in a situation of moral ambiguity."
+    },
+    {
+      "object": "Swirling Patterns",
+      "interpretation_broken": "Broken patterns might signify a disconnection from the subconscious or a fear of the unknown aspects of oneself.",
+      "interpretation_beautiful": "If the patterns are seen as beautiful, it suggests a harmony with one's subconscious and an openness to the flow of intuitive insights.",
+      "interpretation_threatening": "If the patterns appear threatening, it may indicate anxiety about losing control or being overwhelmed by repressed emotions or desires."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "self-reflection",
+      "identity",
+      "fear"
+    ],
+    "mcadams_markers": [
+      "integration",
+      "shadow",
+      "power"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What does the reflection in the mirror reveal about the parts of yourself you have been hesitant to acknowledge?",
+    "action_prompt": "Approach the mirror and describe the emotions and thoughts that arise as you confront your reflection. What steps can you take to integrate these insights into your daily life?"
+  },
+  "sphere_id": 1,
+  "sphere_key": "IDENTITY"
+}

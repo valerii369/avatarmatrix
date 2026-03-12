@@ -1,0 +1,46 @@
+{
+  "scene_name": "The Gilded Cemetery",
+  "psychological_foundation": "The scene explores the intersection of financial aspirations and the inevitability of death, inviting reflection on what is truly valuable and the transformations one must undergo to find new beginnings.",
+  "immersion_architecture": {
+    "orientation": "A vast, eerily silent cemetery stretches out under a pale moonlight, its tombstones glinting with an unnatural golden hue. The ground is littered with crumbling coins, mingled with scattered wilted flowers, as if the remnants of some opulent past offering. A gentle mist swirls through the air, carrying the faint scent of aged paper currency, whispering secrets from the beyond.",
+    "complication": "A sudden gust of wind lifts the mist, revealing a hidden path leading towards a massive, ornate vault that seems to pulsate with a life of its own."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Golden Tombstones",
+      "interpretation_broken": "If perceived as broken, it suggests unresolved issues with the past and a fear of letting go of old values tied to material wealth.",
+      "interpretation_beautiful": "If seen as beautiful, it indicates a deep understanding and acceptance of the cyclical nature of life and the value of legacy beyond mere monetary gain.",
+      "interpretation_threatening": "If felt as threatening, it reflects anxiety about the impermanence of wealth and the fear of inevitable loss."
+    },
+    {
+      "object": "Crumbling Coins",
+      "interpretation_broken": "If perceived as broken, it signifies a struggle with self-worth and an identity crisis linked to financial instability.",
+      "interpretation_beautiful": "If seen as beautiful, it represents liberation from material constraints and the recognition of true riches in life experiences.",
+      "interpretation_threatening": "If felt as threatening, it indicates a fear of poverty and the anxiety of financial ruin."
+    },
+    {
+      "object": "Ornate Vault",
+      "interpretation_broken": "If perceived as broken, it suggests feelings of vulnerability and exposure, as if one's deepest secrets and fears are laid bare.",
+      "interpretation_beautiful": "If seen as beautiful, it symbolizes a gateway to profound personal transformation and the unlocking of one's true potential.",
+      "interpretation_threatening": "If felt as threatening, it reflects a fear of confronting one's deepest desires and the potential chaos of significant change."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "money",
+      "death",
+      "change"
+    ],
+    "mcadams_markers": [
+      "legacy",
+      "transformation",
+      "fear"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What does the vault symbolize in your life, and what secrets or treasures does it hold?",
+    "action_prompt": "Envision yourself walking through the mist towards the vault. What do you hope to find inside, and how will it transform your current path?"
+  },
+  "sphere_id": 2,
+  "sphere_key": "MONEY"
+}

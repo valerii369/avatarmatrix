@@ -39,5 +39,7 @@
   "transformation_mechanics": {
     "externalization_question": "Что символизирует для вас зверь, вышедший из картины?",
     "action_prompt": "Что делает ваше тело, когда зверь приближается? Как вы реагируете?"
-  }
+  },
+  "sphere_id": 3,
+  "sphere_key": "RELATIONS"
 }

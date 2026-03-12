@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "How does the concept of financial completion feel to you when imagined as a market that may never close?",
     "action_prompt": "What does your body feel like doing in response to the scattered coins of light? How does it affect your movement through the market?"
-  }
+  },
+  "sphere_id": 2,
+  "sphere_key": "MONEY"
 }

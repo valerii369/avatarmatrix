@@ -42,5 +42,7 @@
   "transformation_mechanics": {
     "externalization_question": "What does the intertwining path of the labyrinth represent in your current relationships?",
     "action_prompt": "What does your body feel as you stand before the shifting paths of the labyrinth?"
-  }
+  },
+  "sphere_id": 3,
+  "sphere_key": "RELATIONS"
 }

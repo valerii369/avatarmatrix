@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "What does the celestial garden represent in your life's journey?",
     "action_prompt": "What does your body do as the breeze stirs the starlit garden?"
-  }
+  },
+  "sphere_id": 3,
+  "sphere_key": "RELATIONS"
 }

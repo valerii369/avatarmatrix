@@ -1,0 +1,46 @@
+{
+  "scene_name": "Suspended Reflections",
+  "psychological_foundation": "This scene explores the archetype of the Hanged Man, delving into the dual nature of voluntary sacrifice for greater insight versus the stagnation and suffering of unnecessary martyrdom.",
+  "immersion_architecture": {
+    "orientation": "A dense fog rolls over a desolate landscape where trees grow upside down, their roots stretching towards the sky, all mirrored perfectly in a shallow, still lake. In the distance, a lone clock tower stands, its hands frozen, casting long shadows over a field of withered sunflowers.",
+    "complication": "A sudden gust of wind stirs the fog and the clock tower's bell tolls, resonating with an eerie, hollow sound."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Upside-down Trees",
+      "interpretation_broken": "Perceiving the trees as broken suggests a feeling of disconnection from one's roots or foundational beliefs, indicating a struggle with identity and personal growth.",
+      "interpretation_beautiful": "Seeing beauty in the trees may reflect an appreciation for unconventional perspectives and adaptability in one's identity.",
+      "interpretation_threatening": "If the trees appear threatening, it might indicate fear of losing control or the chaos that can come with change and new perspectives."
+    },
+    {
+      "object": "Frozen Clock Tower",
+      "interpretation_broken": "A broken perception here suggests a struggle with feeling stuck in time or an inability to progress in life, indicating a crisis in finding one's purpose and direction.",
+      "interpretation_beautiful": "Finding beauty in the frozen clock may symbolize peace with the present, acceptance, and a sense of timelessness in one's identity.",
+      "interpretation_threatening": "A threatening clock tower could symbolize an overwhelming pressure of time, a fear of missed opportunities, or anxiety about aging and life's transience."
+    },
+    {
+      "object": "Withered Sunflowers",
+      "interpretation_broken": "Seeing the sunflowers as broken might highlight feelings of lost potential, unfulfilled dreams, or a lack of vitality in one's self-concept.",
+      "interpretation_beautiful": "Finding beauty in these withered flowers can indicate acceptance of life's cycles and the wisdom gleaned from past experiences.",
+      "interpretation_threatening": "If the sunflowers are perceived as threatening, it may represent a fear of decay, loss, and the inevitability of change."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "stuck",
+      "sacrifice",
+      "reflection"
+    ],
+    "mcadams_markers": [
+      "identity exploration",
+      "sacrifice narrative",
+      "surrender and insight"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What do the upside-down trees reveal about your current perspective on life and its challenges?",
+    "action_prompt": "Reflect on a belief or behavior you have held onto that no longer serves you and consider what you might gain by letting it go."
+  },
+  "sphere_id": 1,
+  "sphere_key": "IDENTITY"
+}

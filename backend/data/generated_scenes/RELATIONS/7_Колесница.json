@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "Как песчаная буря отражает ваши внутренние конфликты и их влияние на отношения?",
     "action_prompt": "Что делает ваше тело, когда вы представляете, что управляете Колесницей через бурю?"
-  }
+  },
+  "sphere_id": 3,
+  "sphere_key": "RELATIONS"
 }

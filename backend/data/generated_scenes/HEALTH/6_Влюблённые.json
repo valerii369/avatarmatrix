@@ -40,5 +40,7 @@
   "transformation_mechanics": {
     "externalization_question": "How do these opposing forces manifest in your relationships?",
     "action_prompt": "What does your body feel when you think about the balance or imbalance within?"
-  }
+  },
+  "sphere_id": 6,
+  "sphere_key": "HEALTH"
 }

@@ -42,5 +42,7 @@
   "transformation_mechanics": {
     "externalization_question": "Как бы вы описали свою миссию, если бы она была цирковым представлением?",
     "action_prompt": "Как ваше тело реагирует на неожиданное появление теней в зеркалах?"
-  }
+  },
+  "sphere_id": 5,
+  "sphere_key": "MISSION"
 }

@@ -39,5 +39,7 @@
   "transformation_mechanics": {
     "externalization_question": "Какой аспект вашей жизни ощущается как нечто, что вы не хотите завершать?",
     "action_prompt": "Что делает ваше тело, когда вы представляете, как часы начинают тикать быстрее?"
-  }
+  },
+  "sphere_id": 7,
+  "sphere_key": "SOCIETY"
 }
