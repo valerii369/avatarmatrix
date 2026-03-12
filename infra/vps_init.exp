@@ -1,0 +1,34 @@
+#!/usr/bin/expect -f
+set timeout -1
+set password "eCTyD*R.94zTba"
+set host "103.74.92.72"
+set remote_dir "/root/avatar/backend"
+
+spawn ssh -o StrictHostKeyChecking=no root@$host
+expect "*assword:*"
+send "$password\r"
+expect "#"
+
+send "cd $remote_dir\r"
+expect "#"
+
+send "source venv/bin/activate\r"
+expect "#"
+
+send "export PYTHONPATH=\$PYTHONPATH:\$(pwd)\r"
+expect "#"
+
+puts "\n🚀 Running Alembic Migrations...\n"
+send "alembic upgrade head\r"
+expect "#"
+
+puts "\n🚀 Importing Scenes to DB...\n"
+send "python3 scripts/import_scenes_to_db.py\r"
+expect "#"
+
+puts "\n🚀 Running Final Scene Audit...\n"
+send "python3 scripts/check_scenes_audit.py\r"
+expect "#"
+
+send "exit\r"
+expect eof

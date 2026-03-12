@@ -35,6 +35,7 @@ proc remote_cmd {cmd} {
 # 1. Deploy Core Components
 scp_dir "$local_root/backend/app" "$remote_dir/backend/"
 scp_dir "$local_root/backend/data" "$remote_dir/backend/"
+scp_dir "$local_root/backend/scripts" "$remote_dir/backend/"
 scp_dir "$local_root/backend/migrations" "$remote_dir/backend/"
 scp_dir "$local_root/bot" "$remote_dir/"
 
