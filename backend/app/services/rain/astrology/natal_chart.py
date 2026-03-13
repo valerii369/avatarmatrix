@@ -9,10 +9,9 @@ import swisseph as swe
 from geopy.geocoders import Nominatim
 from timezonefinder import TimezoneFinder
 from datetime import datetime
-import pytz
+from app.config import settings
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
-DATA_DIR = os.path.join(BASE_DIR, "data")
+DATA_DIR = settings.DATA_DIR
 
 with open(os.path.join(DATA_DIR, "planet_archetype_map.json")) as f:
     PLANET_ARCHETYPE_MAP = json.load(f)

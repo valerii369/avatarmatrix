@@ -5,8 +5,7 @@ from app.config import settings
 
 client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-DATA_DIR = os.path.join(BASE_DIR, "data")
+DATA_DIR = settings.DATA_DIR
 
 with open(os.path.join(DATA_DIR, "archetypes.json")) as f:
     ARCHETYPES = {item["id"]: item for item in json.load(f)}

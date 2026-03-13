@@ -1,8 +1,13 @@
+import os
 from pydantic_settings import BaseSettings
 from functools import lru_cache
 
 
 class Settings(BaseSettings):
+    # Base paths
+    BASE_DIR: str = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    DATA_DIR: str = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
+
     DATABASE_URL: str
     BOT_TOKEN: str
     OPENAI_API_KEY: str
