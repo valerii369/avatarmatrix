@@ -188,7 +188,7 @@ export default function ProfilePage() {
                     />
                 )}
                 {activeTab === "settings" && (
-                    <SettingsView />
+                    <SettingsView userId={userId!} />
                 )}
                 {activeTab === "referrals" && (
                     <ReferralView userId={userId!} referralCode={referralCode} />
@@ -280,7 +280,7 @@ function MainProfileView({ game, loadingGame, profile, setShowShop, setShowSubsc
     );
 }
 
-function SettingsView() {
+function SettingsView({ userId }: { userId: number }) {
     const [lang, setLang] = useState("RU");
     const { musicEnabled, sfxEnabled, toggleMusic, toggleSfx, play } = useAudio();
 
@@ -367,6 +367,37 @@ function SettingsView() {
                         <span className="text-sm font-semibold text-white">Как это работает?</span>
                     </div>
                     <span className="text-white/20">→</span>
+                </button>
+            </div>
+
+            <div className="glass p-4 space-y-2">
+                <h3 className="text-sm font-bold text-white/40 uppercase tracking-widest mb-1">Опасная зона</h3>
+                
+                <button
+                    onClick={async () => {
+                        if (confirm("Вы уверены? Это полностью сбросит ваш прогресс, удалит все карточки и сессии.")) {
+                            try {
+                                const tg = (window as any).Telegram?.WebApp;
+                                const tid = tg?.initDataUnsafe?.user?.id || userId; 
+                                if (!tid) return;
+                                await profileAPI.reset(tid);
+                                localStorage.removeItem("avatar_token");
+                                window.location.href = "/onboarding";
+                            } catch (e) {
+                                console.error("Reset error", e);
+                                alert("Ошибка при сбросе профиля");
+                            }
+                        }
+                    }}
+                    className="w-full flex items-center justify-between p-3 bg-rose-500/10 rounded-2xl border border-rose-500/20 active:scale-[0.98] transition-all text-left group"
+                >
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center text-xl">⚠️</div>
+                        <div>
+                            <p className="text-sm font-semibold text-rose-400">Начать заново</p>
+                            <p className="text-[10px] text-rose-500/40">Полный сброс параметров</p>
+                        </div>
+                    </div>
                 </button>
             </div>
 

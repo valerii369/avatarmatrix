@@ -5,6 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.user_print import UserPrint
+from app.models.natal_chart import NatalChart
 from app.schemas.user_print import UserPrintSchema
 from app.agents.common import client, settings
 
@@ -63,6 +64,14 @@ class UserPrintManager:
         """
         current_up = await UserPrintManager.get_user_print(db, user_id)
         current_data_json = current_up.model_dump_json() if current_up else "{}"
+        
+        # Add NatalChart context (Astro-breakdown)
+        natal_res = await db.execute(select(NatalChart).where(NatalChart.user_id == user_id))
+        natal_chart = natal_res.scalar_one_or_none()
+        astro_context = "No natal chart found."
+        if natal_chart:
+            astro_context = json.dumps(natal_chart.sphere_descriptions_json, ensure_ascii=False)
+
         rivers_context = json.dumps(source_data, ensure_ascii=False) if source_data else "No technical source data provided."
 
         extraction_prompt = f"""
@@ -79,6 +88,9 @@ class UserPrintManager:
 
 ТЕХНИЧЕСКИЕ ИСТОЧНИКИ (РЕКИ):
 {rivers_context}
+
+АСТРОЛОГИЧЕСКИЙ БАЗИС (ЗВЕЗДЫ):
+{astro_context}
 
 ЖИВОЙ ОПЫТ СЕССИИ:
 {transcript}

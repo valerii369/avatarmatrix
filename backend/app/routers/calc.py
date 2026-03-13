@@ -16,6 +16,7 @@ from app.core.astrology.natal_chart import (
 from app.core.astrology.aspect_calculator import calculate_aspects, to_dict as aspects_to_dict
 from app.core.astrology.llm_engine import synthesize_sphere_descriptions
 from app.core.astrology.vector_matcher import match_archetypes_to_spheres
+from app.core.user_print_manager import UserPrintManager
 import logging
 
 logger = logging.getLogger(__name__)
@@ -199,6 +200,17 @@ async def calculate(
     logger.info(f"Committing Astro results for user {user.id}...")
     await db.commit()
     logger.info("Commit successful.")
+
+    # Update the Hub (Ocean - User Print) with Astro base
+    try:
+        await UserPrintManager.update_user_print(
+            db, 
+            user.id, 
+            "Initial Astrological Calculation", 
+            {"source": "astro_natal_chart", "spheres": sphere_descriptions}
+        )
+    except Exception as e:
+        logger.warning(f"Initial User Print synthesis failed: {e}")
 
     return CalcResponse(
         success=True,
