@@ -1,0 +1,46 @@
+{
+  "scene_name": "Moonlit Reflection",
+  "psychological_foundation": "The scene explores the dual nature of the Moon archetype, presenting both its potential for deep, intuitive understanding and its shadow of irrational fear and illusion.",
+  "immersion_architecture": {
+    "orientation": "The scene unfolds in a surreal forest bathed in ethereal moonlight, where trees cast elongated shadows that dance like specters on the soft, luminescent ground. A winding path of glistening silver leads to a tranquil pond that mirrors the star-filled sky, creating an illusion of walking among the stars. The air is filled with a gentle, haunting melody that seems to emanate from the very essence of the night.",
+    "complication": "A sudden ripple disturbs the pond's surface, shattering the celestial reflection and sending a chill through the air, as if awakening an ancient, hidden presence."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Pond",
+      "interpretation_broken": "Perceiving the pond as broken may indicate a sense of lost clarity or disrupted self-reflection, suggesting unresolved internal conflicts.",
+      "interpretation_beautiful": "Finding beauty in the pond reflects a connection with one's inner peace and the ability to see the harmony in life's complexities.",
+      "interpretation_threatening": "Seeing the pond as threatening might symbolize fear of the unknown or the anxiety of delving too deeply into one's subconscious."
+    },
+    {
+      "object": "Moonlight",
+      "interpretation_broken": "If moonlight seems broken, it may signify a disconnection from intuition or a struggle to illuminate one's inner world.",
+      "interpretation_beautiful": "Beautiful moonlight represents a profound connection with intuition and an appreciation for the mysteries of life.",
+      "interpretation_threatening": "Perceiving moonlight as threatening could indicate fear of self-discovery or anxiety about confronting hidden truths."
+    },
+    {
+      "object": "Shadows",
+      "interpretation_broken": "Broken shadows might reflect a fear of one's darker aspects or a desire to escape from confronting personal truths.",
+      "interpretation_beautiful": "Beautiful shadows suggest a comfort with the unknown and an acceptance of the dual nature of life.",
+      "interpretation_threatening": "Threatening shadows may represent looming fears or the sense of being overwhelmed by one's own subconscious."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "fear",
+      "illusion",
+      "intuition"
+    ],
+    "mcadams_markers": [
+      "self-reflection",
+      "inner peace",
+      "subconscious exploration"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What does the ripple in the pond represent in your life journey?",
+    "action_prompt": "What does your body do when you feel the ripple in the air?"
+  },
+  "sphere_id": 7,
+  "sphere_key": "SOCIETY"
+}

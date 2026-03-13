@@ -2,7 +2,7 @@
 Calc router: birth data input → natal chart calculation → 176 cards generation.
 """
 from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -49,6 +49,7 @@ class CalcResponse(BaseModel):
 @router.post("", response_model=CalcResponse)
 async def calculate(
     request: BirthDataRequest,
+    background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
 ):
     """
@@ -201,16 +202,22 @@ async def calculate(
     await db.commit()
     logger.info("Commit successful.")
 
-    # Update the Hub (Ocean - User Print) with Astro base
-    try:
-        await UserPrintManager.update_user_print(
-            db, 
-            user.id, 
-            "Initial Astrological Calculation", 
-            {"source": "astro_natal_chart", "spheres": sphere_descriptions}
-        )
-    except Exception as e:
-        logger.warning(f"Initial User Print synthesis failed: {e}")
+    # Update the Hub (Ocean - User Print) with Astro base via background task
+    from app.database import AsyncSessionLocal
+    async def _bg_hub_update(u_id, s_desc):
+        async with AsyncSessionLocal() as session:
+            try:
+                await UserPrintManager.update_user_print(
+                    session, 
+                    u_id, 
+                    "Initial Astrological Calculation", 
+                    {"source": "astro_natal_chart", "spheres": s_desc}
+                )
+                await session.commit()
+            except Exception as bg_e:
+                logger.warning(f"Background User Print synthesis failed: {bg_e}")
+
+    background_tasks.add_task(_bg_hub_update, user.id, sphere_descriptions)
 
     return CalcResponse(
         success=True,

@@ -12,8 +12,10 @@ import { CardSkeleton } from "@/components/Skeleton";
 // GraphView removed in favor of AI Sessions
 
 const SPHERE_NAMES: Record<string, string> = {
-    IDENTITY: "Личность", MONEY: "Деньги", RELATIONS: "Отношения",
-    FAMILY: "Род", MISSION: "Миссия", HEALTH: "Здоровье", SOCIETY: "Влияние", SPIRIT: "Духовность"
+    IDENTITY: "Личность", RESOURCES: "Ресурсы", COMMUNICATION: "Связи",
+    ROOTS: "Корни", CREATIVITY: "Творчество", SERVICE: "Служение",
+    PARTNERSHIP: "Партнерство", TRANSFORMATION: "Тень", EXPANSION: "Поиск",
+    STATUS: "Статус", VISION: "Будущее", SPIRIT: "Дух"
 };
 
 const MicIcon = ({ className }: { className?: string }) => (
@@ -290,7 +292,7 @@ export default function ReflectPage() {
     const [loading, setLoading] = useState(false);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const draftRef = useRef<HTMLTextAreaElement>(null);
-    const SPHERES = ["all", "IDENTITY", "MONEY", "RELATIONS", "FAMILY", "MISSION", "HEALTH", "SOCIETY", "SPIRIT"];
+    const SPHERES = ["all", "IDENTITY", "RESOURCES", "COMMUNICATION", "ROOTS", "CREATIVITY", "SERVICE", "PARTNERSHIP", "TRANSFORMATION", "EXPANSION", "STATUS", "VISION", "SPIRIT"];
 
     const [isChatting, setIsChatting] = useState(false);
     const [chatMessages, setChatMessages] = useState<{ role: string, content: string }[]>([]);

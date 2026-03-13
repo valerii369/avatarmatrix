@@ -1,0 +1,46 @@
+{
+  "scene_name": "The Inverted Garden",
+  "psychological_foundation": "The scene explores the archetype of the Hanged Man, focusing on the themes of voluntary sacrifice and altered perception, as well as the shadow aspects of victimhood and stagnation.",
+  "immersion_architecture": {
+    "orientation": "In a topsy-turvy garden where trees grow roots-up into the sky, and the ground is a mosaic of shimmering glass shards, the air is thick with an ethereal mist that refracts the fragmented light into surreal rainbows. The distant echoes of unseen waterfalls create a haunting melody that harmonizes with the gentle rustling of leaves that seem to whisper secrets of forgotten languages.",
+    "complication": "A sudden gust of wind stirs the glass shards, casting dancing reflections that momentarily blind and disorient, causing a shift in the perceived reality of the garden."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Roots-in-the-sky Trees",
+      "interpretation_broken": "If perceived as broken, it may indicate a feeling of disconnection from one's source of strength or identity.",
+      "interpretation_beautiful": "Seen as beautiful, it suggests an appreciation for unconventional perspectives and the beauty in what is typically unseen.",
+      "interpretation_threatening": "If threatening, it could reflect fear of vulnerability or the unsettling nature of reversed roles."
+    },
+    {
+      "object": "Glass Shard Ground",
+      "interpretation_broken": "As broken, it signifies an awareness of underlying fragility and potential danger in one's foundation.",
+      "interpretation_beautiful": "If seen as beautiful, it represents finding beauty in complexity and the multifaceted nature of experiences.",
+      "interpretation_threatening": "When threatening, it may symbolize anxiety about walking a precarious path where each step could lead to pain."
+    },
+    {
+      "object": "Ethereal Mist",
+      "interpretation_broken": "Perceived as broken, it could indicate a loss of clarity or confusion about one's current path.",
+      "interpretation_beautiful": "If beautiful, it suggests an embrace of mystery and the unknown, finding peace in ambiguity.",
+      "interpretation_threatening": "Seen as threatening, it reflects a fear of the obscured and the unpredictable nature of life."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "sacrifice",
+      "perception",
+      "victimhood"
+    ],
+    "mcadams_markers": [
+      "identity",
+      "meaning",
+      "transformation"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What role does the feeling of sacrifice or stagnation play in your current life story?",
+    "action_prompt": "What does your body want to do in this upside-down world that challenges gravity and perspective?"
+  },
+  "sphere_id": 7,
+  "sphere_key": "SOCIETY"
+}

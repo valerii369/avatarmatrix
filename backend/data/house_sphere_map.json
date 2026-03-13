@@ -1,50 +1,50 @@
 {
     "1": {
         "spheres": ["IDENTITY"],
-        "name": "Я и Маска"
+        "name": "Личность"
     },
     "2": {
         "spheres": ["RESOURCES"],
-        "name": "Ценности и Ресурсы"
+        "name": "Ресурсы"
     },
     "3": {
         "spheres": ["COMMUNICATION"],
-        "name": "Связи и Среда"
+        "name": "Связи"
     },
     "4": {
         "spheres": ["ROOTS"],
-        "name": "Дом и Род"
+        "name": "Корни"
     },
     "5": {
         "spheres": ["CREATIVITY"],
-        "name": "Творчество и Созидание"
+        "name": "Творчество"
     },
     "6": {
         "spheres": ["SERVICE"],
-        "name": "Польза и Служение"
+        "name": "Служение"
     },
     "7": {
         "spheres": ["PARTNERSHIP"],
-        "name": "Партнерство и Отражение"
+        "name": "Партнерство"
     },
     "8": {
         "spheres": ["TRANSFORMATION"],
-        "name": "Кризис и Алхимия"
+        "name": "Тень"
     },
     "9": {
         "spheres": ["EXPANSION"],
-        "name": "Мировоззрение и Горизонты"
+        "name": "Поиск"
     },
     "10": {
         "spheres": ["STATUS"],
-        "name": "Признание и Вершина"
+        "name": "Статус"
     },
     "11": {
         "spheres": ["VISION"],
-        "name": "Будущее и Коллектив"
+        "name": "Будущее"
     },
     "12": {
         "spheres": ["SPIRIT"],
-        "name": "Дух и Целостность"
+        "name": "Дух"
     }
 }

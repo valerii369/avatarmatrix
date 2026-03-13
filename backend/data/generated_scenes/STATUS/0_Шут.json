@@ -1,0 +1,46 @@
+{
+  "scene_name": "The Infinite Carousel",
+  "psychological_foundation": "This scene is based on the archetype of the Fool and focuses on the theme of Status, exploring the dynamics of potentiality, freedom, and the tension between chaos and order.",
+  "immersion_architecture": {
+    "orientation": "In a surreal landscape, a vast and colorful carousel spins in an endless desert. The sky above is a swirl of auroras and shooting stars, painting a canvas of cosmic wonder. The air is filled with the whimsical music of an unseen calliope, harmonizing with the gentle clinking of glass beads that hang from invisible strings.",
+    "complication": "Suddenly, the carousel begins to slow down and the music falters, creating a dissonant echo that reverberates through the desert."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Carousel",
+      "interpretation_broken": "Seeing the carousel as broken may indicate feelings of stagnation or fear of missed opportunities, suggesting the user struggles with embracing change or new beginnings.",
+      "interpretation_beautiful": "If the carousel is perceived as beautiful, it reflects the user's appreciation for life's cycles and the joy found in embracing the unknown and unexpected.",
+      "interpretation_threatening": "Perceiving the carousel as threatening suggests anxiety about losing control or being swept away by chaos, indicating a fear of surrendering to life's flow."
+    },
+    {
+      "object": "Auroras",
+      "interpretation_broken": "Broken auroras may symbolize a loss of hope or inspiration, suggesting the user feels disconnected from their inner potential or creativity.",
+      "interpretation_beautiful": "Beautiful auroras reflect the user's connection to their inner light and the ability to find beauty in the mysterious and the unknown.",
+      "interpretation_threatening": "If auroras are seen as threatening, it may indicate a fear of the unknown or an overwhelming sense of insignificance in the face of vast possibilities."
+    },
+    {
+      "object": "Glass Beads",
+      "interpretation_broken": "Broken glass beads may signify shattered illusions or lost dreams, indicating the user may be grappling with disillusionment or unmet expectations.",
+      "interpretation_beautiful": "If the beads are seen as beautiful, it reflects an ability to find beauty in fragility and the interconnectedness of experiences.",
+      "interpretation_threatening": "Seeing the beads as threatening suggests a fear of vulnerability or exposure, indicating apprehension about the consequences of revealing one's true self."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "change",
+      "uncertainty",
+      "potential"
+    ],
+    "mcadams_markers": [
+      "exploration",
+      "identity",
+      "transformation"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What does the slowing carousel remind you of in your life?",
+    "action_prompt": "Imagine yourself stepping onto the carousel. What do you see from this new perspective, and how does it change your view on embracing new beginnings?"
+  },
+  "sphere_id": 10,
+  "sphere_key": "STATUS"
+}

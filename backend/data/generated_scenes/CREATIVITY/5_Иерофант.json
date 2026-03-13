@@ -1,0 +1,46 @@
+{
+  "scene_name": "Temple of the Hidden Wisdom",
+  "psychological_foundation": "The scene explores the archetype of the Hierophant within the context of one's mission or purpose, examining both its light and shadow aspects.",
+  "immersion_architecture": {
+    "orientation": "In the dimly lit chamber of an ancient temple, soft beams of moonlight filter through the cracked dome, casting an ethereal glow upon the mosaic floor depicting a sacred mandala. Echoes of distant chants resonate through the air, blending with the rustling of leaves from a hidden grove just beyond the temple walls. Mysterious symbols carved into the stone pillars seem to shimmer as if whispering secrets of forgotten wisdom.",
+    "complication": "A sudden gust of wind sweeps through the temple, extinguishing the candles and leaving only the moonlight to illuminate the path, urging the seeker to continue deeper into the unknown."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Mosaic Floor",
+      "interpretation_broken": "The broken mosaic signifies a disruption in one's understanding of their spiritual path or purpose.",
+      "interpretation_beautiful": "A beautiful mosaic represents a harmonious integration of complex ideas and a deep connection to one's mission.",
+      "interpretation_threatening": "A threatening mosaic suggests fear of confronting hidden truths or the complexity of one's beliefs."
+    },
+    {
+      "object": "Stone Pillars",
+      "interpretation_broken": "Broken pillars indicate a loss of foundational beliefs or support in one's spiritual journey.",
+      "interpretation_beautiful": "Beautiful pillars symbolize strength and a solid grounding in one's values and mission.",
+      "interpretation_threatening": "Threatening pillars imply rigidity and inflexibility in one's belief system, possibly overshadowing personal growth."
+    },
+    {
+      "object": "Moonlight",
+      "interpretation_broken": "Broken moonlight reveals a disconnect from intuition and a lack of guidance in spiritual matters.",
+      "interpretation_beautiful": "A beautiful moonlight signifies clarity and enlightenment, illuminating the path to one's true purpose.",
+      "interpretation_threatening": "Threatening moonlight suggests fear of the unknown and hesitation in trusting one's inner guidance."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "insight",
+      "cognitive_processes",
+      "spirituality"
+    ],
+    "mcadams_markers": [
+      "redemption_sequence",
+      "agency",
+      "communion"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "How does the presence of this ancient wisdom influence your current path or purpose?",
+    "action_prompt": "What does your body feel compelled to do as the moonlight reveals the path deeper into the temple?"
+  },
+  "sphere_id": 5,
+  "sphere_key": "MISSION"
+}

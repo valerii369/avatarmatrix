@@ -1,0 +1,44 @@
+{
+  "scene_name": "The Alchemical Garden",
+  "psychological_foundation": "A surreal garden that symbolizes the spiritual journey of harmony and moderation, exploring the balance between opposing forces to create an inner peace.",
+  "immersion_architecture": {
+    "orientation": "In the heart of a garden, surreal and vibrant, a river of mercury flows silently beside a bed of glowing flowers that pulsate in rhythm with an unseen heartbeat. An ancient sundial stands, casting shadows that move in unexpected directions, suggesting the passage of time in a non-linear fashion. Above, the sky shifts colors like a living painting, reflecting the inner emotional landscape of the observer.",
+    "complication": "A sudden crack appears in the sundial, emitting a low hum that disturbs the harmony of the scene, as the mercury river begins to ripple violently."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Mercury River",
+      "interpretation_broken": "Perceiving the river as broken suggests a struggle with the flow of emotions and an inability to harmonize inner conflicts.",
+      "interpretation_beautiful": "Seeing the river as beautiful indicates a deep connection to one's emotional state and an appreciation for the fluidity of life.",
+      "interpretation_threatening": "Viewing the river as threatening points to a fear of being overwhelmed by emotions or change."
+    },
+    {
+      "object": "Glowing Flowers",
+      "interpretation_broken": "If the flowers are seen as broken, it may indicate a feeling of lost potential or creativity.",
+      "interpretation_beautiful": "Finding the flowers beautiful reflects a sense of wonder and inspiration from the natural world.",
+      "interpretation_threatening": "Seeing the flowers as threatening suggests anxiety about the unpredictability of growth or change."
+    },
+    {
+      "object": "Ancient Sundial",
+      "interpretation_broken": "A broken sundial represents a disconnect from one's sense of time or progress in life.",
+      "interpretation_beautiful": "A beautiful sundial symbolizes an appreciation for the passage of time and life's journey.",
+      "interpretation_threatening": "A threatening sundial indicates fear of time running out or anxiety about the future."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "emotions",
+      "time"
+    ],
+    "mcadams_markers": [
+      "harmony",
+      "growth"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "How does the disturbance in the garden reflect conflicts in your own life?",
+    "action_prompt": "What is your body doing as you observe the transformation in the garden?"
+  },
+  "sphere_id": 8,
+  "sphere_key": "SPIRIT"
+}

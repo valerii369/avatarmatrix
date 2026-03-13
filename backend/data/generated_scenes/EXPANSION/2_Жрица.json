@@ -1,0 +1,44 @@
+{
+  "scene_name": "The Veiled Sanctuary",
+  "psychological_foundation": "The scene explores the archetype of the Priestess within the realm of Expansion, reflecting the tension between the pursuit of deeper understanding and the risk of retreating into illusion.",
+  "immersion_architecture": {
+    "orientation": "In a mist-enshrouded grove, where ancient trees form a cathedral-like canopy, crystalline waters flow silently over dark stones, weaving intricate patterns of light and shadow. In the center stands a monolithic stone altar, veiled in translucent silks that shimmer with an otherworldly glow.",
+    "complication": "A strong wind suddenly gusts through the grove, tugging at the silks and revealing cryptic symbols etched into the stone beneath."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Monolithic Stone Altar",
+      "interpretation_broken": "Perceiving the altar as broken may indicate a fear of disconnection from one's inner truth or a perceived barrier in accessing deeper wisdom.",
+      "interpretation_beautiful": "Seeing the altar as beautiful suggests a harmonious connection with the unconscious and an appreciation for the mysteries it holds.",
+      "interpretation_threatening": "Viewing the altar as threatening might reflect anxiety about confronting hidden truths or a fear of the power these truths might hold."
+    },
+    {
+      "object": "Crystalline Waters",
+      "interpretation_broken": "If the waters appear broken, it could symbolize a disruption in emotional clarity or a struggle to let emotions flow freely.",
+      "interpretation_beautiful": "Perceiving the waters as beautiful signifies a serene acceptance of one's emotional depths and the intuitive insights they bring.",
+      "interpretation_threatening": "Finding the waters threatening may indicate a fear of being overwhelmed by emotions or the unknown aspects of the self."
+    },
+    {
+      "object": "Translucent Silks",
+      "interpretation_broken": "Seeing the silks as broken may suggest a concern over a loss of privacy or the fragility of one's defenses against the outside world.",
+      "interpretation_beautiful": "Perceiving the silks as beautiful reflects an appreciation for the delicate balance between concealment and revelation.",
+      "interpretation_threatening": "Viewing the silks as threatening could indicate a fear of being exposed or a sense of vulnerability in revealing one's inner self."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "insight",
+      "cognitive_processes"
+    ],
+    "mcadams_markers": [
+      "exploration",
+      "identity"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What truths are hidden beneath the surface of your current understanding?",
+    "action_prompt": "Approach the altar and gently lift the silks, allowing yourself to see and interpret the symbols revealed beneath."
+  },
+  "sphere_id": 9,
+  "sphere_key": "EXPANSION"
+}

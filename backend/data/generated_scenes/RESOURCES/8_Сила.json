@@ -1,0 +1,50 @@
+{
+  "scene_name": "Luminous Cavern of Wealth",
+  "psychological_foundation": "Exploration of the archetype of Strength in relation to the concept of money, highlighting the balance between internal mastery and external expression.",
+  "immersion_architecture": {
+    "orientation": "Deep within a cavern illuminated by the soft glow of luminescent crystals, rivers of liquid gold flow in intricate patterns, creating a harmonious symphony of light and shadow. The air is thick with a palpable energy, as if the very essence of wealth is suspended in the atmosphere, awaiting a rightful claim. Flickering on the walls are engravings of mythical beasts, each frozen in a moment of serene power.",
+    "complication": "Suddenly, a tremor shakes the ground, causing the liquid gold to ripple and the crystals to hum with an intensified luminescence."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Luminescent Crystals",
+      "interpretation_broken": "A perception of the crystals as broken may suggest a disconnection from one's own inner light and a struggle to see beauty in self-worth.",
+      "interpretation_beautiful": "Seeing the crystals as beautiful could symbolize an appreciation for intrinsic value and the recognition of inner strength.",
+      "interpretation_threatening": "If the crystals are perceived as threatening, it might indicate a fear of the overwhelming nature of one's own potential and the responsibilities that come with it."
+    },
+    {
+      "object": "Rivers of Liquid Gold",
+      "interpretation_broken": "Viewing the rivers as broken could reflect feelings of financial instability or a belief that wealth is elusive and uncontrollable.",
+      "interpretation_beautiful": "If seen as beautiful, it suggests a harmonious relationship with money and the ability to appreciate its flow as a tool for growth and creativity.",
+      "interpretation_threatening": "Perceiving the rivers as threatening might indicate anxiety around financial matters or fear of being consumed by material pursuits."
+    },
+    {
+      "object": "Engravings of Mythical Beasts",
+      "interpretation_broken": "Perception of the engravings as broken can signify a fear of one's own primal instincts and a disconnection from personal power.",
+      "interpretation_beautiful": "Seeing the engravings as beautiful might reflect a healthy integration of instinctual energy and a reverence for one's own inner strength.",
+      "interpretation_threatening": "If the engravings are viewed as threatening, it could suggest a fear of losing control over one's more primitive instincts and the chaos they might unleash."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "power",
+      "fear",
+      "control",
+      "beauty",
+      "wealth"
+    ],
+    "mcadams_markers": [
+      "internal mastery",
+      "external expression",
+      "financial security",
+      "primal instincts",
+      "self-worth"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "How do you perceive the balance between your internal power and your relationship with money?",
+    "action_prompt": "Visualize yourself channeling your inner strength to harmonize your financial goals with your deeper values. What steps will you take to manifest this alignment?"
+  },
+  "sphere_id": 2,
+  "sphere_key": "MONEY"
+}

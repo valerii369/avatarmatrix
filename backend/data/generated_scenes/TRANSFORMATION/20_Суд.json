@@ -1,0 +1,44 @@
+{
+  "scene_name": "The Celestial Judgement",
+  "psychological_foundation": "Exploring the archetype of Judgement within the realm of spirituality, focusing on the potential for global spiritual awakening, self-forgiveness, and the fear of self-condemnation.",
+  "immersion_architecture": {
+    "orientation": "In a surreal ethereal landscape, shimmering auroras dance across an endless twilight sky, casting prismatic reflections onto the ground. Giant, ancient trees with iridescent leaves form a cathedral-like grove, their branches whispering secrets of forgotten wisdom. A translucent river winds through this grove, its waters glowing with an inner light, suggesting purity and transformation.",
+    "complication": "A sudden tremor reverberates through the grove, causing the auroras to flicker and the river to momentarily darken, hinting at the struggle between liberation and the chains of past guilt."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Auroras",
+      "interpretation_broken": "If perceived as broken, it may indicate a disruption in the person's spiritual or creative energy, reflecting a struggle to connect with higher consciousness.",
+      "interpretation_beautiful": "If seen as beautiful, it suggests a profound connection to the divine or an appreciation for the beauty of spiritual awakening.",
+      "interpretation_threatening": "If perceived as threatening, it may represent fear of the unknown or apprehension about the transformative power of spiritual experiences."
+    },
+    {
+      "object": "Ancient Trees",
+      "interpretation_broken": "If perceived as broken, it may signify a disconnection from ancestral roots or a feeling of loss regarding one's heritage.",
+      "interpretation_beautiful": "If seen as beautiful, it indicates a reverence for ancestral wisdom and a strong connection to one's lineage.",
+      "interpretation_threatening": "If perceived as threatening, it could reflect a fear of familial expectations or unresolved issues with one's past."
+    },
+    {
+      "object": "Translucent River",
+      "interpretation_broken": "If perceived as broken, it may suggest blocked emotional flow or an inability to release past traumas.",
+      "interpretation_beautiful": "If seen as beautiful, it signifies emotional clarity and the ability to embrace change and transformation.",
+      "interpretation_threatening": "If perceived as threatening, it might represent fear of emotional vulnerability or the overwhelming nature of change."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "cognitive_processes",
+      "insight"
+    ],
+    "mcadams_markers": [
+      "redemption_sequence",
+      "contamination_sequence"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What does the trembling in the grove represent in your life?",
+    "action_prompt": "What does your body do when the auroras flicker and the river darkens?"
+  },
+  "sphere_id": 8,
+  "sphere_key": "SPIRIT"
+}

@@ -1,0 +1,48 @@
+{
+  "scene_name": "The Enigmatic Temple of Health",
+  "psychological_foundation": "This scene integrates the archetype of the Hierophant within the realm of Health, exploring the duality of wisdom and dogmatism.",
+  "immersion_architecture": {
+    "orientation": "In the heart of an ancient forest, shrouded in perpetual twilight, stands a temple made of translucent marble. The air is thick with the scent of aged parchment and healing herbs, as if every breath is an invocation of forgotten wisdom. Vines adorned with luminescent flowers entwine the columns, casting ethereal patterns of light that dance across the temple floor.",
+    "complication": "A low, resonant hum begins to emanate from the altar, causing the vines to pulse and the flowers to emit a blinding light."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Marble Temple Walls",
+      "interpretation_broken": "Feeling disconnected from one's spiritual or physical health practices, possibly due to a perceived lack of authenticity.",
+      "interpretation_beautiful": "A deep appreciation for the beauty and harmony of traditional health practices and the wisdom they embody.",
+      "interpretation_threatening": "A sense of being overwhelmed by rigid health doctrines or suffocated by their demands."
+    },
+    {
+      "object": "Luminescent Flowers",
+      "interpretation_broken": "A loss of hope or vitality in one's health journey, as if the light guiding them has dimmed.",
+      "interpretation_beautiful": "Recognition of the gentle, guiding presence of natural remedies and holistic health approaches.",
+      "interpretation_threatening": "Fear of the unknown or mistrust of unconventional health methods that challenge the status quo."
+    },
+    {
+      "object": "Altar",
+      "interpretation_broken": "The core of one's health beliefs or practices feels unstable or questioned.",
+      "interpretation_beautiful": "A sacred center of personal healing and transformation, where one feels aligned with higher health principles.",
+      "interpretation_threatening": "A perception that one's health beliefs are being imposed upon, leading to conflict or resistance."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "spirituality",
+      "tradition",
+      "health",
+      "wisdom"
+    ],
+    "mcadams_markers": [
+      "authority",
+      "faith",
+      "tradition",
+      "transformation"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What role does the 'healing temple' play in your life, and how does it influence your health choices?",
+    "action_prompt": "What does your body feel as the hum of the altar grows stronger, and how do you respond to the light?"
+  },
+  "sphere_id": 6,
+  "sphere_key": "HEALTH"
+}

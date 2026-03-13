@@ -1,0 +1,45 @@
+{
+  "scene_name": "The Devil's Mirror",
+  "psychological_foundation": "This scene explores the archetype of the Devil within the sphere of spirituality, focusing on the integration of the shadow, the release from shame, and the allure of power and materialism.",
+  "immersion_architecture": {
+    "orientation": "In a dimly lit chamber, walls are adorned with intricate patterns of intertwining vines and serpentine forms, casting shadows that seem to writhe with a life of their own. The air is thick with the scent of incense, mingling with the metallic tang of something ancient and forbidden. At the center stands an ornate mirror, its surface shifting between reflections and illusions, inviting the viewer to confront their deepest fears and desires.",
+    "complication": "Suddenly, the mirror begins to pulse with a dark energy, drawing the shadows closer and whispering promises of power and hidden truths."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Mirror",
+      "interpretation_broken": "If the mirror is perceived as broken, it suggests an internal conflict with self-perception and a fear of facing one's true self.",
+      "interpretation_beautiful": "If the mirror is seen as beautiful, it reflects a willingness to explore inner desires and accept all facets of one's identity.",
+      "interpretation_threatening": "If the mirror appears threatening, it symbolizes the fear of uncovering repressed aspects of the self and the danger of succumbing to temptation."
+    },
+    {
+      "object": "Serpentine Vines",
+      "interpretation_broken": "Broken vines indicate a disruption in life's natural flow and a struggle against transformation.",
+      "interpretation_beautiful": "Beautiful vines suggest harmony with one's instincts and the acceptance of natural growth and change.",
+      "interpretation_threatening": "Threatening vines symbolize entanglement in destructive patterns and the fear of being overpowered by primal urges."
+    },
+    {
+      "object": "Incense",
+      "interpretation_broken": "Broken incense implies a disconnect from spiritual practices and a loss of tranquility.",
+      "interpretation_beautiful": "Beautiful incense represents a deep connection to the spiritual realm and a sense of peace.",
+      "interpretation_threatening": "Threatening incense indicates overwhelming emotions or spiritual experiences that are difficult to process."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "insight",
+      "causation",
+      "certainty"
+    ],
+    "mcadams_markers": [
+      "exploration of identity",
+      "encounter with the shadow"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What do the whispers from the mirror tell you about your own desires and fears?",
+    "action_prompt": "How does your body respond to the pulsing energy of the mirror?"
+  },
+  "sphere_id": 8,
+  "sphere_key": "SPIRIT"
+}

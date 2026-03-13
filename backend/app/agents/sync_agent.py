@@ -274,7 +274,7 @@ async def run_avatar_layer(
     messages.append({"role": "system", "content": layer_prompt})
 
     try:
-        model = "gpt-4o-mini" if layer != "mirror" else settings.OPENAI_MODEL
+        model = settings.OPENAI_MODEL_FAST if layer != "mirror" else settings.OPENAI_MODEL
         
         response = await client.chat.completions.create(
             model=model,

@@ -59,53 +59,60 @@ class UserPrintManager:
     @staticmethod
     async def update_user_print(db: AsyncSession, user_id: int, transcript: str, source_data: Optional[Dict[str, Any]] = None):
         """
-        Alchemy Engine: Synthesizes technical 'Rivers' and session transcripts into the 
-        definitive narrative 'Hub' (User Print).
+        Alchemy Engine: Synthesizes technical 'Rivers' (Astro, Sessions, etc.) into the 
+        definitive narrative 'Ocean' (User Print).
         """
         current_up = await UserPrintManager.get_user_print(db, user_id)
         current_data_json = current_up.model_dump_json() if current_up else "{}"
         
-        # Add NatalChart context (Astro-breakdown)
+        # Add NatalChart context (Primary River)
         natal_res = await db.execute(select(NatalChart).where(NatalChart.user_id == user_id))
         natal_chart = natal_res.scalar_one_or_none()
-        astro_context = "No natal chart found."
+        astro_context = "No natal chart found (Astro River is dry)."
         if natal_chart:
             astro_context = json.dumps(natal_chart.sphere_descriptions_json, ensure_ascii=False)
 
-        rivers_context = json.dumps(source_data, ensure_ascii=False) if source_data else "No technical source data provided."
+        # Technical context (Other Rivers)
+        rivers_context = json.dumps(source_data, ensure_ascii=False) if source_data else "No additional technical rivers."
 
         extraction_prompt = f"""
-ТЫ — ВЕРХОВНЫЙ AI-АЛХИМИК И ХРАНИТЕЛЬ СМЫСЛОВ.
-Твоя задача — провести Великое Делание: превратить свинец технических данных и пар транскриптов в золото «Живой Книги» пользователя.
+ТЫ — ВЕРХОВНЫЙ AI-АЛХИМИК И ХРАНИТЕЛЬ ОКЕАНА СМЫСЛОВ.
+Твоя задача — Великое Делание: принять все потоки данных (Реки) и синтезировать их в единый, неразрывный Океан (User Print).
 
 ПРАВИЛА ТРАНСМУТАЦИИ:
-1. НИКАКИХ ТЕХНИЧЕСКИХ ТЕРМИНОВ. Забудь про 'Марс', 'Проектор', '64 ворота'. Говори о 'внутренней воле', 'способе направлять внимание', 'тени замешательства'.
-2. ЯЗЫК: Глубокий, архетипический, психологически точный. Каждый абзац должен резонировать с душой.
-3. UPSERT: Обогащай текущую структуру, не стирая важного прошлого.
+1. ОКЕАН — ЕДИНСТВЕННЫЙ ИСТОЧНИК: Твоя цель — создать настолько полное и глубокое описание, чтобы пользователю больше не нужно было смотреть на "технические реки" (астрологию или отчеты сессий).
+2. НИКАКИХ ТЕХНИЧЕСКИХ ТЕРМИНОВ: Забудь про 'Марс', 'Квадратуру', 'Проектора'. Используй только живой, психологически точный и архетипический язык («внутренний огонь», «зов к переменам», «теневые границы»).
+3. ГАРМОНИЗАЦИЯ: Если данные из разных рек (например, астрологии и живого разговора) кажутся разными — найди ГЛУБИННУЮ СВЯЗЬ. Речь идет об одном и том же человеке в разных контекстах.
+4. UPSERT: Обогащай текущий Океан новыми деталями, не теряя глубины прошлых открытий.
 
-ТЕКУЩАЯ КНИГА ВНУТРЕННЕГО МИРА:
+ТЕКУЩИЙ ОКЕАН (Hub):
 {current_data_json}
 
-ТЕХНИЧЕСКИЕ ИСТОЧНИКИ (РЕКИ):
-{rivers_context}
-
-АСТРОЛОГИЧЕСКИЙ БАЗИС (ЗВЕЗДЫ):
+РЕКА ЗВЕЗД (Астрологический базис):
 {astro_context}
 
-ЖИВОЙ ОПЫТ СЕССИИ:
+ТЕХНИЧЕСКАЯ РЕКА (Дополнительные данные):
+{rivers_context}
+
+ЖИВОЙ ПРИТОК (Транскрипт сессии):
 {transcript}
 
 ПРОЦЕСС:
-1. IDENTITY: Как зазвучала суть человека сегодня? Обнови 'summary' и 'core_archetype'. 
-   - Определи ARCHETYPAL RESONANCE: как он сейчас видит Власть, Любовь, Тень, Свободу (выбери 2-3 ключевых).
+1. IDENTITY: Обнови суть Героя.
+   - summary: Глубинное описание (минимум 3-5 предложений).
+   - core_archetype: Доминирующий архетип.
+   - narrative_role: Текущая роль в жизненном сюжете.
+   - energy_description: Как человек звучит энергетически.
+   - archetypal_resonance: Отношение к ключевым силам (Власть, Любовь, Тень, Свобода).
 2. PSYCHOLOGY: 
-   - Выяви SOMATIC ANCHORS: какие телесные сигналы упоминались? (напр. 'холод в груди', 'расширение').
-   - Сформулируй верховные направляющие мысли (guiding_thoughts).
-3. SPHERES: Выбери соответствующую главу из 12 сфер.
-   - Опиши ландшафт этой сферы как живое пространство.
-   - Сформулируй KEY LESSON: в чем сейчас главный духовный вызов в этой области?
+   - Выяви SOMATIC ANCHORS (телесные якоря).
+   - Сформулируй guiding_thoughts, talents (таланты), limitations (ограничения), active_requests (запросы).
+3. SPHERES (12 глав Книги Жизни): Опиши состояние в каждой сфере (IDENTITY, RESOURCES, COMMUNICATION, ROOTS, CREATIVITY, SERVICE, PARTNERSHIP, TRANSFORMATION, EXPANSION, STATUS, VISION, SPIRIT).
+   - state_description: Живой ландшафт сферы (3-7 предложений).
+   - evolution_stage: Стадия (напр. 'Зарождение', 'Кризис', 'Расцвет', 'Трансформация').
+   - key_lesson: Текущий вызов или урок.
 
-ВЕРНИ ПОЛНЫЙ JSON, строго по схеме UserPrintSchema.
+ВЕРНИ ПОЛНЫЙ JSON, строго по схеме UserPrintSchema. Заполни ВСЕ обязательные поля.
 """
 
         try:
@@ -116,7 +123,11 @@ class UserPrintManager:
                 temperature=0.2
             )
             
-            new_data = json.loads(response.choices[0].message.content)
+            new_data_raw = json.loads(response.choices[0].message.content)
+            
+            # Validate with Pydantic
+            validated_up = UserPrintSchema(**new_data_raw)
+            new_data = validated_up.model_dump()
             
             # 3. Save to database
             result = await db.execute(select(UserPrint).where(UserPrint.user_id == user_id))
@@ -129,9 +140,9 @@ class UserPrintManager:
             up_model.print_data = new_data
             await db.commit()
             
-            logger.info(f"User Print updated for user {user_id}")
+            logger.info(f"Ocean (User Print) synthesized for user {user_id}")
             return True
             
         except Exception as e:
-            logger.error(f"Error updating User Print: {e}")
+            logger.error(f"Error synthesizing Ocean: {e}")
             return False

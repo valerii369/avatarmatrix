@@ -1,0 +1,44 @@
+{
+  "scene_name": "Lunar Whisper",
+  "psychological_foundation": "The scene is anchored in the exploration of the Moon archetype, focusing on the duality of intuition and illusion within relational contexts. It seeks to uncover deep-seated fears and the potential for profound understanding.",
+  "immersion_architecture": {
+    "orientation": "The moonlit garden is shrouded in a silvery mist, with shadows dancing among the twisted vines of ancient trees. A tranquil pond mirrors the sky, its surface occasionally disturbed by the gentle ripple of unseen creatures. The air is filled with the scent of night-blooming flowers, their petals glowing faintly under the lunar light.",
+    "complication": "A sudden gust of wind scatters the mist, momentarily revealing a path that leads deeper into the garden, where whispers seem to beckon."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Moonlit Pond",
+      "interpretation_broken": "If the pond appears broken, it suggests a disruption in the individual's emotional reflection or a fear of confronting their subconscious.",
+      "interpretation_beautiful": "If the pond is seen as beautiful, it reflects a harmonious connection with one's inner world and a receptivity to deep emotional insights.",
+      "interpretation_threatening": "If the pond seems threatening, it indicates anxiety about what lies beneath the surface of one's consciousness or unresolved emotional conflicts."
+    },
+    {
+      "object": "Twisted Vines",
+      "interpretation_broken": "Seeing the vines as broken may indicate a perceived barrier to personal growth or a struggle to connect with others.",
+      "interpretation_beautiful": "If the vines are beautiful, it suggests a perception of life's complexity as rich and interconnected, with potential for personal and relational growth.",
+      "interpretation_threatening": "Viewing the vines as threatening could imply feelings of entrapment or being overwhelmed by life's challenges and relational complexities."
+    },
+    {
+      "object": "Night-Blooming Flowers",
+      "interpretation_broken": "Broken flowers may symbolize a loss of hope or beauty in one's relational experiences or creativity.",
+      "interpretation_beautiful": "Beautiful flowers represent the emergence of new possibilities and the blossoming of hidden talents or emotions.",
+      "interpretation_threatening": "Threatening flowers might suggest fears of vulnerability or the potential for beauty to conceal danger or deception."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "emotional expression",
+      "insight"
+    ],
+    "mcadams_markers": [
+      "narrative coherence",
+      "identity exploration"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What whispers from the shadows seem to call to you in moments of uncertainty?",
+    "action_prompt": "What does your body do as you follow the path deeper into the garden?"
+  },
+  "sphere_id": 3,
+  "sphere_key": "RELATIONS"
+}

@@ -1,0 +1,48 @@
+{
+  "scene_name": "Tower of Mirrors",
+  "psychological_foundation": "Exploration of the balance between personal status and relational dynamics within the archetype of Lovers, highlighting the inner union and transformation through love.",
+  "immersion_architecture": {
+    "orientation": "In a surreal tower of mirrors, reflections distort and amplify, casting fragments of light and shadow that dance across the polished marble floor. The air is thick with the scent of blooming jasmine and the soft echo of distant, inaudible whispers. A grand, ornate staircase spirals upwards, leading to unseen heights, symbolizing the journey towards personal and relational transcendence.",
+    "complication": "A sudden shattering sound reverberates through the tower, as one of the mirrors cracks, sending a cascade of glittering shards to the floor."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Mirror",
+      "interpretation_broken": "A broken mirror suggests a fractured self-image or an internal conflict impacting one's status or relational identity.",
+      "interpretation_beautiful": "A beautiful mirror reflects one's desire for clarity and understanding of both self and partner, indicating harmonious relational dynamics.",
+      "interpretation_threatening": "A threatening mirror may symbolize fear of self-revelation or the anxiety of confronting one's own vulnerabilities in a relationship."
+    },
+    {
+      "object": "Jasmine Scent",
+      "interpretation_broken": "The absence or souring of the jasmine scent might indicate a loss of romantic idealism or disillusionment in love.",
+      "interpretation_beautiful": "A beautiful jasmine scent symbolizes the intoxicating allure of a new or deepening romantic connection.",
+      "interpretation_threatening": "An overpowering jasmine scent might suggest smothering emotions or the fear of losing oneself in the relationship."
+    },
+    {
+      "object": "Spiral Staircase",
+      "interpretation_broken": "A broken staircase symbolizes a perceived barrier to personal growth or relational progression, a halt in the journey towards union.",
+      "interpretation_beautiful": "A beautifully crafted staircase represents the potential for growth and transformation within a relationship, each step a conscious choice towards unity.",
+      "interpretation_threatening": "A threatening staircase might indicate the daunting challenge of navigating relational complexities or the fear of inevitable change."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "relationship",
+      "identity",
+      "reflection",
+      "conflict"
+    ],
+    "mcadams_markers": [
+      "self-exploration",
+      "transformation",
+      "union",
+      "growth"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What part of yourself do you see reflected in the broken mirror, and how does it impact your relationships?",
+    "action_prompt": "Imagine walking up the spiral staircase, each step taking you closer to understanding and integrating different aspects of yourself and your partner. What do you discover at the top?"
+  },
+  "sphere_id": 10,
+  "sphere_key": "STATUS"
+}

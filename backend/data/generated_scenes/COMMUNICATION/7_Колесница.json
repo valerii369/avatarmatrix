@@ -1,0 +1,46 @@
+{
+  "scene_name": "Path of the Charioteer",
+  "psychological_foundation": "Exploring the dynamics of focused willpower, discipline, and the balance between different internal forces in the context of relationships.",
+  "immersion_architecture": {
+    "orientation": "Вокруг простирается загадочный пустынный пейзаж, залитый лунным светом, с изрезанными тенями дюн, напоминающими фигуры танцующих сфинксов. В воздухе витает едва уловимый аромат, будто смесь ладана и морской соли, создавая атмосферу древней мистерии. Вдали видна Колесница, стоящая на вершине дюны, как символ силы и контроля, готовая к движению.",
+    "complication": "Внезапно начинается песчаная буря, угрожая поглотить всё и унести колесницу в забвение."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Колесница",
+      "interpretation_broken": "Потеря контроля в жизни и неспособность управлять своими внутренними конфликтами.",
+      "interpretation_beautiful": "Гармония и баланс между логикой и эмоциями, способность направлять свою жизнь в нужное русло.",
+      "interpretation_threatening": "Опасность агрессивного самоутверждения и подавления чувств окружающих ради достижения своих целей."
+    },
+    {
+      "object": "Луна",
+      "interpretation_broken": "Затруднение в понимании своих эмоций и потребностей.",
+      "interpretation_beautiful": "Интуитивное понимание и осознанность, позволяющая видеть скрытые аспекты себя и других.",
+      "interpretation_threatening": "Неопределенность и страх перед своими подсознательными желаниями."
+    },
+    {
+      "object": "Песчаная буря",
+      "interpretation_broken": "Чувство уязвимости и неспособности справиться с внешними и внутренними кризисами.",
+      "interpretation_beautiful": "Возможность трансформации и очищения через преодоление трудностей.",
+      "interpretation_threatening": "Чувство подавленности и беспомощности перед лицом неуправляемых событий."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "control",
+      "balance",
+      "discipline"
+    ],
+    "mcadams_markers": [
+      "agency",
+      "autonomy",
+      "mastery"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "Как песчаная буря отражает ваши внутренние конфликты и их влияние на отношения?",
+    "action_prompt": "Что делает ваше тело, когда вы представляете, что управляете Колесницей через бурю?"
+  },
+  "sphere_id": 3,
+  "sphere_key": "RELATIONS"
+}

@@ -1,0 +1,46 @@
+{
+  "scene_name": "Whispering Ruins",
+  "psychological_foundation": "Exploring the delicate balance between embracing intuitive insights and the shadow of emotional detachment and illusion.",
+  "immersion_architecture": {
+    "orientation": "In the heart of an ancient labyrinth, moonlight filters through cracks in the marbled ceilings, casting a silvery glow on the walls inscribed with cryptic runes. The air is thick with the scent of forgotten incense, and an eerie silence envelops the space, as if the labyrinth itself is holding its breath. Shadows dance across the floor, forming patterns that seem to whisper secrets from a time long past.",
+    "complication": "The sudden sound of a distant bell echoes through the corridors, a haunting call that seems to summon the hidden depths of the soul."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Marbled Ceilings",
+      "interpretation_broken": "A perception of broken ceilings suggests a fear of losing one's connection to higher knowledge or an inability to access inner wisdom.",
+      "interpretation_beautiful": "Seeing beauty in the ceilings may indicate an appreciation for the mystery of the unknown and a harmonious relationship with one's subconscious.",
+      "interpretation_threatening": "If the ceilings appear threatening, it may reflect anxiety about the overwhelming power of unconscious forces or a fear of being crushed by the weight of hidden truths."
+    },
+    {
+      "object": "Cryptic Runes",
+      "interpretation_broken": "Broken runes might symbolize a sense of disconnection from one's spiritual path or a fear that one's intuitive insights are incomplete or misunderstood.",
+      "interpretation_beautiful": "Beautiful runes could represent a deep appreciation for the complexity of life and a respect for the wisdom contained within the subconscious.",
+      "interpretation_threatening": "Threatening runes may indicate a fear of confronting the darker aspects of the self or an overwhelming sense of being judged by one's own inner knowledge."
+    },
+    {
+      "object": "Whispering Shadows",
+      "interpretation_broken": "Shadows perceived as broken may suggest a struggle to integrate disparate parts of the self or a fear of being consumed by one's own doubts.",
+      "interpretation_beautiful": "Beautiful shadows might indicate a comfort with ambiguity and a recognition of the beauty in life's mysteries.",
+      "interpretation_threatening": "Threatening shadows could reflect a fear of the unknown or a sense that one's hidden fears are manifesting in reality."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "insight",
+      "causation",
+      "certainty"
+    ],
+    "mcadams_markers": [
+      "narrative tone",
+      "agency",
+      "communion"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "How do you interpret the whispers of the labyrinth?",
+    "action_prompt": "Reflect on a time when your intuition guided you successfully. How can you embrace that wisdom more fully in your current situation?"
+  },
+  "sphere_id": 10,
+  "sphere_key": "STATUS"
+}

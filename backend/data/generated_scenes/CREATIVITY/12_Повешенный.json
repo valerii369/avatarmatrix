@@ -1,0 +1,48 @@
+{
+  "scene_name": "The Hanging Garden",
+  "psychological_foundation": "The scene explores the archetype of 'The Hanged Man', focusing on the concepts of voluntary sacrifice and perspective shift, as well as the potential pitfalls of victim mentality.",
+  "immersion_architecture": {
+    "orientation": "The garden floats suspended in the sky, each plant and tree hanging upside down, defying gravity. The air is thick with the scent of blooming night flowers that glow with an ethereal light, casting shadows that dance across an invisible floor. In the distance, a large clock hangs in mid-air, its hands stationary, as if time itself has taken a pause.",
+    "complication": "A sudden gust of wind disturbs the stillness, causing the hanging plants to sway violently, and the clock to emit a resonant chime that echoes through the garden."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Hanging Plants",
+      "interpretation_broken": "Perceiving the plants as broken suggests feelings of disconnection from nature or one's own personal growth.",
+      "interpretation_beautiful": "Seeing the plants as beautiful reflects an appreciation for unconventional beauty and a readiness to embrace new perspectives.",
+      "interpretation_threatening": "If the plants seem threatening, it may indicate anxiety about change or instability in one's life."
+    },
+    {
+      "object": "Glowing Night Flowers",
+      "interpretation_broken": "If the flowers appear broken, it could signify a loss of hope or inspiration.",
+      "interpretation_beautiful": "Viewing the flowers as beautiful indicates a sense of wonder and the ability to find light in darkness.",
+      "interpretation_threatening": "Seeing the flowers as threatening might reveal a fear of the unknown or of hidden truths."
+    },
+    {
+      "object": "Suspended Clock",
+      "interpretation_broken": "A broken clock suggests a sense of being stuck in time or a fear of wasted time.",
+      "interpretation_beautiful": "A beautiful clock reflects an understanding and acceptance of the flow of time and one's place within it.",
+      "interpretation_threatening": "If the clock is perceived as threatening, it may indicate fear of impending deadlines or the passage of time."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "time",
+      "change",
+      "growth",
+      "fear"
+    ],
+    "mcadams_markers": [
+      "sacrifice",
+      "perspective",
+      "disconnection",
+      "anxiety"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What part of your life feels suspended, waiting for a change?",
+    "action_prompt": "What does your body do in response to the swaying plants and the chiming clock?"
+  },
+  "sphere_id": 5,
+  "sphere_key": "MISSION"
+}

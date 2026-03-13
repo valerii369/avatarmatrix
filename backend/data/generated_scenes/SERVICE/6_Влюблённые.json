@@ -1,0 +1,46 @@
+{
+  "scene_name": "Whispering Oasis",
+  "psychological_foundation": "The scene explores the dual nature of love, focusing on the internal union of opposites leading to self-wholeness versus the loss of identity in another.",
+  "immersion_architecture": {
+    "orientation": "A shimmering oasis emerges in the heart of a vast, undulating desert. The air is thick with the scent of blooming night flowers, and the water reflects a sky studded with twin moons in perfect balance. In this surreal setting, the oasis invites contemplation and introspection, free from the presence of any human soul.",
+    "complication": "A sudden gust of wind disturbs the mirrored surface of the oasis, revealing hidden depths below."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Water Reflection",
+      "interpretation_broken": "A broken reflection indicates a fragmented self-perception and internal conflict.",
+      "interpretation_beautiful": "A beautiful reflection suggests harmony and acceptance of one's dual nature.",
+      "interpretation_threatening": "A threatening reflection symbolizes fear of confronting one's true emotions."
+    },
+    {
+      "object": "Twin Moons",
+      "interpretation_broken": "Broken moons symbolize a disconnection between conscious desires and subconscious needs.",
+      "interpretation_beautiful": "Beautiful twin moons reflect a perfect balance of masculine and feminine energies within.",
+      "interpretation_threatening": "Threatening moons suggest conflict and anxiety over reconciling different aspects of the self."
+    },
+    {
+      "object": "Blooming Night Flowers",
+      "interpretation_broken": "Broken flowers represent a loss of potential and growth in personal relationships.",
+      "interpretation_beautiful": "Beautiful flowers signify the flourishing of deep, transformative love.",
+      "interpretation_threatening": "Threatening flowers imply an overwhelming intensity and fear of vulnerability in love."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "emotions",
+      "self-reflection",
+      "balance"
+    ],
+    "mcadams_markers": [
+      "identity",
+      "intimacy",
+      "transformation"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "How do these opposing forces manifest in your relationships?",
+    "action_prompt": "What does your body feel when you think about the balance or imbalance within?"
+  },
+  "sphere_id": 6,
+  "sphere_key": "HEALTH"
+}

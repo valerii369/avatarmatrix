@@ -1,0 +1,49 @@
+{
+  "scene_name": "The Currency of Judgement",
+  "psychological_foundation": "Exploration of how financial concerns intertwine with personal and ancestral judgement, leading to a transformative realization or entrapment in guilt.",
+  "immersion_architecture": {
+    "orientation": "In a vast, dimly lit vault, the walls are lined with countless golden coins that shimmer with an ethereal glow, casting strange shadows that dance like spectres of the past. The air is thick with a metallic scent, echoing with the distant chime of coins falling from unseen heights, as if recounting tales of fortune and folly. Below, a mirrored floor reflects everything upside down, distorting reality and hinting at hidden truths beneath the surface.",
+    "complication": "A single, rusted coin rolls across the floor, breaking the mirror and revealing a gaping void beneath, filled with whispers of judgement and regret."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Golden Coins",
+      "interpretation_broken": "Perceived as broken, the coins suggest a shattered sense of value or worth, indicating unresolved financial guilt or anxiety.",
+      "interpretation_beautiful": "Seen as beautiful, the coins symbolize prosperity, abundance, and the potential for spiritual wealth beyond the material.",
+      "interpretation_threatening": "If threatening, the coins imply financial burdens or the fear that material desires overshadow deeper existential needs."
+    },
+    {
+      "object": "Mirrored Floor",
+      "interpretation_broken": "A broken mirror suggests a fractured self-image or identity crisis, where past financial decisions haunt the present.",
+      "interpretation_beautiful": "As beautiful, the mirror represents clarity and the ability to see one's true reflection, embracing both light and shadow.",
+      "interpretation_threatening": "If seen as threatening, the mirror reveals fear of the truth or self-judgement that one is unable to escape."
+    },
+    {
+      "object": "Rusted Coin",
+      "interpretation_broken": "A broken rusted coin signifies the decay of outdated values or beliefs about money that no longer serve the individual.",
+      "interpretation_beautiful": "As beautiful, the rusted coin represents the wisdom gained from past financial experiences and the beauty in imperfection.",
+      "interpretation_threatening": "Threatening rust suggests corrosion of trust or the fear that financial instability will lead to ruin."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "money",
+      "value",
+      "self-worth",
+      "regret",
+      "judgement"
+    ],
+    "mcadams_markers": [
+      "financial narrative",
+      "ancestral influence",
+      "personal transformation",
+      "material vs spiritual values"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "In what ways do the whispers of judgement about money manifest in your life, and how do they influence your present decisions?",
+    "action_prompt": "What does your body do when confronted with the rusted coin that reveals the void beneath the mirror?"
+  },
+  "sphere_id": 2,
+  "sphere_key": "MONEY"
+}

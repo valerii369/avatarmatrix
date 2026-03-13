@@ -1,0 +1,46 @@
+{
+  "scene_name": "The Enchanted Garden of Choices",
+  "psychological_foundation": "This scene is grounded in the exploration of the archetype of The Lovers, focusing on the concepts of union within oneself and the transformative power of love, both of which are essential for making meaningful life choices.",
+  "immersion_architecture": {
+    "orientation": "In a garden where the moonlight paints the roses silver, and the air is thick with the scent of jasmine, the pathways twist and turn like the veins of a heart. A gentle breeze carries whispers of forgotten dreams, and the stars above seem to form constellations that pull at the edges of memory, suggesting paths not yet taken.",
+    "complication": "A sudden gust of wind scatters the petals from a single rose, revealing a hidden path that wasn't there before."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Moonlit Roses",
+      "interpretation_broken": "A perception of the roses as wilted or decaying may suggest feelings of loss or disillusionment in romantic or personal aspirations.",
+      "interpretation_beautiful": "Seeing them as beautiful could indicate a deep appreciation for the transient beauty in life and relationships, and a readiness to embrace transformations.",
+      "interpretation_threatening": "If perceived as threatening, it may reflect a fear of vulnerability or the potential pain that can accompany love and change."
+    },
+    {
+      "object": "Jasmine Scent",
+      "interpretation_broken": "If the scent is perceived as overpowering or unpleasant, it could signify a struggle with overwhelming emotions or desires.",
+      "interpretation_beautiful": "A beautiful scent may symbolize a harmonious connection with one's desires and an openness to new experiences.",
+      "interpretation_threatening": "Perceiving it as threatening might indicate a fear of being consumed by one's passions or losing control over personal boundaries."
+    },
+    {
+      "object": "Hidden Path",
+      "interpretation_broken": "If the path is seen as broken or blocked, it could reflect feelings of being stuck or indecisive about the future.",
+      "interpretation_beautiful": "A beautiful path suggests an exciting opportunity for personal growth and exploration of new aspects of oneself.",
+      "interpretation_threatening": "A threatening path may indicate anxiety about the unknown or fear of making the wrong choice."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "emotional tone",
+      "cognitive processes",
+      "time orientation"
+    ],
+    "mcadams_markers": [
+      "agency",
+      "communion",
+      "exploration"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What choices in your life feel like hidden paths waiting to be discovered?",
+    "action_prompt": "Imagine taking a step onto the hidden path. What do you feel, and what do you hope to find at the end of it?"
+  },
+  "sphere_id": 9,
+  "sphere_key": "EXPANSION"
+}

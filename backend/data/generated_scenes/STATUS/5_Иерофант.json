@@ -1,0 +1,47 @@
+{
+  "scene_name": "Temple of Echoes",
+  "psychological_foundation": "The scene explores the dual nature of the Hierophant archetype, focusing on the dynamics of spiritual authority and the impact of status on personal belief systems.",
+  "immersion_architecture": {
+    "orientation": "In a vast, ethereal temple made of shimmering glass and echoing whispers, shafts of light pierce through the translucent walls, casting intricate patterns on the marble floor. The air is filled with the faint scent of incense and the distant hum of ancient chants, creating a bridge between the realms of the sacred and the mundane.",
+    "complication": "Suddenly, the harmonious whispers turn into a cacophony of conflicting echoes, as if the temple itself is questioning the authenticity of its own teachings."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Glass Walls",
+      "interpretation_broken": "A perception of the glass walls as broken suggests a disruption in one's spiritual or ideological beliefs, indicating a crisis of faith or a challenge to established doctrines.",
+      "interpretation_beautiful": "Seeing the glass walls as beautiful reflects a harmonious relationship with one's beliefs and a deep appreciation for spiritual traditions and wisdom.",
+      "interpretation_threatening": "Viewing the glass walls as threatening indicates fear of transparency or vulnerability in spiritual matters, suggesting anxiety about the fragility of one's belief system."
+    },
+    {
+      "object": "Shafts of Light",
+      "interpretation_broken": "If the shafts of light appear broken, it signifies a loss of clarity or guidance, suggesting confusion and lack of direction in spiritual or personal growth.",
+      "interpretation_beautiful": "Perceiving the shafts of light as beautiful symbolizes enlightenment and the presence of divine guidance, representing hope and inspiration.",
+      "interpretation_threatening": "Seeing the shafts of light as threatening implies fear of exposure or revelation, indicating discomfort with truth or self-awareness."
+    },
+    {
+      "object": "Echoes",
+      "interpretation_broken": "Broken echoes suggest a disconnect between one's inner voice and external influences, possibly leading to internal conflict or a rejection of authority.",
+      "interpretation_beautiful": "Beautiful echoes represent harmony between inner wisdom and external teachings, reflecting a balanced integration of personal insights and learned knowledge.",
+      "interpretation_threatening": "Threatening echoes imply an overwhelming pressure from external beliefs or expectations, potentially leading to feelings of being controlled or overpowered by others' doctrines."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "spiritual",
+      "authority",
+      "beliefs",
+      "conflict"
+    ],
+    "mcadams_markers": [
+      "inner voice",
+      "personal growth",
+      "faith"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "How do the echoes within your own mind reflect the teachings you follow?",
+    "action_prompt": "Identify a belief you hold that is influenced by external authority. Explore its origin and how it aligns with your personal values."
+  },
+  "sphere_id": 10,
+  "sphere_key": "STATUS"
+}

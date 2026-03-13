@@ -1,0 +1,46 @@
+{
+  "scene_name": "The Enchanted Orchard",
+  "psychological_foundation": "The scene draws upon the archetype of the Empress, exploring themes of unconditional acceptance, natural abundance, and the dual nature of nurturing as both liberating and suffocating.",
+  "immersion_architecture": {
+    "orientation": "In a dreamlike orchard where the sky is a surreal tapestry of deep violets and shimmering golds, trees bear fruit that glows with an inner light, casting soft hues over the ground. The air is thick with the scent of ripe abundance, and a gentle breeze carries the whisper of leaves as if sharing ancient secrets. The soil underfoot feels alive, pulsing gently as if breathing with the rhythm of the earth itself.",
+    "complication": "A sudden, ominous shadow passes over the orchard, dimming the luminescent fruits and causing the leaves to tremble with unease."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Glowing Fruit",
+      "interpretation_broken": "Seeing the fruit as broken may indicate feelings of wasted potential or the fear that one's efforts to nurture and grow are failing.",
+      "interpretation_beautiful": "Viewing the fruit as beautiful suggests a recognition of one's ability to create and sustain life and projects, acknowledging the beauty in growth and nourishment.",
+      "interpretation_threatening": "Perceiving the fruit as threatening may reflect anxieties about the overwhelming responsibilities of nurturing and the fear of failing those who depend on you."
+    },
+    {
+      "object": "Whispering Leaves",
+      "interpretation_broken": "If the leaves are perceived as broken, it might symbolize a communication breakdown or the sense of being disconnected from one's roots or community.",
+      "interpretation_beautiful": "Finding the leaves beautiful could indicate a deep connection to nature and an appreciation for the wisdom and guidance that comes from past generations or intrinsic instincts.",
+      "interpretation_threatening": "Seeing the leaves as threatening suggests fear of hidden dangers or the worry that past experiences or ancestral influences might have a negative impact on current life."
+    },
+    {
+      "object": "Breathing Soil",
+      "interpretation_broken": "Broken soil might represent instability in one's foundation or a lack of grounding in reality or identity.",
+      "interpretation_beautiful": "Beautiful soil suggests a solid, nurturing foundation that supports growth and personal development, highlighting an appreciation for life's nurturing aspects.",
+      "interpretation_threatening": "Threatening soil could symbolize fear of being overwhelmed by one's environment or the life circumstances that feel uncontrollable and engulfing."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "nature",
+      "abundance",
+      "nurture"
+    ],
+    "mcadams_markers": [
+      "nurturance",
+      "growth",
+      "ancestry"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "How does the shadow in the orchard reflect aspects of nurturing in your life?",
+    "action_prompt": "What does your body do as you walk through the orchard under the shadow?"
+  },
+  "sphere_id": 7,
+  "sphere_key": "SOCIETY"
+}

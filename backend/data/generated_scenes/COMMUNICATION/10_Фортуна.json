@@ -1,0 +1,46 @@
+{
+  "scene_name": "The Garden of Fortune",
+  "psychological_foundation": "This scene explores the relationship dynamics through the archetype of Fortune, focusing on the understanding of life's cyclical nature, the balance between fate and personal agency, and the emotional responses to change.",
+  "immersion_architecture": {
+    "orientation": "In a surreal garden, vibrant flowers bloom amidst spiraling vines, their colors shifting with the rhythm of an unseen tide. At the center stands an ancient sundial, its shadow tracing the dance of time across a mosaic of shifting patterns. A gentle breeze carries the scent of change, and the distant sound of chimes echoes like whispers of fate.",
+    "complication": "Suddenly, the sundial's shadow stops moving, casting an unchanging silhouette that defies the natural flow of time."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Sundial",
+      "interpretation_broken": "The broken sundial suggests a disruption in one's perception of time and change, indicating a possible struggle with accepting life's cyclical nature.",
+      "interpretation_beautiful": "A beautiful sundial reflects a harmonious relationship with time and an appreciation for the natural cycles of growth and transition.",
+      "interpretation_threatening": "A threatening sundial may symbolize a fear of the future or anxiety about the passage of time and its implications on relationships."
+    },
+    {
+      "object": "Spiraling Vines",
+      "interpretation_broken": "Broken vines imply a loss of connection or support within relationships, potentially indicating feelings of isolation or abandonment.",
+      "interpretation_beautiful": "Beautiful vines suggest a nurturing and supportive relationship environment, characterized by growth and mutual understanding.",
+      "interpretation_threatening": "Threatening vines could represent entanglement or suffocation in a relationship, where boundaries are blurred or overstepped."
+    },
+    {
+      "object": "Chimes",
+      "interpretation_broken": "Broken chimes indicate a silence or lack of communication, possibly leading to misunderstandings or unresolved issues in relationships.",
+      "interpretation_beautiful": "Beautiful chimes symbolize harmonious communication and a melody of shared experiences that enrich relationships.",
+      "interpretation_threatening": "Threatening chimes may suggest discordance or intrusive thoughts that disturb the peace within a relationship."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "time",
+      "change",
+      "relationship"
+    ],
+    "mcadams_markers": [
+      "agency",
+      "communion",
+      "redemption"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What role does the concept of 'fortune' play in shaping your relationships and how do you perceive its influence?",
+    "action_prompt": "What does your body instinctively do when faced with an unexpected halt in the flow of time or change?"
+  },
+  "sphere_id": 3,
+  "sphere_key": "RELATIONS"
+}

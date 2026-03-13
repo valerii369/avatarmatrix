@@ -1,0 +1,48 @@
+{
+  "scene_name": "The Hanging Garden",
+  "psychological_foundation": "Exploration of sacrifice and perspective shift through the lens of health and body, inspired by the archetype of the Hanged Man.",
+  "immersion_architecture": {
+    "orientation": "In the twilight of a forgotten garden, where vines hang suspended from the sky as if defying gravity, a perpetually swinging pendulum-shaped mirror reflects the distorted images of the world around. The air is thick with the scent of moss and damp earth, and the faint sound of dripping water echoes like a heartbeat throughout the space.",
+    "complication": "An unseen force causes the pendulum mirror to swing violently, shattering the images reflected within and revealing hidden truths beneath its surface."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Pendulum-shaped Mirror",
+      "interpretation_broken": "A broken mirror may indicate a fractured sense of self or identity, suggesting a need to piece together one's understanding of their own health and well-being.",
+      "interpretation_beautiful": "A beautiful mirror reflects the desire to see one's true self clearly, symbolizing self-acceptance and the quest for inner harmony.",
+      "interpretation_threatening": "A threatening mirror might symbolize fear of confronting one's own reflection, or the anxiety of facing internal truths about one's body or health."
+    },
+    {
+      "object": "Suspended Vines",
+      "interpretation_broken": "Broken vines suggest a disconnection from one's roots or natural state, indicating potential neglect of physical health or foundational well-being.",
+      "interpretation_beautiful": "Beautiful vines represent growth and vitality, a sign of thriving health and the nurturing of one's body.",
+      "interpretation_threatening": "Threatening vines indicate entanglement or suffocation, potentially symbolizing overwhelming health issues or the feeling of being trapped in one's physical state."
+    },
+    {
+      "object": "Dripping Water",
+      "interpretation_broken": "Broken water flow suggests disruption in emotional release or bodily functions, highlighting stress or health concerns that need attention.",
+      "interpretation_beautiful": "Beautiful, steady dripping water symbolizes cleansing and renewal, indicative of a healthy emotional and physical state.",
+      "interpretation_threatening": "Threatening water could represent the fear of being overwhelmed by emotions or health challenges, suggesting a need to address these issues."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "reflection",
+      "change",
+      "health",
+      "sacrifice"
+    ],
+    "mcadams_markers": [
+      "self-exploration",
+      "perspective",
+      "identity",
+      "transformation"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What does the pendulum mirror reveal about your current state of health when it swings?",
+    "action_prompt": "What does your body do as the mirror swings and the truth is revealed?"
+  },
+  "sphere_id": 6,
+  "sphere_key": "HEALTH"
+}

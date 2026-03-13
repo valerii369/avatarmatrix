@@ -1,0 +1,46 @@
+{
+  "scene_name": "Tower of Reflections",
+  "psychological_foundation": "This scene explores the dynamics of breaking free from rigid patterns in relationships, inspired by the Tower archetype's themes of sudden insight and liberation.",
+  "immersion_architecture": {
+    "orientation": "A vast, surreal landscape opens up where a towering structure of mirrors stands in the center, reflecting the ever-changing sky. The ground is covered in fine, white sand that shifts with the slightest breeze, creating patterns that mimic the constellations above. Around the tower, a moat filled with shimmering, iridescent liquid subtly changes color, casting a kaleidoscope of hues onto the mirrored surface.",
+    "complication": "Suddenly, a violent gust of wind sweeps across the landscape, causing the mirrors to vibrate and emit a low, resonant hum."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Mirrors",
+      "interpretation_broken": "Seeing the mirrors as broken suggests a realization that previous self-images or perceptions of relationships are fractured or incomplete.",
+      "interpretation_beautiful": "Viewing the mirrors as beautiful indicates an appreciation for the clarity and multifaceted nature of self-reflection and relationships.",
+      "interpretation_threatening": "Perceiving the mirrors as threatening may reflect fear of confronting one's true self or the complexities within relationships."
+    },
+    {
+      "object": "Sand",
+      "interpretation_broken": "If the sand appears broken or scattered, it may symbolize feeling unstable or lacking a solid foundation in relationships.",
+      "interpretation_beautiful": "Perceiving the sand as beautiful suggests an acceptance of change and the fluid nature of personal connections.",
+      "interpretation_threatening": "Seeing the sand as threatening can indicate anxiety about change and the impermanence of relationships."
+    },
+    {
+      "object": "Moat",
+      "interpretation_broken": "A broken moat can symbolize feelings of vulnerability or a breach in emotional defenses within a relationship.",
+      "interpretation_beautiful": "A beautiful moat suggests a harmonious balance between protecting oneself and being open to others.",
+      "interpretation_threatening": "A threatening moat may represent perceived barriers or emotional distance in a relationship."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "reflection",
+      "change",
+      "insight"
+    ],
+    "mcadams_markers": [
+      "identity",
+      "growth",
+      "liberation"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What does the tower symbolize in your current relationship dynamics?",
+    "action_prompt": "What does your body want to do in response to the vibrating mirrors?"
+  },
+  "sphere_id": 3,
+  "sphere_key": "RELATIONS"
+}

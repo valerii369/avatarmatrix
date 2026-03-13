@@ -15,8 +15,8 @@ class Settings(BaseSettings):
     CORS_ORIGINS: list[str] = ["*"]
 
     # OpenAI model settings
-    OPENAI_MODEL: str = "gpt-4o"
-    OPENAI_MODEL_FAST: str = "gpt-4o-mini"
+    OPENAI_MODEL: str = "o3-mini"
+    OPENAI_MODEL_FAST: str = "gpt-5-mini"
 
     # Token budgets (hidden from user)
     TOKEN_BUDGET_REFLECTION: int = 800

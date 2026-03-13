@@ -1,0 +1,45 @@
+{
+  "scene_name": "The Celestial Garden",
+  "psychological_foundation": "The scene explores the archetype of the Star, focusing on the dual nature of inspiration and detachment from reality, while intertwining the theme of Mission or Purpose.",
+  "immersion_architecture": {
+    "orientation": "In a surreal garden suspended between the cosmos and the earth, luminous flowers emit a gentle light, casting intricate shadows on the crystalline pathways. Each step taken on these paths produces a melodious resonance, echoing the celestial music of the spheres. Above, the night sky is a tapestry of constellations, each star pulsating with a rhythm that seems to speak directly to one's soul.",
+    "complication": "Suddenly, a star falls from the sky, landing in the garden with a soft thud, and its glow begins to dim, casting uncertainty over the path ahead."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Luminous Flowers",
+      "interpretation_broken": "If perceived as broken, it may indicate a feeling of lost potential or inspiration, suggesting a disconnect from one's creativity or higher purpose.",
+      "interpretation_beautiful": "If perceived as beautiful, it reflects a deep appreciation for the subtle beauty and inspiration found in everyday life and experiences.",
+      "interpretation_threatening": "If perceived as threatening, it could symbolize an overwhelming or intimidating sense of expectation to shine or succeed."
+    },
+    {
+      "object": "Crystalline Pathways",
+      "interpretation_broken": "If perceived as broken, it suggests a lack of clear direction or path in one's life mission, possibly reflecting confusion or insecurity.",
+      "interpretation_beautiful": "If perceived as beautiful, it indicates a harmonious alignment with one's life journey and an appreciation for the guidance received along the way.",
+      "interpretation_threatening": "If perceived as threatening, it might reflect anxiety about making the wrong choices or fear of vulnerability on one's path."
+    },
+    {
+      "object": "Falling Star",
+      "interpretation_broken": "If perceived as broken, it symbolizes shattered dreams or the feeling that one's aspirations are unattainable, leading to disillusionment.",
+      "interpretation_beautiful": "If perceived as beautiful, it represents hope and the belief that even setbacks can be wondrous and lead to new opportunities.",
+      "interpretation_threatening": "If perceived as threatening, it denotes fear of failure or the belief that one's aspirations may lead to unexpected and possibly negative consequences."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "insight",
+      "causation",
+      "tentative"
+    ],
+    "mcadams_markers": [
+      "narrative coherence",
+      "moral of the story"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What does the falling star represent in your life?",
+    "action_prompt": "What does your body do as you witness the star's descent and its impact on the garden?"
+  },
+  "sphere_id": 5,
+  "sphere_key": "MISSION"
+}

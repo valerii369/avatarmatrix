@@ -1,0 +1,48 @@
+{
+  "scene_name": "The Ancestral Garden",
+  "psychological_foundation": "This scene explores the complex interplay between familial legacies and the transformative power of acknowledging the end of one phase to begin anew. It delves into the archetype of Death within the family context, emphasizing both the potential for growth through release and the stagnation that can result from clinging to the past.",
+  "immersion_architecture": {
+    "orientation": "In a garden that seems to stretch infinitely, ancient trees twist their branches into the sky, their roots entwined with crumbling stone relics. The air is thick with the scent of forgotten blossoms, and shadows of departed family members flicker across the ground in the dappled sunlight, whispering stories of old. A solitary fountain, its water still and reflective, stands at the center, holding the echoes of generations past.",
+    "complication": "The fountain suddenly overflows, spilling water that transforms into a river, threatening to wash away the ancient stone relics."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Ancient Trees",
+      "interpretation_broken": "If perceived as broken, it may indicate a disruption or fracture in the family lineage or a sense of disconnection from ancestral roots.",
+      "interpretation_beautiful": "If perceived as beautiful, it may signify a deep appreciation and reverence for family history and the strength drawn from ancestral connections.",
+      "interpretation_threatening": "If perceived as threatening, it may suggest fear of being overshadowed by family expectations or the burden of lineage."
+    },
+    {
+      "object": "Stone Relics",
+      "interpretation_broken": "If perceived as broken, it may symbolize the loss of familial traditions or a break in cultural continuity.",
+      "interpretation_beautiful": "If perceived as beautiful, it may represent a cherished legacy and the endurance of family values over time.",
+      "interpretation_threatening": "If perceived as threatening, it may reflect anxiety about being trapped by outdated beliefs or family obligations."
+    },
+    {
+      "object": "Fountain",
+      "interpretation_broken": "If perceived as broken, it may indicate emotional stagnation or an inability to tap into one's emotional history.",
+      "interpretation_beautiful": "If perceived as beautiful, it may represent the flow of emotions and memories that nourish personal growth.",
+      "interpretation_threatening": "If perceived as threatening, it may suggest being overwhelmed by past emotions or family drama."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "emotion",
+      "family",
+      "change",
+      "history"
+    ],
+    "mcadams_markers": [
+      "legacy",
+      "ancestry",
+      "transformation",
+      "identity"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What stories do the shadows of your ancestors tell, and how do they influence your current path?",
+    "action_prompt": "What does your body do as the river of change approaches the ancient relics?"
+  },
+  "sphere_id": 4,
+  "sphere_key": "FAMILY"
+}

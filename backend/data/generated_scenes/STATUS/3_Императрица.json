@@ -1,0 +1,46 @@
+{
+  "scene_name": "Garden of Prosperity",
+  "psychological_foundation": "This scene explores the archetype of the Empress, focusing on themes of unconditional acceptance, natural abundance, and the potential shadows of stifling care and material attachment. The setting is designed to evoke thoughts about one's status in relation to nurturing and abundance.",
+  "immersion_architecture": {
+    "orientation": "Under a sky tinted with rich hues of gold and crimson, an endless garden stretches beyond sight, each plant bearing fruit that glows with an inner light. The air is thick with the scent of fertile earth mingling with the sweetness of ripe harvests, as if the very atmosphere is saturated with life-giving potential. In the center, an ornate fountain flows with a liquid that sparkles like liquid sunshine, hinting at the boundless resources available yet urging discernment in their use.",
+    "complication": "A sudden shadow passes over the garden, and the once shimmering fruits begin to wither and fall, as if drawing back from an unseen threat."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Glowing Fruit",
+      "interpretation_broken": "Seeing the fruit as broken might indicate feelings of inadequacy or fear of failure in nurturing one's own potential or relationships.",
+      "interpretation_beautiful": "Perceiving the fruit as beautiful suggests an appreciation for growth, potential, and the nurturing aspects of life.",
+      "interpretation_threatening": "Viewing the fruit as threatening could reflect anxiety about abundance or the pressure of meeting expectations."
+    },
+    {
+      "object": "Ornate Fountain",
+      "interpretation_broken": "A broken fountain may symbolize a perceived lack of resources or an inability to sustain oneself or others emotionally.",
+      "interpretation_beautiful": "A beautiful fountain signifies emotional abundance and a sense of inner fulfillment.",
+      "interpretation_threatening": "A threatening fountain might suggest fear of being overwhelmed by emotions or the responsibilities of nurturing."
+    },
+    {
+      "object": "Endless Garden",
+      "interpretation_broken": "If seen as broken, the garden might represent feelings of being trapped or overwhelmed by responsibilities.",
+      "interpretation_beautiful": "A beautiful garden reflects harmony, balance, and the joy of nurturing growth in one's life.",
+      "interpretation_threatening": "A threatening garden may indicate anxiety about losing control or fear of being unable to manage one's environment or relationships."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "nurturing",
+      "abundance",
+      "control issues"
+    ],
+    "mcadams_markers": [
+      "nurturance",
+      "power",
+      "resource management"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "In what areas of your life do you feel you are either nurturing too much or not enough?",
+    "action_prompt": "Create a plan to balance nurturing in your life, focusing on areas where you can let go of control and allow natural growth."
+  },
+  "sphere_id": 10,
+  "sphere_key": "STATUS"
+}

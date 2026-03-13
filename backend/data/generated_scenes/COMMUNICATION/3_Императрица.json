@@ -1,0 +1,44 @@
+{
+  "scene_name": "Garden of Abundance",
+  "psychological_foundation": "This scene explores the dynamics of nurturing relationships, inspired by the archetype of the Empress, reflecting both the light and shadow aspects of unconditional acceptance, fertility, and the potential for overbearing care.",
+  "immersion_architecture": {
+    "orientation": "In a lush, sprawling garden filled with vibrant, oversized flora, the air is thick with the scent of blooming jasmine and ripe citrus. The landscape is dotted with ornate fountains that overflow with sparkling, crystal-clear water, symbolizing the abundance of life. Golden sunlight filters through a canopy of ancient, towering trees, casting dappled shadows on the ground below.",
+    "complication": "A sudden, chilling breeze sweeps through the garden, causing the vibrant flowers to wither and the fountains to momentarily dry up, creating an unsettling tension in the otherwise idyllic scene."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Fountain",
+      "interpretation_broken": "If the fountain is perceived as broken, it may indicate feelings of emotional depletion or a fear of not being able to sustain nurturing relationships.",
+      "interpretation_beautiful": "Seeing the fountain as beautiful suggests a healthy appreciation for the abundance and flow of emotional resources in one's life.",
+      "interpretation_threatening": "If the fountain feels threatening, it could symbolize anxiety around being overwhelmed by the demands of others or the fear of losing control over one's own resources."
+    },
+    {
+      "object": "Flowers",
+      "interpretation_broken": "Broken flowers may reflect a sense of lost potential or unfulfilled desires within personal relationships.",
+      "interpretation_beautiful": "Beautiful flowers indicate a recognition of life's beauty and the potential for growth and connection.",
+      "interpretation_threatening": "Threatening flowers might suggest fear of entrapment or being smothered by the expectations of loved ones."
+    },
+    {
+      "object": "Sunlight",
+      "interpretation_broken": "If the sunlight is seen as broken, it could denote a lack of clarity or warmth in one's emotional life.",
+      "interpretation_beautiful": "Beautiful sunlight represents enlightenment, hope, and the presence of nurturing energy.",
+      "interpretation_threatening": "Threatening sunlight may reflect a fear of exposure or vulnerability in relationships."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "emotional expression",
+      "relationship dynamics"
+    ],
+    "mcadams_markers": [
+      "nurturance",
+      "control"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "How does the balance between nurturing and control manifest in your relationships?",
+    "action_prompt": "What does your body do as you imagine yourself walking through this garden when the breeze occurs?"
+  },
+  "sphere_id": 3,
+  "sphere_key": "RELATIONS"
+}

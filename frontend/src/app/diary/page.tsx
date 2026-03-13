@@ -8,8 +8,10 @@ import { BottomNav } from "@/app/page";
 import { CardSkeleton } from "@/components/Skeleton";
 
 const SPHERE_NAMES: Record<string, string> = {
-    IDENTITY: "Личность", MONEY: "Деньги", RELATIONS: "Отношения",
-    FAMILY: "Род", MISSION: "Миссия", HEALTH: "Здоровье", SOCIETY: "Влияние", SPIRIT: "Духовность"
+    IDENTITY: "Личность", RESOURCES: "Ресурсы", COMMUNICATION: "Связи",
+    ROOTS: "Корни", CREATIVITY: "Творчество", SERVICE: "Служение",
+    PARTNERSHIP: "Партнерство", TRANSFORMATION: "Тень", EXPANSION: "Поиск",
+    STATUS: "Статус", VISION: "Будущее", SPIRIT: "Дух"
 };
 
 export default function DiaryPage() {
@@ -17,7 +19,7 @@ export default function DiaryPage() {
     const [activeFilter, setActiveFilter] = useState("all");
     const [statusFilter, setStatusFilter] = useState("plan");
 
-    const SPHERES = ["all", "IDENTITY", "MONEY", "RELATIONS", "FAMILY", "MISSION", "HEALTH", "SOCIETY", "SPIRIT"];
+    const SPHERES = ["all", "IDENTITY", "RESOURCES", "COMMUNICATION", "ROOTS", "CREATIVITY", "SERVICE", "PARTNERSHIP", "TRANSFORMATION", "EXPANSION", "STATUS", "VISION", "SPIRIT"];
 
     // SWR Fetcher
     const { data: rawEntries, isValidating: loading } = useSWR(

@@ -14,7 +14,7 @@ from pydantic import BaseModel, Field
 class ReflectionAnalysis(BaseModel):
     hawkins_score: int = Field(description="Вибрационный уровень (20-1000).")
     hawkins_level: str = Field(description="Название уровня Хокинса.")
-    sphere: str = Field(description="Код сферы: IDENTITY, MONEY, RELATIONS, FAMILY, MISSION, HEALTH, SOCIETY, SPIRIT.")
+    sphere: str = Field(description="Код сферы: IDENTITY, RESOURCES, COMMUNICATION, ROOTS, CREATIVITY, SERVICE, PARTNERSHIP, TRANSFORMATION, EXPANSION, STATUS, VISION, SPIRIT.")
     archetype_id: int = Field(description="ID наиболее резонирующего архетипа.")
     dominant_emotion: str = Field(description="Доминирующая эмоция в тексте.")
     ai_analysis: str = Field(description="Короткий (2-3 предложения), глубокий инсайт или поддержка.")
@@ -39,7 +39,7 @@ async def analyze_reflection(text: str) -> dict:
     3. ТОЧНАЯ КАЛИБРОВКА (ШКАЛА ХОКИНСА): 
        - Оцени вибрацию (20-1000) по самому честному маркеру. 
        - Помни про «интеллектуальный мост»: если человек много рассуждает, но не чувствует — балл не выше 400.
-    4. КЛАССИФИКАЦИЯ: Определи сферу жизни (IDENTITY, MONEY, RELATIONS, FAMILY, MISSION, HEALTH, SOCIETY, SPIRIT) и резонирующий архетип.
+    4. КЛАССИФИКАЦИЯ: Определи сферу жизни (IDENTITY, RESOURCES, COMMUNICATION, ROOTS, CREATIVITY, SERVICE, PARTNERSHIP, TRANSFORMATION, EXPANSION, STATUS, VISION, SPIRIT) и резонирующий архетип.
     5. ИНСАЙТ ДЛЯ ДУШИ: Сформулируй 2-3 предложения поддержки. Это должен быть не «диагноз», а теплый, глубокий инсайт, который дает ресурс или подсвечивает выход.
     
     Отвечай строго в JSON:

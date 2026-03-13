@@ -25,12 +25,16 @@ with open(os.path.join(DATA_DIR, "hawkins_scale.json")) as f:
 
 SPHERE_AGENT_STYLES = {
     "IDENTITY": "зеркало",
-    "MONEY": "практичный мудрец",
-    "RELATIONS": "тёплый честный друг",
-    "FAMILY": "мудрый старейшина",
-    "MISSION": "вдохновляющий стратег",
-    "HEALTH": "мудрый целитель",
-    "SOCIETY": "стратег-наставник",
+    "RESOURCES": "практичный мудрец",
+    "COMMUNICATION": "пытливый исследователь",
+    "ROOTS": "мудрый старейшина",
+    "CREATIVITY": "вдохновляющий творец",
+    "SERVICE": "терпеливый мастер",
+    "PARTNERSHIP": "тёплый честный друг",
+    "TRANSFORMATION": "хранитель теней",
+    "EXPANSION": "вдохновляющий стратег",
+    "STATUS": "строгий наставник",
+    "VISION": "футуролог-мечтатель",
     "SPIRIT": "проводник тишины",
 }
 

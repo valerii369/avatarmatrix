@@ -1,0 +1,46 @@
+{
+  "scene_name": "The Carnival of Mirrors",
+  "psychological_foundation": "This scene explores the archetype of the Fool and its manifestation within society, highlighting themes of potentiality, trust, and the tension between freedom and responsibility.",
+  "immersion_architecture": {
+    "orientation": "A sprawling carnival stretches into the horizon, its vibrant tents and flickering lights casting playful shadows on the ground. The air is filled with the sweet aroma of spun sugar and the distant laughter of invisible revelers. Mirrors of all shapes and sizes line the pathways, reflecting not only the kaleidoscope of colors but also distorting reality itself.",
+    "complication": "One of the larger mirrors suddenly shatters, sending shards of glass shimmering across the ground, as a quiet hush descends upon the carnival."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Mirrors",
+      "interpretation_broken": "Seeing broken mirrors may reflect a fear of self-reflection or the fragmentation of one's identity and potential.",
+      "interpretation_beautiful": "Beautiful mirrors suggest a healthy relationship with self-awareness and the ability to see one's true potential clearly.",
+      "interpretation_threatening": "Threatening mirrors could symbolize the fear of confronting one's deepest truths or the unknown aspects of the self."
+    },
+    {
+      "object": "Carnival Lights",
+      "interpretation_broken": "Broken lights might indicate a feeling of lost joy or a fear that life's vibrancy is fading away.",
+      "interpretation_beautiful": "Beautiful lights represent the allure of endless possibilities and the joy of embracing life's adventures.",
+      "interpretation_threatening": "Threatening lights could denote an overwhelming sense of chaos or the fear of being blinded by illusions."
+    },
+    {
+      "object": "Tents",
+      "interpretation_broken": "Broken tents may symbolize instability in one's life or the fear of losing a safe haven.",
+      "interpretation_beautiful": "Beautiful tents signify the comfort and security found in life's journey and the potential for new beginnings.",
+      "interpretation_threatening": "Threatening tents could reflect the fear of confinement or the pressure of societal expectations."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "self-reflection",
+      "identity",
+      "freedom"
+    ],
+    "mcadams_markers": [
+      "potentiality",
+      "responsibility",
+      "trust"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "How does the shattered mirror reflect your current sense of self or potential?",
+    "action_prompt": "What does your body want to do in response to the sound of shattering glass? Is it to move towards the shards or away from them?"
+  },
+  "sphere_id": 7,
+  "sphere_key": "SOCIETY"
+}

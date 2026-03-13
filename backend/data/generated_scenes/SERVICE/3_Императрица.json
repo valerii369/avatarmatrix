@@ -1,0 +1,44 @@
+{
+  "scene_name": "Garden of Abundance",
+  "psychological_foundation": "The scene is inspired by the archetype of the Empress, focusing on the themes of health, body, and natural abundance. It explores the dual aspects of nurturing and control, highlighting the balance between care and overprotection.",
+  "immersion_architecture": {
+    "orientation": "In the heart of a lush, magical garden, where every tree and plant seems to hum with life, the air is filled with the rich scent of blooming flowers and the sound of trickling water. The vivid colors of the flora create a tapestry of greens, pinks, and golds, and the gentle rustling of leaves whispers secrets of ancient times. The garden is a sanctuary of growth and fertility, with the earth beneath pulsating warmly, as if alive with the promise of endless possibilities.",
+    "complication": "A sudden shadow falls over the garden as ominous clouds gather in the sky, threatening to unleash a torrential rain that could either nourish or drown the vibrant life below."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Blooming Flower",
+      "interpretation_broken": "Seeing the flower as broken may indicate feelings of personal inadequacy or a fear of lost potential.",
+      "interpretation_beautiful": "Viewing the flower as beautiful suggests appreciation for life's beauty and a sense of personal growth.",
+      "interpretation_threatening": "Perceiving the flower as threatening might reflect anxiety about vulnerability or being overwhelmed by emotions."
+    },
+    {
+      "object": "Trickling Water",
+      "interpretation_broken": "If the water is seen as broken, it might symbolize emotional blockages or a perceived lack of emotional flow.",
+      "interpretation_beautiful": "Seeing the water as beautiful indicates a harmonious emotional state and openness to life's experiences.",
+      "interpretation_threatening": "If the water is perceived as threatening, it could suggest fear of being overwhelmed by one's emotions or situations."
+    },
+    {
+      "object": "Ancient Tree",
+      "interpretation_broken": "A broken tree may represent a fear of instability or the loss of foundational support in life.",
+      "interpretation_beautiful": "A beautiful tree signifies strength, resilience, and a deep connection to one's roots and heritage.",
+      "interpretation_threatening": "A threatening tree might indicate fear of being overshadowed or controlled by external forces."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "emotional expression",
+      "cognitive processing"
+    ],
+    "mcadams_markers": [
+      "agency",
+      "communion"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What does the gathering storm represent in your life?",
+    "action_prompt": "What does your body do as you stand in this garden, sensing the approaching storm?"
+  },
+  "sphere_id": 6,
+  "sphere_key": "HEALTH"
+}

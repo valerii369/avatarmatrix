@@ -1,0 +1,46 @@
+{
+  "scene_name": "Starlit Oasis",
+  "psychological_foundation": "Combining the archetype of The Star with themes of health, hope, and self-realization, this scene explores the duality of inspiration and disconnection, prompting reflection on one's path to healing and inner alignment.",
+  "immersion_architecture": {
+    "orientation": "Under a vast, star-speckled sky, an ethereal oasis emerges in the heart of a moonlit desert. The air shimmers with a mystical glow as a crystalline pool reflects the constellations above, creating an illusion of infinite depth. Tall, slender palm trees sway gently, casting elongated shadows that dance upon the silver sand.",
+    "complication": "A sudden, chilling wind sweeps through the oasis, stirring the water into turbulent ripples and bending the palm trees with an ominous creak."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Crystalline Pool",
+      "interpretation_broken": "Symbolizes a fractured self-image or disrupted inner clarity, possibly indicating a struggle with self-acceptance or vision for the future.",
+      "interpretation_beautiful": "Represents deep self-awareness and the ability to reflect on one's inner world, suggesting harmony and peace with oneself.",
+      "interpretation_threatening": "Indicates fear of the unknown depths within oneself, possibly hinting at anxiety about hidden emotions or uncharted parts of the psyche."
+    },
+    {
+      "object": "Palm Trees",
+      "interpretation_broken": "Suggests a loss of support or stability in life, symbolizing weakened resilience or grounding.",
+      "interpretation_beautiful": "Represents strength and flexibility, indicating a balanced and adaptable approach to life's challenges.",
+      "interpretation_threatening": "Conveys feelings of vulnerability or being overshadowed by larger, uncontrollable forces, possibly triggering a sense of exposure or insecurity."
+    },
+    {
+      "object": "Starry Sky",
+      "interpretation_broken": "Reflects a loss of guidance or hope, symbolizing confusion or a lack of direction in one's life journey.",
+      "interpretation_beautiful": "Symbolizes inspiration and a connection to higher ideals, indicating a strong sense of purpose and hope.",
+      "interpretation_threatening": "Suggests overwhelming expectations or the pressure of unreachable aspirations, potentially causing stress or feelings of inadequacy."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "hope",
+      "reflection",
+      "inspiration"
+    ],
+    "mcadams_markers": [
+      "self-realization",
+      "inner-clarity",
+      "journey"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "How does the turbulence in the oasis mirror any current disturbances in your life?",
+    "action_prompt": "What does your body do when faced with the sudden chill in the oasis?"
+  },
+  "sphere_id": 6,
+  "sphere_key": "HEALTH"
+}

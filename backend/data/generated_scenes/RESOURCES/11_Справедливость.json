@@ -1,0 +1,46 @@
+{
+  "scene_name": "The Gilded Scales",
+  "psychological_foundation": "This scene explores the complex relationship between money and justice, examining the dual nature of fairness as both an enlightening and potentially destructive force.",
+  "immersion_architecture": {
+    "orientation": "In a vast, marble hall, grand scales of justice hang suspended from an invisible ceiling. The scales are gilded, yet tarnished, surrounded by a cascade of golden coins that fall endlessly, never touching the ground. Their clinking echoes through the space, a constant, rhythmic reminder of the weight of wealth and fairness.",
+    "complication": "Suddenly, one of the scales tips dramatically, causing a cascade of coins to spill over and scatter across the marble floor, disrupting the balance."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Gilded Scales",
+      "interpretation_broken": "If perceived as broken, the scales suggest a loss of faith in the justice system, indicating feelings of imbalance and corruption.",
+      "interpretation_beautiful": "If seen as beautiful, the scales symbolize harmony and the ideal of fair judgment, inspiring trust and order.",
+      "interpretation_threatening": "If threatening, the scales may represent oppressive scrutiny and the fear of judgment, suggesting anxiety about being weighed and found wanting."
+    },
+    {
+      "object": "Golden Coins",
+      "interpretation_broken": "If the coins are seen as broken, they may indicate the futility of wealth in providing true satisfaction and security, pointing to disillusionment with material success.",
+      "interpretation_beautiful": "If viewed as beautiful, the coins could symbolize prosperity and opportunity, reflecting a positive relationship with wealth.",
+      "interpretation_threatening": "If threatening, the coins might represent the burden of financial obligations or greed, inciting fear of loss or corruption."
+    },
+    {
+      "object": "Marble Hall",
+      "interpretation_broken": "If the hall appears broken, it may reflect a perceived decay of foundational values or stability, suggesting an environment of chaos.",
+      "interpretation_beautiful": "If seen as beautiful, the hall represents strength, stability, and the grandeur of justice at its finest.",
+      "interpretation_threatening": "If perceived as threatening, the hall might symbolize an intimidating system or structure that feels impossible to navigate or escape."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "anxiety",
+      "wealth",
+      "justice"
+    ],
+    "mcadams_markers": [
+      "moral",
+      "stability",
+      "conflict"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "How do you perceive the balance between wealth and fairness in your life?",
+    "action_prompt": "Reflect on a decision you've made recently involving money. How did considerations of fairness influence your choice?"
+  },
+  "sphere_id": 2,
+  "sphere_key": "MONEY"
+}

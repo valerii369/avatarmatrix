@@ -201,59 +201,31 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* ── Tab Switcher (Replaces StatTiles) ── */}
+      {/* ── Tab Switcher (Matches Cards design) ── */}
       <div className="px-4 mb-4">
-        <div className="flex gap-2 p-1.5 bg-white/[0.04] border border-white/[0.05] rounded-2xl">
+        <div
+          className="grid grid-cols-3 gap-1 p-1"
+          style={{
+            background: "rgba(255,255,255,0.04)",
+            border: "1px solid var(--border)",
+            borderRadius: 14,
+          }}
+        >
           <TabButton 
             active={activeTab === "avatar"} 
             onClick={() => setActiveTab("avatar")} 
             label="Твой AVATAR" 
-            icon="✨"
           />
           <TabButton 
             active={activeTab === "about"} 
             onClick={() => setActiveTab("about")} 
             label="О тебе" 
-            icon="💎"
           />
           <TabButton 
             active={activeTab === "world"} 
             onClick={() => setActiveTab("world")} 
             label="Твой мир" 
-            icon="🌌"
             disabled
-          />
-        </div>
-      </div>
-
-      {/* ── Rank + Level Progress ── */}
-      <div className="px-4 mb-3">
-        <div className="flex items-center justify-between mb-1">
-          <span style={{ fontSize: 13, color: "var(--text-secondary)", fontWeight: 500 }}>
-            {title || "Новичок"}
-          </span>
-          <span style={{ fontSize: 12, fontWeight: 400 }}>
-            <span style={{ color: "var(--text-muted)" }}>
-              ({formatScore(xpCollectedInLevel)} / {formatScore(levelRange)} XP)
-            </span>
-            {" "}
-            <span style={{ color: "var(--text-secondary)", fontWeight: 500 }}>
-              {Math.round(levelProgress * 100)}%
-            </span>
-          </span>
-        </div>
-        <div style={{
-          height: 3, background: "rgba(255,255,255,0.08)", borderRadius: 2, overflow: "hidden",
-        }}>
-          <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: `${levelProgress * 100}%` }}
-            transition={{ duration: 1, ease: "easeOut", delay: 0.3 }}
-            style={{
-              height: "100%",
-              background: "linear-gradient(90deg, #10B981, #06B6D4)",
-              borderRadius: 2,
-            }}
           />
         </div>
       </div>
@@ -267,6 +239,37 @@ export default function HomePage() {
             exit={{ opacity: 0, y: -10 }}
             className="flex-1 flex flex-col"
           >
+            {/* ── Rank + Level Progress ── */}
+            <div className="px-4 mb-3">
+              <div className="flex items-center justify-between mb-1">
+                <span style={{ fontSize: 13, color: "var(--text-secondary)", fontWeight: 500 }}>
+                  {title || "Новичок"}
+                </span>
+                <span style={{ fontSize: 12, fontWeight: 400 }}>
+                  <span style={{ color: "var(--text-muted)" }}>
+                    ({formatScore(xpCollectedInLevel)} / {formatScore(levelRange)} XP)
+                  </span>
+                  {" "}
+                  <span style={{ color: "var(--text-secondary)", fontWeight: 500 }}>
+                    {Math.round(levelProgress * 100)}%
+                  </span>
+                </span>
+              </div>
+              <div style={{
+                height: 3, background: "rgba(255,255,255,0.08)", borderRadius: 2, overflow: "hidden",
+              }}>
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${levelProgress * 100}%` }}
+                  transition={{ duration: 1, ease: "easeOut", delay: 0.3 }}
+                  style={{
+                    height: "100%",
+                    background: "linear-gradient(90deg, #10B981, #06B6D4)",
+                    borderRadius: 2,
+                  }}
+                />
+              </div>
+            </div>
             {/* ── Score ── */}
             <div className="px-4 text-center mb-1">
               <p style={{
@@ -329,18 +332,24 @@ export default function HomePage() {
   );
 }
 
-function TabButton({ active, onClick, label, icon, disabled }: any) {
+function TabButton({ active, onClick, label, disabled }: any) {
   return (
     <button
       disabled={disabled}
       onClick={onClick}
-      className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-[11px] font-bold transition-all duration-300 ${
-        active 
-          ? "bg-white/[0.08] text-white shadow-lg border border-white/10" 
-          : "text-white/20 hover:text-white/40 border border-transparent"
-      } ${disabled ? "opacity-20 cursor-not-allowed grayscale" : "cursor-pointer"}`}
+      style={{
+        padding: "8px 4px",
+        borderRadius: 10,
+        fontSize: 11,
+        fontWeight: 500,
+        transition: "all 0.2s",
+        background: active ? "rgba(255,255,255,0.1)" : "transparent",
+        color: active ? "var(--text-primary)" : "var(--text-muted)",
+        border: "none",
+        cursor: disabled ? "not-allowed" : "pointer",
+        opacity: disabled ? 0.3 : 1,
+      }}
     >
-      <span className="text-sm">{icon}</span>
       {label}
     </button>
   );

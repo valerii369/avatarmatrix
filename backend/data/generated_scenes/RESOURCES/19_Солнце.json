@@ -1,0 +1,44 @@
+{
+  "scene_name": "The Golden Bazaar",
+  "psychological_foundation": "Exploration of the relationship between self-worth and material wealth through the lens of the Sun archetype, highlighting tensions between genuine joy and ego-driven desires.",
+  "immersion_architecture": {
+    "orientation": "In the center of a bustling bazaar, golden coins rain from the sky like shimmering confetti, illuminating the cobblestone paths with a radiant glow. The air is filled with the scent of exotic spices and the distant melody of a flute, creating an atmosphere that oscillates between dream and reality. Enormous mirrors, reflecting the sun's blinding light, line the perimeter, distorting the images of the opulent stalls and creating an ever-shifting kaleidoscope of wealth and desire.",
+    "complication": "As a sudden gust of wind sweeps through the bazaar, the golden coins begin to melt into pools of liquid gold, threatening to engulf the entire marketplace."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Golden Coins",
+      "interpretation_broken": "A sense of loss or fear of instability in one's financial situation or self-worth.",
+      "interpretation_beautiful": "A harmonious relationship with wealth, seeing it as a source of joy and opportunity.",
+      "interpretation_threatening": "An overwhelming or suffocating presence of material concerns, overshadowing personal values."
+    },
+    {
+      "object": "Mirrors",
+      "interpretation_broken": "A fractured self-image or insecurity about one's identity and achievements.",
+      "interpretation_beautiful": "A clear and positive self-image, embracing one's true self and accomplishments.",
+      "interpretation_threatening": "A distorted self-perception, driven by external validation and fear of judgment."
+    },
+    {
+      "object": "Flute Melody",
+      "interpretation_broken": "A disruption in personal harmony or creativity, feeling out of tune with one's desires.",
+      "interpretation_beautiful": "A natural flow of creativity and contentment, resonating with one's inner peace.",
+      "interpretation_threatening": "An intrusive or dissonant influence, disrupting focus and inner tranquility."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "focus on financial stability",
+      "perception of self-worth"
+    ],
+    "mcadams_markers": [
+      "narrative identity",
+      "ego development"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "How do the melting coins reflect your relationship with change and security?",
+    "action_prompt": "What does your body feel as the golden coins transform around you?"
+  },
+  "sphere_id": 2,
+  "sphere_key": "MONEY"
+}

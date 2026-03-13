@@ -1,0 +1,46 @@
+{
+  "scene_name": "The Silent Observatory",
+  "psychological_foundation": "The scene explores the archetype of the Hermit, focusing on the dual nature of isolation as both a path to enlightenment and a potential descent into unhealthy seclusion.",
+  "immersion_architecture": {
+    "orientation": "In a vast, surreal desert landscape stands a solitary observatory, its silver dome gleaming under a canopy of swirling stars. The air is thick with the scent of ancient parchment, and the only sound is the whisper of sand moving in the wind, echoing the quiet introspection of the soul. Inside, walls lined with old, leather-bound books seem to pulse with the wisdom of ages.",
+    "complication": "A sudden gust of wind slams the observatory door shut, locking you inside with only the faint glow of starlight filtering through the dome."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Observatory Dome",
+      "interpretation_broken": "A broken dome suggests a disruption in the quest for knowledge or an inability to see the bigger picture, indicating potential barriers in personal insight.",
+      "interpretation_beautiful": "A beautiful dome symbolizes a gateway to universal truths and an openness to the mysteries of the cosmos, reflecting inner harmony and enlightenment.",
+      "interpretation_threatening": "A threatening dome implies a fear of the unknown or an overwhelming sense of insignificance in the face of vast, cosmic forces."
+    },
+    {
+      "object": "Ancient Books",
+      "interpretation_broken": "Broken books indicate a loss of wisdom or a disconnection from valuable life lessons and experiences.",
+      "interpretation_beautiful": "Beautiful books represent a rich connection to history and knowledge, suggesting a deep appreciation for learning and growth.",
+      "interpretation_threatening": "Threatening books suggest that knowledge can be overwhelming or that past experiences might be haunting or unresolved."
+    },
+    {
+      "object": "Whispering Sand",
+      "interpretation_broken": "Broken sand whispers imply a silence that disconnects one from the subtle messages of the soul or intuition.",
+      "interpretation_beautiful": "Beautiful whispering sand reflects a harmonious connection with one's inner voice and the subtle guidance of the subconscious mind.",
+      "interpretation_threatening": "Threatening sand suggests a fear of being buried or overwhelmed by one's own thoughts or emotions."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "isolation",
+      "introspection",
+      "knowledge"
+    ],
+    "mcadams_markers": [
+      "identity",
+      "wisdom",
+      "solitude"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What does the observatory represent in your own life journey towards understanding?",
+    "action_prompt": "What does your body do when the door locks shut and you find yourself alone with the stars?"
+  },
+  "sphere_id": 7,
+  "sphere_key": "SOCIETY"
+}

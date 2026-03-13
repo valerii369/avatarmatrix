@@ -1,46 +1,46 @@
 {
-  "scene_name": "The Crystal Palace of Order",
-  "psychological_foundation": "This scene explores the balance between structured authority and oppressive rigidity, drawing on the spiritual aspect of leadership and control as embodied by the Emperor archetype.",
+  "scene_name": "Императорский Эфир",
+  "psychological_foundation": "Дух и Император: мудрость, структурированная энергия и теневые аспекты подавления, пронизанные глубоким символизмом.",
   "immersion_architecture": {
-    "orientation": "In the heart of an ethereal landscape, a towering crystal palace stands, its shimmering walls refracting the light into a kaleidoscope of colors. The air is still, yet charged with the echo of silent command, as though the environment itself is held in a delicate balance. Surrounding the palace, an intricate labyrinth of hedges stretches outwards, each path leading to unknown destinations, inviting yet daunting in its complexity.",
-    "complication": "Suddenly, a tremor pulses through the ground, causing the crystal walls to emit an unsettling hum that reverberates through the labyrinth, threatening to disrupt the fragile order of the palace."
+    "orientation": "Безмолвное пространство, где ночь и рассвет сливаются в гармоничную симфонию оттенков, отражая дух вечного лидерства Императора. Сюрреалистичные линии архитектурной строгости переплетаются с тенями древних символов, создавая атмосферу умиротворённой силы и немой ответственности.",
+    "complication": "Из тихой глубины возникают неоднозначные световые импульсы, нарушающие порядок и призывающие внимательный анализ структуры власти."
   },
   "projection_dictionary": [
     {
-      "object": "Crystal Walls",
-      "interpretation_broken": "If perceived as broken, it may indicate a fear of losing control or the collapse of established structures in one's life.",
-      "interpretation_beautiful": "If seen as beautiful, it reflects an appreciation for order, clarity, and the reflection of inner light and truth.",
-      "interpretation_threatening": "If viewed as threatening, it suggests anxiety surrounding rigid structures or the pressure of high expectations."
+      "object": "Старинный трон",
+      "interpretation_broken": "При восприятии трона как сломанного, он сигнализирует о слабости основ власти и утрате древней мудрости, намекая на потерю устойчивости и порядка.",
+      "interpretation_beautiful": "Видимый в его красоте трон символизирует искреннюю, вдохновляющую силу лидера, создающего безопасное и поддерживающее пространство для роста.",
+      "interpretation_threatening": "Если трон кажется угрожающим, это отражает страх диктаторства, когда жесткое управление превращается в тиранию, подавляя чужие воли."
     },
     {
-      "object": "Labyrinth",
-      "interpretation_broken": "If perceived as broken, it might symbolize confusion or a loss of direction in life.",
-      "interpretation_beautiful": "If seen as beautiful, it indicates a fascination with complexity and a desire for exploration and self-discovery.",
-      "interpretation_threatening": "If viewed as threatening, it suggests overwhelming challenges or the fear of being trapped."
+      "object": "Древние колонны",
+      "interpretation_broken": "Сломанные колонны указывают на трещины в фундаменте систем, где даже самые прочные устои могут потерять свою способность поддерживать идеалы Императора.",
+      "interpretation_beautiful": "Когда колонны кажутся красивыми, они олицетворяют прочность и гармонию, являясь основой для мудрого и уверенного лидерства.",
+      "interpretation_threatening": "Угрожающее восприятие колонн напоминает о жестком контроле и деспотизме, где дисциплина может подавлять индивидуальное развитие."
     },
     {
-      "object": "Echo of Silent Command",
-      "interpretation_broken": "If perceived as broken, it may indicate a struggle with authority or a lack of self-discipline.",
-      "interpretation_beautiful": "If seen as beautiful, it reflects harmony with one's inner voice and the ability to lead oneself and others.",
-      "interpretation_threatening": "If viewed as threatening, it suggests an oppressive internal or external force dictating one's actions."
+      "object": "Магический сфинкс",
+      "interpretation_broken": "Сломанный сфинкс намекает на утрату загадочности духа, указывая на нарушение баланса между мудростью и контролем.",
+      "interpretation_beautiful": "Его красота воплощает глубокую древнюю мудрость, которая питает духовное лидерство и дарует чувство безопасности.",
+      "interpretation_threatening": "В угрожающем облике сфинкса скрыта сила, способная разрушать устои порядка, пробуждая страх перед непредсказуемым деспотизмом."
     }
   ],
   "diagnostic_focus": {
     "pennebaker_markers": [
-      "control",
-      "order",
-      "authority"
+      "ответственность",
+      "структурированность",
+      "мистическая власть"
     ],
     "mcadams_markers": [
-      "power",
-      "stability",
-      "responsibility"
+      "духовная авторитетность",
+      "контроль границ",
+      "трансформационная логика"
     ]
   },
   "transformation_mechanics": {
-    "externalization_question": "How does the tremor in the palace mirror any internal conflicts you are experiencing with control and authority?",
-    "action_prompt": "What does your body do as the hum reverberates through the labyrinth? Do you feel the urge to stabilize, escape, or confront the source?"
+    "externalization_question": "Каким образом ваша внутренняя дисциплина и способность к адаптации влияют на ваше ощущение духовного лидерства?",
+    "action_prompt": "Исследуйте свои границы и постройте новые системы поддержки, позволяющие интегрировать тень и свет вашей власти."
   },
-  "sphere_id": 8,
+  "sphere_id": 12,
   "sphere_key": "SPIRIT"
 }

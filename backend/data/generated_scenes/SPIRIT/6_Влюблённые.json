@@ -1,45 +1,47 @@
 {
-  "scene_name": "Garden of Dualities",
-  "psychological_foundation": "In this scene, the spiritual journey of 'The Lovers' archetype is explored, focusing on the inner union of opposites, the transformative power of love, and the potential pitfalls of losing oneself in another.",
+  "scene_name": "Сияние Влюблённых Духов",
+  "psychological_foundation": "Дух (SPIRIT)",
   "immersion_architecture": {
-    "orientation": "A surreal garden where roses and thorns grow intertwined, casting long shadows under a twilight sky. The air is thick with the scent of jasmine, blending with the distant sound of a heart beating like a distant drum. A tranquil lake mirrors the sky, its surface occasionally broken by ripples that seem to form fleeting yin-yang symbols.",
-    "complication": "A sudden gust of wind stirs the garden, causing the roses to shed petals and revealing hidden paths that twist and turn in unexpected directions."
+    "orientation": "В бескрайнем, сюрреалистическом пространстве, где эфирные реки серебрятся под мерцающими облаками, древние элементы природы сплетаются в узор, напоминающий союз противоположностей. Нет людей, лишь отражения духовной любви, вызванной магией лабиринтов света и тени, окутывающие пространство тонкой атмосферой трансформации.",
+    "complication": "Неожиданно в центре Лунного озера вспыхивает ослепительный сияющий вихрь, нарушая хрупкий покой и заставляя древние символы вибрировать в напряжённом ритме."
   },
   "projection_dictionary": [
     {
-      "object": "Roses",
-      "interpretation_broken": "Seeing broken roses might reflect a sense of loss or disillusionment in love, as if the beauty and promise of connection have been shattered.",
-      "interpretation_beautiful": "Beautiful roses symbolize the allure and transformative power of love, representing harmony and the potential for a deep, fulfilling union.",
-      "interpretation_threatening": "If the roses seem threatening, it could indicate fear of vulnerability and the pain that can accompany intimate relationships."
+      "object": "Лунное озеро",
+      "interpretation_broken": "Если воспринимается как сломанное, озеро символизирует эмоциональную фрагментацию и утрату целостности, указывающее на глубокий внутренний разлом.",
+      "interpretation_beautiful": "Как красивое, озеро отражает глубокую связь с внутренней сущностью, объединяя противоположные начала и напоминая о единстве духа.",
+      "interpretation_threatening": "В виде угрожающего элемента, озеро олицетворяет скрытые бездны страховых эмоций, где мрак может поглотить свет, вызывая тревогу и неуверенность."
     },
     {
-      "object": "Lake",
-      "interpretation_broken": "A broken or disturbed lake surface may suggest emotional turmoil or unresolved conflicts within the self, disrupting inner peace.",
-      "interpretation_beautiful": "A beautiful, serene lake reflects inner harmony and balance, indicative of a well-integrated sense of self and emotional clarity.",
-      "interpretation_threatening": "If the lake appears threatening, it might symbolize the fear of delving into the unconscious mind, where hidden emotions and truths reside."
+      "object": "Световой мост",
+      "interpretation_broken": "При восприятии его как сломанного, мост указывает на разрыв между внутренними конфликтами и неспособность преодолеть чувственные барьеры.",
+      "interpretation_beautiful": "В его красивой форме, мост символизирует искусное соединение противоположностей, создавая путь к целостности и осознанному выбору сердца.",
+      "interpretation_threatening": "Если кажется угрожающим, мост отражает рискованную подвешенность между мирами, где каждая трещина может привести к падению в бездну сомнений."
     },
     {
-      "object": "Paths",
-      "interpretation_broken": "Broken paths might indicate confusion or indecision, reflecting difficulties in choosing a direction or committing to a particular path in life or relationships.",
-      "interpretation_beautiful": "Beautiful paths suggest a clear sense of purpose and direction, embodying confidence in one's choices and the journey ahead.",
-      "interpretation_threatening": "Threatening paths could reflect anxiety about the unknown future, fear of making wrong choices, or the pressure of expectations."
+      "object": "Плавающие зеркальные осколки",
+      "interpretation_broken": "В сломанном виде эти осколки демонстрируют разобщённость идентичности и страх утраты собственной целостности в поисках внешней спасительной половинки.",
+      "interpretation_beautiful": "Как красивый элемент, они представляют собой фрагментированное, но искреннее отражение души, показывая множество граней единого целого.",
+      "interpretation_threatening": "Когда воспринимаются как угрожающие, осколки символизируют хаос и непреодолимый страх перед поглощением внутренней пустотой, побуждая к мучительным сомнениям и неустойчивым решениям."
     }
   ],
   "diagnostic_focus": {
     "pennebaker_markers": [
-      "emotion",
-      "cognitive"
+      "интроспекция",
+      "трансформация",
+      "целостность",
+      "любовь"
     ],
     "mcadams_markers": [
-      "love",
-      "identity",
-      "transformation"
+      "архетип Влюблённых",
+      "духовное соединение",
+      "интеграция противоположностей"
     ]
   },
   "transformation_mechanics": {
-    "externalization_question": "How does love and connection manifest in your life, and how does it influence your sense of self?",
-    "action_prompt": "What does your body do when you feel the push and pull of love and independence?"
+    "externalization_question": "Как вы ощущаете союз противоположностей внутри себя, когда перед вами встаёт выбор, основанный на подлинной любви и целостности духа?",
+    "action_prompt": "Опишите момент, когда вы сделали осознанный 'сердечный' выбор, преодолев страх одиночества, и как это изменило путь вашего внутреннего мира."
   },
-  "sphere_id": 8,
+  "sphere_id": 12,
   "sphere_key": "SPIRIT"
 }

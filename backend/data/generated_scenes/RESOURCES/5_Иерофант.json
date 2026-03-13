@@ -1,0 +1,47 @@
+{
+  "scene_name": "The Vault of Whispers",
+  "psychological_foundation": "This scene explores the dichotomy of financial wisdom versus dogmatic attachment to material wealth, inspired by the archetype of the Hierophant.",
+  "immersion_architecture": {
+    "orientation": "The chamber is vast, with walls lined with ancient tomes and scrolls, each inscribed with symbols that glint gold in the flickering candlelight. In the center, a large vault door looms, its surface engraved with a complex mandala, reflecting both opulence and mystery. The air is thick with the scent of old parchment and incense, creating an aura of sacred reverence and hidden knowledge.",
+    "complication": "Suddenly, the vault door creaks open slightly by itself, revealing a faint, alluring glow from within."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Ancient Tomes",
+      "interpretation_broken": "Perceiving them as broken may indicate a disconnect or loss of faith in traditional wisdom or past teachings.",
+      "interpretation_beautiful": "Seeing them as beautiful suggests a reverence for history, tradition, and the knowledge passed down through generations.",
+      "interpretation_threatening": "If they appear threatening, it might reflect anxiety or fear towards established norms and the weight of inherited expectations."
+    },
+    {
+      "object": "Vault Door",
+      "interpretation_broken": "A broken vault door could symbolize perceived insecurity or vulnerability in one's financial or spiritual foundations.",
+      "interpretation_beautiful": "If the door is seen as beautiful, it represents an appreciation for the mysteries of life and a trust in the process of revelation.",
+      "interpretation_threatening": "A threatening vault door may indicate fear of the unknown or apprehension about what lies beyond one's current understanding."
+    },
+    {
+      "object": "Mandala Engravings",
+      "interpretation_broken": "Seeing these as broken might suggest a perceived disintegration of life's harmony or confusion about one's path.",
+      "interpretation_beautiful": "As beautiful, they signify a sense of unity and the interconnectedness of all things, offering a sense of peace and purpose.",
+      "interpretation_threatening": "If threatening, it may reflect fear of complexity and the overwhelming nature of life's intricate patterns."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "wisdom",
+      "tradition",
+      "fear",
+      "wealth"
+    ],
+    "mcadams_markers": [
+      "identity",
+      "values",
+      "legacy"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What does the glow from within the vault represent for you?",
+    "action_prompt": "Reflect on a time when you had to choose between following tradition and forging your own path. What did you learn from that experience?"
+  },
+  "sphere_id": 2,
+  "sphere_key": "MONEY"
+}

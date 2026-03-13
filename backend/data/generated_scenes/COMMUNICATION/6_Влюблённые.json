@@ -1,0 +1,48 @@
+{
+  "scene_name": "Echoes of the Heart",
+  "psychological_foundation": "The scene explores the archetype of the Lovers within the sphere of Relations, focusing on the light and shadow aspects of union, choice, and identity.",
+  "immersion_architecture": {
+    "orientation": "In the surreal garden of dichotomies, crystalline flowers bloom amidst shadows, casting prismatic reflections on a sky painted with twilight hues. An ancient, stone labyrinth lies at the center, its paths shifting with the whispers of a gentle, unseen breeze. The air is filled with the ethereal music of wind chimes, their notes weaving stories of old lovers and lost identities.",
+    "complication": "A sudden, ominous silence envelops the garden, and the labyrinth's paths begin to intertwine and converge, urging the seeker towards a singular, yet uncertain, destination."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Crystalline Flowers",
+      "interpretation_broken": "A sense of lost beauty and fragility of emotions, reflecting a fear of vulnerability in relationships.",
+      "interpretation_beautiful": "The potential for growth and transformation in love, symbolizing the beauty of embracing one's emotions fully.",
+      "interpretation_threatening": "The overwhelming and potentially dangerous allure of idealized love, hinting at the fear of losing oneself."
+    },
+    {
+      "object": "Stone Labyrinth",
+      "interpretation_broken": "A feeling of entrapment and confusion in one's relationships, symbolizing the struggle to find clarity and direction.",
+      "interpretation_beautiful": "The journey of self-discovery and the harmonious balance of opposites, leading to inner peace and understanding.",
+      "interpretation_threatening": "The fear of an inescapable, twisting path in love, where choices are fraught with uncertainty and risk."
+    },
+    {
+      "object": "Wind Chimes",
+      "interpretation_broken": "A loss of harmony and communication in relationships, indicating a breakdown in connection and understanding.",
+      "interpretation_beautiful": "The gentle, harmonious flow of communication and shared experiences, enriching the bonds of love.",
+      "interpretation_threatening": "The anxiety of miscommunication and the haunting echo of unresolved emotions in a relationship."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "emotion",
+      "relationship",
+      "identity",
+      "choice"
+    ],
+    "mcadams_markers": [
+      "union",
+      "transformation",
+      "vulnerability",
+      "self-discovery"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What does the intertwining path of the labyrinth represent in your current relationships?",
+    "action_prompt": "What does your body feel as you stand before the shifting paths of the labyrinth?"
+  },
+  "sphere_id": 3,
+  "sphere_key": "RELATIONS"
+}

@@ -1,0 +1,46 @@
+{
+  "scene_name": "The Whispering Grove",
+  "psychological_foundation": "Exploring the archetype of Death and transformation within the sphere of Health, this scene invites participants to confront endings and new beginnings, highlighting the potential for profound change and release.",
+  "immersion_architecture": {
+    "orientation": "The Whispering Grove is an ethereal landscape where towering, ancient trees reach skyward, their leaves a kaleidoscope of colors shifting from deep crimson to vibrant gold. Soft mist floats among the trunks, carrying the scent of earth and forgotten memories, while a gentle, otherworldly hum resonates through the air like a distant heartbeat. At the heart of the grove, a crystal-clear pool reflects the swirling patterns of the sky above, suggesting both stillness and change.",
+    "complication": "A sudden gust of wind ripples through the grove, dislodging a cascade of leaves into the pool, distorting its reflection and revealing a hidden path beneath its surface."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Ancient Tree",
+      "interpretation_broken": "If perceived as broken, the tree may symbolize a disconnection from one's roots or a sense of lost vitality and support.",
+      "interpretation_beautiful": "If perceived as beautiful, the tree represents deep wisdom, strength, and an enduring connection to life's cycles.",
+      "interpretation_threatening": "If perceived as threatening, the tree could reflect intimidation by the forces of nature and time, or fear of one's own mortality."
+    },
+    {
+      "object": "Crystal Pool",
+      "interpretation_broken": "If perceived as broken, the pool suggests a fractured self-image or the inability to see one's true potential and future clearly.",
+      "interpretation_beautiful": "If perceived as beautiful, the pool symbolizes clarity of vision and the potential for profound self-discovery and renewal.",
+      "interpretation_threatening": "If perceived as threatening, the pool may evoke fear of the unknown depths of one's psyche and the changes that lie hidden beneath the surface."
+    },
+    {
+      "object": "Kaleidoscope Leaves",
+      "interpretation_broken": "If perceived as broken, the leaves might indicate a loss of hope or joy, a sense of life's vibrancy slipping away.",
+      "interpretation_beautiful": "If perceived as beautiful, the leaves represent the beauty of life's transitions and the natural process of letting go to make room for new growth.",
+      "interpretation_threatening": "If perceived as threatening, the leaves could signify anxiety about inevitable change and the loss of control over life's direction."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "emotional expression",
+      "cognitive processing",
+      "self-reflection"
+    ],
+    "mcadams_markers": [
+      "agency",
+      "communion",
+      "redemption"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What does the path beneath the pool represent in your journey of change and renewal?",
+    "action_prompt": "What does your body feel as you step closer to the pool and consider the hidden path beneath its surface?"
+  },
+  "sphere_id": 6,
+  "sphere_key": "HEALTH"
+}
