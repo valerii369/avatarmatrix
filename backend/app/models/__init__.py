@@ -15,6 +15,7 @@ from app.models.reflection_session import ReflectionSession
 from app.models.text_diagnostics import (
     Sphere, Archetype, TextScene, SceneInteraction, SceneStats, SceneSet, SceneSetItem
 )
+from app.models.user_print import UserPrint
 
 __all__ = [
     "User",
@@ -43,5 +44,6 @@ __all__ = [
     "SceneStats",
     "SceneSet",
     "SceneSetItem",
-    "ReflectionSession"
+    "ReflectionSession",
+    "UserPrint"
 ]

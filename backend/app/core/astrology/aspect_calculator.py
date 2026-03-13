@@ -18,11 +18,11 @@ class Aspect:
 
 
 ASPECT_DEFINITIONS = {
-    "conjunction":  {"angle": 0,   "orb": 7.0,  "symbol": "☌", "strength_base": 5, "label": "Слияние"},
-    "opposition":   {"angle": 180, "orb": 7.0,  "symbol": "☍", "strength_base": 4, "label": "Напряжённая полярность"},
-    "square":       {"angle": 90,  "orb": 6.0,  "symbol": "□", "strength_base": 3, "label": "Конфликт, точка роста"},
-    "trine":        {"angle": 120, "orb": 7.0,  "symbol": "△", "strength_base": 4, "label": "Гармония"},
-    "sextile":      {"angle": 60,  "orb": 5.0,  "symbol": "⚹", "strength_base": 2, "label": "Возможность"},
+    "conjunction":  {"angle": 0,   "orb": 8.0,  "symbol": "☌", "strength_base": 5, "label": "Слияние сил"},
+    "opposition":   {"angle": 180, "orb": 8.0,  "symbol": "☍", "strength_base": 4, "label": "Противостояние, полярность"},
+    "square":       {"angle": 90,  "orb": 7.0,  "symbol": "□", "strength_base": 4, "label": "Динамический вызов, трение"},
+    "trine":        {"angle": 120, "orb": 8.0,  "symbol": "△", "strength_base": 4, "label": "Естественный поток, талант"},
+    "sextile":      {"angle": 60,  "orb": 5.0,  "symbol": "⚹", "strength_base": 2, "label": "Возможность реализации"},
 }
 
 

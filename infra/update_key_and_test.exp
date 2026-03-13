@@ -1,0 +1,22 @@
+#!/usr/bin/expect -f
+set timeout -1
+set password "eCTyD*R.94zTba"
+set host "103.74.92.72"
+set new_key "YOUR_OPENAI_KEY_HERE"
+
+spawn ssh -o StrictHostKeyChecking=no root@$host
+expect "*assword:*"
+send "$password\r"
+expect "#"
+
+send "sed -i 's|^OPENAI_API_KEY=.*|OPENAI_API_KEY=$new_key|' /root/avatar/backend/.env\r"
+expect "#"
+
+send "systemctl restart avatar-backend\r"
+expect "#"
+
+send "cd /root/avatar/backend && source venv/bin/activate && python3 scripts/test_openai_key.py\r"
+expect "#"
+
+send "exit\r"
+expect eof

@@ -22,7 +22,11 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-SPHERES = ["IDENTITY", "MONEY", "RELATIONS", "FAMILY", "MISSION", "HEALTH", "SOCIETY", "SPIRIT"]
+SPHERES = [
+    "IDENTITY", "RESOURCES", "COMMUNICATION", "ROOTS",
+    "CREATIVITY", "SERVICE", "PARTNERSHIP", "TRANSFORMATION",
+    "EXPANSION", "STATUS", "VISION", "SPIRIT"
+]
 ARCHETYPE_IDS = list(range(22))  # 0-21
 
 
@@ -200,6 +204,6 @@ async def calculate(
         success=True,
         natal_chart=chart_dict,
         recommended_cards=recommended_dict,
-        total_cards=22 * 8,
+        total_cards=22 * 12,
         message=f"Карта рассчитана. Рекомендовано {len(recommended_dict)} карточек.",
     )

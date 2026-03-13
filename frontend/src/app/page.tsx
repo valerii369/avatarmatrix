@@ -1,13 +1,14 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import useSWR from "swr";
 import { useUserStore, useCardsStore } from "@/lib/store";
 import { authAPI, cardsAPI, profileAPI } from "@/lib/api";
 import { EnergyIcon } from "@/components/EnergyIcon";
 import { Skeleton } from "@/components/Skeleton";
 import ConsciousnessVisualization from "@/components/ConsciousnessVisualization";
+import MasterHubView from "@/components/MasterHubView";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -30,6 +31,7 @@ export default function HomePage() {
   const { cards, setCards } = useCardsStore();
   const [status, setStatus] = useState<"loading" | "redirecting" | "ready" | "error">("loading");
   const [errorInfo, setErrorInfo] = useState<string>("");
+  const [activeTab, setActiveTab] = useState<"avatar" | "about" | "world">("avatar");
 
   // 1. Auth & Init
   useEffect(() => {
@@ -84,7 +86,6 @@ export default function HomePage() {
     () => profileAPI.get(userId!).then(res => res.data),
     {
       onSuccess: (data) => {
-        // AI-path users have no birth_date but have onboarding_done=true — don't redirect them
         if (!data.birth_date && !data.onboarding_done) router.push("/onboarding");
         setUser({
           xp: data.xp,
@@ -107,21 +108,20 @@ export default function HomePage() {
     }
   );
 
-  const displayCards = cardsData || cards;
+  const displayCards = useMemo(() => cardsData || cards, [cardsData, cards]);
 
   // ── Derived stats ──────────────────────────────────────────────────────────
-  const openedSpheres = new Set(
-    displayCards?.filter((c: any) => c.status !== "locked" && c.hawkins_peak > 0).map((c: any) => c.sphere)
-  ).size || 0;
-  const openedCards = displayCards?.filter((c: any) => c.status !== "locked").length || 0;
-  const recommended = displayCards?.filter((c: any) => c.is_recommended_astro || c.is_recommended_ai).length || 0;
-  const totalScore = displayCards?.reduce((sum: number, c: any) => sum + (c.hawkins_peak || 0), 0) || 0;
+  const activeCards = useMemo(() => 
+    displayCards?.filter((c: any) => ["synced", "aligned", "aligning"].includes(c.status)).length || 0
+  , [displayCards]);
+
+  const totalScore = useMemo(() => 
+    displayCards?.reduce((sum: number, c: any) => sum + (c.hawkins_peak || 0), 0) || 0
+  , [displayCards]);
 
   const levelRange = Math.max(xpNext - xpCurrent, 1);
   const xpCollectedInLevel = Math.max(xp - xpCurrent, 0);
   const levelProgress = Math.min(xpCollectedInLevel / levelRange, 1);
-
-  const activeCards = displayCards?.filter((c: any) => ["synced", "aligned", "aligning"].includes(c.status)).length || 0;
 
   // ── Loading/Error States ───────────────────────────────────────────────────
   if (status === "loading" || status === "redirecting" || !userId) {
@@ -201,26 +201,32 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* ── Stats tiles ── */}
+      {/* ── Tab Switcher (Replaces StatTiles) ── */}
       <div className="px-4 mb-4">
-        <div className="grid grid-cols-3 gap-2">
-          {cardsLoading && !cardsData ? (
-            <>
-              <Skeleton className="h-16 rounded-2xl" />
-              <Skeleton className="h-16 rounded-2xl" />
-              <Skeleton className="h-16 rounded-2xl" />
-            </>
-          ) : (
-            <>
-              <StatTile label="Сферы" value={`${openedSpheres}/8`} color="#F59E0B" />
-              <StatTile label="Карточки" value={`${activeCards}/${TOTAL_CARDS}`} color="#10B981" />
-              <StatTile label="Рекомендовано" value={String(recommended)} color="#60A5FA" />
-            </>
-          )}
+        <div className="flex gap-2 p-1.5 bg-white/[0.04] border border-white/[0.05] rounded-2xl">
+          <TabButton 
+            active={activeTab === "avatar"} 
+            onClick={() => setActiveTab("avatar")} 
+            label="Твой AVATAR" 
+            icon="✨"
+          />
+          <TabButton 
+            active={activeTab === "about"} 
+            onClick={() => setActiveTab("about")} 
+            label="О тебе" 
+            icon="💎"
+          />
+          <TabButton 
+            active={activeTab === "world"} 
+            onClick={() => setActiveTab("world")} 
+            label="Твой мир" 
+            icon="🌌"
+            disabled
+          />
         </div>
       </div>
 
-      {/* ── Rank + Level row ── */}
+      {/* ── Rank + Level Progress ── */}
       <div className="px-4 mb-3">
         <div className="flex items-center justify-between mb-1">
           <span style={{ fontSize: 13, color: "var(--text-secondary)", fontWeight: 500 }}>
@@ -252,61 +258,91 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* ── Score ── */}
-      <div className="px-4 text-center mb-1">
-        <motion.p
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          style={{
-            fontSize: 48,
-            fontWeight: 800,
-            color: "var(--text-primary)",
-            letterSpacing: "-1px",
-            lineHeight: 1,
-            fontFamily: "'Outfit', sans-serif",
-          }}
-        >
-          {formatScore(totalScore)}
-        </motion.p>
-        <p style={{
-          fontSize: 12,
-          fontWeight: 600,
-          color: "rgba(255,255,255,0.3)",
-          textTransform: "uppercase",
-          letterSpacing: "0.1em",
-          marginTop: 4
-        }}>
-          Общий Индекс Сознания
-        </p>
-      </div>
+      <AnimatePresence mode="wait">
+        {activeTab === "avatar" && (
+          <motion.div
+            key="avatar-tab"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="flex-1 flex flex-col"
+          >
+            {/* ── Score ── */}
+            <div className="px-4 text-center mb-1">
+              <p style={{
+                fontSize: 48,
+                fontWeight: 800,
+                color: "var(--text-primary)",
+                letterSpacing: "-1px",
+                lineHeight: 1,
+                fontFamily: "'Outfit', sans-serif",
+              }}>
+                {formatScore(totalScore)}
+              </p>
+              <p style={{
+                fontSize: 12,
+                fontWeight: 600,
+                color: "rgba(255,255,255,0.3)",
+                textTransform: "uppercase",
+                letterSpacing: "0.1em",
+                marginTop: 4
+              }}>
+                Общий Индекс Сознания
+              </p>
+            </div>
 
-      {/* ── Main Visualization ── */}
-      <div className="flex-1 flex flex-col items-center justify-center relative min-h-[400px]">
-        <ConsciousnessVisualization cards={displayCards || []} />
-      </div>
+            {/* ── Main Visualization ── */}
+            <div className="flex-1 flex flex-col items-center justify-center relative min-h-[350px]">
+              <ConsciousnessVisualization cards={displayCards || []} />
+            </div>
+          </motion.div>
+        )}
+
+        {activeTab === "about" && (
+          <motion.div
+            key="about-tab"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="flex-1"
+          >
+            <MasterHubView userId={userId} />
+          </motion.div>
+        )}
+
+        {activeTab === "world" && (
+          <motion.div
+            key="world-tab"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex-1 flex flex-col items-center justify-center p-10 text-center opacity-30"
+          >
+            <div className="text-4xl mb-4">🌌</div>
+            <p className="text-sm font-medium">Твой мир — персональное пространство,<br/>создаваемое AI на основе твоих данных.</p>
+            <p className="text-[10px] uppercase tracking-widest mt-2 font-bold text-violet-400">В разработке...</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <BottomNav active="home" />
     </div>
   );
 }
 
-function StatTile({ label, value, color }: { label: string; value: string; color: string }) {
+function TabButton({ active, onClick, label, icon, disabled }: any) {
   return (
-    <div style={{
-      background: "rgba(255,255,255,0.04)",
-      border: "1px solid var(--border)",
-      borderRadius: 16,
-      padding: "12px 10px",
-      textAlign: "center",
-    }}>
-      <p style={{ fontSize: 11, color, fontWeight: 600, marginBottom: 4, lineHeight: 1 }}>
-        {label}
-      </p>
-      <p style={{ fontSize: 20, fontWeight: 700, color: "var(--text-primary)", lineHeight: 1 }}>
-        {value}
-      </p>
-    </div>
+    <button
+      disabled={disabled}
+      onClick={onClick}
+      className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-[11px] font-bold transition-all duration-300 ${
+        active 
+          ? "bg-white/[0.08] text-white shadow-lg border border-white/10" 
+          : "text-white/20 hover:text-white/40 border border-transparent"
+      } ${disabled ? "opacity-20 cursor-not-allowed grayscale" : "cursor-pointer"}`}
+    >
+      <span className="text-sm">{icon}</span>
+      {label}
+    </button>
   );
 }
 
