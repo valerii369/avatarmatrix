@@ -1,6 +1,6 @@
 import json
 from pydantic import BaseModel, Field
-from .common import client, settings, SPHERE_AGENT_STYLES
+from app.agents.common import client, settings, SPHERE_AGENT_STYLES
 
 # ---------------------------------------------------------------------
 # PYDANTIC STRUCTURED OUTPUTS

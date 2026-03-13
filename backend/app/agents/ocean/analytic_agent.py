@@ -1,12 +1,11 @@
 import json
 from typing import Optional
-from .common import client, settings, ARCHETYPES, SPHERES, MATRIX_DATA
-from .sync_agent import build_avatar_prompt
+from app.agents.common import client, settings, ARCHETYPES, SPHERES, MATRIX_DATA
+from app.agents.river.sync_agent import build_avatar_prompt
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update
 from app.models.portrait import UserPortrait, Pattern
 from app.models.sync_session import SyncSession
-from app.agents.sync_agent import build_avatar_prompt
 
 async def run_mirror_analysis(
     archetype_id: int,

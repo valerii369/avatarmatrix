@@ -9,7 +9,7 @@ from app.database import Base
 from app.models.data_architecture import UserBehaviorProfileV2
 from app.models.text_diagnostics import TextScene, SceneStats, Sphere, Archetype, SceneInteraction
 from app.agents.common import client, settings
-from app.agents.sync_agent import get_embedding
+from app.agents.river.sync_agent import get_embedding
 
 # --- Pydantic Models for Structured Output (High Standard) ---
 class Interpretation(BaseModel):

@@ -4,7 +4,7 @@ from sqlalchemy import select
 
 from app.database import get_db
 from app.models import User, CardProgress, GameState
-from app.core.economy import get_sphere_awareness, calculate_xp_for_level
+from app.services.ocean.economy_service import get_sphere_awareness, calculate_xp_for_level
 
 from app.agents.common import SPHERES
 

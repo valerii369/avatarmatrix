@@ -6,7 +6,7 @@ from sqlalchemy import select, desc
 
 from app.database import get_db
 from app.models import DiaryEntry, User
-from app.core.economy import award_xp, XP_VALUES
+from app.services.ocean.economy_service import award_xp, XP_VALUES
 from app.agents.master_agent import analyze_reflection, ARCHETYPES
 
 router = APIRouter()

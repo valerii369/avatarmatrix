@@ -1,5 +1,5 @@
 import random
-from .common import client, settings, ARCHETYPES, SPHERES, MATRIX_DATA
+from app.agents.common import client, settings, ARCHETYPES, SPHERES, MATRIX_DATA
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.text_diagnostics import TextScene, SceneSet, SceneSetItem, SceneInteraction

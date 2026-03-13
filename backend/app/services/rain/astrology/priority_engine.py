@@ -7,9 +7,9 @@ import os
 from dataclasses import dataclass
 from typing import Optional
 
-from app.core.astrology.natal_chart import NatalChartData
+from app.services.rain.astrology.natal_chart import NatalChartData
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
 DATA_DIR = os.path.join(BASE_DIR, "data")
 
 with open(os.path.join(DATA_DIR, "house_sphere_map.json")) as f:

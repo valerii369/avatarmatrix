@@ -8,7 +8,7 @@ from sqlalchemy import select
 
 from app.database import get_db, AsyncSessionLocal
 from app.models import UserPortrait
-from app.core.portrait_builder import (
+from app.services.rain.portrait_service import (
     build_full_portrait,
     get_next_recommended_cards,
 )

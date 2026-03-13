@@ -1,5 +1,5 @@
 import json
-from .common import client, settings
+from app.agents.common import client, settings
 
 def get_hawkins_agent_level(hawkins_score: int) -> int:
     """Determine which level agent to use based on Hawkins score (1-10 system)."""

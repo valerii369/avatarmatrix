@@ -10,12 +10,12 @@ from sqlalchemy import select
 from app.database import get_db
 from app.models import CardProgress, SyncSession, User, SphereKnowledge, UserWorldKnowledge, UserPortrait, SceneSet, SceneSetItem, SceneInteraction
 from app.models.card_progress import CardStatus
-from app.agents.sync_agent import run_avatar_layer, get_response_metrics
-from app.agents.analytic_agent import run_mirror_analysis, extract_response_features, update_user_portrait
-from app.core.feature_extractor import FeatureExtractor
-from app.core.economy import spend_energy, hawkins_to_rank, award_xp, process_card_rank_up, XP_VALUES
-from app.core.portrait_builder import build_portrait_for_sphere
-from app.core.user_print_manager import UserPrintManager
+from app.agents.river.sync_agent import run_avatar_layer, get_response_metrics
+from app.agents.ocean.analytic_agent import run_mirror_analysis, extract_response_features, update_user_portrait
+from app.services.river.feature_service import FeatureExtractor
+from app.services.ocean.economy_service import spend_energy, hawkins_to_rank, award_xp, process_card_rank_up, XP_VALUES
+from app.services.rain.portrait_service import build_portrait_for_sphere
+from app.services.ocean.manager import OceanService
 from app.database import AsyncSessionLocal
 
 router = APIRouter()
@@ -52,7 +52,7 @@ async def _background_sync_processing(user_id: int, session_id: int, sphere: str
                     "archetype_id": sync_session.archetype_id
                 }
                 
-                await UserPrintManager.update_user_print(session, user_id, transcript_text, source_data)
+                await OceanService.update_ocean(session, user_id, transcript_text, source_data)
             
             await session.commit()
         except Exception as e:
@@ -556,7 +556,7 @@ async def process_phase(
                             user_ts = datetime.datetime.fromisoformat(user_timestamp)
                             reading_time = (user_ts - ai_ts).total_seconds()
 
-                        from app.agents.sync_agent import get_embedding
+                        from app.agents.river.sync_agent import get_embedding
                         resp_emb = await get_embedding(user_response_text)
 
                         # NEW: Extract structured features for research and future training

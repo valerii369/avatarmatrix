@@ -4,7 +4,7 @@ from openai import AsyncOpenAI
 
 from app.config import settings
 from app.models.avatar_card import AvatarCard
-from app.core.astrology.priority_engine import RecommendedCard
+from app.services.rain.astrology.priority_engine import RecommendedCard
 
 client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
 

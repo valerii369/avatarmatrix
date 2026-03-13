@@ -11,7 +11,7 @@ from timezonefinder import TimezoneFinder
 from datetime import datetime
 import pytz
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
 DATA_DIR = os.path.join(BASE_DIR, "data")
 
 with open(os.path.join(DATA_DIR, "planet_archetype_map.json")) as f:

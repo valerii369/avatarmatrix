@@ -17,7 +17,7 @@ from sqlalchemy import select
 from app.database import get_db
 from app.models import User, GameState
 from app.config import settings
-from app.core.economy import update_streak, calculate_xp_for_level
+from app.services.ocean.economy_service import update_streak, calculate_xp_for_level
 
 router = APIRouter()
 
