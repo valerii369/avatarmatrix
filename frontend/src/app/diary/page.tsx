@@ -101,7 +101,7 @@ export default function DiaryPage() {
                             color: activeFilter === s ? "var(--violet-l)" : "var(--text-muted)",
                             border: `1px solid ${activeFilter === s ? "var(--violet-l)" : "var(--border)"}`,
                         }}>
-                        {s === "all" ? "Все сферы" : SPHERE_NAMES[s]}
+                        {s === "all" ? "Все" : SPHERE_NAMES[s]}
                     </button>
                 ))}
             </div>
