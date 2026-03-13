@@ -17,7 +17,7 @@ from app.core.astrology.natal_chart import (
 from app.core.astrology.aspect_calculator import calculate_aspects, to_dict as aspects_to_dict
 from app.core.astrology.llm_engine import synthesize_sphere_descriptions
 from app.core.astrology.vector_matcher import match_archetypes_to_spheres
-from app.core.user_print_manager import UserPrintManager
+from app.core.user_print_manager import OceanService
 import logging
 
 logger = logging.getLogger(__name__)
