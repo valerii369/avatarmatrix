@@ -37,7 +37,7 @@ async def trigger_portrait_build(
 
 @router.get("/{user_id}")
 async def get_portrait(user_id: int, db: AsyncSession = Depends(get_db)):
-    """Get the full user portrait (all 8 spheres)."""
+    """Get the full user portrait (all 12 spheres)."""
     result = await db.execute(
         select(UserPortrait).where(UserPortrait.user_id == user_id)
     )

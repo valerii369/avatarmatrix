@@ -5,10 +5,9 @@ from sqlalchemy import select
 from app.database import get_db
 from app.models import User, CardProgress, NatalChart, Pattern
 from app.core.economy import calculate_xp_for_level, get_level_title
+from app.agents.common import SPHERES
 
 router = APIRouter()
-
-SPHERES = ["IDENTITY", "MONEY", "RELATIONS", "FAMILY", "MISSION", "HEALTH", "SOCIETY", "SPIRIT"]
 
 
 @router.get("/{user_id}")
@@ -27,7 +26,7 @@ async def get_profile(user_id: int, db: AsyncSession = Depends(get_db)):
 
     # Build fingerprint (for matching — available when spheres ≥500)
     strong_spheres = {}
-    for sphere in SPHERES:
+    for sphere in SPHERES.keys():
         sphere_cards = [c for c in all_cards if c.sphere == sphere and c.hawkins_peak >= 500]
         if len(sphere_cards) == 22:  # All 22 archetypes in sphere ≥500
             avg_h = int(sum(c.hawkins_peak for c in sphere_cards) / 22)

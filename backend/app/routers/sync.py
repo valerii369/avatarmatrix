@@ -1,5 +1,5 @@
 """
-Sync router: manage 10-phase synchronization sessions.
+Sync router: manage 5-phase synchronization sessions.
 """
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from pydantic import BaseModel

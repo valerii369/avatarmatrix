@@ -6,10 +6,9 @@ from datetime import date, timedelta
 from app.database import get_db
 from app.models import CardProgress, AlignSession, SyncSession
 from app.core.economy import get_sphere_awareness
+from app.agents.common import SPHERES
 
 router = APIRouter()
-
-SPHERES = ["IDENTITY", "MONEY", "RELATIONS", "FAMILY", "MISSION", "HEALTH", "SOCIETY", "SPIRIT"]
 
 
 @router.get("/{user_id}/week")
@@ -42,7 +41,7 @@ async def weekly_retro(user_id: int, db: AsyncSession = Depends(get_db)):
 
     # Sphere summary
     sphere_summary = {}
-    for sphere in SPHERES:
+    for sphere in SPHERES.keys():
         sphere_cards = [c for c in all_cards if c.sphere == sphere]
         played = [c for c in sphere_cards if c.hawkins_peak > 0]
         min_h = min((c.hawkins_peak for c in played), default=0)

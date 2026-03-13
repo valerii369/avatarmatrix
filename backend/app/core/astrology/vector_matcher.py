@@ -20,7 +20,7 @@ async def match_archetypes_to_spheres(
     sphere_descriptions: dict
 ) -> list[RecommendedCard]:
     """
-    Takes LLM generated descriptions for each of the 8 spheres, converts them
+    Takes LLM generated descriptions for each of the 12 spheres, converts them
     to embeddings, and queries pgvector to find the closest matching Archetype 
     (from the AvatarCards table) for that specific sphere.
     """

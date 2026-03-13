@@ -8,6 +8,7 @@ from app.models import User, CardProgress, AIDiagnosticSession
 from app.models.card_progress import CardStatus
 from app.agents.onboarding_agent import generate_onboarding_response, extract_onboarding_cards
 from app.core.economy import process_referral_reward
+from app.agents.common import SPHERES
 
 router = APIRouter()
 
@@ -87,11 +88,11 @@ async def calculate_cards(request: OnboardingCalculateRequest, db: AsyncSession 
     existing_result = await db.execute(select(CardProgress).where(CardProgress.user_id == user.id))
     existing_cards = {(cp.archetype_id, cp.sphere): cp for cp in existing_result.scalars().all()}
 
-    SPHERES = ["IDENTITY", "MONEY", "RELATIONS", "FAMILY", "MISSION", "HEALTH", "SOCIETY", "SPIRIT"]
+    sphere_keys = list(SPHERES.keys())
     ARCHETYPE_IDS = list(range(22))
 
     for arch_id in ARCHETYPE_IDS:
-        for sphere_key in SPHERES:
+        for sphere_key in sphere_keys:
             key = (arch_id, sphere_key)
             score = rec_lookup.get(key)
             is_rec = score is not None

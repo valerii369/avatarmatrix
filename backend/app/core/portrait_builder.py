@@ -10,6 +10,7 @@ from sqlalchemy import select
 from app.models import (
     CardProgress, SyncSession, UserPortrait, Pattern, Connection
 )
+from app.agents.common import SPHERES
 
 
 async def build_portrait_for_sphere(
@@ -118,11 +119,11 @@ async def build_portrait_for_sphere(
 
 
 async def build_full_portrait(db: AsyncSession, user_id: int) -> dict:
-    """Build portrait for all 8 spheres and detect cross-sphere connections."""
-    SPHERES = ["IDENTITY", "MONEY", "RELATIONS", "FAMILY", "MISSION", "HEALTH", "SOCIETY", "SPIRIT"]
+    """Build portrait for all 12 spheres and detect cross-sphere connections."""
+    sphere_keys = list(SPHERES.keys())
 
     portraits = {}
-    for sphere in SPHERES:
+    for sphere in sphere_keys:
         portrait = await build_portrait_for_sphere(db, user_id, sphere)
         portraits[sphere] = {
             "avg_hawkins": portrait.avg_hawkins,

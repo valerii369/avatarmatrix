@@ -103,39 +103,59 @@ body {
   --sphere-glow: rgba(245, 158, 11, 0.3);
 }
 
-.sphere-MONEY {
+.sphere-RESOURCES {
   --sphere-color: #10B981;
   --sphere-glow: rgba(16, 185, 129, 0.3);
 }
 
-.sphere-RELATIONS {
-  --sphere-color: #EC4899;
-  --sphere-glow: rgba(236, 72, 153, 0.3);
+.sphere-COMMUNICATION {
+  --sphere-color: #06B6D4;
+  --sphere-glow: rgba(6, 182, 212, 0.3);
 }
 
-.sphere-FAMILY {
+.sphere-ROOTS {
   --sphere-color: #F97316;
   --sphere-glow: rgba(249, 115, 22, 0.3);
 }
 
-.sphere-MISSION {
+.sphere-CREATIVITY {
+  --sphere-color: #EC4899;
+  --sphere-glow: rgba(236, 72, 153, 0.3);
+}
+
+.sphere-SERVICE {
+  --sphere-color: #14B8A6;
+  --sphere-glow: rgba(20, 184, 166, 0.3);
+}
+
+.sphere-PARTNERSHIP {
   --sphere-color: #3B82F6;
   --sphere-glow: rgba(59, 130, 246, 0.3);
 }
 
-.sphere-HEALTH {
-  --sphere-color: #22C55E;
-  --sphere-glow: rgba(34, 197, 94, 0.3);
+.sphere-TRANSFORMATION {
+  --sphere-color: #6366F1;
+  --sphere-glow: rgba(99, 102, 241, 0.3);
 }
 
-.sphere-SOCIETY {
+.sphere-EXPANSION {
   --sphere-color: #8B5CF6;
   --sphere-glow: rgba(139, 92, 246, 0.3);
 }
 
+.sphere-STATUS {
+  --sphere-color: #EF4444;
+  --sphere-glow: rgba(239, 68, 68, 0.3);
+}
+
+.sphere-VISION {
+  --sphere-color: #D946EF;
+  --sphere-glow: rgba(217, 70, 239, 0.3);
+}
+
 .sphere-SPIRIT {
-  --sphere-color: #A78BFA;
-  --sphere-glow: rgba(167, 139, 250, 0.3);
+  --sphere-color: #64748B;
+  --sphere-glow: rgba(100, 116, 139, 0.3);
 }
 
 /* Animated background stars */
