@@ -36,8 +36,10 @@ export const authAPI = {
 };
 
 export const calcAPI = {
-    calculate: (data: { birth_date: string; birth_time: string; birth_place: string; user_id: number }) =>
+    calculate: (data: { birth_date: string; birth_time: string; birth_place: string; user_id: number; gender?: string }) =>
         api.post("/api/calc", data),
+    geocode: (place: string) =>
+        api.post("/api/calc/geocode", { birth_place: place }),
 };
 
 export const cardsAPI = {

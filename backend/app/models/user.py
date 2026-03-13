@@ -15,6 +15,7 @@ class User(Base, TimestampMixin):
     tg_username: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     first_name: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
     last_name: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
+    gender: Mapped[Optional[str]] = mapped_column(String(16), nullable=True) # "male", "female", "other"
 
     # Birth data
     birth_date: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)

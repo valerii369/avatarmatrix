@@ -77,6 +77,12 @@ const DAYS = Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, '0')
 const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
 const MINUTES = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0'));
 
+const GENDER_OPTIONS = [
+    { value: "male", label: "Мужской", icon: "♂" },
+    { value: "female", label: "Женский", icon: "♀" },
+    { value: "other", label: "Другой", icon: "⚧" }
+];
+
 const CustomSelect = ({ value, onChange, options, flex, label }: any) => (
     <div style={{ flex: flex || 1, position: "relative" }}>
         {label && <p className="text-[10px] text-white/20 uppercase tracking-widest mb-1.5 ml-1">{label}</p>}
@@ -114,34 +120,54 @@ function AstroFlow({ onBack }: { onBack: () => void }) {
     const { userId, setUser } = useUserStore();
     const [step, setStep] = useState(0);
     const [form, setForm] = useState({
+        gender: "male",
         birth_year: "1990", birth_month: "01", birth_day: "15",
         birth_hour: "12", birth_minute: "00", birth_place: ""
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [geoResult, setGeoResult] = useState<any>(null);
 
     const steps = [
+        { id: "gender", title: "Ваш пол", hint: "Это поможет подобрать стиль общения", icon: "👤", iconColor: "var(--cyan)", description: "Выберите ваш пол для персонализации ответов ИИ" },
         { id: "date", title: "Дата рождения", hint: "Точная дата — основа вашей карты", icon: "✦", iconColor: "var(--gold)", description: "Дата рождения формирует ядро вашей архетипической карты" },
         { id: "time", title: "Время рождения", hint: "Если не знаете — укажите 12:00", icon: "◉", iconColor: "var(--violet-l)", description: "Точное время раскрывает Асцендент и расположение домов" },
-        { id: "place", title: "Место рождения", placeholder: "Москва, Россия", hint: "Введите город и страну", icon: "◈", iconColor: "var(--cyan)", description: "Географические координаты влияют на точность расчётов" },
+        { id: "place", title: "Место рождения", placeholder: "Москва, Россия", hint: "Введите город и страну", icon: "◈", iconColor: "var(--green)", description: "Географические координаты влияют на точность расчётов" },
+        { id: "confirm", title: "Подтверждение", hint: "Проверьте координаты места", icon: "✓", iconColor: "var(--emerald)", description: "Убедитесь, что место определено верно для точных расчётов" },
     ];
 
     const currentStep = steps[step];
     const progress = ((step + 1) / steps.length) * 100;
 
     const handleNext = async () => {
+        setError("");
+        if (currentStep.id === "place") {
+            setLoading(true);
+            try {
+                const res = await calcAPI.geocode(form.birth_place);
+                setGeoResult(res.data);
+                setStep(s => s + 1);
+            } catch (e: any) {
+                setError("Не удалось найти место. Попробуйте уточнить название.");
+            } finally {
+                setLoading(false);
+            }
+            return;
+        }
+
         if (step < steps.length - 1) {
             setStep(s => s + 1);
             return;
         }
+
         setLoading(true);
-        setError("");
         try {
             await calcAPI.calculate({
                 birth_date: `${form.birth_year}-${form.birth_month}-${form.birth_day}`,
                 birth_time: `${form.birth_hour}:${form.birth_minute}`,
                 birth_place: form.birth_place,
                 user_id: userId!,
+                gender: form.gender
             });
             setUser({ onboardingDone: true });
             router.push("/");
@@ -160,7 +186,7 @@ function AstroFlow({ onBack }: { onBack: () => void }) {
                     <span className="text-[10px] font-bold">{Math.round(progress)}%</span>
                 </div>
                 <div className="h-1 bg-white/5 rounded-full overflow-hidden">
-                    <motion.div className="h-full bg-gradient-to-r from-violet-500 to-amber-500 rounded-full" animate={{ width: `${progress}%` }} />
+                    <motion.div className="h-full bg-gradient-to-r from-violet-500 to-emerald-500 rounded-full" animate={{ width: `${progress}%` }} />
                 </div>
             </div>
 
@@ -184,7 +210,24 @@ function AstroFlow({ onBack }: { onBack: () => void }) {
                     <div className="h-px bg-white/5 mb-6" />
 
                     <div className="space-y-4">
-                        {currentStep.id === "date" ? (
+                        {currentStep.id === "gender" ? (
+                            <div className="grid grid-cols-3 gap-3">
+                                {GENDER_OPTIONS.map(opt => (
+                                    <button
+                                        key={opt.value}
+                                        onClick={() => setForm(f => ({ ...f, gender: opt.value }))}
+                                        className={`p-4 rounded-xl border transition-all flex flex-col items-center gap-2 ${
+                                            form.gender === opt.value 
+                                            ? "bg-violet-500/20 border-violet-500/50 text-white" 
+                                            : "bg-white/5 border-white/10 text-white/40 hover:bg-white/10"
+                                        }`}
+                                    >
+                                        <span className="text-2xl">{opt.icon}</span>
+                                        <span className="text-[10px] font-bold uppercase tracking-wider">{opt.label}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        ) : currentStep.id === "date" ? (
                             <div className="flex gap-2">
                                 <CustomSelect label="День" value={form.birth_day} onChange={(v: string) => setForm(f => ({ ...f, birth_day: v }))} options={DAYS} flex={0.6} />
                                 <CustomSelect label="Месяц" value={form.birth_month} onChange={(v: string) => setForm(f => ({ ...f, birth_month: v }))} options={MONTHS} flex={1.2} />
@@ -196,15 +239,33 @@ function AstroFlow({ onBack }: { onBack: () => void }) {
                                 <div className="text-white/20 pb-4 font-bold">:</div>
                                 <CustomSelect label="Мин" value={form.birth_minute} onChange={(v: string) => setForm(f => ({ ...f, birth_minute: v }))} options={MINUTES} />
                             </div>
-                        ) : (
+                        ) : currentStep.id === "place" ? (
                             <div className="relative">
                                 <input
                                     type="text" value={form.birth_place}
                                     onChange={(e) => setForm(f => ({ ...f, birth_place: e.target.value }))}
                                     placeholder={currentStep.placeholder} autoFocus
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-[16px] text-white placeholder:text-white/20 outline-none focus:border-violet-500/50 transition-all font-medium"
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-[16px] text-white placeholder:text-white/20 outline-none focus:border-emerald-500/50 transition-all font-medium"
                                 />
-                                {form.birth_place && <div className="absolute right-4 top-1/2 -translate-y-1/2 text-emerald-400 text-xs">✓</div>}
+                            </div>
+                        ) : (
+                            <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-2xl p-5 text-center">
+                                <p className="text-xs text-white/60 mb-1">Место определено как:</p>
+                                <p className="text-lg font-bold text-white mb-4">{geoResult?.place}</p>
+                                <div className="flex justify-center gap-6 text-[10px] text-white/40 font-mono">
+                                    <div className="flex flex-col">
+                                        <span>ШИРОТА</span>
+                                        <span className="text-emerald-400 font-bold">{geoResult?.lat.toFixed(4)}°</span>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span>ДОЛГОТА</span>
+                                        <span className="text-emerald-400 font-bold">{geoResult?.lon.toFixed(4)}°</span>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span>ЧАСОВОЙ ПОЯС</span>
+                                        <span className="text-emerald-400 font-bold">{geoResult?.tz_name}</span>
+                                    </div>
+                                </div>
                             </div>
                         )}
                     </div>
@@ -229,13 +290,17 @@ function AstroFlow({ onBack }: { onBack: () => void }) {
                     color: "#fff"
                 }}
             >
-                <span className="relative z-10">{loading ? "Синхронизация..." : step < steps.length - 1 ? "Продолжить" : "Построить Аватара ✨"}</span>
+                <span className="relative z-10">{loading ? (currentStep.id === "place" ? "Поиск..." : "Синхронизация...") : step < steps.length - 1 ? "Продолжить" : "Построить Аватара ✨"}</span>
                 {!(currentStep.id === "place" && !form.birth_place) && !loading && (
                     <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500 skew-x-12" />
                 )}
             </button>
 
-            <button onClick={() => step > 0 ? setStep(s => s - 1) : onBack()} className="w-full mt-4 text-[10px] font-bold text-white/20 uppercase tracking-widest hover:text-white/40 transition-colors">
+            <button 
+                onClick={() => step > 0 ? setStep(s => s - 1) : onBack()} 
+                className="w-full mt-4 text-[10px] font-bold text-white/20 uppercase tracking-widest hover:text-white/40 transition-colors"
+                style={{ display: step === 0 && !onBack ? 'none' : 'block' }}
+            >
                 Назад
             </button>
         </motion.div>
@@ -499,7 +564,7 @@ function AIFlow({ onBack }: { onBack: () => void }) {
 import SacredGeometryLogo from "@/components/SacredGeometryLogo";
 
 export default function OnboardingPage() {
-    const [path, setPath] = useState<"astro" | "ai" | null>(null);
+    const [path, setPath] = useState<"astro" | "ai" | "visual" | null>("astro");
 
     const particles = useMemo(() =>
         Array.from({ length: 24 }, (_, i) => ({
@@ -512,7 +577,7 @@ export default function OnboardingPage() {
         })), []);
 
     return (
-        <div className={`min-h-screen flex flex-col ${path === 'ai' ? '' : 'items-center justify-center'} px-4 relative overflow-hidden bg-[#060818]`}>
+        <div className={`min-h-screen flex flex-col items-center justify-center px-4 relative overflow-hidden bg-[#060818]`}>
             <div className="absolute inset-0 pointer-events-none">
                 <div style={{
                     position: "absolute", top: "10%", left: "15%", width: 280, height: 280,
@@ -537,57 +602,25 @@ export default function OnboardingPage() {
                 ))}
             </div>
 
-            <div className="relative z-10 w-full max-w-[360px]" style={{ transform: path === null || path === 'astro' ? "translateY(-8vh)" : "none" }}>
+            <div className="relative z-10 w-full max-w-[360px]" style={{ transform: "translateY(-8vh)" }}>
                 {/* Logo & Header */}
-                {path !== "ai" && (
-                    <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
-                        <div style={{ marginBottom: 4 }}>
-                            <SacredGeometryLogo size={216} progress={0.9} />
-                        </div>
-                        <h1 className="text-[44px] font-bold tracking-tight" style={{
-                            marginBottom: -2,
-                            background: "linear-gradient(to right, #EF4444 5%, #F97316, #EAB308, #10B981, #3B82F6, #6366F1, #A855F7 95%)",
-                            WebkitBackgroundClip: "text",
-                            WebkitTextFillColor: "transparent",
-                            backgroundClip: "text",
-                            color: "transparent"
-                        }}>AVATAR</h1>
-                        <p className="text-[10px] text-white/30 uppercase tracking-[0.2em]">Платформа эволюции</p>
-                    </motion.div>
-                )}
+                <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
+                    <div style={{ marginBottom: 4 }}>
+                        <SacredGeometryLogo size={216} progress={0.9} />
+                    </div>
+                    <h1 className="text-[44px] font-bold tracking-tight" style={{
+                        marginBottom: -2,
+                        background: "linear-gradient(to right, #EF4444 5%, #F97316, #EAB308, #10B981, #3B82F6, #6366F1, #A855F7 95%)",
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent",
+                        backgroundClip: "text",
+                        color: "transparent"
+                    }}>AVATAR</h1>
+                    <p className="text-[10px] text-white/30 uppercase tracking-[0.2em]">Платформа эволюции</p>
+                </motion.div>
 
-                {path === null && (
-                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col gap-4">
-                        <button
-                            onClick={() => setPath('astro')}
-                            className="bg-white/5 border border-white/10 hover:bg-white/10 p-5 rounded-[2rem] text-left transition-all group shadow-xl"
-                        >
-                            <h3 className="text-violet-400 font-bold mb-1 flex items-center justify-between">
-                                <span>✦ Доверяю астрологии</span>
-                                <span className="opacity-0 group-hover:opacity-100 transition-opacity">→</span>
-                            </h3>
-                            <p className="text-xs text-white/40 leading-relaxed">
-                                Расчет архетипов на основе вашей натальной карты. Точный астрологический слепок личности.
-                            </p>
-                        </button>
-
-                        <button
-                            onClick={() => setPath('ai')}
-                            className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20 hover:border-amber-500/40 p-5 rounded-[2rem] text-left transition-all group shadow-xl"
-                        >
-                            <h3 className="text-amber-400 font-bold mb-1 flex items-center justify-between">
-                                <span>☼ Доверяю себе</span>
-                                <span className="opacity-0 group-hover:opacity-100 transition-opacity">→</span>
-                            </h3>
-                            <p className="text-xs text-white/40 leading-relaxed">
-                                Диагностика через живой диалог с ИИ. Выявление активных сфер и архетипов в моменте.
-                            </p>
-                        </button>
-                    </motion.div>
-                )}
-
-                {path === 'astro' && <AstroFlow onBack={() => setPath(null)} />}
-                {path === 'ai' && <AIFlow onBack={() => setPath(null)} />}
+                {path === 'astro' && <AstroFlow onBack={() => {}} />}
+                {path === 'ai' && <AIFlow onBack={() => setPath('astro')} />}
             </div>
         </div>
     );

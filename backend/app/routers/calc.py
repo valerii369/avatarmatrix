@@ -36,15 +36,20 @@ class BirthDataRequest(BaseModel):
     birth_time: str      # "14:30" or "00:00" if unknown
     birth_place: str     # "Москва, Россия"
     user_id: int         # internal user ID
+    gender: Optional[str] = None # "male", "female", "other"
 
 
-class CalcResponse(BaseModel):
-    success: bool
-    natal_chart: dict
-    recommended_cards: list[dict]
-    total_cards: int
-    message: str
+class GeocodeRequest(BaseModel):
+    birth_place: str
 
+@router.post("/geocode")
+async def get_geocode(request: GeocodeRequest):
+    """Geocode a place name for confirmation."""
+    try:
+        lat, lon, tz_name = await geocode_place(request.birth_place)
+        return {"lat": lat, "lon": lon, "tz_name": tz_name, "place": request.birth_place}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 @router.post("", response_model=CalcResponse)
 async def calculate(
@@ -195,6 +200,7 @@ async def calculate(
     user.birth_lat = lat
     user.birth_lon = lon
     user.birth_tz = tz_name
+    user.gender = request.gender
     user.onboarding_done = True
     db.add(user)
 

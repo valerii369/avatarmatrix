@@ -99,6 +99,8 @@ def build_avatar_prompt(
 Архетип: {archetype.get('name', '')} | Тень: {arch_shadow} | Свет: {arch_light}
 Сфера: {sphere_data.get('name_ru', sphere)}
 Описание связки: {arch_description}
+Пол пользователя: {portrait_context.get('gender', 'не указан')} (учитывай это для стиля обращения и окончаний)
+Язык системы: RU (Всегда отвечай только на русском языке)
 """
 
     if portrait_context:

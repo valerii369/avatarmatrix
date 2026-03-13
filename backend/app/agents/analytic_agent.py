@@ -49,8 +49,8 @@ async def run_mirror_analysis(
     response = await client.chat.completions.create(
         model=settings.OPENAI_MODEL,
         messages=messages,
-        max_tokens=600,
-        temperature=0.2,
+        max_tokens=1500,
+        temperature=0.3, # Slightly higher for more creative/deep narrative
         response_format={"type": "json_object"},
     )
     

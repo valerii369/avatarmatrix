@@ -30,9 +30,13 @@ async def onboarding_chat(request: OnboardingChatRequest):
     Generate the next message for the AI Diagnostic flow.
     We pass the entire chat history so it's stateless on the backend.
     """
+    user_result = await db.execute(select(User).where(User.id == request.user_id))
+    user = user_result.scalar_one_or_none()
+    gender = user.gender if user else None
+    
     history_dicts = [{"role": msg.role, "content": msg.content} for msg in request.chat_history]
     
-    response_text, is_ready = await generate_onboarding_response(history_dicts)
+    response_text, is_ready = await generate_onboarding_response(history_dicts, gender=gender)
     
     return {"text": response_text, "ready": is_ready}
 

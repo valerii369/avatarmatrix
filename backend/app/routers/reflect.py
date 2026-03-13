@@ -45,7 +45,7 @@ async def daily_reflection(request: ReflectRequest, db: AsyncSession = Depends(g
         raise HTTPException(status_code=402, detail=f"Недостаточно ✦ Энергии ({cost}✦ для записи)")
 
     # Run AI Analysis for AI/Sphere classification
-    analysis = await analyze_reflection(request.content)
+    analysis = await analyze_reflection(request.content, gender=user.gender or "не указан", language=user.language)
     h_score = analysis.get("hawkins_score", 200)
     ai_feedback = analysis.get("ai_analysis", "")
     sphere = analysis.get("sphere", "IDENTITY")
@@ -124,7 +124,7 @@ async def start_reflection_chat(request: ReflectRequest, db: AsyncSession = Depe
         raise HTTPException(status_code=402, detail="Недостаточно ✦ Энергии (20✦ для глубокой рефлексии)")
 
     # Первичный анализ для определения сферы
-    analysis = await analyze_reflection(request.content)
+    analysis = await analyze_reflection(request.content, gender=user.gender or "не указан", language=user.language)
     sphere = analysis.get("sphere", "IDENTITY")
     
     # Создание сессии (с начальной фазой 1 - Entrance)
@@ -143,7 +143,8 @@ async def start_reflection_chat(request: ReflectRequest, db: AsyncSession = Depe
         chat_history=[],
         user_message=request.content,
         sphere=sphere,
-        current_phase=session.current_phase
+        current_phase=session.current_phase,
+        gender=user.gender or "не указан"
     )
     
     # Продвижение по фазам, если ИИ считает, что цель фазы достигнута
@@ -185,11 +186,18 @@ async def send_reflection_message(request: ChatMessageRequest, db: AsyncSession 
     chat_history = session.messages_json[:-1]
     
     # Генерируем ответ ИИ с учетом текущей фазы
+    user_gender = "не указан"
+    user_result = await db.execute(select(User).where(User.id == request.user_id))
+    user = user_result.scalar_one_or_none()
+    if user:
+        user_gender = user.gender or "не указан"
+
     ai_response, phase_complete, analysis_dict = await reflection_chat_message(
         chat_history=chat_history,
         user_message=request.message,
         sphere=session.sphere,
-        current_phase=session.current_phase
+        current_phase=session.current_phase,
+        gender=user_gender
     )
     
     # Progress the state machine
@@ -236,7 +244,15 @@ async def finish_reflection_chat(request: ChatMessageRequest, db: AsyncSession =
 
     # Итоговый анализ всего диалога
     full_transcript = "\n".join([f"{m['role']}: {m['content']}" for m in session.messages_json])
-    analysis = await analyze_reflection(full_transcript)
+    user_gender = "не указан"
+    user_lang = "ru"
+    user_result = await db.execute(select(User).where(User.id == request.user_id))
+    user = user_result.scalar_one_or_none()
+    if user:
+        user_gender = user.gender or "не указан"
+        user_lang = user.language
+
+    analysis = await analyze_reflection(full_transcript, gender=user_gender, language=user_lang)
     
     # Обогащаем финальный анализ тем Хокинсом, который мы вытащили на 4-й фазе прямо в агенте (если он там есть)
     agent_hawkins = session.final_analysis.get("hawkins_score") if session.final_analysis else None

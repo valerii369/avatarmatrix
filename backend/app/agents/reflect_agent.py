@@ -47,7 +47,8 @@ async def reflection_chat_message(
     chat_history: list[dict],
     user_message: str,
     sphere: str = "IDENTITY",
-    current_phase: int = 1
+    current_phase: int = 1,
+    gender: str = "не указан"
 ) -> tuple[str, bool, dict]:
     """
     Generate structured AI response for an interactive 4-phase reflection session.
@@ -58,6 +59,8 @@ async def reflection_chat_message(
     
     system_prompt = f"""Ты — ИИ-психолог AVATAR, обладающий огромным опытом и глубокой эмпатией. 
 Твой стиль: {sphere_style}. Ты говоришь как живой человек, а не как алгоритм.
+Пол пользователя: {chat_history[0].get('gender') if chat_history and isinstance(chat_history[0], dict) else 'не указан'} (используй корректные окончания и стиль обращения).
+Язык: RU. Всегда пиши только на русском.
 
 {phase_instructions}
 

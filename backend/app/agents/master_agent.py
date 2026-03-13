@@ -19,7 +19,7 @@ class ReflectionAnalysis(BaseModel):
     dominant_emotion: str = Field(description="Доминирующая эмоция в тексте.")
     ai_analysis: str = Field(description="Короткий (2-3 предложения), глубокий инсайт или поддержка.")
 
-async def analyze_reflection(text: str) -> dict:
+async def analyze_reflection(text: str, gender: str = "не указан", language: str = "ru") -> dict:
     """
     Deep analysis of user reflection (diary entry / daily check-in).
     Extracts vibration (Hawkins), Sphere, and Archetypal resonance.
@@ -29,6 +29,8 @@ async def analyze_reflection(text: str) -> dict:
 
     prompt = f"""
     ТЫ — мудрое, эмпатичное ядро системы AVATAR. Ты помогаешь человеку осознать скрытые смыслы его состояния через его слова.
+    Пол пользователя: {gender} (используй корректные окончания и стиль обращения).
+    Язык: {language.upper()} (Всегда отвечай только на этом языке).
     
     ТЕКСТ РЕФЛЕКСИИ:
     "{text}"

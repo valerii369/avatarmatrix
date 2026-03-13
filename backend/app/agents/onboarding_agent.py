@@ -35,7 +35,7 @@ class OnboardingResponse(BaseModel):
     ai_response: str = Field(description="Текст ответа для пользователя.")
     is_ready: bool = Field(description="Установи в true, если собрано достаточно данных о болях и целях пользователя, и пора завершать диагностику.")
 
-async def generate_onboarding_response(chat_history: list[dict]) -> tuple[str, bool]:
+async def generate_onboarding_response(chat_history: list[dict], gender: str = None) -> tuple[str, bool]:
     """
     Generate the next AI response in the onboarding diagnostic flow using JSON Structured Outputs.
     chat_history should include previous user/assistant messages.
@@ -47,12 +47,17 @@ async def generate_onboarding_response(chat_history: list[dict]) -> tuple[str, b
         if len(user_msg) < 15 and user_msg.lower() not in ["поехать", "начать", "поехали"]:
             return "Пожалуйста, расскажите чуть подробнее. Чем больше контекста вы дадите сейчас, тем точнее система подберет ваши Архетипические Карты. Что именно вас сейчас беспокоит?", False
 
-    system_prompt = """Ты — ИИ-диагност системы AVATAR.
+    gender_context = f"Учитывай, что пол пользователя: {gender}." if gender else ""
+    
+    system_prompt = f"""Ты — ИИ-диагност системы AVATAR.
 Твоя цель — провести интенсивное, глубокое интервью с пользователем (максимум 3 вопроса), чтобы точно понять его текущую жизненную ситуацию, боли, стремления и точки роста.
 Ты используешь методологию '3 Зеркала' (на базе Окна Джохари):
 1. **Зеркало Фактов**: Выявление явной боли (Что болит в реальности? Отношения, деньги, выгорание?)
 2. **Зеркало Тени (Скрытая выгода)**: Почему эта боль до сих пор не решена? В чем скрытый профит текущего состояния?
 3. **Зеркало Потенциала**: Как выглядит идеальный исход?
+
+{gender_context}
+ОБЯЗАТЕЛЬНО отвечай на русском языке. Используй обращения, соответствующие полу пользователя, если он указан.
 
 ПРАВИЛА ДИАЛОГА:
 - Задавай только глубокие, сдвоенные вопросы (сразу в суть).
