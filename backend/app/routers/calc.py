@@ -202,7 +202,13 @@ async def calculate(
     await db.commit()
     logger.info("Commit successful.")
 
-    # Update the Hub (Ocean - User Print) with Astro base via background task
+    # Populate the Hub (Ocean) immediately with Astro data (Synchronous)
+    try:
+        await UserPrintManager.initialize_from_astro(db, user.id, sphere_descriptions)
+    except Exception as init_e:
+        logger.warning(f"Initial User Print population failed: {init_e}")
+
+    # Update the Hub (Ocean - User Print) with deep synthesis refinement via background task
     from app.database import AsyncSessionLocal
     async def _bg_hub_update(u_id, s_desc):
         async with AsyncSessionLocal() as session:

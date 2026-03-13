@@ -652,7 +652,7 @@ function SubscriptionModal({ onClose, userId }: { onClose: () => void; userId: n
 
                 <div className="grid grid-cols-1 gap-3 text-left">
                     {[
-                        "Доступ ко всем 8 сферам жизни",
+                        "Доступ ко всем 12 сферам жизни",
                         "Приоритетные сессии с ИИ",
                         "Эксклюзивные архетипические отчеты",
                         "Увеличенный лимит Энергии"

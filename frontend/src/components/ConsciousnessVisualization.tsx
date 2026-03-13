@@ -2,14 +2,18 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 
 const SPHERES = [
-    { id: 1, key: "IDENTITY", icon: "♡", name: "Личность", color: [245, 158, 11] }, // #F59E0B
-    { id: 2, key: "MONEY", icon: "◈", name: "Деньги", color: [16, 185, 129] }, // #10B981
-    { id: 3, key: "RELATIONS", icon: "∞", name: "Отношения", color: [236, 72, 153] }, // #EC4899
-    { id: 4, key: "FAMILY", icon: "⬡", name: "Семья", color: [249, 115, 22] }, // #F97316
-    { id: 5, key: "MISSION", icon: "✦", name: "Предназначение", color: [59, 130, 246] }, // #3B82F6
-    { id: 6, key: "HEALTH", icon: "◎", name: "Здоровье", color: [34, 197, 94] }, // #22C55E
-    { id: 7, key: "SOCIETY", icon: "◇", name: "Проявленность", color: [139, 92, 246] }, // #8B5CF6
-    { id: 8, key: "SPIRIT", icon: "⊛", name: "Духовность", color: [167, 139, 250] }, // #A78BFA
+    { id: 1,  key: "IDENTITY",       icon: "user",           name: "Личность",   color: [245, 158, 11] },  // #F59E0B
+    { id: 2,  key: "RESOURCES",      icon: "database",       name: "Ресурсы",     color: [16, 185, 129] },  // #10B981
+    { id: 3,  key: "COMMUNICATION",  icon: "message-circle",  name: "Связи",       color: [6, 182, 212] },   // #06B6D4
+    { id: 4,  key: "ROOTS",          icon: "home",           name: "Корни",       color: [249, 115, 22] },  // #F97316
+    { id: 5,  key: "CREATIVITY",     icon: "heart",          name: "Творчество",  color: [236, 72, 153] },  // #EC4899
+    { id: 6,  key: "SERVICE",        icon: "clipboard",      name: "Служение",    color: [20, 184, 166] },  // #14B8A6
+    { id: 7,  key: "PARTNERSHIP",    icon: "link",           name: "Партнерство", color: [59, 130, 246] },  // #3B82F6
+    { id: 8,  key: "TRANSFORMATION", icon: "zap",            name: "Тень",        color: [99, 102, 241] },  // #6366F1
+    { id: 9,  key: "EXPANSION",      icon: "compass",        name: "Поиск",       color: [139, 92, 246] },  // #8B5CF6
+    { id: 10, key: "STATUS",         icon: "award",          name: "Статус",      color: [239, 68, 68] },   // #EF4444
+    { id: 11, key: "VISION",         icon: "users",          name: "Будущее",     color: [217, 70, 239] },  // #D946EF
+    { id: 12, key: "SPIRIT",         icon: "moon",           name: "Дух",         color: [100, 116, 139] }, // #64748B
 ];
 
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
@@ -122,7 +126,7 @@ export default function ConsciousnessVisualization({ cards = [] }: Consciousness
         const getPositions = () => {
             const cx = w / 2, cy = h * 0.44, r = Math.min(w, h) * 0.35;
             return SPHERES.map((s, i) => {
-                const a = (i / 8) * Math.PI * 2 - Math.PI / 2;
+                const a = (i / 12) * Math.PI * 2 - Math.PI / 2;
                 return {
                     x: cx + Math.cos(a) * r,
                     y: cy + Math.sin(a) * r,
@@ -171,7 +175,7 @@ export default function ConsciousnessVisualization({ cards = [] }: Consciousness
         };
 
         const drawCenter = (t: number, cx: number, cy: number, sts: any[], intro: number) => {
-            const gs = sts.reduce((s, st) => s + st.sphere_score, 0) / 8;
+            const gs = sts.reduce((s, st) => s + st.sphere_score, 0) / 12;
             const gi = Math.max(0.15, easePow(gs, 1.1)) * intro;
             const bR = Math.min(w, h) * 0.13;
             const br = Math.sin(t * 0.0008) * 4;
@@ -212,7 +216,7 @@ export default function ConsciousnessVisualization({ cards = [] }: Consciousness
 
             for (let i = 0; i < 6; i++) {
                 const a = (i / 6) * Math.PI * 2 + rot, pp = Math.sin(t * 0.0012 + i * 1.05) * 0.1 + 0.9;
-                const si2 = i % 8;
+                const si2 = i % 12;
                 const [sr, sg, sb] = SPHERES[si2].color;
                 const inf = Math.max(0.2, easePow(sts[si2].sphere_score, 1.2));
                 ctx.strokeStyle = `rgba(${Math.floor(lerp(180, sr, inf * 0.6))},${Math.floor(lerp(210, sg, inf * 0.6))},${Math.floor(lerp(255, sb, inf * 0.6))},${(0.15 + gi * 0.2) * pp})`;
@@ -525,7 +529,7 @@ export default function ConsciousnessVisualization({ cards = [] }: Consciousness
             introRef.current = clamp(elapsed / 2500, 0, 1);
             const intro = 1 - Math.pow(1 - introRef.current, 3);
 
-            for (let i = 0; i < 8; i++) smoothRef.current[i] = lerp(smoothRef.current[i], states[i].sphere_score, 0.05);
+            for (let i = 0; i < 12; i++) smoothRef.current[i] = lerp(smoothRef.current[i], states[i].sphere_score, 0.05);
 
             drawBg(ts);
             drawParts(ts, intro);

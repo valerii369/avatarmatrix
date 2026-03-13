@@ -146,3 +146,51 @@ class UserPrintManager:
         except Exception as e:
             logger.error(f"Error synthesizing Ocean: {e}")
             return False
+
+    @staticmethod
+    async def initialize_from_astro(db: AsyncSession, user_id: int, sphere_descriptions: Dict[str, str]):
+        """
+        Quickly creates an initial User Print from raw astrological descriptions.
+        This provides immediate feedback to the user before the Alchemist refines it.
+        """
+        # 1. Prepare SphereNarratives
+        spheres = {}
+        for code, desc in sphere_descriptions.items():
+            spheres[code] = {
+                "state_description": desc,
+                "evolution_stage": "Зарождение (Астро)"
+            }
+
+        # 2. Build initial structure
+        initial_data = {
+            "identity": {
+                "summary": sphere_descriptions.get("IDENTITY", "Ваш AVATAR пробуждается..."),
+                "core_archetype": "В поиске...",
+                "narrative_role": "Странник",
+                "energy_description": "Формирующаяся",
+                "archetypal_resonance": {}
+            },
+            "psychology": {
+                "guiding_thoughts": [],
+                "active_requests": [],
+                "inner_tensions": [],
+                "talents": [],
+                "limitations": [],
+                "somatic_anchors": []
+            },
+            "spheres": spheres,
+            "metadata": {"initial_sync": "astro"}
+        }
+
+        # 3. Save to database
+        result = await db.execute(select(UserPrint).where(UserPrint.user_id == user_id))
+        up_model = result.scalar_one_or_none()
+        
+        if not up_model:
+            up_model = UserPrint(user_id=user_id)
+            db.add(up_model)
+        
+        up_model.print_data = initial_data
+        await db.commit()
+        logger.info(f"Ocean (User Print) initialized from Astro for user {user_id}")
+        return True
