@@ -8,7 +8,7 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from app.database import get_db
+from app.database import get_db, AsyncSessionLocal
 from app.models import User, NatalChart, CardProgress
 from app.models.card_progress import CardStatus
 from app.services.rain.astrology.natal_chart import (
@@ -38,6 +38,14 @@ class BirthDataRequest(BaseModel):
     birth_place: str     # "Москва, Россия"
     user_id: int         # internal user ID
     gender: Optional[str] = None # "male", "female", "other"
+
+
+class CalcResponse(BaseModel):
+    success: bool
+    natal_chart: dict
+    recommended_cards: list
+    total_cards: int
+    message: str
 
 
 class GeocodeRequest(BaseModel):
