@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from app.config import settings
-from app.services.rain.astrology.natal_chart import NatalChartData
+from app.core.astrology.natal_chart import NatalChartData
 
 DATA_DIR = settings.DATA_DIR
 

@@ -5,7 +5,7 @@ from datetime import date, timedelta
 
 from app.database import get_db
 from app.models import CardProgress, AlignSession, SyncSession
-from app.services.ocean.economy_service import get_sphere_awareness
+from app.core.economy import get_sphere_awareness
 from app.agents.common import SPHERES
 
 router = APIRouter()

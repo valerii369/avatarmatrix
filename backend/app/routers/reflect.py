@@ -7,10 +7,10 @@ from datetime import date
 from app.database import get_db
 from app.models import User, DiaryEntry, CardProgress, ReflectionSession
 from app.models.card_progress import CardStatus
-from app.services.ocean.economy_service import spend_energy, award_xp
+from app.core.economy import spend_energy, award_xp
 from app.agents.master_agent import analyze_reflection
-from app.agents.river.reflect_agent import reflection_chat_message
-from app.services.rain.astrology.vector_matcher import match_text_to_archetypes
+from app.agents.reflect_agent import reflection_chat_message
+from app.core.astrology.vector_matcher import match_text_to_archetypes
 
 
 router = APIRouter()

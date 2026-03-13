@@ -5,7 +5,7 @@ from sqlalchemy import select
 
 from app.database import get_db
 from app.models import User
-from app.services.ocean.economy_service import award_energy, REFERRAL_PURCHASE_BONUS
+from app.core.economy import award_energy, REFERRAL_PURCHASE_BONUS
 
 router = APIRouter()
 

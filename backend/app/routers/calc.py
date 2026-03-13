@@ -11,13 +11,13 @@ from sqlalchemy import select
 from app.database import get_db, AsyncSessionLocal
 from app.models import User, NatalChart, CardProgress
 from app.models.card_progress import CardStatus
-from app.services.rain.astrology.natal_chart import (
+from app.core.astrology.natal_chart import (
     calculate_natal_chart, geocode_place, to_dict as chart_to_dict
 )
-from app.services.rain.astrology.aspect_calculator import calculate_aspects, to_dict as aspects_to_dict
-from app.services.rain.astrology.llm_engine import synthesize_sphere_descriptions
-from app.services.rain.astrology.vector_matcher import match_archetypes_to_spheres
-from app.services.ocean.manager import OceanService
+from app.core.astrology.aspect_calculator import calculate_aspects, to_dict as aspects_to_dict
+from app.core.astrology.llm_engine import synthesize_sphere_descriptions
+from app.core.astrology.vector_matcher import match_archetypes_to_spheres
+from app.core.user_print_manager import UserPrintManager
 import logging
 
 logger = logging.getLogger(__name__)

@@ -6,8 +6,8 @@ from sqlalchemy import select
 from app.database import get_db
 from app.models import User, CardProgress, AIDiagnosticSession
 from app.models.card_progress import CardStatus
-from app.agents.rain.onboarding_agent import generate_onboarding_response, extract_onboarding_cards
-from app.services.ocean.economy_service import process_referral_reward
+from app.agents.onboarding_agent import generate_onboarding_response, extract_onboarding_cards
+from app.core.economy import process_referral_reward
 from app.agents.common import SPHERES
 
 router = APIRouter()

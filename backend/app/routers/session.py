@@ -6,8 +6,8 @@ from sqlalchemy import select
 
 from app.database import AsyncSessionLocal
 from app.models import CardProgress, AlignSession, SyncSession, User, DiaryEntry
-from app.agents.river.align_agent import alignment_session_message
-from app.services.ocean.economy_service import spend_energy, hawkins_to_rank, process_card_rank_up
+from app.agents.align_agent import alignment_session_message
+from app.core.economy import spend_energy, hawkins_to_rank, process_card_rank_up
 from app.config import settings
 
 router = APIRouter()

@@ -11,7 +11,7 @@ from sqlalchemy import select
 
 from app.database import get_db
 from app.models import CardProgress, AlignSession, SyncSession
-from app.services.ocean.economy_service import hawkins_to_rank, RANK_NAMES
+from app.core.economy import hawkins_to_rank, RANK_NAMES
 
 router = APIRouter()
 

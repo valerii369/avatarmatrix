@@ -4,7 +4,7 @@ from app.agents.common import (
     client, settings, ARCHETYPES, SPHERES, MATRIX_DATA,
     SPHERE_AGENT_STYLES, LEVEL_METHODOLOGIES, LEVEL_GOALS
 )
-from app.agents.river.hawkins_agent import get_hawkins_agent_level
+from app.agents.hawkins_agent import get_hawkins_agent_level
 
 class AlignmentResponse(BaseModel):
     ai_response: str = Field(description="Ответ пользователю согласно текущему протоколу (2-4 предложения).")

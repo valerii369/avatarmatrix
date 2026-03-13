@@ -4,7 +4,7 @@ from sqlalchemy import select
 
 from app.database import get_db
 from app.models import User, CardProgress, NatalChart, Pattern
-from app.services.ocean.economy_service import calculate_xp_for_level, get_level_title
+from app.core.economy import calculate_xp_for_level, get_level_title
 from app.agents.common import SPHERES
 
 router = APIRouter()

@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.models.data_architecture import Event
-from app.agents.ocean.evolution_agent import EvolutionAgent
+from app.agents.evolution_agent import EvolutionAgent
 
 router = APIRouter()
 

@@ -10,12 +10,12 @@ from sqlalchemy import select
 from app.database import get_db
 from app.models import CardProgress, SyncSession, User, SphereKnowledge, UserWorldKnowledge, UserPortrait, SceneSet, SceneSetItem, SceneInteraction
 from app.models.card_progress import CardStatus
-from app.agents.river.sync_agent import run_avatar_layer, get_response_metrics
-from app.agents.ocean.analytic_agent import run_mirror_analysis, extract_response_features, update_user_portrait
-from app.services.river.feature_service import FeatureExtractor
-from app.services.ocean.economy_service import spend_energy, hawkins_to_rank, award_xp, process_card_rank_up, XP_VALUES
-from app.services.rain.portrait_service import build_portrait_for_sphere
-from app.services.ocean.manager import OceanService
+from app.agents.sync_agent import run_avatar_layer, get_response_metrics
+from app.agents.analytic_agent import run_mirror_analysis, extract_response_features, update_user_portrait
+from app.core.feature_extractor import FeatureExtractor
+from app.core.economy import spend_energy, hawkins_to_rank, award_xp, process_card_rank_up, XP_VALUES
+from app.core.portrait_service import build_portrait_for_sphere
+from app.core.user_print_manager import OceanService
 from app.database import AsyncSessionLocal
 
 router = APIRouter()
@@ -556,7 +556,7 @@ async def process_phase(
                             user_ts = datetime.datetime.fromisoformat(user_timestamp)
                             reading_time = (user_ts - ai_ts).total_seconds()
 
-                        from app.agents.river.sync_agent import get_embedding
+                        from app.agents.sync_agent import get_embedding
                         resp_emb = await get_embedding(user_response_text)
 
                         # NEW: Extract structured features for research and future training
