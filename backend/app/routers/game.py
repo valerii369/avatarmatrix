@@ -6,9 +6,9 @@ from app.database import get_db
 from app.models import User, CardProgress, GameState
 from app.core.economy import get_sphere_awareness, calculate_xp_for_level
 
-router = APIRouter()
+from app.agents.common import SPHERES
 
-SPHERES = ["IDENTITY", "MONEY", "RELATIONS", "FAMILY", "MISSION", "HEALTH", "SOCIETY", "SPIRIT"]
+router = APIRouter()
 
 
 @router.get("/{user_id}")
@@ -23,7 +23,7 @@ async def get_game_state(user_id: int, db: AsyncSession = Depends(get_db)):
 
     # Sphere awareness
     sphere_data = {}
-    for sphere in SPHERES:
+    for sphere in SPHERES.keys():
         sphere_cards = [c for c in all_cards if c.sphere == sphere and c.hawkins_peak > 0]
         min_hawkins = min((c.hawkins_peak for c in sphere_cards), default=0)
         sphere_data[sphere] = {

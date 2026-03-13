@@ -1,0 +1,46 @@
+{
+  "scene_name": "The Valley of Mirrors",
+  "psychological_foundation": "This scene explores the archetype of Death in the context of Expansion, emphasizing the transformational power of endings and the fear of change. It encourages letting go of the past to embrace new beginnings.",
+  "immersion_architecture": {
+    "orientation": "In a valley shrouded in perpetual twilight, mirrors of all shapes and sizes are scattered across the landscape, reflecting distorted images of the sky and surrounding terrain. The air is thick with a palpable stillness, and the ground is covered with a fine layer of ash, adding to the ethereal atmosphere. A distant rumbling echoes through the valley, hinting at inevitable change.",
+    "complication": "One of the mirrors shatters spontaneously, sending a ripple of distortion across the reflections in the valley."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Mirrors",
+      "interpretation_broken": "If the mirrors are perceived as broken, it reflects a fear of self-examination and the inability to integrate one's fragmented self, indicating resistance to change.",
+      "interpretation_beautiful": "If the mirrors are perceived as beautiful, it signifies a healthy acceptance of self-reflection and the potential for transformation through understanding.",
+      "interpretation_threatening": "If the mirrors are perceived as threatening, it suggests anxiety about facing the truth and the potential chaos that comes with change."
+    },
+    {
+      "object": "Ash",
+      "interpretation_broken": "If the ash is perceived as broken, it symbolizes a disregard for past experiences, leading to a lack of growth and superficial understanding.",
+      "interpretation_beautiful": "If the ash is perceived as beautiful, it represents the fertile ground for new beginnings, appreciating the past as a foundation for future growth.",
+      "interpretation_threatening": "If the ash is perceived as threatening, it indicates a fear of stagnation and being buried under old, unresolved issues."
+    },
+    {
+      "object": "Twilight",
+      "interpretation_broken": "If the twilight is perceived as broken, it reflects a longing for clarity and the discomfort of being in a transitional state.",
+      "interpretation_beautiful": "If the twilight is perceived as beautiful, it captures the beauty of being in-between, appreciating the subtle shifts and the journey of transformation.",
+      "interpretation_threatening": "If the twilight is perceived as threatening, it indicates fear of the unknown and the discomfort with ambiguity and uncertainty."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "self-reflection",
+      "transformation",
+      "fear"
+    ],
+    "mcadams_markers": [
+      "narrative identity",
+      "personal myths",
+      "psychological growth"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What aspect of your life feels like it's caught in the twilight, neither ending nor beginning?",
+    "action_prompt": "Identify one 'mirror' in your life that needs to shatter for you to move forward, and write about how that change could lead to personal growth."
+  },
+  "sphere_id": 9,
+  "sphere_key": "EXPANSION"
+}

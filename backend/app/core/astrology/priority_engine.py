@@ -17,7 +17,11 @@ with open(os.path.join(DATA_DIR, "house_sphere_map.json")) as f:
 
 PRIORITY_RANK = {"critical": 0, "high": 1, "medium": 2, "additional": 3}
 
-SPHERES = ["IDENTITY", "MONEY", "RELATIONS", "FAMILY", "MISSION", "HEALTH", "SOCIETY", "SPIRIT"]
+SPHERES = [
+    "IDENTITY", "RESOURCES", "COMMUNICATION", "ROOTS",
+    "CREATIVITY", "SERVICE", "PARTNERSHIP", "TRANSFORMATION",
+    "EXPANSION", "STATUS", "VISION", "SPIRIT"
+]
 
 
 @dataclass
@@ -40,17 +44,16 @@ def generate_recommended_cards(chart: NatalChartData) -> list[RecommendedCard]:
     """
     Generate prioritized list of recommended cards from natal chart.
 
-    Rules (from architecture):
-    - 🔴 Critical: Sun, Moon, Pluto, Saturn; Stellium planets; Ascendant ruler; Stationary planets
-    - 🟠 High: North Node, Chiron, Lilith
-    - 🟡 Medium: Mars, Venus, Jupiter, Mercury
-    - 🟢 Additional: Uranus, Neptune, South Node, Decan rulers
-    - Retrograde planets → archetype active in SHADOW (still recommended, marked)
+    Rules for 12-Sphere Precision:
+    - 🔴 Critical: Sun, Moon, Ascendant Ruler, MC (in STATUS), any Stationary planet.
+    - 🟠 High: Stellium planets (3+ in sign/house), Nodes, Chiron.
+    - 🟡 Medium: All other planets in their houses.
+    - 🟢 Additional: Lilith, Decan rulers, secondary sign archetypes.
     """
     recommended: list[RecommendedCard] = []
-    seen_keys = set()  # (archetype_id, sphere) to avoid duplicates
+    seen_keys = set()  # (archetype_id, sphere)
 
-    # Detect stelliums: 3+ planets in same sign or house
+    # Detect stelliums
     sign_counts: dict[str, list[str]] = {}
     house_counts: dict[int, list[str]] = {}
 
@@ -58,13 +61,11 @@ def generate_recommended_cards(chart: NatalChartData) -> list[RecommendedCard]:
         sign_counts.setdefault(planet.sign, []).append(planet.name_en)
         house_counts.setdefault(planet.house, []).append(planet.name_en)
 
-    stellium_signs = {sign for sign, planets in sign_counts.items() if len(planets) >= 3}
-    stellium_houses = {house for house, planets in house_counts.items() if len(planets) >= 3}
     stellium_planets = set()
-    for sign in stellium_signs:
-        stellium_planets.update(sign_counts[sign])
-    for house in stellium_houses:
-        stellium_planets.update(house_counts[house])
+    for planets in sign_counts.values():
+        if len(planets) >= 3: stellium_planets.update(planets)
+    for planets in house_counts.values():
+        if len(planets) >= 3: stellium_planets.update(planets)
 
     def add_card(archetype_id: int, sphere: str, priority: str, reason: str,
                  planet_name: str = None, retrograde: bool = False):
@@ -87,51 +88,41 @@ def generate_recommended_cards(chart: NatalChartData) -> list[RecommendedCard]:
             is_retrograde=retrograde,
         ))
 
+    # 1. Ascendant Ruler - Critical in IDENTITY
     for planet in chart.planets:
-        # Determine effective priority
+        if planet.name_en == chart.ascendant_ruler:
+            add_card(
+                planet.archetype_id, "IDENTITY", "critical",
+                f"{planet.name} — управитель Асцендента (Путь Личности)",
+                planet.name_en, planet.retrograde
+            )
+
+    # 2. Main Planet Pass
+    for planet in chart.planets:
         priority = planet.priority
         is_stationary = getattr(planet, "is_stationary", False)
         
-        if planet.name_en in stellium_planets or is_stationary:
+        # Override priorities based on special conditions
+        if planet.name_en in ["Sun", "Moon"] or is_stationary:
             priority = "critical"
+        elif planet.name_en in stellium_planets:
+            priority = "high"
 
-        # Ascendant ruler → critical in IDENTITY
-        if planet.name_en == chart.ascendant_ruler:
-            identity_spheres = ["IDENTITY"]
-            for sphere in identity_spheres:
-                add_card(
-                    planet.archetype_id, sphere, "critical",
-                    f"{planet.name} — управитель Асцендента",
-                    planet.name_en, planet.retrograde
-                )
-
-        # Planet archetype in its house spheres
         planet_spheres = get_spheres_for_house(planet.house)
-        retro_suffix = " (в ТЕНИ — ретроград)" if planet.retrograde else ""
-        stat_suffix = " (Точка опоры — стационарна)" if is_stationary else ""
-        reason_planet = f"{planet.name} в доме {planet.house}{retro_suffix}{stat_suffix}"
+        retro_suffix = " (Ретроград — внутренняя работа)" if planet.retrograde else ""
+        stat_suffix = " (Стационар — точка фиксации)" if is_stationary else ""
+        reason_base = f"{planet.name} в {planet.house} доме{retro_suffix}{stat_suffix}"
 
         for sphere in planet_spheres:
-            # Planet archetype
-            add_card(planet.archetype_id, sphere, priority, reason_planet,
+            # Main Planet Archetype
+            add_card(planet.archetype_id, sphere, priority, reason_base,
                      planet.name_en, planet.retrograde)
-            # Sign primary archetype
+            
+            # Sign Primary Archetype - adds secondary depth
             if planet.sign_primary_archetype != planet.archetype_id:
-                sign_priority = min(priority, "medium", key=lambda p: PRIORITY_RANK.get(p, 3))
+                sign_priority = "medium" if priority == "critical" else "additional"
                 add_card(planet.sign_primary_archetype, sphere, sign_priority,
-                         f"{planet.name} в {planet.sign_ru} (знак, основной)",
-                         planet.name_en, planet.retrograde)
-            # Sign secondary archetype (lower priority)
-            if planet.sign_secondary_archetype not in (planet.archetype_id, planet.sign_primary_archetype):
-                add_card(planet.sign_secondary_archetype, sphere, "additional",
-                         f"{planet.name} в {planet.sign_ru} (знак, доп.)",
-                         planet.name_en, planet.retrograde)
-                         
-            # Decan ruler archetype
-            decan_archetype = getattr(planet, "decan_ruler_archetype", 0)
-            if decan_archetype and decan_archetype not in (planet.archetype_id, planet.sign_primary_archetype, planet.sign_secondary_archetype):
-                add_card(decan_archetype, sphere, "additional",
-                         f"{planet.name} в {planet.sign_ru} (декан: {getattr(planet, 'decan_ruler', '')})",
+                         f"{planet.name} в знаке {planet.sign_ru}",
                          planet.name_en, planet.retrograde)
 
     # Sort by priority

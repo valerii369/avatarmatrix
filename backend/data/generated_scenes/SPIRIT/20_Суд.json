@@ -1,44 +1,46 @@
 {
-  "scene_name": "The Celestial Judgement",
-  "psychological_foundation": "Exploring the archetype of Judgement within the realm of spirituality, focusing on the potential for global spiritual awakening, self-forgiveness, and the fear of self-condemnation.",
+  "scene_name": "Пробуждение духа: Суд и Искупление",
+  "psychological_foundation": "Сцена отражает архетип Суда, представляющий переход от жесткого самоосуждения к всеобъемлющему прощению себя и родовых травм. Здесь дух символизирует как свет глобального духовного пробуждения, так и тень грузовины вины, указывающую на необходимость искупления и преображения.",
   "immersion_architecture": {
-    "orientation": "In a surreal ethereal landscape, shimmering auroras dance across an endless twilight sky, casting prismatic reflections onto the ground. Giant, ancient trees with iridescent leaves form a cathedral-like grove, their branches whispering secrets of forgotten wisdom. A translucent river winds through this grove, its waters glowing with an inner light, suggesting purity and transformation.",
-    "complication": "A sudden tremor reverberates through the grove, causing the auroras to flicker and the river to momentarily darken, hinting at the struggle between liberation and the chains of past guilt."
+    "orientation": "На фоне сумеречной арены, где эфирный свет переплетается с тенями древних руин и зыбущимися образами кармических уз, пространство наполняется ощущением мистической притягательности и глубокой, первобытной силы духа. Эфемерные пейзажи словно оживляют древние сказания, где каждый камень и отблеск света свидетельствуют о вечном процессе трансформации.",
+    "complication": "В самом центре этого пространства внезапно вспыхивает пульсирующий огонь, пробуждая эхо забытых судеб и вызывая внутренний зов к трансформации."
   },
   "projection_dictionary": [
     {
-      "object": "Auroras",
-      "interpretation_broken": "If perceived as broken, it may indicate a disruption in the person's spiritual or creative energy, reflecting a struggle to connect with higher consciousness.",
-      "interpretation_beautiful": "If seen as beautiful, it suggests a profound connection to the divine or an appreciation for the beauty of spiritual awakening.",
-      "interpretation_threatening": "If perceived as threatening, it may represent fear of the unknown or apprehension about the transformative power of spiritual experiences."
+      "object": "Разбитое зеркало",
+      "interpretation_broken": "Если зеркало воспринимается как сломанное, оно отражает раздробленное прошлое и наслаивающиеся чувства вины, указывая на неразрешенные раны, требующие прощения.",
+      "interpretation_beautiful": "В его трещинах можно увидеть хрупкую красоту внутренней правды, где каждая осколок — напоминание о возможности целостного исцеления через принятие своей истории.",
+      "interpretation_threatening": "Угрожающим оно становится, когда отражение будущего кажется запятнанным страхом осуждения и безысходностью, предвещая финальную оценку, способную парализовать дух."
     },
     {
-      "object": "Ancient Trees",
-      "interpretation_broken": "If perceived as broken, it may signify a disconnection from ancestral roots or a feeling of loss regarding one's heritage.",
-      "interpretation_beautiful": "If seen as beautiful, it indicates a reverence for ancestral wisdom and a strong connection to one's lineage.",
-      "interpretation_threatening": "If perceived as threatening, it could reflect a fear of familial expectations or unresolved issues with one's past."
+      "object": "Сияющий лотос",
+      "interpretation_broken": "Когда лотос воспринимается как сломанный, его лепестки символизируют фрагментарное состояние души, разобщенной с родовой силой и потерявшей единство с сердцем процветания.",
+      "interpretation_beautiful": "В своей красоте он олицетворяет возрождение, очищение и глубокую связь с духовным пробуждением, побуждая к исцелению через принятие и прощение.",
+      "interpretation_threatening": "В угрожающем обличье лотос напоминает о неизбежном столкновении между светом и тенью, где красота становится маской скрытой боли и подавленных эмоций."
     },
     {
-      "object": "Translucent River",
-      "interpretation_broken": "If perceived as broken, it may suggest blocked emotional flow or an inability to release past traumas.",
-      "interpretation_beautiful": "If seen as beautiful, it signifies emotional clarity and the ability to embrace change and transformation.",
-      "interpretation_threatening": "If perceived as threatening, it might represent fear of emotional vulnerability or the overwhelming nature of change."
+      "object": "Зловещий башенный циферблат",
+      "interpretation_broken": "Если циферблат кажется сломанным, он символизирует потерю времени и контроль над судьбой, отражая застывшие моменты самосудия и кармических ошибок.",
+      "interpretation_beautiful": "Как красивая метафора, он приглашает осознать каждую секунду жизни как возможность для обновления и искупления, где время становится союзником трансформации.",
+      "interpretation_threatening": "В угрожающем свете циферблат предвещает неизбежное судебное решение, где страх финальной оценки становится тенью, способной заморозить волю к изменениям."
     }
   ],
   "diagnostic_focus": {
     "pennebaker_markers": [
-      "cognitive_processes",
-      "insight"
+      "global_spiritual_awakening",
+      "self_forgiveness",
+      "ancestral_healing"
     ],
     "mcadams_markers": [
-      "redemption_sequence",
-      "contamination_sequence"
+      "sense_of_calling",
+      "psychological_transformation",
+      "transcendence"
     ]
   },
   "transformation_mechanics": {
-    "externalization_question": "What does the trembling in the grove represent in your life?",
-    "action_prompt": "What does your body do when the auroras flicker and the river darkens?"
+    "externalization_question": "Какие осколки прошлого ты готов отпустить, чтобы принять новую энергию трансформации и стать полноценным носителем родовой силы?",
+    "action_prompt": "Открой сердце для прощения — начни воспринимать каждую трещину своей истории как возможность для обновления и обретения истинного духа."
   },
-  "sphere_id": 8,
+  "sphere_id": 12,
   "sphere_key": "SPIRIT"
 }

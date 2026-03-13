@@ -1,45 +1,44 @@
 {
-  "scene_name": "The Veil of the High Priestess",
-  "psychological_foundation": "This scene explores the archetype of the High Priestess, focusing on the spiritual domain. The scene examines the dual aspects of the Priestess archetype, both light and shadow, through a surreal environment that invites introspection and projection.",
+  "scene_name": "Таинство Духа: Зов Жрицы",
+  "psychological_foundation": "Слияние сакрального духа с бессознательным, где архетип Жрицы обнажает истину через интуитивные эхо, соединяя свет глубокого понимания с тенями уклончивой иллюзии.",
   "immersion_architecture": {
-    "orientation": "A moonlit forest clearing, where mist weaves through ancient trees like whispers of forgotten secrets. In the center, an altar of crystalline stones glows faintly, casting ethereal shadows that dance on the ground. The air is thick with silence, a sacred hush that invites contemplation beyond the veil of the known.",
-    "complication": "A sudden chill descends as the mist begins to swirl more aggressively, forming a vortex that seems to pulse with an unspoken question."
+    "orientation": "Над зыбким пейзажем существ, где эфирные туманы и светящиеся нарративы переплетаются, витает атмосфера древней загадочности. Каждый элемент пространства – от мягкого перелива света до теней, скрывающих невыразимые символы, – дышит духом вечной тайны и недосказанности.",
+    "complication": "Из глубин эфира прорывается зыбкий сигнал перемен, когда таинственный шёпот нарушает безмолвие, предвещая приближение неизбежного конфликта между светом интуиции и тенью укрытых страхов."
   },
   "projection_dictionary": [
     {
-      "object": "Altar of Crystalline Stones",
-      "interpretation_broken": "Perceiving the altar as broken may indicate a disrupted connection to one's inner wisdom and spiritual foundations.",
-      "interpretation_beautiful": "Seeing the altar as beautiful suggests a harmonious alignment with one's inner truth and a deep appreciation for spiritual mysteries.",
-      "interpretation_threatening": "Viewing the altar as threatening could reflect fear of the unknown or resistance to exploring one's deeper consciousness."
+      "object": "Зеркало Безмолвия",
+      "interpretation_broken": "Если зеркало воспринимается как сломанное, оно отражает раздробленность внутренней идентичности и потерю целостности в столкновении с бессознательным.",
+      "interpretation_beautiful": "Как красивое, зеркало предстает в виде утонченного портала, открывающего безупречную интуицию и глубокие сакральные знания, что скрыты за повседневной реальностью.",
+      "interpretation_threatening": "В угрожающем свете оно становится символом безысходности самоуничтожения, где трещины на поверхности указывают на незалеченные раны души."
     },
     {
-      "object": "Mist",
-      "interpretation_broken": "If the mist is seen as broken, it may symbolize confusion and difficulty in navigating one's subconscious or spiritual path.",
-      "interpretation_beautiful": "Perceiving the mist as beautiful indicates comfort in ambiguity and an openness to the mysteries of the psyche.",
-      "interpretation_threatening": "Seeing the mist as threatening might suggest anxiety about hidden aspects of the self and fear of confronting inner truths."
+      "object": "Лунный Фонтан",
+      "interpretation_broken": "В образе сломанного источника фонтан намекает на иссякание духовных резервов и утрату гармонии между сознательным и бессознательным.",
+      "interpretation_beautiful": "Если воспринимается как красивый, фонтан олицетворяет вечное обновление и сияние сакрального знания, дарующего силы для глубоких трансформаций.",
+      "interpretation_threatening": "В угрожающем образе он предстает как водоворот, способный смыть защитные слои эго, вымывая скрытые страхи и неразрешенные конфликты."
     },
     {
-      "object": "Moonlight",
-      "interpretation_broken": "Broken moonlight could represent a fractured intuition or a struggle to see clearly one's path or purpose.",
-      "interpretation_beautiful": "Beautiful moonlight suggests clarity in intuition and a strong connection to one's inner guidance.",
-      "interpretation_threatening": "Threatening moonlight may symbolize overwhelming insights or truths that challenge one's current understanding."
+      "object": "Древо Духов",
+      "interpretation_broken": "Когда древо видится сломанным, его растрескавшаяся кора символизирует утрату связи с предками и разрушение вечных архетипических основ.",
+      "interpretation_beautiful": "В красивом аспекте оно излучает мудрость, его ветви переплетаются с потоками бессознательного, открывая путь к внутренней целостности и истинной интуиции.",
+      "interpretation_threatening": "Если древо воспринимается как угрожающее, его силуэт становится предвестником древних сил, готовых нарушить хрупкий баланс между духовным пробуждением и эмоциональной отстраненностью."
     }
   ],
   "diagnostic_focus": {
     "pennebaker_markers": [
-      "insight",
-      "tentative",
-      "inhibition"
+      "отражения несказанного",
+      "метафорическая аллегория тишины"
     ],
     "mcadams_markers": [
-      "self-exploration",
-      "spirituality"
+      "мифологические отзвуки архетипа Жрицы",
+      "нарративные слои духовной эволюции"
     ]
   },
   "transformation_mechanics": {
-    "externalization_question": "What unseen forces do you feel are swirling around you, challenging or guiding your path?",
-    "action_prompt": "What does your body do as the mist swirls around you? Do you feel drawn to the altar, or do you hesitate?"
+    "externalization_question": "Какой шёпот из глубин вашего бессознательного пытается прорваться сквозь завесу иллюзий?",
+    "action_prompt": "Откройтесь интуиции и позвольте внутренней Жрице направить вас к истинным знаниям, отвергнув иллюзии и пассивное уклонение."
   },
-  "sphere_id": 8,
+  "sphere_id": 12,
   "sphere_key": "SPIRIT"
 }

@@ -1,45 +1,46 @@
 {
-  "scene_name": "The Devil's Mirror",
-  "psychological_foundation": "This scene explores the archetype of the Devil within the sphere of spirituality, focusing on the integration of the shadow, the release from shame, and the allure of power and materialism.",
+  "scene_name": "Пламя Теней в Лабиринте Духа",
+  "psychological_foundation": "Сценарий раскрывает драматический диалог между силой и темной энергией, приглашая смелое знакомство с внутренними демонами и путём освобождения от ложных ограничений.",
   "immersion_architecture": {
-    "orientation": "In a dimly lit chamber, walls are adorned with intricate patterns of intertwining vines and serpentine forms, casting shadows that seem to writhe with a life of their own. The air is thick with the scent of incense, mingling with the metallic tang of something ancient and forbidden. At the center stands an ornate mirror, its surface shifting between reflections and illusions, inviting the viewer to confront their deepest fears and desires.",
-    "complication": "Suddenly, the mirror begins to pulse with a dark energy, drawing the shadows closer and whispering promises of power and hidden truths."
+    "orientation": "В сумеречном пейзаже, где дымчатые облака искрятся неоном, обнажённое пространство наполняется проекциями древних символов и расплавленных теней духа, создавая атмосферу магнетического мистицизма. Таинственные формы, вырезанные в зыбкой материи, отзываются эхо утраченных изделий и обещаний могущества.",
+    "complication": "Неожиданно из глубин лабиринта вспыхивает пульсирующее пламя, который нарушает статичность мира и вызывает концентрацию вытесненной энергии, готовой вырваться наружу."
   },
   "projection_dictionary": [
     {
-      "object": "Mirror",
-      "interpretation_broken": "If the mirror is perceived as broken, it suggests an internal conflict with self-perception and a fear of facing one's true self.",
-      "interpretation_beautiful": "If the mirror is seen as beautiful, it reflects a willingness to explore inner desires and accept all facets of one's identity.",
-      "interpretation_threatening": "If the mirror appears threatening, it symbolizes the fear of uncovering repressed aspects of the self and the danger of succumbing to temptation."
+      "object": "Сломанные зеркальные осколки",
+      "interpretation_broken": "Олицетворяют разрушенную иллюзию контроля, символизируя распад старых доктрин и несбывшиеся ожидания.",
+      "interpretation_beautiful": "При восприятии их красоты, осколки отражают возможность целительной интеграции тени и воссоединения с истинным я.",
+      "interpretation_threatening": "В угрожающем свете они служат предупреждением о силе самообмана, манипуляций и опасности токсичных привязанностей."
     },
     {
-      "object": "Serpentine Vines",
-      "interpretation_broken": "Broken vines indicate a disruption in life's natural flow and a struggle against transformation.",
-      "interpretation_beautiful": "Beautiful vines suggest harmony with one's instincts and the acceptance of natural growth and change.",
-      "interpretation_threatening": "Threatening vines symbolize entanglement in destructive patterns and the fear of being overpowered by primal urges."
+      "object": "Огненные руны",
+      "interpretation_broken": "В их сломанном состоянии руны говорят о разобщенности между внутренней силой и внешней реальностью, указывая на хрупкость творческого пламени души.",
+      "interpretation_beautiful": "Их сияние символизирует магнетизм, харизму и возможность обращения вытесненной энергии в мощное проявление власти.",
+      "interpretation_threatening": "Когда руны воспринимаются как угрозу, они предупреждают о пагубной одержимости материальным и опасности погружения в манипуляции и иллюзии."
     },
     {
-      "object": "Incense",
-      "interpretation_broken": "Broken incense implies a disconnect from spiritual practices and a loss of tranquility.",
-      "interpretation_beautiful": "Beautiful incense represents a deep connection to the spiritual realm and a sense of peace.",
-      "interpretation_threatening": "Threatening incense indicates overwhelming emotions or spiritual experiences that are difficult to process."
+      "object": "Мистический лабиринт",
+      "interpretation_broken": "Лабиринт, лишённый целостности, передаёт ощущение путаницы и раздвоенности личности, где путь к самопознанию разрушен.",
+      "interpretation_beautiful": "В красивом прочтении он символизирует бесконечное пространство для исследований, где каждая тропа ведёт к глубоким тайнам и скрытым резервам духа.",
+      "interpretation_threatening": "При угрозе лабиринт становится символом опасности потерять свою сущность в бесконечной сети иллюзий и разрушающих страстей."
     }
   ],
   "diagnostic_focus": {
     "pennebaker_markers": [
-      "insight",
-      "causation",
-      "certainty"
+      "агрессия",
+      "вожделение",
+      "освобождение от стыда"
     ],
     "mcadams_markers": [
-      "exploration of identity",
-      "encounter with the shadow"
+      "интеграция тени",
+      "магнетическая материальность",
+      "перерождение через кризис"
     ]
   },
   "transformation_mechanics": {
-    "externalization_question": "What do the whispers from the mirror tell you about your own desires and fears?",
-    "action_prompt": "How does your body respond to the pulsing energy of the mirror?"
+    "externalization_question": "Какие аспекты твоей внутренней тьмы готовы выйти на свет, чтобы принести трансформацию или разрушение?",
+    "action_prompt": "Исследуй свои противоречия, позволь вытесненной энергии стать инструментом мощного самовыражения и преобразования."
   },
-  "sphere_id": 8,
+  "sphere_id": 12,
   "sphere_key": "SPIRIT"
 }

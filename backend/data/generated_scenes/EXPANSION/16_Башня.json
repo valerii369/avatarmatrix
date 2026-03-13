@@ -1,0 +1,46 @@
+{
+  "scene_name": "The Crumbling Tower",
+  "psychological_foundation": "This scene explores the archetype of the Tower in the context of personal expansion, focusing on the tension between liberation and destruction.",
+  "immersion_architecture": {
+    "orientation": "The scene unfolds in a surreal landscape where a massive, ancient tower looms against a sky streaked with vibrant colors, as if the heavens themselves are being torn apart. The ground around the tower is littered with shards of reflective glass, capturing distorted images of the sky and tower, creating an illusion of an infinite labyrinth. The air is thick with the scent of ozone and echoes with the distant rumble of thunder, suggesting a storm brewing just beyond the horizon.",
+    "complication": "A sudden bolt of lightning strikes the tower, causing a cascade of stones to fall and shatter the reflective glass below."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Tower",
+      "interpretation_broken": "A broken tower may symbolize a collapse of one's ego or belief structures, potentially leading to a crisis of identity.",
+      "interpretation_beautiful": "A beautiful tower might represent aspirational goals or the allure of ascension to new heights of understanding.",
+      "interpretation_threatening": "A threatening tower could indicate oppressive systems or overwhelming personal challenges that seem insurmountable."
+    },
+    {
+      "object": "Reflective Glass",
+      "interpretation_broken": "Broken glass might symbolize shattered illusions or the breaking of facades, revealing uncomfortable truths.",
+      "interpretation_beautiful": "Beautiful glass can represent clarity, insight, or the allure of perfect self-reflection.",
+      "interpretation_threatening": "Threatening glass could suggest vulnerability or the potential for painful insight that cuts deep."
+    },
+    {
+      "object": "Lightning",
+      "interpretation_broken": "Broken lightning may suggest a failure to achieve enlightenment or the loss of sudden insight.",
+      "interpretation_beautiful": "Beautiful lightning might symbolize a moment of epiphany or the power of transformative energy.",
+      "interpretation_threatening": "Threatening lightning could indicate sudden, destructive change or uncontrollable forces."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "insight",
+      "causation",
+      "anger"
+    ],
+    "mcadams_markers": [
+      "identity",
+      "agency",
+      "communion"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What elements of your life feel like they are on the brink of collapse or transformation?",
+    "action_prompt": "Imagine you have the power to channel the energy of the storm. How would you use it to effect change in your life?"
+  },
+  "sphere_id": 9,
+  "sphere_key": "EXPANSION"
+}

@@ -1,0 +1,50 @@
+{
+  "scene_name": "Solar Expansion",
+  "psychological_foundation": "The scene explores the archetype of the Sun, focusing on the balance between the light and shadow aspects of expansive, radiant energy. It delves into the existential quest for authenticity and self-expression, highlighting the tension between genuine joy and egocentric illusions.",
+  "immersion_architecture": {
+    "orientation": "In a surreal desert landscape, the sky blazes with an eternal twilight, casting long shadows across the sand dunes that shimmer with golden hues. Sunflowers, impossibly large, sway gently despite the absence of wind, their faces perpetually turned towards the unseen sun. A crystal-clear oasis reflects the sky, its water glowing with an inner light, suggesting unseen depths.",
+    "complication": "A sudden eclipse darkens the sky, casting the landscape into a deep shadow, and the sunflowers begin to wilt, their faces drooping towards the ground."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Sunflowers",
+      "interpretation_broken": "If perceived as broken, it may indicate a struggle with self-worth and the fear of not living up to one's potential.",
+      "interpretation_beautiful": "If seen as beautiful, it reflects an appreciation for natural cycles and the acceptance of life's transient beauty.",
+      "interpretation_threatening": "If threatening, it suggests anxiety about being overshadowed or overwhelmed by external expectations."
+    },
+    {
+      "object": "Desert",
+      "interpretation_broken": "A broken desert could suggest feelings of barrenness and a lack of creativity or inspiration.",
+      "interpretation_beautiful": "Seeing the desert as beautiful may symbolize a sense of peace with solitude and an appreciation for simplicity.",
+      "interpretation_threatening": "If perceived as threatening, it indicates fears of isolation and emotional desolation."
+    },
+    {
+      "object": "Oasis",
+      "interpretation_broken": "A broken oasis might reveal disillusionment with sources of hope and comfort.",
+      "interpretation_beautiful": "If viewed as beautiful, it shows a deep trust in life's hidden reserves and hope for rejuvenation.",
+      "interpretation_threatening": "If seen as threatening, it points to fears of false security and the danger of illusions."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "light",
+      "shadow",
+      "balance",
+      "authenticity",
+      "self-expression"
+    ],
+    "mcadams_markers": [
+      "existential",
+      "self-realization",
+      "joy",
+      "illusion",
+      "fear"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What part of your life feels eclipsed or overshadowed by external circumstances?",
+    "action_prompt": "Imagine yourself as a sunflower in this scene. How would you realign yourself towards the light, even during an eclipse?"
+  },
+  "sphere_id": 9,
+  "sphere_key": "EXPANSION"
+}

@@ -1,48 +1,44 @@
 {
-  "scene_name": "The Temple of Echoes",
-  "psychological_foundation": "This scene explores themes of spiritual authority and the transmission of wisdom, focusing on the balance between genuine mentorship and dogmatic control.",
+  "scene_name": "Эфемерный Храм Духа",
+  "psychological_foundation": "Слияние архетипа Иерофанта и духовного поиска в безграничном пространстве, где истинная мудрость сталкивается с догматизмом.",
   "immersion_architecture": {
-    "orientation": "In a vast temple hall, echoes of ancient chants reverberate off the marble walls, creating an auditory tapestry that seems both comforting and overwhelming. Stained glass windows cast kaleidoscopic patterns of light on the floor, shifting as the sun moves across the sky. Incense smoke spirals upwards, weaving through the air as if carrying prayers to the heavens.",
-    "complication": "A sudden gust of wind flings open the temple doors, scattering sacred scrolls across the floor."
+    "orientation": "На зыбком фоне ночного неба, где неоновые отблески и мерцающий туман играют ролями древних символов, парят разрушенные своды заброшенного храма, отражая мистическую энергию и таинственную сущность духа. Среди эфемерных руин, где обломки золотых артефактов и мерцающие каналы света создают иллюзию живого ритуала, величественный архетип Иерофанта возвышается как проводник между сферами высших истин и повседневной реальности.",
+    "complication": "Внезапный грохот исчезающих теней нарушает хрупкий баланс, заставляя само пространство вибрировать под давлением древних откровений."
   },
   "projection_dictionary": [
     {
-      "object": "Stained Glass Windows",
-      "interpretation_broken": "Seeing the stained glass as broken might symbolize a perceived fracture in one's belief system or a loss of spiritual clarity.",
-      "interpretation_beautiful": "If the stained glass is perceived as beautiful, it may reflect an appreciation for the complexity and multifaceted nature of spiritual truths.",
-      "interpretation_threatening": "Finding the stained glass threatening could indicate a fear of being judged or scrutinized by higher powers."
+      "object": "Разрушенный алтарь",
+      "interpretation_broken": "Если алтарь воспринимается как 'сломанный', это символизирует утрату истинной духовной опоры и падение под влиянием фарисейства.",
+      "interpretation_beautiful": "В образе 'красивого' алтаря проявляется возможность трансформации и возрождения через глубокое осознание своих внутренних мифов.",
+      "interpretation_threatening": "Как 'угрожающий', разрушенный алтарь может сигнализировать о надвигающихся кризисах веры, когда догматизм готов поглотить нежное пламя духовного поиска."
     },
     {
-      "object": "Echoes of Chants",
-      "interpretation_broken": "If the echoes are perceived as broken, it might suggest a feeling of disconnection from one's spiritual community or tradition.",
-      "interpretation_beautiful": "Hearing the echoes as beautiful could represent a deep connection and resonance with spiritual teachings or practices.",
-      "interpretation_threatening": "If the echoes are threatening, it may denote an overwhelming pressure to conform to religious expectations or dogmas."
+      "object": "Великолепное кристальное озеро",
+      "interpretation_broken": "В восприятии 'сломанного' озера отражается искажение истинного духа, где красота теряет свою чистоту из-за внутренних конфликтов.",
+      "interpretation_beautiful": "Когда озеро кажется 'красивым', оно символизирует чистоту, прозрачность и возможность глубокого самоосознания, как зеркало для души, ищущей свет и мудрость.",
+      "interpretation_threatening": "Если озеро внушает 'угрожающие' образы, это может означать острую опасность, когда зов высших истин подавляется давлением внешнего авторитаризма."
     },
     {
-      "object": "Incense Smoke",
-      "interpretation_broken": "Seeing the incense smoke as broken could symbolize a disruption in one's spiritual practice or a feeling that prayers are not being heard.",
-      "interpretation_beautiful": "If the incense smoke is seen as beautiful, it might indicate a sense of peace and transcendence in spiritual rituals.",
-      "interpretation_threatening": "Perceiving incense smoke as threatening may reflect anxiety about the impermanence of life or the unknown aspects of spirituality."
+      "object": "Угрожающее каменное древо",
+      "interpretation_broken": "При восприятии этого дерева как 'сломанного', оно олицетворяет распад традиционных структур и падение духовных идолов, разрушенных под натиском времени.",
+      "interpretation_beautiful": "В виде 'красивого' символа, дерево представляет собой силу преодоления и жизненную силу, питающую духовные корни и свидетельствующую о вечном цикле возрождения.",
+      "interpretation_threatening": "Как 'угрожающее', каменное древо может символизировать нервное напряжение и угрозу диктатуры догм, когда истинное наставничество заменяется слепым следованием древним прописанным формулам."
     }
   ],
   "diagnostic_focus": {
     "pennebaker_markers": [
-      "spirituality",
-      "belief",
-      "community",
-      "tradition"
+      "мифологизация",
+      "ритуальное переживание"
     ],
     "mcadams_markers": [
-      "mentor",
-      "authority",
-      "tradition",
-      "faith"
+      "духовный наставник",
+      "путеводитель через кризис идентичности"
     ]
   },
   "transformation_mechanics": {
-    "externalization_question": "In what ways do the echoes of past teachings influence your current spiritual path?",
-    "action_prompt": "What does your body do when you hear the sudden gust of wind in the temple?"
+    "externalization_question": "Каким образом ты готов преобразовать свои внутренние мифы, чтобы отразить правду за рамками догм?",
+    "action_prompt": "Исследуй свою духовную линию и позволь внутреннему Иерофанту стать проводником между вечностью и настоящим."
   },
-  "sphere_id": 8,
+  "sphere_id": 12,
   "sphere_key": "SPIRIT"
 }

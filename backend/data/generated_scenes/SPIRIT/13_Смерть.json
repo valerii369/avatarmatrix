@@ -1,47 +1,44 @@
 {
-  "scene_name": "Labyrinth of Transcendence",
-  "psychological_foundation": "This scene explores the archetypal theme of Death within the context of spiritual transformation, inspired by the narrative and psychological theories of Jung, Laban, and others.",
+  "scene_name": "Пепел Духа",
+  "psychological_foundation": "Эта сцена переплетает архетип смерти с глубокой духовной трансформацией, где старое и неизбежное уступает место безбрежной свободе нового бытия. Здесь дух обретает силу через экологичное отпускание, позволяющее каждому осознать, что в конце всегда зарождается начало.",
   "immersion_architecture": {
-    "orientation": "The scene is set in a surreal labyrinth made of shifting sands and towering obsidian walls, reflecting the light of a perpetually setting sun. Shadows dance along the walls, creating intricate patterns that seem to whisper forgotten truths. The air is thick with the scent of incense and the distant echo of a gong reverberates through the corridors.",
-    "complication": "A sudden gust of wind disrupts the sand, revealing a hidden path that was previously obscured."
+    "orientation": "В сумеречном пейзаже, где небо сливается с обугленными облаками и мерцающим светом, выслеживаются символы вечного возрождения и неизбежного конца. Абстрактные контуры пейзажа резонируют с чувством утраты и обещанием новой жизни, создавая атмосферу сверхъестественного очищения без присутствия людей.",
+    "complication": "Из центра пепельного вихря неожиданно поднимается огненная вспышка, нарушая кажущуюся гармонию и вызывая напряжённое чувство предстоящей перемены."
   },
   "projection_dictionary": [
     {
-      "object": "Obsidian Walls",
-      "interpretation_broken": "A perception of the walls as broken suggests a feeling of vulnerability and the collapse of protective boundaries.",
-      "interpretation_beautiful": "Seeing the walls as beautiful indicates an appreciation for strength and the mysterious allure of the unknown.",
-      "interpretation_threatening": "Viewing the walls as threatening may reflect a fear of the unknown and the daunting nature of deep personal transformation."
+      "object": "Разбитое зеркальное озеро",
+      "interpretation_broken": "Если воспринимается как сломанное, оно символизирует разрушение иллюзий и утрату старого образа 'Я', что ведёт к болезненному, но необходимому процессу внутренней деконструкции.",
+      "interpretation_beautiful": "В виде красивого отражения, оно олицетворяет возможность увидеть обновлённое само 'Я' в множестве граней, где каждая трещина расцвечена светом нового понимания.",
+      "interpretation_threatening": "При угрожающем восприятии, оно предупреждает об опасности застывания в прошлом и страхе перед отказом от развивающегося потенциала."
     },
     {
-      "object": "Shifting Sands",
-      "interpretation_broken": "If the sands are perceived as broken, it may symbolize instability and a lack of foundation in one's life.",
-      "interpretation_beautiful": "Finding beauty in the sands suggests adaptability and the potential for growth through change.",
-      "interpretation_threatening": "Perceiving the sands as threatening could indicate a fear of change and the uncontrollable nature of life's transitions."
+      "object": "Древняя обугленная скала",
+      "interpretation_broken": "Как сломленная, она олицетворяет несостоятельность старых структур и убеждений, разрушение которых дает начало освобождению от устаревших ролей и шаблонов.",
+      "interpretation_beautiful": "В своей красоте, скала символизирует прочную основу, на которой возможно построить обновлённую сущность, опору для нового жизненного пути.",
+      "interpretation_threatening": "Если воспринимается как угрожающая, она предвещает опасность застывания в прошлом и повторение болезненных циклов, от которых трудно уйти."
     },
     {
-      "object": "Setting Sun",
-      "interpretation_broken": "A broken sun could symbolize hopelessness or the end of illumination and understanding.",
-      "interpretation_beautiful": "A beautiful sun represents enlightenment, hope, and the promise of new beginnings.",
-      "interpretation_threatening": "A threatening sun might reflect an overwhelming sense of impending endings or burnout."
+      "object": "Огненный вихрь",
+      "interpretation_broken": "В сломанном виде вихрь воплощает хаос и дезинтеграцию личности, где старое 'Я' полностью растворяется без возможности восстановления прежнего порядка.",
+      "interpretation_beautiful": "Красота вихря заключается в его способности сметать остатки устаревшего, пробуждая феникса внутри каждого, чтобы возродиться в новой форме.",
+      "interpretation_threatening": "Когда вихрь кажется угрожающим, он символизирует неконтролируемую силу разрушения, которая может пожрать все, если не станет катализатором осознанной трансформации."
     }
   ],
   "diagnostic_focus": {
     "pennebaker_markers": [
-      "transformation",
-      "change",
-      "fear",
-      "hope"
+      "Освобождающая печаль",
+      "Принятие конечности"
     ],
     "mcadams_markers": [
-      "narrative identity",
-      "archetypal journeys",
-      "transcendence"
+      "Этап переосмысления",
+      "Внутренняя трансформация"
     ]
   },
   "transformation_mechanics": {
-    "externalization_question": "In what ways does the thought of change manifest in your life as a labyrinth?",
-    "action_prompt": "What does your body feel as you navigate the shifting sands and towering walls of this scene?"
+    "externalization_question": "Что из своего прошлого ты готов оставить в пепле, чтобы родить новую искру жизни?",
+    "action_prompt": "Запиши или визуализируй символ, отражающий ту часть тебя, которую пора отпустить, и представь, как из пепла взмывает обновлённое 'Я'."
   },
-  "sphere_id": 8,
+  "sphere_id": 12,
   "sphere_key": "SPIRIT"
 }

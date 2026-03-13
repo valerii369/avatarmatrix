@@ -1,81 +1,50 @@
 {
     "1": {
-        "spheres": [
-            "IDENTITY"
-        ],
-        "note": "Я, тело, подача себя"
+        "spheres": ["IDENTITY"],
+        "name": "Личность"
     },
     "2": {
-        "spheres": [
-            "MONEY"
-        ],
-        "note": "Ресурсы, ценности, самооценка"
+        "spheres": ["RESOURCES"],
+        "name": "Ресурсы"
     },
     "3": {
-        "spheres": [
-            "MISSION",
-            "RELATIONS",
-            "IDENTITY"
-        ],
-        "note": "Коммуникация — распределяется"
+        "spheres": ["COMMUNICATION"],
+        "name": "Связи"
     },
     "4": {
-        "spheres": [
-            "FAMILY"
-        ],
-        "note": "Корни, семья, дом, предки"
+        "spheres": ["ROOTS"],
+        "name": "Корни"
     },
     "5": {
-        "spheres": [
-            "IDENTITY",
-            "FAMILY",
-            "MISSION"
-        ],
-        "note": "Творчество — распределяется"
+        "spheres": ["CREATIVITY"],
+        "name": "Творчество"
     },
     "6": {
-        "spheres": [
-            "HEALTH"
-        ],
-        "note": "Тело, рутина, служение"
+        "spheres": ["SERVICE"],
+        "name": "Служение"
     },
     "7": {
-        "spheres": [
-            "RELATIONS"
-        ],
-        "note": "Партнёрства, брак, другой"
+        "spheres": ["PARTNERSHIP"],
+        "name": "Партнерство"
     },
     "8": {
-        "spheres": [
-            "MONEY",
-            "RELATIONS",
-            "SPIRIT"
-        ],
-        "note": "Трансформация — распределяется"
+        "spheres": ["TRANSFORMATION"],
+        "name": "Тень"
     },
     "9": {
-        "spheres": [
-            "MISSION",
-            "SPIRIT"
-        ],
-        "note": "Философия — распределяется"
+        "spheres": ["EXPANSION"],
+        "name": "Поиск"
     },
     "10": {
-        "spheres": [
-            "MISSION"
-        ],
-        "note": "Карьера, призвание, статус"
+        "spheres": ["STATUS"],
+        "name": "Статус"
     },
     "11": {
-        "spheres": [
-            "SOCIETY"
-        ],
-        "note": "Друзья, сообщество, будущее"
+        "spheres": ["VISION"],
+        "name": "Будущее"
     },
     "12": {
-        "spheres": [
-            "SPIRIT"
-        ],
-        "note": "Бессознательное, трансценденция"
+        "spheres": ["SPIRIT"],
+        "name": "Дух"
     }
 }

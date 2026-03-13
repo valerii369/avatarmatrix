@@ -15,6 +15,7 @@ from app.agents.analytic_agent import run_mirror_analysis, extract_response_feat
 from app.core.feature_extractor import FeatureExtractor
 from app.core.economy import spend_energy, hawkins_to_rank, award_xp, process_card_rank_up, XP_VALUES
 from app.core.portrait_builder import build_portrait_for_sphere
+from app.core.user_print_manager import UserPrintManager
 from app.database import AsyncSessionLocal
 
 router = APIRouter()
@@ -30,8 +31,28 @@ async def _background_sync_processing(user_id: int, session_id: int, sphere: str
             # 2. Extract features
             await FeatureExtractor.process_sync_session(session, session_id, user_id)
             
-            # 3. Update portrait
-            await update_user_portrait(session, user_id, session_id)
+            # 3. Update technical portrait (River)
+            portrait_res = await update_user_portrait(session, user_id, session_id)
+            
+            # 4. Update the Hub (Ocean - User Print)
+            # Fetch the completed session to get the transcript
+            sync_session_res = await session.execute(select(SyncSession).where(SyncSession.id == session_id))
+            sync_session = sync_session_res.scalar_one_or_none()
+            
+            if sync_session:
+                transcript_text = "\n".join([f"{m['role']}: {m['content']}" for m in sync_session.session_transcript])
+                
+                # We pass the analytical results as 'source_data' for the Alchemist
+                source_data = {
+                    "sphere": sphere,
+                    "hawkins_score": sync_session.hawkins_score,
+                    "core_pattern": sync_session.core_pattern,
+                    "shadow_active": sync_session.shadow_active,
+                    "body_anchor": sync_session.body_anchor,
+                    "archetype_id": sync_session.archetype_id
+                }
+                
+                await UserPrintManager.update_user_print(session, user_id, transcript_text, source_data)
             
             await session.commit()
         except Exception as e:

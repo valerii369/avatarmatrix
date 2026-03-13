@@ -118,6 +118,10 @@ export const paymentsAPI = {
         api.post("/api/payments/create-invoice", { user_id: userId, offer_id: offerId }),
 };
 
+export const masterHubAPI = {
+    get: (userId: number) => api.get(`/api/master-hub/${userId}`),
+};
+
 // WebSocket helper
 export function createSessionWS(userId: number, cardProgressId: number): WebSocket {
     const wsBase = API_BASE.replace("http", "ws");

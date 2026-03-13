@@ -1,0 +1,46 @@
+{
+  "scene_name": "The Suspended Forest",
+  "psychological_foundation": "The scene is a symbolic representation of the archetype of the Hanged Man in the realm of Expansion, focusing on the duality of voluntary sacrifice and the illusion of entrapment.",
+  "immersion_architecture": {
+    "orientation": "In a forest where the trees grow upside down, their roots exposed to the sky while their leaves brush the earth, the air is thick with a mist that twinkles with unspoken secrets. The ground is covered with shards of broken mirrors, reflecting fragmented visions of reality. The atmosphere is one of disorienting serenity, as if the world itself has paused to contemplate its own reflection.",
+    "complication": "A sudden gust of wind sends a cascade of leaves spiraling upwards, revealing a path of light that invites exploration."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Upside down trees",
+      "interpretation_broken": "Perceiving these trees as broken suggests a struggle with seeing the world from unconventional perspectives, feeling that one's own growth is hindered or misaligned.",
+      "interpretation_beautiful": "Seeing beauty in these trees indicates an appreciation for unconventional wisdom and the ability to find harmony in chaos.",
+      "interpretation_threatening": "Finding these trees threatening may reflect a fear of losing stability and the anxiety of facing the unknown when familiar structures are overturned."
+    },
+    {
+      "object": "Shards of broken mirrors",
+      "interpretation_broken": "If seen as broken, this suggests a fragmented sense of self or identity, with pieces of one's life feeling disconnected.",
+      "interpretation_beautiful": "Seeing beauty here indicates an acceptance of one's multifaceted identity and the ability to find coherence in diversity.",
+      "interpretation_threatening": "Perceiving them as threatening suggests the fear of confronting one's own reflections or the discomfort of facing inner truths."
+    },
+    {
+      "object": "Mist with twinkling secrets",
+      "interpretation_broken": "Perceiving this mist as broken might indicate a feeling that one's intuition or inner guidance is clouded or unreliable.",
+      "interpretation_beautiful": "Seeing it as beautiful suggests a trust in the mysteries of life and a readiness to embrace the unknown with curiosity.",
+      "interpretation_threatening": "If seen as threatening, it may reflect anxiety about hidden aspects of life or fear of being consumed by uncertainty."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "self-reflection",
+      "identity",
+      "perception"
+    ],
+    "mcadams_markers": [
+      "sacrifice",
+      "transformation",
+      "acceptance"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What part of your life feels like it's been turned upside down, and how does this shift offer a new perspective?",
+    "action_prompt": "Embrace a moment of stillness and allow yourself to perceive the world from a different angle, seeking insight in what appears inverted."
+  },
+  "sphere_id": 9,
+  "sphere_key": "EXPANSION"
+}

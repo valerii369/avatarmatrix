@@ -1,0 +1,44 @@
+{
+  "scene_name": "The Cosmic Oasis",
+  "psychological_foundation": "Exploration of the World archetype through the lens of Expansion, focusing on the journey towards total integration and the potential pitfalls of fearing completion.",
+  "immersion_architecture": {
+    "orientation": "In a surreal desert, the sands shimmer with an iridescent glow, reflecting the tapestry of constellations above. Giant, translucent spheres float gently in the air, each containing a miniature ecosystem, from lush forests to tranquil lakes. A distant, ethereal music hums through the air, as if the universe itself is singing a lullaby.",
+    "complication": "A sudden, intense gust of wind scatters the floating spheres, sending them spiraling in different directions."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Translucent Spheres",
+      "interpretation_broken": "Perceiving the spheres as broken may indicate a fear of fragmentation and an inability to see the interconnectedness of one's experiences.",
+      "interpretation_beautiful": "Seeing the spheres as beautiful suggests a recognition of the diversity and richness of life experiences, and a celebration of the journey towards integration.",
+      "interpretation_threatening": "If the spheres are seen as threatening, it might reflect anxiety about the unknown or fear of losing control over the narrative of one's life."
+    },
+    {
+      "object": "Iridescent Sands",
+      "interpretation_broken": "If the sands are perceived as broken, it could signify a fear of instability or the inability to find solid ground in one's life journey.",
+      "interpretation_beautiful": "When seen as beautiful, the sands represent an appreciation for the fluid and ever-changing nature of life's path.",
+      "interpretation_threatening": "Perceiving the sands as threatening could indicate a dread of change or the fear of being overwhelmed by the vastness of life's possibilities."
+    },
+    {
+      "object": "Ethereal Music",
+      "interpretation_broken": "Viewing the music as broken might suggest a disconnection from one's inner harmony or a struggle to find meaning in the chaos of life.",
+      "interpretation_beautiful": "Finding beauty in the music implies a deep connection with the rhythm of life and an acceptance of its inherent harmony.",
+      "interpretation_threatening": "If the music is seen as threatening, it may reflect a fear of being consumed by emotions or the overpowering nature of the subconscious mind."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "emotional expression",
+      "cognitive processing"
+    ],
+    "mcadams_markers": [
+      "narrative coherence",
+      "integration of self"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What part of your journey feels like it is spiraling out of control, and how can you re-center it?",
+    "action_prompt": "Create a visual map of your life's journey, marking moments of integration and fragmentation, and reflect on how they have shaped your current worldview."
+  },
+  "sphere_id": 9,
+  "sphere_key": "EXPANSION"
+}

@@ -1,44 +1,44 @@
 {
-  "scene_name": "The Alchemical Garden",
-  "psychological_foundation": "A surreal garden that symbolizes the spiritual journey of harmony and moderation, exploring the balance between opposing forces to create an inner peace.",
+  "scene_name": "Алхимия Умеренности: Духовное Перетекание",
+  "psychological_foundation": "Дух (SPIRIT) в текстовой проекции истинной внутренней алхимии, соединяющей несоединимое для рождения нового качества, где меру и такт переплетаются с глубокой эмоциональной мудростью.",
   "immersion_architecture": {
-    "orientation": "In the heart of a garden, surreal and vibrant, a river of mercury flows silently beside a bed of glowing flowers that pulsate in rhythm with an unseen heartbeat. An ancient sundial stands, casting shadows that move in unexpected directions, suggesting the passage of time in a non-linear fashion. Above, the sky shifts colors like a living painting, reflecting the inner emotional landscape of the observer.",
-    "complication": "A sudden crack appears in the sundial, emitting a low hum that disturbs the harmony of the scene, as the mercury river begins to ripple violently."
+    "orientation": "В безбрежном эфирном пространстве, где мерцающие оттенки света и тени переплетаются, возвышаются древние, почти забытые артефакты, символизирующие вечный баланс духа. Тишина и пульсирующая энергия сливаются, создавая сюрреалистичный диалог, в котором каждая деталь наполнена отголосками умеренности и трансформации.",
+    "complication": "Неожиданный всплеск темного сияния пробивает спокойствие эфира, вызывая трепет и напряженность в ритме вечного танца энергии."
   },
   "projection_dictionary": [
     {
-      "object": "Mercury River",
-      "interpretation_broken": "Perceiving the river as broken suggests a struggle with the flow of emotions and an inability to harmonize inner conflicts.",
-      "interpretation_beautiful": "Seeing the river as beautiful indicates a deep connection to one's emotional state and an appreciation for the fluidity of life.",
-      "interpretation_threatening": "Viewing the river as threatening points to a fear of being overwhelmed by emotions or change."
+      "object": "Зеркальное озеро",
+      "interpretation_broken": "Ледяные трещины на его поверхности сигнализируют о потере целостности духа, предостерегая о дисгармонии внутренней алхимии.",
+      "interpretation_beautiful": "Идеально гладкая поверхность озера отражает глубокое чувство меры и такта, демонстрируя совершенную симфонию энергии и спокойствия.",
+      "interpretation_threatening": "Темные водные тени, скользящие по его краям, могут быть восприняты как предвестники внутренней нестабильности и подавленной силы."
     },
     {
-      "object": "Glowing Flowers",
-      "interpretation_broken": "If the flowers are seen as broken, it may indicate a feeling of lost potential or creativity.",
-      "interpretation_beautiful": "Finding the flowers beautiful reflects a sense of wonder and inspiration from the natural world.",
-      "interpretation_threatening": "Seeing the flowers as threatening suggests anxiety about the unpredictability of growth or change."
+      "object": "Лабиринт из россыпей световых частиц",
+      "interpretation_broken": "Сломанный лабиринт указывает на фрагментацию внутреннего мира, где энергии утратили свою взаимосвязь и нарушен ритм самоисцеления.",
+      "interpretation_beautiful": "Безупречно выстроенный лабиринт символизирует гармоничное распределение энергии, где каждая световая частица точно исполняет свою роль в великой симфонии духа.",
+      "interpretation_threatening": "Если лабиринт кажется угрожающим, это намек на подавление яркости и трансформации, когда страх перед переменами затмевает внутреннюю искру."
     },
     {
-      "object": "Ancient Sundial",
-      "interpretation_broken": "A broken sundial represents a disconnect from one's sense of time or progress in life.",
-      "interpretation_beautiful": "A beautiful sundial symbolizes an appreciation for the passage of time and life's journey.",
-      "interpretation_threatening": "A threatening sundial indicates fear of time running out or anxiety about the future."
+      "object": "Кристаллическое дерево",
+      "interpretation_broken": "Разбитые ветви этого дерева предвещают утрату связи с глубинной мудростью, выражая страх перед расцветом истинного потенциала.",
+      "interpretation_beautiful": "Целостное сияние дерева олицетворяет идеал умеренности, где каждая ветвь отражает гармонию и природу внутренней алхимии.",
+      "interpretation_threatening": "Если дерево воспринимается как угрожающее, это знак искажения силы и света, где энергия превращается в источник внутреннего конфликта и застоя."
     }
   ],
   "diagnostic_focus": {
     "pennebaker_markers": [
-      "emotions",
-      "time"
+      "эмоциональное самовыражение через символизм",
+      "трансформация через архетипические образы"
     ],
     "mcadams_markers": [
-      "harmony",
-      "growth"
+      "нарративная идентичность через внутренние архетипы",
+      "личное развитие в каждом символе"
     ]
   },
   "transformation_mechanics": {
-    "externalization_question": "How does the disturbance in the garden reflect conflicts in your own life?",
-    "action_prompt": "What is your body doing as you observe the transformation in the garden?"
+    "externalization_question": "Какие из представленных символов резонируют с вашей внутренней алхимией, и как их восприятие помогает раскрыть истинную умеренность вашего духа?",
+    "action_prompt": "Представьте, как вы, преображая утраченные элементы, восстанавливаете целостность и создаете новый источник яркой, гармоничной энергии."
   },
-  "sphere_id": 8,
+  "sphere_id": 12,
   "sphere_key": "SPIRIT"
 }

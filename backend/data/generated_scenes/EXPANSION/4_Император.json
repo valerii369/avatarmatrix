@@ -1,0 +1,46 @@
+{
+  "scene_name": "The Eternal Courtyard",
+  "psychological_foundation": "This scene explores the dynamic between the search for expansion and the archetype of the Emperor, where leadership and order meet rigidity and control.",
+  "immersion_architecture": {
+    "orientation": "In the heart of an infinite courtyard, enclosed by towering marble walls, lies a labyrinthine garden. The hedges of the garden are meticulously trimmed, forming geometric patterns that stretch as far as the eye can see under a sky that shifts colors like a kaleidoscope. In the center stands an imposing statue of an emperor, cast in bronze, exuding both authority and an air of silent contemplation.",
+    "complication": "Suddenly, a tremor shakes the ground, causing the labyrinth walls to shimmer and distort."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Marble Walls",
+      "interpretation_broken": "If perceived as broken, it may indicate the user's fear of losing protective boundaries or a collapse of perceived order.",
+      "interpretation_beautiful": "If seen as beautiful, it may reflect the user's appreciation for structure and the safety provided by well-defined limits.",
+      "interpretation_threatening": "If perceived as threatening, it may signify feelings of being trapped or constrained by external pressures."
+    },
+    {
+      "object": "Labyrinthine Garden",
+      "interpretation_broken": "If seen as broken, it could suggest the user feels lost or confused in their life journey.",
+      "interpretation_beautiful": "If viewed as beautiful, it indicates a fascination with complexity and the beauty of intricate systems.",
+      "interpretation_threatening": "If perceived as threatening, it might reflect anxiety about navigating life's challenges and fear of the unknown."
+    },
+    {
+      "object": "Statue of the Emperor",
+      "interpretation_broken": "If seen as broken, it may symbolize the user's challenge with authority or internal conflict regarding leadership roles.",
+      "interpretation_beautiful": "If viewed as beautiful, it indicates respect for wisdom and the guidance of those who lead.",
+      "interpretation_threatening": "If perceived as threatening, it may reflect a fear of authoritarian control or oppressive structures in one's life."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "control",
+      "boundaries",
+      "authority"
+    ],
+    "mcadams_markers": [
+      "power",
+      "order",
+      "expansion"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What part of the labyrinth feels most like your current path in life?",
+    "action_prompt": "Consider creating a small change in your daily routine that represents a shift towards more freedom or order, depending on what you seek."
+  },
+  "sphere_id": 9,
+  "sphere_key": "EXPANSION"
+}

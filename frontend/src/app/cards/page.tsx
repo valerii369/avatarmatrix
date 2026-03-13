@@ -14,18 +14,23 @@ import { Skeleton, MiniCardSkeleton } from "@/components/Skeleton";
 const SPHERES = [
     { key: "ALL", name: "Все", color: "#ffffff" },
     { key: "IDENTITY", name: "Личность", color: "#F59E0B" },
-    { key: "MONEY", name: "Деньги", color: "#10B981" },
-    { key: "RELATIONS", name: "Отношения", color: "#EC4899" },
-    { key: "FAMILY", name: "Род", color: "#F97316" },
-    { key: "MISSION", name: "Миссия", color: "#3B82F6" },
-    { key: "HEALTH", name: "Здоровье", color: "#22C55E" },
-    { key: "SOCIETY", name: "Влияние", color: "#8B5CF6" },
-    { key: "SPIRIT", name: "Духовность", color: "#A78BFA" },
+    { key: "RESOURCES", name: "Ресурсы", color: "#10B981" },
+    { key: "COMMUNICATION", name: "Связи", color: "#06B6D4" },
+    { key: "ROOTS", name: "Корни", color: "#F97316" },
+    { key: "CREATIVITY", name: "Творчество", color: "#EC4899" },
+    { key: "SERVICE", name: "Служение", color: "#14B8A6" },
+    { key: "PARTNERSHIP", name: "Партнерство", color: "#3B82F6" },
+    { key: "TRANSFORMATION", name: "Тень", color: "#6366F1" },
+    { key: "EXPANSION", name: "Поиск", color: "#8B5CF6" },
+    { key: "STATUS", name: "Статус", color: "#EF4444" },
+    { key: "VISION", name: "Будущее", color: "#D946EF" },
+    { key: "SPIRIT", name: "Дух", color: "#64748B" },
 ];
 
 const SPHERE_EMOJI: Record<string, string> = {
-    IDENTITY: "✦", MONEY: "◈", RELATIONS: "❤", FAMILY: "⚘",
-    MISSION: "◉", HEALTH: "⬡", SOCIETY: "◐", SPIRIT: "∞",
+    IDENTITY: "✦", RESOURCES: "◈", COMMUNICATION: "❤", ROOTS: "⚘",
+    CREATIVITY: "◉", SERVICE: "⬡", PARTNERSHIP: "◐", TRANSFORMATION: "∞",
+    EXPANSION: "▲", STATUS: "◈", VISION: "◌", SPIRIT: "◑",
 };
 
 // Status labels & colors as shown on the screenshot
@@ -194,7 +199,7 @@ export default function CardsPage() {
                         </>
                     ) : (
                         <>
-                            <StatTile label="Сферы" value={`${openedSpheres}/8`} color="#F59E0B" />
+                            <StatTile label="Сферы" value={`${openedSpheres}/12`} color="#F59E0B" />
                             <StatTile label="Карточки" value={`${activeCards}/${TOTAL_CARDS}`} color="#10B981" />
                             <StatTile label="Рекомендовано" value={String(recommended)} color="#60A5FA" />
                         </>

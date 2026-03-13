@@ -245,6 +245,44 @@ def calculate_natal_chart(
         result.south_node_sign = south_sign_en
         result.south_node_sign_ru = south_sign_ru
 
+    # Add Part of Fortune (Фортуна)
+    # Day: Asc + Moon - Sun | Night: Asc + Sun - Moon
+    sun = next((p for p in result.planets if p.name_en == "Sun"), None)
+    moon = next((p for p in result.planets if p.name_en == "Moon"), None)
+    if sun and moon:
+        sun_degree = sun.degree
+        moon_degree = moon.degree
+        # Determine if day or night (Sun above/below horizon)
+        is_day = get_house(sun_degree, cusps) > 6
+
+        if is_day:
+            fortune_degree = (ascendant_degree + moon_degree - sun_degree) % 360
+        else:
+            fortune_degree = (ascendant_degree + sun_degree - moon_degree) % 360
+        
+        f_sign_en, f_sign_ru, _ = degree_to_sign(fortune_degree)
+        f_house = get_house(fortune_degree, cusps)
+        f_sign_data = SIGN_ARCHETYPE_MAP.get(f_sign_en, {})
+
+        fortune = PlanetPosition(
+            name="Колесо Фортуны",
+            name_en="PartFortune",
+            degree=round(fortune_degree, 4),
+            sign=f_sign_en,
+            sign_ru=f_sign_ru,
+            house=f_house,
+            retrograde=False,
+            is_stationary=False,
+            speed=0.0,
+            archetype_id=10,  # Колесо Фортуны
+            sign_primary_archetype=f_sign_data.get("primary_archetype", 0),
+            sign_secondary_archetype=f_sign_data.get("secondary_archetype", 0),
+            decan_ruler=DECAN_MAP.get(f_sign_en, ["Sun", "Sun", "Sun"])[min(int((fortune_degree % 30) // 10), 2)],
+            decan_ruler_archetype=PLANET_ARCHETYPE_MAP.get(DECAN_MAP.get(f_sign_en, ["Sun", "Sun", "Sun"])[min(int((fortune_degree % 30) // 10), 2)], {}).get("archetype_id", 0),
+            priority="high",
+        )
+        result.planets.append(fortune)
+
     return result
 
 

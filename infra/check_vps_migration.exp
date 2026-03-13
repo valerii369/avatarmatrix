@@ -1,0 +1,9 @@
+#!/usr/bin/expect -f
+set timeout -1
+set password "eCTyD*R.94zTba"
+set host "103.74.92.72"
+
+spawn ssh -o StrictHostKeyChecking=no root@$host "cat /root/avatar/backend/migrations/versions/a535e559fc9f_add_current_phase_to_reflectionsession.py"
+expect "*assword:*"
+send "$password\r"
+expect eof

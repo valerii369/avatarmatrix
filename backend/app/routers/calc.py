@@ -2,7 +2,7 @@
 Calc router: birth data input → natal chart calculation → 176 cards generation.
 """
 from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -16,13 +16,18 @@ from app.core.astrology.natal_chart import (
 from app.core.astrology.aspect_calculator import calculate_aspects, to_dict as aspects_to_dict
 from app.core.astrology.llm_engine import synthesize_sphere_descriptions
 from app.core.astrology.vector_matcher import match_archetypes_to_spheres
+from app.core.user_print_manager import UserPrintManager
 import logging
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-SPHERES = ["IDENTITY", "MONEY", "RELATIONS", "FAMILY", "MISSION", "HEALTH", "SOCIETY", "SPIRIT"]
+SPHERES = [
+    "IDENTITY", "RESOURCES", "COMMUNICATION", "ROOTS",
+    "CREATIVITY", "SERVICE", "PARTNERSHIP", "TRANSFORMATION",
+    "EXPANSION", "STATUS", "VISION", "SPIRIT"
+]
 ARCHETYPE_IDS = list(range(22))  # 0-21
 
 
@@ -44,6 +49,7 @@ class CalcResponse(BaseModel):
 @router.post("", response_model=CalcResponse)
 async def calculate(
     request: BirthDataRequest,
+    background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
 ):
     """
@@ -196,10 +202,33 @@ async def calculate(
     await db.commit()
     logger.info("Commit successful.")
 
+    # Populate the Hub (Ocean) immediately with Astro data (Synchronous)
+    try:
+        await UserPrintManager.initialize_from_astro(db, user.id, sphere_descriptions)
+    except Exception as init_e:
+        logger.warning(f"Initial User Print population failed: {init_e}")
+
+    # Update the Hub (Ocean - User Print) with deep synthesis refinement via background task
+    from app.database import AsyncSessionLocal
+    async def _bg_hub_update(u_id, s_desc):
+        async with AsyncSessionLocal() as session:
+            try:
+                await UserPrintManager.update_user_print(
+                    session, 
+                    u_id, 
+                    "Initial Astrological Calculation", 
+                    {"source": "astro_natal_chart", "spheres": s_desc}
+                )
+                await session.commit()
+            except Exception as bg_e:
+                logger.warning(f"Background User Print synthesis failed: {bg_e}")
+
+    background_tasks.add_task(_bg_hub_update, user.id, sphere_descriptions)
+
     return CalcResponse(
         success=True,
         natal_chart=chart_dict,
         recommended_cards=recommended_dict,
-        total_cards=22 * 8,
+        total_cards=22 * 12,
         message=f"Карта рассчитана. Рекомендовано {len(recommended_dict)} карточек.",
     )

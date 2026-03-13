@@ -1,0 +1,45 @@
+{
+  "scene_name": "Labyrinth of Desires",
+  "psychological_foundation": "This scene is rooted in the exploration of the Devil archetype within the Expansion sphere, focusing on the dynamic tension between repressed desires and the potential for empowerment through acknowledgment and integration.",
+  "immersion_architecture": {
+    "orientation": "In a dimly lit cavernous space, walls glisten with mysterious, shifting symbols that seem to pulse with an inner light. The air is thick with the scent of incense and echoes of distant, haunting melodies linger like whispers of forgotten truths. Shadows dance provocatively, hinting at hidden pathways and the promise of undiscovered secrets.",
+    "complication": "A sudden, blinding flash reveals a doorway that was not there before, pulsating with an irresistible allure."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Symbols on the Walls",
+      "interpretation_broken": "If seen as broken, it suggests a fear or resistance towards confronting one's own subconscious thoughts and desires.",
+      "interpretation_beautiful": "If perceived as beautiful, it indicates a readiness to embrace the complexity of one's inner world.",
+      "interpretation_threatening": "If felt as threatening, it reveals anxiety about the unknown aspects of the self and the potential chaos they might unleash."
+    },
+    {
+      "object": "Incense Scent",
+      "interpretation_broken": "If considered broken, it implies a disconnection from spiritual or deeper emotional experiences.",
+      "interpretation_beautiful": "If found beautiful, it suggests a harmonious relationship with one's own spiritual and emotional depths.",
+      "interpretation_threatening": "If perceived as threatening, it indicates a fear of being overwhelmed by intense emotions or spiritual experiences."
+    },
+    {
+      "object": "Doorway",
+      "interpretation_broken": "If seen as broken, it reflects a belief in being trapped by one's circumstances or limited by internal barriers.",
+      "interpretation_beautiful": "If perceived as beautiful, it signifies an openness to new experiences and personal growth.",
+      "interpretation_threatening": "If felt as threatening, it highlights a fear of change or the unknown, and the implications of stepping into new territories."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "desire",
+      "fear",
+      "power"
+    ],
+    "mcadams_markers": [
+      "integration",
+      "transformation"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What does the doorway symbolize for you in your current journey?",
+    "action_prompt": "Imagine yourself stepping through the doorway. What do you discover about your hidden desires and potential powers on the other side?"
+  },
+  "sphere_id": 9,
+  "sphere_key": "EXPANSION"
+}

@@ -1,0 +1,46 @@
+{
+  "scene_name": "The Verdant Labyrinth",
+  "psychological_foundation": "Exploration of nurturing and abundance within the self, alongside the shadow of over-control and material attachment.",
+  "immersion_architecture": {
+    "orientation": "A lush, sprawling garden unfolds infinitely under a canopy of twinkling stars, where gravity seems lighter and every step feels like a gentle float. The air is saturated with the fragrance of blooming jasmine and the soft hum of unseen creatures basking in the moon's glow. Marble fountains, adorned with intricate carvings of mythical creatures, bubble with a golden, honey-like liquid that seems to pulse with life.",
+    "complication": "A sudden gust of wind scatters the petals from the flowers, swirling them into a whirlwind that blocks the path ahead."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Marble Fountains",
+      "interpretation_broken": "Perceiving the fountains as broken may suggest a fear of emotional stagnation or a block in creative flow, indicating a struggle with accessing one's inner abundance.",
+      "interpretation_beautiful": "Seeing the fountains as beautiful can reflect a deep appreciation for life's natural rhythms and an openness to receive and share emotional and creative wealth.",
+      "interpretation_threatening": "If the fountains appear threatening, it might signify an anxiety around being overwhelmed by one's emotions or the pressure of maintaining external appearances."
+    },
+    {
+      "object": "Golden Liquid",
+      "interpretation_broken": "Viewing the liquid as broken might indicate a sense of disconnect from one's inner resources or a fear of depletion in personal energy or creativity.",
+      "interpretation_beautiful": "If the liquid seems beautiful, it could represent a harmonious connection with one's inner vitality and a sense of fulfillment and contentment.",
+      "interpretation_threatening": "Seeing the liquid as threatening could suggest a fear of excess or the potential dangers of overindulgence in sensory pleasures."
+    },
+    {
+      "object": "Whirlwind of Petals",
+      "interpretation_broken": "Seeing the whirlwind as broken may reflect a sense of frustration or feeling stuck in life's progress, as if opportunities are slipping away.",
+      "interpretation_beautiful": "Perceiving the whirlwind as beautiful might indicate an acceptance of life's chaotic nature and a willingness to embrace change and transformation.",
+      "interpretation_threatening": "If the whirlwind appears threatening, it could signify a fear of losing control or being swept away by life's unpredictable forces."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "emotional expression",
+      "sensory detail",
+      "nature imagery"
+    ],
+    "mcadams_markers": [
+      "nurturance",
+      "control",
+      "material attachment"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "How does the garden reflect the balance between nurturing growth and controlling outcomes in your life?",
+    "action_prompt": "Imagine stepping into the whirlwind and allowing it to guide you to a new path in the garden. What do you discover about your own capacity for growth and transformation?"
+  },
+  "sphere_id": 9,
+  "sphere_key": "EXPANSION"
+}

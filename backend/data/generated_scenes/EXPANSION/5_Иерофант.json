@@ -1,0 +1,47 @@
+{
+  "scene_name": "The Enigmatic Temple",
+  "psychological_foundation": "The scene draws upon the archetype of the Hierophant, focusing on the search for higher knowledge and spiritual truths. It reflects the tension between transmitting wisdom and the potential for dogmatism.",
+  "immersion_architecture": {
+    "orientation": "An ancient temple stands amidst swirling mists, its stone walls etched with cryptic symbols that seem to pulse with a faint, otherworldly glow. The air is heavy with the scent of incense, and the faint echoes of chanting can be heard, as if the temple itself is alive with the whispers of forgotten truths. A labyrinthine garden surrounds the temple, its paths twisting and turning into the unknown.",
+    "complication": "A sudden gust of wind sweeps through the temple, scattering the cryptic symbols into the air like autumn leaves, obscuring the path forward."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Cryptic Symbols",
+      "interpretation_broken": "Seeing the symbols as broken may indicate a struggle with understanding or accepting complex ideas and truths.",
+      "interpretation_beautiful": "Perceiving the symbols as beautiful suggests a deep appreciation for the mystery and complexity of spiritual knowledge.",
+      "interpretation_threatening": "Finding the symbols threatening could reflect anxiety about the unknown or fear of confronting challenging beliefs."
+    },
+    {
+      "object": "Labyrinthine Garden",
+      "interpretation_broken": "A broken garden may symbolize feelings of confusion or being lost in one's spiritual journey.",
+      "interpretation_beautiful": "A beautiful garden represents harmony and the richness of exploring one's inner world.",
+      "interpretation_threatening": "A threatening garden might indicate apprehension about the twists and turns of personal growth and discovery."
+    },
+    {
+      "object": "Swirling Mists",
+      "interpretation_broken": "Broken mists could imply a lack of clarity or difficulty in perceiving the truth.",
+      "interpretation_beautiful": "Beautiful mists suggest a comfort in ambiguity and the unfolding journey of understanding.",
+      "interpretation_threatening": "Threatening mists might reflect fear of the unknown and the obscured nature of future insights."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "mystery",
+      "journey",
+      "knowledge",
+      "anxiety"
+    ],
+    "mcadams_markers": [
+      "search for meaning",
+      "spiritual quest",
+      "fear of uncertainty"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What part of this enigmatic temple resonates with your own search for truth?",
+    "action_prompt": "Imagine stepping into the temple and interacting with one of its elements. What do you learn about your own beliefs or fears?"
+  },
+  "sphere_id": 9,
+  "sphere_key": "EXPANSION"
+}

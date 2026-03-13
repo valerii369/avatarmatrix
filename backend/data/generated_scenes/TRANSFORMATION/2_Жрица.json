@@ -1,0 +1,45 @@
+{
+  "scene_name": "The Veil of the High Priestess",
+  "psychological_foundation": "This scene explores the archetype of the High Priestess, focusing on the spiritual domain. The scene examines the dual aspects of the Priestess archetype, both light and shadow, through a surreal environment that invites introspection and projection.",
+  "immersion_architecture": {
+    "orientation": "A moonlit forest clearing, where mist weaves through ancient trees like whispers of forgotten secrets. In the center, an altar of crystalline stones glows faintly, casting ethereal shadows that dance on the ground. The air is thick with silence, a sacred hush that invites contemplation beyond the veil of the known.",
+    "complication": "A sudden chill descends as the mist begins to swirl more aggressively, forming a vortex that seems to pulse with an unspoken question."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Altar of Crystalline Stones",
+      "interpretation_broken": "Perceiving the altar as broken may indicate a disrupted connection to one's inner wisdom and spiritual foundations.",
+      "interpretation_beautiful": "Seeing the altar as beautiful suggests a harmonious alignment with one's inner truth and a deep appreciation for spiritual mysteries.",
+      "interpretation_threatening": "Viewing the altar as threatening could reflect fear of the unknown or resistance to exploring one's deeper consciousness."
+    },
+    {
+      "object": "Mist",
+      "interpretation_broken": "If the mist is seen as broken, it may symbolize confusion and difficulty in navigating one's subconscious or spiritual path.",
+      "interpretation_beautiful": "Perceiving the mist as beautiful indicates comfort in ambiguity and an openness to the mysteries of the psyche.",
+      "interpretation_threatening": "Seeing the mist as threatening might suggest anxiety about hidden aspects of the self and fear of confronting inner truths."
+    },
+    {
+      "object": "Moonlight",
+      "interpretation_broken": "Broken moonlight could represent a fractured intuition or a struggle to see clearly one's path or purpose.",
+      "interpretation_beautiful": "Beautiful moonlight suggests clarity in intuition and a strong connection to one's inner guidance.",
+      "interpretation_threatening": "Threatening moonlight may symbolize overwhelming insights or truths that challenge one's current understanding."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "insight",
+      "tentative",
+      "inhibition"
+    ],
+    "mcadams_markers": [
+      "self-exploration",
+      "spirituality"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What unseen forces do you feel are swirling around you, challenging or guiding your path?",
+    "action_prompt": "What does your body do as the mist swirls around you? Do you feel drawn to the altar, or do you hesitate?"
+  },
+  "sphere_id": 8,
+  "sphere_key": "SPIRIT"
+}

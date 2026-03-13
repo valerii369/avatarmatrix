@@ -1,0 +1,48 @@
+{
+  "scene_name": "Court of Echoes",
+  "psychological_foundation": "The scene is a reflection on the archetype of Justice, exploring the dual aspects of objectivity and rigid judgment, while also delving into the concept of status and its impact on self-perception and actions.",
+  "immersion_architecture": {
+    "orientation": "In the heart of a colossal marble amphitheater, echoes of unseen gavel strikes resonate through the still air, creating ripples in the pools of water that form labyrinthine patterns across the floor. Columns of light filter through an oculus above, casting shifting shadows that resemble the scales of justice, eternally balancing in the breeze. The walls, lined with faceless statues, seem to whisper forgotten verdicts to those who pass through this surreal hall of judgment.",
+    "complication": "A sudden crack splits one of the marble columns, sending a cascade of dust into the air, as a previously unseen door creaks open, revealing an impenetrable darkness beyond."
+  },
+  "projection_dictionary": [
+    {
+      "object": "Marble Column",
+      "interpretation_broken": "Viewing the column as broken might indicate a perception of instability or vulnerability in one's sense of justice or moral foundation.",
+      "interpretation_beautiful": "Seeing the column as beautiful could reflect a deep appreciation for strength, resilience, and the integrity of one's principles.",
+      "interpretation_threatening": "Finding the column threatening may suggest a fear of judgment or a perception of oppressive authority."
+    },
+    {
+      "object": "Labyrinthine Pools",
+      "interpretation_broken": "If perceived as broken, it may suggest confusion or lack of clarity in one's current life path or decision-making process.",
+      "interpretation_beautiful": "Seeing the pools as beautiful could indicate a harmonious connection with one's emotions and subconscious mind.",
+      "interpretation_threatening": "Perceiving the pools as threatening might reflect a fear of being overwhelmed by one's emotions or inner chaos."
+    },
+    {
+      "object": "Faceless Statues",
+      "interpretation_broken": "If seen as broken, this might symbolize a loss of identity or a disconnect with societal roles and expectations.",
+      "interpretation_beautiful": "Viewing the statues as beautiful could represent a sense of unity and transcendence beyond personal ego.",
+      "interpretation_threatening": "Perceiving the statues as threatening may indicate a fear of anonymity or the loss of individuality within societal structures."
+    }
+  ],
+  "diagnostic_focus": {
+    "pennebaker_markers": [
+      "judgment",
+      "balance",
+      "responsibility",
+      "powerlessness"
+    ],
+    "mcadams_markers": [
+      "moral conflict",
+      "identity",
+      "authority",
+      "legacy"
+    ]
+  },
+  "transformation_mechanics": {
+    "externalization_question": "What aspects of your life do you feel are currently under judgment or scrutiny, either by yourself or others?",
+    "action_prompt": "Reflect on a recent decision where you felt judged. How might embracing both the light and shadow aspects of justice change your perspective of this situation?"
+  },
+  "sphere_id": 10,
+  "sphere_key": "STATUS"
+}
