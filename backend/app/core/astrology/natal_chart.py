@@ -71,6 +71,67 @@ class PlanetPosition:
     decan_ruler: str
     decan_ruler_archetype: int
     priority: str
+    dignity: str = "neutral"
+    dignity_score: int = 0
+
+
+DIGNITY_TABLE = {
+    "Domicile": {
+        "Sun": ["Leo"],
+        "Moon": ["Cancer"],
+        "Mercury": ["Gemini", "Virgo"],
+        "Venus": ["Taurus", "Libra"],
+        "Mars": ["Aries", "Scorpio"],
+        "Jupiter": ["Sagittarius", "Pisces"],
+        "Saturn": ["Capricorn", "Aquarius"],
+        "Uranus": ["Aquarius"],
+        "Neptune": ["Pisces"],
+        "Pluto": ["Scorpio"],
+    },
+    "Exaltation": {
+        "Sun": ["Aries"],
+        "Moon": ["Taurus"],
+        "Mercury": ["Virgo"],
+        "Venus": ["Pisces"],
+        "Mars": ["Capricorn"],
+        "Jupiter": ["Cancer"],
+        "Saturn": ["Libra"],
+    },
+    "Detriment": {
+        "Sun": ["Aquarius"],
+        "Moon": ["Capricorn"],
+        "Mercury": ["Sagittarius", "Pisces"],
+        "Venus": ["Aries", "Scorpio"],
+        "Mars": ["Taurus", "Libra"],
+        "Jupiter": ["Gemini", "Virgo"],
+        "Saturn": ["Cancer", "Leo"],
+        "Uranus": ["Leo"],
+        "Neptune": ["Virgo"],
+        "Pluto": ["Taurus"],
+    },
+    "Fall": {
+        "Sun": ["Libra"],
+        "Moon": ["Scorpio"],
+        "Mercury": ["Pisces"],
+        "Venus": ["Virgo"],
+        "Mars": ["Cancer"],
+        "Jupiter": ["Capricorn"],
+        "Saturn": ["Aries"],
+    }
+}
+
+
+def calculate_dignity(planet_name: str, sign: str) -> tuple[str, int]:
+    """Calculate the essential dignity of a planet in a sign."""
+    if sign in DIGNITY_TABLE["Domicile"].get(planet_name, []):
+        return "domicile", 5
+    if sign in DIGNITY_TABLE["Exaltation"].get(planet_name, []):
+        return "exaltation", 4
+    if sign in DIGNITY_TABLE["Detriment"].get(planet_name, []):
+        return "detriment", -5
+    if sign in DIGNITY_TABLE["Fall"].get(planet_name, []):
+        return "fall", -4
+    return "neutral", 0
 
 
 @dataclass
@@ -193,6 +254,8 @@ def calculate_natal_chart(
             decan_ruler = DECAN_MAP.get(sign_en, ["Sun", "Sun", "Sun"])[decan_idx]
             decan_ruler_archetype = PLANET_ARCHETYPE_MAP.get(decan_ruler, {}).get("archetype_id", 0)
 
+            dignity, dignity_score = calculate_dignity(planet_name, sign_en)
+
             planet_pos = PlanetPosition(
                 name=planet_data.get("name", planet_name),
                 name_en=planet_name,
@@ -209,6 +272,8 @@ def calculate_natal_chart(
                 decan_ruler=decan_ruler,
                 decan_ruler_archetype=decan_ruler_archetype,
                 priority=planet_data.get("priority", "medium"),
+                dignity=dignity,
+                dignity_score=dignity_score,
             )
             result.planets.append(planet_pos)
 
@@ -318,6 +383,8 @@ def to_dict(chart: NatalChartData) -> dict:
                 "decan_ruler": p.decan_ruler,
                 "decan_ruler_archetype": p.decan_ruler_archetype,
                 "priority": p.priority,
+                "dignity": p.dignity,
+                "dignity_score": p.dignity_score,
             }
             for p in chart.planets
         ],

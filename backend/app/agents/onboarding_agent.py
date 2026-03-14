@@ -75,7 +75,7 @@ async def generate_onboarding_response(chat_history: list[dict], gender: str = N
 
     try:
         response = await client.chat.completions.create(
-            model=settings.OPENAI_MODEL_FAST, # gpt-4o-mini
+            model=settings.OPENAI_MODEL_FAST,
             messages=messages,
             temperature=0.6,
             response_format={

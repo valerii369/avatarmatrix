@@ -40,23 +40,23 @@ def get_spheres_for_house(house_num: int) -> list[str]:
     return house_data.get("spheres", [])
 
 
-def generate_recommended_cards(chart: NatalChartData) -> list[RecommendedCard]:
+def generate_recommended_cards(chart: NatalChartData, aspects: list = None) -> list[RecommendedCard]:
     """
     Generate prioritized list of recommended cards from natal chart.
 
-    Rules for 12-Sphere Precision:
-    - 🔴 Critical: Sun, Moon, Ascendant Ruler, MC (in STATUS), any Stationary planet.
-    - 🟠 High: Stellium planets (3+ in sign/house), Nodes, Chiron.
-    - 🟡 Medium: All other planets in their houses.
-    - 🟢 Additional: Lilith, Decan rulers, secondary sign archetypes.
+    Refined Rules:
+    - 🔴 Critical: Sun, Moon, Asc Ruler, MC, Stationary, Final Dispositor.
+    - 🟠 High: Stelliums, Angular Houses (1,4,7,10), Aspect King, Strong Dignities, Nodes.
+    - 🟡 Medium: Standard placements.
+    - 🟢 Additional: Minor points.
     """
     recommended: list[RecommendedCard] = []
     seen_keys = set()  # (archetype_id, sphere)
+    aspects = aspects or []
 
-    # Detect stelliums
+    # 1. Detect stelliums
     sign_counts: dict[str, list[str]] = {}
     house_counts: dict[int, list[str]] = {}
-
     for planet in chart.planets:
         sign_counts.setdefault(planet.sign, []).append(planet.name_en)
         house_counts.setdefault(planet.house, []).append(planet.name_en)
@@ -67,11 +67,44 @@ def generate_recommended_cards(chart: NatalChartData) -> list[RecommendedCard]:
     for planets in house_counts.values():
         if len(planets) >= 3: stellium_planets.update(planets)
 
+    # 2. Aspect Weighting (Aspect King)
+    aspect_counts = {}
+    for asp in aspects:
+        # aspects can be Aspect objects or dicts
+        p1 = asp.get("planet1") if isinstance(asp, dict) else getattr(asp, "planet1", None)
+        p2 = asp.get("planet2") if isinstance(asp, dict) else getattr(asp, "planet2", None)
+        if p1: aspect_counts[p1] = aspect_counts.get(p1, 0) + 1
+        if p2: aspect_counts[p2] = aspect_counts.get(p2, 0) + 1
+    
+    aspect_king = max(aspect_counts, key=aspect_counts.get) if aspect_counts else None
+
+    # 3. Final Dispositor Logic
+    # Map sign -> ruler (using same mapping as natal_chart)
+    # Note: For speed, we'll use a simplified mapping here or rely on chart data
+    planet_map = {p.name_en: p for p in chart.planets}
+    
+    def get_ruler(planet_name):
+        p = planet_map.get(planet_name)
+        if not p: return None
+        # We need the ruler of the sign the planet is in
+        # This is a bit recursive. 
+        from app.core.astrology.natal_chart import DIGNITY_TABLE
+        for ruler, signs in DIGNITY_TABLE["Domicile"].items():
+            if p.sign in signs:
+                return ruler
+        return None
+
+    final_dispositor = None
+    # Simple check for a planet in its own domicile
+    domiciles = [p.name_en for p in chart.planets if getattr(p, "dignity", None) == "domicile"]
+    if len(domiciles) == 1:
+        final_dispositor = domiciles[0]
+    # More complex chain logic could be added here, but domicile-owner is the strongest signal
+
     def add_card(archetype_id: int, sphere: str, priority: str, reason: str,
                  planet_name: str = None, retrograde: bool = False):
         key = (archetype_id, sphere)
         if key in seen_keys:
-            # Upgrade priority if we see it again
             for card in recommended:
                 if card.archetype_id == archetype_id and card.sphere == sphere:
                     if PRIORITY_RANK.get(priority, 3) < PRIORITY_RANK.get(card.priority, 3):
@@ -88,44 +121,56 @@ def generate_recommended_cards(chart: NatalChartData) -> list[RecommendedCard]:
             is_retrograde=retrograde,
         ))
 
-    # 1. Ascendant Ruler - Critical in IDENTITY
+    # 4. Ascendant Ruler
     for planet in chart.planets:
         if planet.name_en == chart.ascendant_ruler:
             add_card(
                 planet.archetype_id, "IDENTITY", "critical",
-                f"{planet.name} — управитель Асцендента (Путь Личности)",
+                "Управитель Асцендента (Главный вектор реализации)",
                 planet.name_en, planet.retrograde
             )
 
-    # 2. Main Planet Pass
+    # 5. Main Planet Pass
     for planet in chart.planets:
         priority = planet.priority
         is_stationary = getattr(planet, "is_stationary", False)
+        dignity = getattr(planet, "dignity", "neutral")
         
-        # Override priorities based on special conditions
-        if planet.name_en in ["Sun", "Moon"] or is_stationary:
+        reasons = []
+        if is_stationary: reasons.append("Стационар")
+        
+        # Priority Logic
+        if planet.name_en in ["Sun", "Moon"] or is_stationary or planet.name_en == final_dispositor:
             priority = "critical"
-        elif planet.name_en in stellium_planets:
+            if planet.name_en == final_dispositor: reasons.append("Конечный диспозитор")
+        elif planet.name_en in stellium_planets or planet.name_en == aspect_king:
             priority = "high"
+            if planet.name_en == aspect_king: reasons.append("Король аспектов")
+        
+        if dignity in ["domicile", "exaltation"]:
+            if priority not in ["critical"]: priority = "high"
+            reasons.append(f"Сила ({dignity})")
+        elif dignity in ["detriment", "fall"]:
+            if priority not in ["critical"]: priority = "high"
+            reasons.append(f"Вызов ({dignity})")
+
+        if planet.house in [1, 4, 7, 10]:
+            if priority == "medium": priority = "high"
+            reasons.append("Угловой дом")
 
         planet_spheres = get_spheres_for_house(planet.house)
-        retro_suffix = " (Ретроград — внутренняя работа)" if planet.retrograde else ""
-        stat_suffix = " (Стационар — точка фиксации)" if is_stationary else ""
-        reason_base = f"{planet.name} в {planet.house} доме{retro_suffix}{stat_suffix}"
+        reason_str = f"{planet.name} в {planet.house} доме"
+        if reasons: reason_str += f" [{', '.join(reasons)}]"
 
         for sphere in planet_spheres:
-            # Main Planet Archetype
-            add_card(planet.archetype_id, sphere, priority, reason_base,
+            add_card(planet.archetype_id, sphere, priority, reason_str,
                      planet.name_en, planet.retrograde)
             
-            # Sign Primary Archetype - adds secondary depth
             if planet.sign_primary_archetype != planet.archetype_id:
-                sign_priority = "medium" if priority == "critical" else "additional"
-                add_card(planet.sign_primary_archetype, sphere, sign_priority,
-                         f"{planet.name} в знаке {planet.sign_ru}",
-                         planet.name_en, planet.retrograde)
+                s_priority = "medium" if priority in ["critical", "high"] else "additional"
+                add_card(planet.sign_primary_archetype, sphere, s_priority,
+                         f"Знак {planet.sign_ru}", planet.name_en, planet.retrograde)
 
-    # Sort by priority
     recommended.sort(key=lambda c: PRIORITY_RANK.get(c.priority, 3))
     return recommended
 

@@ -189,7 +189,7 @@ class DatasetBuilder:
         """
 
         response = await client.chat.completions.create(
-            model="gpt-4o",
+            model=settings.OPENAI_MODEL,
             messages=[{"role": "system", "content": system_prompt},
                       {"role": "user", "content": "Сгенерируй эволюционную сцену в формате JSON."}],
             response_format={

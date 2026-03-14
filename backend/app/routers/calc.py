@@ -113,6 +113,12 @@ async def calculate(
     aspects_dict = aspects_to_dict(aspects)
     logger.info(f"Aspects calculated: {len(aspects)} found.")
 
+    # Rule-based recommendations (Standard Astro Logic)
+    from app.core.astrology.priority_engine import generate_recommended_cards
+    logger.info("Generating rule-based recommended cards...")
+    recommended_rules = generate_recommended_cards(chart, aspects)
+    logger.info(f"Rule-based recommendations: {len(recommended_rules)}")
+
     # Generate Synthesized Description via LLM
     logger.info("Synthesizing sphere descriptions via LLM...")
     sphere_descriptions = await synthesize_sphere_descriptions(chart_dict, aspects_dict)
@@ -120,11 +126,27 @@ async def calculate(
     
     # Generate recommended cards via Vector matching
     logger.info("Matching archetypes to spheres (vector search)...")
-    recommended_astro = await match_archetypes_to_spheres(db, sphere_descriptions)
-    logger.info(f"Vector search finished. Recommended: {len(recommended_astro)}")
+    recommended_vector = await match_archetypes_to_spheres(db, sphere_descriptions)
+    logger.info(f"Vector search finished. Recommended (vector): {len(recommended_vector)}")
+    
+    # Merge Recommendations
+    # Rules provide "ground truth" and specific reasons, Vectors provide "semantic fit"
+    combined_recommendations = []
+    seen_rec = set() # (archetype_id, sphere)
+
+    # 1. Rule-based recommendations (Higher Priority for specific reasons)
+    for r in recommended_rules:
+        combined_recommendations.append(r)
+        seen_rec.add((r.archetype_id, r.sphere))
+
+    # 2. Vector-based recommendations (Fill the gaps)
+    for r in recommended_vector:
+        if (r.archetype_id, r.sphere) not in seen_rec:
+            combined_recommendations.append(r)
+            seen_rec.add((r.archetype_id, r.sphere))
     
     # Helper to convert to dict
-    def to_dict(cards):
+    def cards_to_dict(cards):
         return [
             {
                 "archetype_id": c.archetype_id,
@@ -135,12 +157,12 @@ async def calculate(
             for c in cards
         ]
         
-    recommended_dict = to_dict(recommended_astro)
+    recommended_dict = cards_to_dict(combined_recommendations)
 
-    # Build set of recommended (archetype_id, sphere)
+    # Build set of recommended for CardProgress
     recommended_set = {
         (r.archetype_id, r.sphere): r
-        for r in recommended_astro
+        for r in combined_recommendations
     }
 
     # Create/update 264 CardProgress rows
