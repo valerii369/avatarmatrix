@@ -12,7 +12,7 @@ import MasterHubView from "@/components/MasterHubView";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const TOTAL_CARDS = 176;
+const TOTAL_CARDS = 264;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

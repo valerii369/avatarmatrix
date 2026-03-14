@@ -1,5 +1,5 @@
 """
-Calc router: birth data input → natal chart calculation → 176 cards generation.
+Calc router: birth data input → natal chart calculation → 264 cards generation.
 """
 from datetime import datetime
 from typing import Optional
@@ -72,7 +72,7 @@ async def calculate(
     2. Calculate natal chart (pyswisseph)
     3. Calculate aspects
     4. Prioritize cards
-    5. Create/update 176 CardProgress rows
+    5. Create/update 264 CardProgress rows
     6. Save NatalChart to DB
     """
     logger.info(f"--- Astro Calculation Started for user {request.user_id} ---")
@@ -143,7 +143,7 @@ async def calculate(
         for r in recommended_astro
     }
 
-    # Create/update 176 CardProgress rows
+    # Create/update 264 CardProgress rows
     existing_result = await db.execute(
         select(CardProgress).where(CardProgress.user_id == user.id)
     )

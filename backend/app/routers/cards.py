@@ -1,5 +1,5 @@
 """
-Cards router: get all 176 cards with statuses, get single card detail.
+Cards router: get all 264 cards with statuses, get single card detail.
 """
 import json
 import os

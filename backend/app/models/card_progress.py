@@ -1,5 +1,5 @@
 """
-CardProgress: tracks user's progress on each of the 176 cards.
+CardProgress: tracks user's progress on each of the 264 cards.
 Status flow: locked → recommended → in_sync → synced → aligning → aligned
 """
 from typing import Optional

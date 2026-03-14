@@ -43,7 +43,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
     aligned: { label: "Активна", color: "#10B981" },
 };
 
-const TOTAL_CARDS = 176;
+const TOTAL_CARDS = 264;
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
