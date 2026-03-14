@@ -69,7 +69,7 @@ const TRAIT_DESCRIPTIONS: Record<string, string> = {
 
 export default function MasterHubView({ userId }: { userId: number }) {
   const [selectedSphere, setSelectedSphere] = useState<string | null>(null);
-  const [subTab, setSubTab] = useState<"personality" | "analysis">("personality");
+  const [subTab, setSubTab] = useState<"personality" | "sides" | "analysis">("personality");
   const [activeTooltip, setActiveTooltip] = useState<{label: string, value: string} | null>(null);
 
   const { data: hub, isValidating: hubLoading } = useSWR(
@@ -113,35 +113,45 @@ export default function MasterHubView({ userId }: { userId: number }) {
             className="space-y-6"
           >
             {/* ── Sub-Navigation Tabs ── */}
-            <div className="flex p-1 gap-1 bg-white/[0.04] backdrop-blur-xl rounded-[14px] border border-white/10">
+            <div className="flex p-1.5 gap-1.5 bg-white/[0.04] backdrop-blur-3xl rounded-2xl border border-white/10 -mt-2">
               <button
                 onClick={() => setSubTab("personality")}
-                className={`flex-1 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all ${
+                className={`flex-1 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${
                   subTab === "personality" 
-                  ? "bg-white/10 text-white border border-white/10 shadow-lg" 
-                  : "text-white/40 hover:text-white/60"
+                  ? "bg-white/10 text-white border border-white/10 shadow-[0_0_20px_rgba(255,255,255,0.05)]" 
+                  : "text-white/30 hover:text-white/50"
                 }`}
               >
                 О личности
               </button>
               <button
-                onClick={() => setSubTab("analysis")}
-                className={`flex-1 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all ${
-                  subTab === "analysis" 
-                  ? "bg-white/10 text-white border border-white/10 shadow-lg" 
-                  : "text-white/40 hover:text-white/60"
+                onClick={() => setSubTab("sides")}
+                className={`flex-1 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${
+                  subTab === "sides" 
+                  ? "bg-white/10 text-white border border-white/10 shadow-[0_0_20px_rgba(255,255,255,0.05)]" 
+                  : "text-white/30 hover:text-white/50"
                 }`}
               >
-                Разбор
+                Стороны
+              </button>
+              <button
+                onClick={() => setSubTab("analysis")}
+                className={`flex-1 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${
+                  subTab === "analysis" 
+                  ? "bg-white/10 text-white border border-white/10 shadow-[0_0_20px_rgba(255,255,255,0.05)]" 
+                  : "text-white/30 hover:text-white/50"
+                }`}
+              >
+                Разбор сфер
               </button>
             </div>
 
-            {subTab === "personality" ? (
+            {subTab === "personality" && (
               <motion.div
                 key="personality-tab"
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="space-y-6"
+                className="space-y-4"
               >
                 {/* ── Portrait Summary Card ── */}
                 <motion.div
@@ -191,18 +201,28 @@ export default function MasterHubView({ userId }: { userId: number }) {
                     </div>
                   </div>
                 </motion.div>
+              </motion.div>
+            )}
 
-                {/* ── Polarities & Social Interface (Always visible in personality tab) ── */}
+            {subTab === "sides" && (
+              <motion.div
+                key="sides-tab"
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="space-y-4"
+              >
                 <div className="grid grid-cols-2 gap-3">
                   <PolarityCard title="Сильные стороны" items={deep_profile_data.polarities.core_strengths} icon={ShieldCheck} color="#10B981" />
                   <PolarityCard title="Теневые аспекты" items={deep_profile_data.polarities.shadow_aspects} icon={AlertCircle} color="#EF4444" />
                 </div>
               </motion.div>
-            ) : (
+            )}
+
+            {subTab === "analysis" && (
               <motion.div
                 key="analysis-tab"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
                 className="space-y-4"
               >
                 {/* ── 12 Spheres Grid (6x2) ── */}
