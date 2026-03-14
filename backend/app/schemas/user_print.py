@@ -1,38 +1,43 @@
 from typing import List, Dict, Optional, Any
-from pydantic import BaseModel, Field, AliasChoices
+from pydantic import BaseModel, Field
 
-class Identity(BaseModel):
-    """Суть человека, выраженная через живой язык."""
-    summary: str = Field(..., validation_alias=AliasChoices("summary", "description"), description="Глубинное описание сути")
-    core_archetype: str = Field(..., validation_alias=AliasChoices("core_archetype", "archetype"), description="Доминирующий архетип")
-    narrative_role: str = Field(..., validation_alias=AliasChoices("narrative_role", "role"), description="Роль в текущем жизненном сюжете")
-    energy_description: str = Field(..., validation_alias=AliasChoices("energy_description", "energy"), description="Как человек проявляется энергетически")
-    archetypal_resonance: Dict[str, str] = Field(default_factory=dict, description="Отношение к ключевым силам")
+class PortraitSummary(BaseModel):
+    """Краткое поэтичное описание сути личности."""
+    core_identity: str = Field(..., description="2-3 предложения о сути")
+    core_archetype: str = Field(..., description="Ведущий архетип")
+    energy_type: str = Field(..., description="Динамика жизненной силы")
+    narrative_role: str = Field(..., description="Роль в жизненном мифе")
+    current_dynamic: str = Field(..., description="Главный внутренний фокус/конфликт")
 
-class Psychology(BaseModel):
-    """Внутренние процессы и динамика."""
-    guiding_thoughts: List[str] = Field(default_factory=list)
-    active_requests: List[str] = Field(default_factory=list)
-    inner_tensions: List[str] = Field(default_factory=list)
-    talents: List[str] = Field(default_factory=list)
-    limitations: List[str] = Field(default_factory=list)
-    somatic_anchors: List[str] = Field(default_factory=list, description="Телесные якоря и сигналы (напр. 'Сжатие в горле при лжи')")
+class Polarities(BaseModel):
+    """Сильные и слабые стороны."""
+    core_strengths: List[str] = Field(default_factory=list)
+    hidden_talents: List[str] = Field(default_factory=list)
+    shadow_aspects: List[str] = Field(default_factory=list)
+    drain_factors: List[str] = Field(default_factory=list)
 
-class SphereNarrative(BaseModel):
-    """Описание конкретной сферы жизни как главы книги."""
-    state_description: str = Field(..., validation_alias=AliasChoices("state_description", "landscape", "description"), description="Нарратив состояния")
-    active_conflict: Optional[str] = Field(None)
-    central_symbols: List[str] = Field(default_factory=list)
-    evolution_stage: str = Field("Развитие", validation_alias=AliasChoices("evolution_stage", "stage", "evolution"), description="Стадия развития")
-    key_lesson: Optional[str] = Field(None, description="Текущий жизненный урок в этой сфере")
+class SocialInterface(BaseModel):
+    """Взаимодействие с миром."""
+    worldview_stance: str = Field(..., description="Базовое мировоззрение")
+    communication_style: str = Field(..., description="Паттерны общения")
+    karmic_lesson: str = Field(..., description="Трансформационная задача")
+
+class SphereStatus(BaseModel):
+    """Статус отдельной сферы."""
+    status: str = Field(..., description="Стадия развития")
+    insight: str = Field(..., description="Глубокая выжимка по сфере")
+
+class DeepProfileData(BaseModel):
+    """Глубинные данные профиля."""
+    polarities: Polarities
+    social_interface: SocialInterface
+    spheres_status: Dict[str, SphereStatus]
 
 class UserPrintSchema(BaseModel):
     """
-    THE HUB: Живая книга о внутреннем мире человека. 
-    Никаких цифр, планет и технических терминов. Только смыслы.
+    THE OCEAN: Unified Personal Passport.
+    Synthesized from all 'Rivers' (Astro, Sync, Diary).
     """
-    identity: Identity = Field(...)
-    psychology: Psychology = Field(default_factory=Psychology)
-    spheres: Dict[str, SphereNarrative] = Field(default_factory=dict)
-    
+    portrait_summary: PortraitSummary
+    deep_profile_data: DeepProfileData
     metadata: Dict[str, Any] = Field(default_factory=dict)

@@ -26,8 +26,14 @@ async def match_archetypes_to_spheres(
     """
     recommended_cards = []
     
-    for sphere, description in sphere_descriptions.items():
-        if not description.strip():
+    # Handle the new nested structure from llm_engine (Master of Synthesis)
+    spheres_data = sphere_descriptions.get("spheres_12", sphere_descriptions)
+    
+    for sphere, details in spheres_data.items():
+        # Handle both old format (str) and new format (dict with 'interpretation')
+        description = details.get("interpretation", "") if isinstance(details, dict) else details
+        
+        if not description or not (isinstance(description, str) and description.strip()):
             continue
             
         try:
@@ -35,17 +41,16 @@ async def match_archetypes_to_spheres(
             query_embedding = await _get_embedding(description)
             
             # 2. Query Postgres vector distance
-            # Find the AvatarCard currently assigned to this sphere that matches the generated text most closely
             stmt = select(AvatarCard).where(
                 AvatarCard.sphere == sphere
             ).order_by(
                 AvatarCard.embedding.cosine_distance(query_embedding)
-            ).limit(3) # Get top 3
+            ).limit(3)
             
             result = await db.execute(stmt)
             top_cards = result.scalars().all()
             
-            # 3. Add to recommendations (critical for 1st, high for 2nd, etc)
+            # 3. Add to recommendations
             priorities = ["critical", "high", "medium"]
             
             for idx, card in enumerate(top_cards):

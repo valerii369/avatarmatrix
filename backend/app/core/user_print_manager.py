@@ -7,7 +7,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.user_print import UserPrint
 from app.models.natal_chart import NatalChart
-from app.schemas.user_print import UserPrintSchema, Identity, Psychology, SphereNarrative
+from app.schemas.user_print import (
+    UserPrintSchema, PortraitSummary, DeepProfileData, 
+    Polarities, SocialInterface, SphereStatus
+)
 from app.agents.common import client, settings
 
 logger = logging.getLogger(__name__)
@@ -24,7 +27,11 @@ class OceanService:
         result = await db.execute(select(UserPrint).where(UserPrint.user_id == user_id))
         up_model = result.scalar_one_or_none()
         if up_model:
-            return UserPrintSchema(**up_model.print_data)
+            try:
+                return UserPrintSchema(**up_model.print_data)
+            except Exception as e:
+                logger.warning(f"Failed to parse old Ocean data for user {user_id}: {e}")
+                return None
         return None
 
     @staticmethod
@@ -36,17 +43,19 @@ class OceanService:
         if not ocean:
             return ""
 
-        lines = [f"USER_BOOK_CONTEXT (The Ocean): Identity: {ocean.identity.summary} | Role: {ocean.identity.narrative_role} | Archetype: {ocean.identity.core_archetype}"]
+        ps = ocean.portrait_summary
+        lines = [f"USER_BOOK_CONTEXT (The Ocean): Identity: {ps.core_identity} | Role: {ps.narrative_role} | Archetype: {ps.core_archetype}"]
         
-        if ocean.psychology.inner_tensions or ocean.psychology.active_requests:
-            lines.append(f"PSY_STATE: Tensions:{ocean.psychology.inner_tensions[:2]} Requests:{ocean.psychology.active_requests[:1]}")
-
-        if target_sphere and target_sphere in ocean.spheres:
-            s = ocean.spheres[target_sphere]
-            lines.append(f"FOCUS_CHAPTER ({target_sphere}): {s.state_description}")
+        dp = ocean.deep_profile_data
+        if dp.polarities.core_strengths:
+            lines.append(f"STRENGTHS: {', '.join(dp.polarities.core_strengths[:3])}")
+        
+        if target_sphere and target_sphere in dp.eight_spheres_status:
+            s = dp.eight_spheres_status[target_sphere]
+            lines.append(f"FOCUS_CHAPTER ({target_sphere}): {s.insight}")
         else:
-            # Summary of top 3 spheres
-            active = [f"{k}:{v.evolution_stage}" for k, v in list(ocean.spheres.items())[:3]]
+            # Summary of top active spheres
+            active = [f"{k}:{v.status}" for k, v in list(dp.eight_spheres_status.items())[:3]]
             if active:
                 lines.append(f"ACTIVE_CHAPTERS: {', '.join(active)}")
 
@@ -56,6 +65,7 @@ class OceanService:
     async def update_ocean(db: AsyncSession, user_id: int, transcript: str, additional_rivers: Optional[Dict[str, Any]] = None):
         """
         Alchemy Synthesis: Takes raw data (Rivers) and mutates the Ocean (User Print).
+        Updated to use the professional synthesis prompt.
         """
         current_ocean = await OceanService.get_ocean(db, user_id)
         current_data_json = current_ocean.model_dump_json() if current_ocean else "{}"
@@ -71,28 +81,78 @@ class OceanService:
         rivers_context = json.dumps(additional_rivers, ensure_ascii=False) if additional_rivers else "No additional rivers."
 
         extraction_prompt = f"""
-ТЫ — ВЕРХОВНЫЙ AI-АЛХИМИК СИСТЕМЫ AVATAR.
-Твоя задача — Великое Делание: синтезировать все потоки данных (Реки) в единый Океан (User Print).
+ROLE:
+You are the SUPREME AI ALCHEMIST of the AVATAR system. Your task is the Great Work: synthesizing all data flows (Rivers) into a single Ocean (User Print / Personality Passport).
 
-СТРОГИЕ ПРАВИЛА:
-1. НИКАКОГО ЖАРГОНА: Запрещено использовать термины астрологии, HD и т.д.
-2. ГЛУБОКОЕ ОПИСАНИЕ: Минимум 5-10 предложений на каждую из 12 сфер жизни.
-3. ПОЭТИЧНОСТЬ: Используй метафоры, но оставайся психологически точным.
-4. ЛИМИТ IDENTITY: Поле identity.summary должно быть строго до 40 СЛОВ.
+TASK:
+1. Analyze the provided input data:
+   - CURRENT OCEAN (previous state)
+   - RIVER OF STARS (Detailed Synthesis: Interpretation, Light, Shadow, Markers)
+   - TECHNICAL RIVERS (Metrics, context)
+   - LIVING INFLOW (Transcript of the last session)
+2. Extract deep psychological meaning, behavioral patterns, and life scenarios.
+3. ALCHEMY RULES:
+   - INTEGRATION: Synthesize the "Light" and "Shadow" from the River of Stars into the "Polarities" section of the Ocean.
+   - NARRATIVE: Use the "Interpretation" from the River to update the "portrait_summary".
+   - NO DUPLICATION: Do not simply copy-paste. Transform into a cohesive, flowing narrative.
+4. Fill the required JSON structure, strictly following the UserPrintSchema.
 
-ТЕКУЩИЙ ОКЕАН:
+CONSTRAINTS AND RULES (CRITICAL):
+1. NO JARGON: Completely exclude technical astrology terms.
+2. OBJECTIVITY: Maintain balanced analytical tone. Accurately reflect both talents/strengths and shadows/fears without judgment.
+3. CONCISENESS: Dense, informative values. No fluff or cliches.
+4. STRICT JSON OUTPUT: Output ONLY valid JSON. No markdown blocks.
+5. NO HALLUCINATIONS: Fill fields only based on provided data.
+
+CURRENT OCEAN (For continuity):
 {current_data_json}
 
-РЕКА ЗВЕЗД (Астрология):
+RIVER OF STARS (Astrology - 12 Spheres):
 {astro_context}
 
-ТЕХНИЧЕСКИЕ РЕКИ:
+TECHNICAL INFLOWS:
 {rivers_context}
 
-ЖИВОЙ ПРИТОК (Сессия):
+LIVING INFLOW (Session):
 {transcript}
 
-ВЕРНИ ПОЛНЫЙ JSON по схеме UserPrintSchema (identity, psychology, spheres).
+RETURN COMPLETE JSON according to UserPrintSchema:
+{{
+  "portrait_summary": {{
+    "core_identity": "...",
+    "core_archetype": "...",
+    "energy_type": "...",
+    "narrative_role": "...",
+    "current_dynamic": "..."
+  }},
+  "deep_profile_data": {{
+    "polarities": {{
+      "core_strengths": [],
+      "hidden_talents": [],
+      "shadow_aspects": [],
+      "drain_factors": []
+    }},
+    "social_interface": {{
+      "worldview_stance": "...",
+      "communication_style": "...",
+      "karmic_lesson": "..."
+    }},
+    "spheres_status": {{
+      "IDENTITY": {{ "status": "...", "insight": "..." }},
+      "RESOURCES": {{ "status": "...", "insight": "..." }},
+      "COMMUNICATION": {{ "status": "...", "insight": "..." }},
+      "ROOTS": {{ "status": "...", "insight": "..." }},
+      "CREATIVITY": {{ "status": "...", "insight": "..." }},
+      "SERVICE": {{ "status": "...", "insight": "..." }},
+      "PARTNERSHIP": {{ "status": "...", "insight": "..." }},
+      "TRANSFORMATION": {{ "status": "...", "insight": "..." }},
+      "EXPANSION": {{ "status": "...", "insight": "..." }},
+      "STATUS": {{ "status": "...", "insight": "..." }},
+      "VISION": {{ "status": "...", "insight": "..." }},
+      "SPIRIT": {{ "status": "...", "insight": "..." }}
+    }}
+  }}
+}}
 """
         try:
             response = await client.chat.completions.create(
@@ -104,11 +164,6 @@ class OceanService:
             
             new_data_raw = json.loads(response.choices[0].message.content)
             validated_ocean = UserPrintSchema(**new_data_raw)
-            
-            # Word count enforcement
-            summary_words = validated_ocean.identity.summary.split()
-            if len(summary_words) > 40:
-                validated_ocean.identity.summary = " ".join(summary_words[:40]) + "..."
             
             # Save to DB
             result = await db.execute(select(UserPrint).where(UserPrint.user_id == user_id))
@@ -126,23 +181,46 @@ class OceanService:
             return False
 
     @staticmethod
-    async def initialize_from_astro(db: AsyncSession, user_id: int, sphere_descriptions: Dict[str, str]):
-        """Creates the initial Ocean state from raw astrological data."""
-        spheres = {
-            code: SphereNarrative(state_description=desc, evolution_stage="Зарождение")
-            for code, desc in sphere_descriptions.items()
-        }
+    async def initialize_from_astro(db: AsyncSession, user_id: int, sphere_descriptions: Dict[str, Any]):
+        """Creates the initial Ocean state using the full 12-sphere format."""
+        spheres_status = {}
+        all_spheres = [
+            "IDENTITY", "RESOURCES", "COMMUNICATION", "ROOTS", 
+            "CREATIVITY", "SERVICE", "PARTNERSHIP", "TRANSFORMATION", 
+            "EXPANSION", "STATUS", "VISION", "SPIRIT"
+        ]
         
+        # Extract from nested "spheres_12" structure
+        spheres_data = sphere_descriptions.get("spheres_12", sphere_descriptions)
+        
+        for s_key in all_spheres:
+            details = spheres_data.get(s_key, {})
+            # Use 'interpretation' field as the primary insight for the Hub
+            insight = details.get("interpretation", "Данные обрабатываются...") if isinstance(details, dict) else details
+            
+            spheres_status[s_key] = SphereStatus(
+                status="Зарождение",
+                insight=insight
+            )
+
         initial_data = UserPrintSchema(
-            identity=Identity(
-                summary=sphere_descriptions.get("IDENTITY", "Ваш AVATAR пробуждается..."),
+            portrait_summary=PortraitSummary(
+                core_identity=core_id_text,
                 core_archetype="Странник",
+                energy_type="Нейтральная",
                 narrative_role="Герой",
-                energy_description="Начальная"
+                current_dynamic="Активация потенциала"
             ),
-            psychology=Psychology(),
-            spheres=spheres,
-            metadata={"source": "astro_init"}
+            deep_profile_data=DeepProfileData(
+                polarities=Polarities(),
+                social_interface=SocialInterface(
+                    worldview_stance="Поиск смыслов",
+                    communication_style="Наблюдатель",
+                    karmic_lesson="Быть собой"
+                ),
+                spheres_status=spheres_status
+            ),
+            metadata={"source": "astro_init_v4"}
         )
 
         result = await db.execute(select(UserPrint).where(UserPrint.user_id == user_id))
