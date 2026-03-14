@@ -24,18 +24,18 @@ const ICON_MAP: Record<string, any> = {
 };
 
 const SPHERES_META = [
-  { key: "IDENTITY", name: "Личность", color: "#A855F7" },
-  { key: "RESOURCES", name: "Ресурсы", color: "#10B981" },
-  { key: "COMMUNICATION", name: "Связи", color: "#06B6D4" },
-  { key: "ROOTS", name: "Корни", color: "#F97316" },
-  { key: "CREATIVITY", name: "Творчество", color: "#EC4899" },
-  { key: "SERVICE", name: "Служение", color: "#14B8A6" },
-  { key: "PARTNERSHIP", name: "Партнерство", color: "#3B82F6" },
-  { key: "TRANSFORMATION", name: "Тень", color: "#6366F1" },
-  { key: "EXPANSION", name: "Поиск", color: "#8B5CF6" },
-  { key: "STATUS", name: "Статус", color: "#EF4444" },
-  { key: "VISION", name: "Будущее", color: "#D946EF" },
-  { key: "SPIRIT", name: "Дух", color: "#64748B" },
+  { key: "IDENTITY", name: "Личность", subtitle: "Я и тело", color: "#A855F7" },
+  { key: "RESOURCES", name: "Ресурсы", subtitle: "Деньги и ценности", color: "#10B981" },
+  { key: "COMMUNICATION", name: "Связи", subtitle: "Ум и окружение", color: "#06B6D4" },
+  { key: "ROOTS", name: "Корни", subtitle: "Дом и семья", color: "#F97316" },
+  { key: "CREATIVITY", name: "Творчество", subtitle: "Любовь и хобби", color: "#EC4899" },
+  { key: "SERVICE", name: "Служение", subtitle: "Работа и здоровье", color: "#14B8A6" },
+  { key: "PARTNERSHIP", name: "Партнерство", subtitle: "Отношения и союзы", color: "#3B82F6" },
+  { key: "TRANSFORMATION", name: "Тень", subtitle: "Трансформация и сила", color: "#6366F1" },
+  { key: "EXPANSION", name: "Поиск", subtitle: "Мудрость и вера", color: "#8B5CF6" },
+  { key: "STATUS", name: "Статус", subtitle: "Карьера и цели", color: "#EF4444" },
+  { key: "VISION", name: "Будущее", subtitle: "Мечты и группы", color: "#D946EF" },
+  { key: "SPIRIT", name: "Дух", subtitle: "Тишина и тайны", color: "#64748B" },
 ];
 
 export default function MasterHubView({ userId }: { userId: number }) {
@@ -167,8 +167,8 @@ export default function MasterHubView({ userId }: { userId: number }) {
                 animate={{ opacity: 1, x: 0 }}
                 className="space-y-4"
               >
-                {/* ── 12 Spheres Grid ── */}
-                <div className="grid grid-cols-1 gap-3">
+                {/* ── 12 Spheres Grid (6x2) ── */}
+                <div className="grid grid-cols-2 gap-2.5">
                   {SPHERES_META.map((meta, idx) => {
                     const status = deep_profile_data.spheres_status[meta.key];
                     const Icon = ICON_MAP[meta.key] || User;
@@ -179,23 +179,23 @@ export default function MasterHubView({ userId }: { userId: number }) {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: idx * 0.03 }}
                         onClick={() => setSelectedSphere(meta.key)}
-                        className="p-3 rounded-3xl bg-white/[0.02] border border-white/[0.04] flex items-center gap-3 active:scale-[0.98] transition-all cursor-pointer hover:bg-white/[0.05] group"
+                        className="p-3.5 rounded-3xl bg-white/[0.02] border border-white/[0.04] flex flex-col gap-3 active:scale-[0.98] transition-all cursor-pointer hover:bg-white/[0.05] group"
                       >
-                        <div 
-                          className="w-10 h-10 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110"
-                          style={{ backgroundColor: `${meta.color}15`, color: meta.color, border: `1px solid ${meta.color}20` }}
-                        >
-                          <Icon size={20} />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <span className="font-bold text-sm text-white/90">{meta.name}</span>
-                            <span className="text-[9px] font-bold text-white/30 uppercase tracking-tighter bg-white/5 px-2 py-0.5 rounded-full">
-                              {status?.status || "Инициация"}
-                            </span>
+                        <div className="flex items-center justify-between w-full">
+                          <div 
+                            className="w-9 h-9 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110"
+                            style={{ backgroundColor: `${meta.color}15`, color: meta.color, border: `1px solid ${meta.color}20` }}
+                          >
+                            <Icon size={18} />
                           </div>
-                          <p className="text-[11px] text-white/50 leading-relaxed line-clamp-1 mt-0.5 font-light">
-                            {status?.insight || "Гармонизация сферы..."}
+                          <span className="text-[8px] font-bold text-white/30 uppercase tracking-tighter bg-white/5 px-1.5 py-0.5 rounded-md">
+                            {status?.status || "Инициация"}
+                          </span>
+                        </div>
+                        <div className="space-y-0.5">
+                          <span className="font-bold text-xs text-white/90 block">{meta.name}</span>
+                          <p className="text-[10px] text-white/40 leading-tight font-light">
+                            {meta.subtitle}
                           </p>
                         </div>
                       </motion.div>
@@ -237,10 +237,10 @@ export default function MasterHubView({ userId }: { userId: number }) {
                   })()}
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold text-white tracking-tight">
+                  <h1 className="text-xl font-bold text-white tracking-tight -mb-1">
                     {activeSphereMeta?.name}
                   </h1>
-                  <span className="px-2 py-0.5 rounded-full bg-white/5 text-[10px] font-bold text-white/40 uppercase tracking-widest">
+                  <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">
                     {activeSphereData?.status || "Стадия не определена"}
                   </span>
                 </div>
