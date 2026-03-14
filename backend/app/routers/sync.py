@@ -271,7 +271,14 @@ async def start_sync(
         archetype_id=card.archetype_id,
         sphere=card.sphere,
         current_phase=0, # Intro
-        phase_data={"current_layer": "intro", "sub_phase": 0, "scenes": scenes_data},
+        phase_data={
+            "current_layer": "intro", 
+            "sub_phase": 0, 
+            "scenes": scenes_data,
+            "timing": {
+                "intro_0": datetime.datetime.utcnow().isoformat()
+            }
+        },
         session_transcript=[]
     )
     db.add(session)
@@ -548,13 +555,15 @@ async def process_phase(
                 if scene_id:
                     # Calculate timing
                         # We need the timestamp when the AI message was sent
-                        # state["timing"][f"{current_layer}_{sub_phase}"]
                         ai_ts_str = state.get("timing", {}).get(f"{current_layer}_{sub_phase}")
                         reading_time = 0
-                        if ai_ts_str:
-                            ai_ts = datetime.datetime.fromisoformat(ai_ts_str)
-                            user_ts = datetime.datetime.fromisoformat(user_timestamp)
-                            reading_time = (user_ts - ai_ts).total_seconds()
+                        if ai_ts_str and isinstance(ai_ts_str, str):
+                            try:
+                                ai_ts = datetime.datetime.fromisoformat(ai_ts_str)
+                                user_ts = datetime.datetime.fromisoformat(user_timestamp)
+                                reading_time = (user_ts - ai_ts).total_seconds()
+                            except (ValueError, TypeError):
+                                reading_time = 0
 
                         from app.agents.sync_agent import get_embedding
                         resp_emb = await get_embedding(user_response_text)

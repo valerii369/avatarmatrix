@@ -175,17 +175,17 @@ export default function MasterHubView({ userId }: { userId: number }) {
                     return (
                       <motion.div
                         key={meta.key}
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: idx * 0.05 }}
+                        initial={{ opacity: 0, y: 5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: idx * 0.03 }}
                         onClick={() => setSelectedSphere(meta.key)}
-                        className="p-4 rounded-3xl bg-white/[0.02] border border-white/[0.04] flex items-center gap-4 active:scale-[0.98] transition-all cursor-pointer hover:bg-white/[0.05] group"
+                        className="p-3 rounded-3xl bg-white/[0.02] border border-white/[0.04] flex items-center gap-3 active:scale-[0.98] transition-all cursor-pointer hover:bg-white/[0.05] group"
                       >
                         <div 
-                          className="w-12 h-12 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110"
+                          className="w-10 h-10 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110"
                           style={{ backgroundColor: `${meta.color}15`, color: meta.color, border: `1px solid ${meta.color}20` }}
                         >
-                          <Icon size={22} />
+                          <Icon size={20} />
                         </div>
                         <div className="flex-1">
                           <div className="flex items-center justify-between">
@@ -221,10 +221,10 @@ export default function MasterHubView({ userId }: { userId: number }) {
               <ArrowLeft size={16} /> Назад в Океан
             </button>
 
-            <div className="space-y-6">
-              <div className="flex items-center gap-5 px-2">
+            <div className="space-y-4">
+              <div className="flex items-center gap-4 px-2">
                 <div 
-                  className="w-16 h-16 rounded-[1.5rem] flex items-center justify-center shadow-2xl"
+                  className="w-11 h-11 rounded-2xl flex items-center justify-center shadow-lg"
                   style={{ 
                     backgroundColor: `${activeSphereMeta?.color}20`, 
                     color: activeSphereMeta?.color,
@@ -233,11 +233,11 @@ export default function MasterHubView({ userId }: { userId: number }) {
                 >
                   {activeSphereMeta && (() => {
                     const Icon = ICON_MAP[activeSphereMeta.key];
-                    return <Icon size={32} />;
+                    return <Icon size={22} />;
                   })()}
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold text-white tracking-tight">
+                  <h1 className="text-xl font-bold text-white tracking-tight">
                     {activeSphereMeta?.name}
                   </h1>
                   <span className="px-2 py-0.5 rounded-full bg-white/5 text-[10px] font-bold text-white/40 uppercase tracking-widest">
