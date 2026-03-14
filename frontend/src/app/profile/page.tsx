@@ -571,7 +571,7 @@ function ShopModal({ onClose, userId }: { onClose: () => void; userId: number })
                 <div className="space-y-3">
                     {isLoading ? (
                         <div className="py-10 flex justify-center"><div className="w-6 h-6 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" /></div>
-                    ) : offers?.map((offer: any) => (
+                    ) : offers?.filter((o: any) => o.id !== "pack_premium").map((offer: any) => (
                         <button
                             key={offer.id}
                             disabled={!!buyingId}
@@ -677,10 +677,7 @@ function SubscriptionModal({ onClose, userId }: { onClose: () => void; userId: n
                     {isBuying ? (
                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     ) : (
-                        <div className="flex flex-col items-center">
-                           <span className="flex items-center gap-1.5">Купить за ⭐️ 800</span>
-                           <span className="text-[10px] opacity-60 font-medium">Экономия 20% • +1000 ✦</span>
-                        </div>
+                        <span>Купить за ⭐️ 800</span>
                     )}
                 </button>
             </motion.div>
