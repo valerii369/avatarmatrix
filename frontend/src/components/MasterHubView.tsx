@@ -246,13 +246,13 @@ export default function MasterHubView({ userId }: { userId: number }) {
                 </div>
               </div>
 
-              <div className="p-8 rounded-[3rem] bg-white/[0.03] border border-white/[0.05] relative overflow-hidden min-h-[400px]">
+              <div className="relative overflow-hidden min-h-[400px] px-2 py-4">
                  <div 
-                  className="absolute -top-32 -right-32 w-80 h-80 blur-[120px] -z-10 opacity-30"
+                  className="absolute -top-32 -right-32 w-80 h-80 blur-[120px] -z-10 opacity-20"
                   style={{ backgroundColor: activeSphereMeta?.color }}
                  />
                  
-                 <p className="text-base leading-relaxed text-white/90 whitespace-pre-wrap font-light">
+                 <p className="text-sm leading-relaxed text-white/80 whitespace-pre-wrap font-light">
                    {activeSphereData?.insight || "Глубинный смысл этой сферы раскроется в процессе твоей эволюции."}
                  </p>
               </div>
