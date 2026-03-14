@@ -40,7 +40,7 @@ const SPHERES_META = [
 
 export default function MasterHubView({ userId }: { userId: number }) {
   const [selectedSphere, setSelectedSphere] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<"brief" | "detailed">("brief");
+  const [subTab, setSubTab] = useState<"personality" | "analysis">("personality");
 
   const { data: hub, isValidating: hubLoading } = useSWR(
     userId ? ["master-hub", userId] : null,
@@ -82,57 +82,71 @@ export default function MasterHubView({ userId }: { userId: number }) {
             exit={{ opacity: 0, x: -20 }}
             className="space-y-6"
           >
-            {/* ── View Switcher ── */}
-            <div className="flex justify-end px-1">
-              <button 
-                onClick={() => setViewMode(viewMode === "brief" ? "detailed" : "brief")}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold uppercase tracking-wider text-white/60 hover:text-white transition-colors"
+            {/* ── Sub-Navigation Tabs ── */}
+            <div className="flex p-1 gap-1 bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 mx-1">
+              <button
+                onClick={() => setSubTab("personality")}
+                className={`flex-1 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all ${
+                  subTab === "personality" 
+                  ? "bg-violet-500/20 text-violet-300 border border-violet-500/30 shadow-lg" 
+                  : "text-white/40 hover:text-white/60"
+                }`}
               >
-                {viewMode === "brief" ? <Eye size={14} /> : <EyeOff size={14} />}
-                {viewMode === "brief" ? "Детально" : "Кратко"}
+                О личности
+              </button>
+              <button
+                onClick={() => setSubTab("analysis")}
+                className={`flex-1 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all ${
+                  subTab === "analysis" 
+                  ? "bg-blue-500/20 text-blue-300 border border-blue-500/30 shadow-lg" 
+                  : "text-white/40 hover:text-white/60"
+                }`}
+              >
+                Разбор
               </button>
             </div>
 
-            {/* ── Portrait Summary Card ── */}
-            <motion.div
-              layout
-              className="p-6 rounded-[2.5rem] bg-gradient-to-br from-violet-600/10 to-blue-600/5 border border-white/10 backdrop-blur-3xl shadow-2xl relative overflow-hidden"
-            >
-              <div className="absolute -top-10 -right-10 w-40 h-40 bg-violet-500/20 blur-[60px] rounded-full" />
-              <div className="flex flex-col gap-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-violet-400 animate-pulse" />
-                  <span className="text-[10px] font-bold text-violet-400 uppercase tracking-[0.3em]">
-                    Идентификация Аватара
-                  </span>
-                </div>
-
-                <p className="text-sm font-medium text-white leading-snug">
-                  {portrait_summary.core_identity}
-                </p>
-
-                <div className="grid grid-cols-2 gap-2 mt-2">
-                  <SummaryTag label="Архетип" value={portrait_summary.core_archetype} color="violet" />
-                  <SummaryTag label="Роль" value={portrait_summary.narrative_role} color="blue" />
-                  <SummaryTag label="Энергия" value={portrait_summary.energy_type} color="emerald" />
-                  <SummaryTag label="Фокус" value={portrait_summary.current_dynamic} color="amber" />
-                </div>
-              </div>
-            </motion.div>
-
-            {/* ── Detailed Profile Sections ── */}
-            {viewMode === "detailed" && (
+            {subTab === "personality" ? (
               <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="space-y-4"
+                key="personality-tab"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="space-y-6"
               >
+                {/* ── Portrait Summary Card ── */}
+                <motion.div
+                  layout
+                  className="p-6 rounded-[2.5rem] bg-gradient-to-br from-violet-600/10 to-blue-600/5 border border-white/10 backdrop-blur-3xl shadow-2xl relative overflow-hidden"
+                >
+                  <div className="absolute -top-10 -right-10 w-40 h-40 bg-violet-500/20 blur-[60px] rounded-full" />
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-violet-400 animate-pulse" />
+                      <span className="text-[10px] font-bold text-violet-400 uppercase tracking-[0.3em]">
+                        Идентификация Аватара
+                      </span>
+                    </div>
+
+                    <p className="text-sm font-medium text-white leading-snug">
+                      {portrait_summary.core_identity}
+                    </p>
+
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                      <SummaryTag label="Архетип" value={portrait_summary.core_archetype} color="violet" />
+                      <SummaryTag label="Роль" value={portrait_summary.narrative_role} color="blue" />
+                      <SummaryTag label="Энергия" value={portrait_summary.energy_type} color="emerald" />
+                      <SummaryTag label="Фокус" value={portrait_summary.current_dynamic} color="amber" />
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* ── Polarities & Social Interface (Always visible in personality tab) ── */}
                 <div className="grid grid-cols-2 gap-3">
                   <PolarityCard title="Сильные стороны" items={deep_profile_data.polarities.core_strengths} icon={ShieldCheck} color="#10B981" />
                   <PolarityCard title="Теневые аспекты" items={deep_profile_data.polarities.shadow_aspects} icon={AlertCircle} color="#EF4444" />
                 </div>
                 
-                <div className="p-5 rounded-3xl bg-white/[0.03] border border-white/[0.05] space-y-4">
+                <div className="p-5 rounded-3xl bg-white/[0.03] border border-white/[0.05] space-y-4 shadow-xl">
                   <h3 className="text-[10px] font-bold uppercase tracking-widest text-white/30 flex items-center gap-2">
                     <Info size={14} /> Социальный интерфейс
                   </h3>
@@ -146,48 +160,50 @@ export default function MasterHubView({ userId }: { userId: number }) {
                   </div>
                 </div>
               </motion.div>
-            )}
-
-            {/* ── 8 Spheres Grid ── */}
-            <div className="space-y-3">
-              <h3 className="text-[10px] font-bold uppercase tracking-[0.4em] text-white/20 px-2">
-                Система 12 сфер
-              </h3>
-              <div className="grid grid-cols-1 gap-3">
-                {SPHERES_META.map((meta, idx) => {
-                  const status = deep_profile_data.spheres_status[meta.key];
-                  const Icon = ICON_MAP[meta.key] || User;
-                  return (
-                    <motion.div
-                      key={meta.key}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: idx * 0.05 }}
-                      onClick={() => setSelectedSphere(meta.key)}
-                      className="p-4 rounded-3xl bg-white/[0.02] border border-white/[0.04] flex items-center gap-4 active:scale-[0.98] transition-all cursor-pointer hover:bg-white/[0.05] group"
-                    >
-                      <div 
-                        className="w-12 h-12 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110"
-                        style={{ backgroundColor: `${meta.color}15`, color: meta.color, border: `1px solid ${meta.color}20` }}
+            ) : (
+              <motion.div
+                key="analysis-tab"
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="space-y-4"
+              >
+                {/* ── 12 Spheres Grid ── */}
+                <div className="grid grid-cols-1 gap-3">
+                  {SPHERES_META.map((meta, idx) => {
+                    const status = deep_profile_data.spheres_status[meta.key];
+                    const Icon = ICON_MAP[meta.key] || User;
+                    return (
+                      <motion.div
+                        key={meta.key}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: idx * 0.05 }}
+                        onClick={() => setSelectedSphere(meta.key)}
+                        className="p-4 rounded-3xl bg-white/[0.02] border border-white/[0.04] flex items-center gap-4 active:scale-[0.98] transition-all cursor-pointer hover:bg-white/[0.05] group"
                       >
-                        <Icon size={22} />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <span className="font-bold text-sm text-white/90">{meta.name}</span>
-                          <span className="text-[9px] font-bold text-white/30 uppercase tracking-tighter bg-white/5 px-2 py-0.5 rounded-full">
-                            {status?.status || "Инициация"}
-                          </span>
+                        <div 
+                          className="w-12 h-12 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110"
+                          style={{ backgroundColor: `${meta.color}15`, color: meta.color, border: `1px solid ${meta.color}20` }}
+                        >
+                          <Icon size={22} />
                         </div>
-                        <p className="text-[11px] text-white/50 leading-relaxed line-clamp-1 mt-0.5 font-light">
-                          {status?.insight || "Гармонизация сферы..."}
-                        </p>
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </div>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between">
+                            <span className="font-bold text-sm text-white/90">{meta.name}</span>
+                            <span className="text-[9px] font-bold text-white/30 uppercase tracking-tighter bg-white/5 px-2 py-0.5 rounded-full">
+                              {status?.status || "Инициация"}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-white/50 leading-relaxed line-clamp-1 mt-0.5 font-light">
+                            {status?.insight || "Гармонизация сферы..."}
+                          </p>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            )}
           </motion.div>
         ) : (
           /* ── Sphere Detail View ── */
