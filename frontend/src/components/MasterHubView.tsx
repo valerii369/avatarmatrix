@@ -113,34 +113,52 @@ export default function MasterHubView({ userId }: { userId: number }) {
             className="space-y-6"
           >
             {/* ── Sub-Navigation Tabs ── */}
-            <div className="flex p-1.5 gap-1.5 bg-white/[0.04] backdrop-blur-3xl rounded-2xl border border-white/10 -mt-2">
+            <div className="flex p-1 gap-1 bg-white/[0.04] border border-white/10 rounded-[14px]">
               <button
                 onClick={() => setSubTab("personality")}
-                className={`flex-1 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${
-                  subTab === "personality" 
-                  ? "bg-white/10 text-white border border-white/10 shadow-[0_0_20px_rgba(255,255,255,0.05)]" 
-                  : "text-white/30 hover:text-white/50"
-                }`}
+                style={{
+                  padding: "8px 4px",
+                  borderRadius: 10,
+                  fontSize: 11,
+                  fontWeight: 500,
+                  transition: "all 0.2s",
+                  background: subTab === "personality" ? "rgba(255,255,255,0.1)" : "transparent",
+                  color: subTab === "personality" ? "var(--text-primary)" : "var(--text-muted)",
+                  border: "none",
+                  flex: 1
+                }}
               >
                 О личности
               </button>
               <button
                 onClick={() => setSubTab("sides")}
-                className={`flex-1 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${
-                  subTab === "sides" 
-                  ? "bg-white/10 text-white border border-white/10 shadow-[0_0_20px_rgba(255,255,255,0.05)]" 
-                  : "text-white/30 hover:text-white/50"
-                }`}
+                style={{
+                  padding: "8px 4px",
+                  borderRadius: 10,
+                  fontSize: 11,
+                  fontWeight: 500,
+                  transition: "all 0.2s",
+                  background: subTab === "sides" ? "rgba(255,255,255,0.1)" : "transparent",
+                  color: subTab === "sides" ? "var(--text-primary)" : "var(--text-muted)",
+                  border: "none",
+                  flex: 1
+                }}
               >
                 Стороны
               </button>
               <button
                 onClick={() => setSubTab("analysis")}
-                className={`flex-1 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${
-                  subTab === "analysis" 
-                  ? "bg-white/10 text-white border border-white/10 shadow-[0_0_20px_rgba(255,255,255,0.05)]" 
-                  : "text-white/30 hover:text-white/50"
-                }`}
+                style={{
+                  padding: "8px 4px",
+                  borderRadius: 10,
+                  fontSize: 11,
+                  fontWeight: 500,
+                  transition: "all 0.2s",
+                  background: subTab === "analysis" ? "rgba(255,255,255,0.1)" : "transparent",
+                  color: subTab === "analysis" ? "var(--text-primary)" : "var(--text-muted)",
+                  border: "none",
+                  flex: 1
+                }}
               >
                 Разбор сфер
               </button>
