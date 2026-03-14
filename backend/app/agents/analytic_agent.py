@@ -49,7 +49,6 @@ async def run_mirror_analysis(
         model=settings.OPENAI_MODEL,
         messages=messages,
         max_tokens=1500,
-        temperature=0.3, # Slightly higher for more creative/deep narrative
         response_format={"type": "json_object"},
     )
     
@@ -137,8 +136,7 @@ async def extract_response_features(
             model=settings.OPENAI_MODEL,
             messages=[{"role": "system", "content": "Ты — AI-интерпретатор поведенческих паттернов."},
                       {"role": "user", "content": prompt}],
-            response_format={"type": "json_object"},
-            temperature=0.1
+            response_format={"type": "json_object"}
         )
         return json.loads(response.choices[0].message.content)
     except Exception as e:

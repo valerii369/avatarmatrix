@@ -59,7 +59,6 @@ async def analyze_reflection(text: str, gender: str = "не указан", langu
             model=settings.OPENAI_MODEL_FAST,
             messages=[{"role": "system", "content": "Система анализа рефлексий AVATAR."},
                       {"role": "user", "content": prompt}],
-            temperature=0.4,
             response_format={
                 "type": "json_schema", 
                 "json_schema": {"name": "reflection_analysis", "schema": ReflectionAnalysis.model_json_schema()}

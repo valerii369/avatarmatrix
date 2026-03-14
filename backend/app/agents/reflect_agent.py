@@ -84,7 +84,6 @@ async def reflection_chat_message(
         response = await client.chat.completions.create(
             model=settings.OPENAI_MODEL_FAST,
             messages=messages,
-            temperature=0.7,
             response_format={
                 "type": "json_schema", 
                 "json_schema": {"name": "reflection_schema", "schema": ReflectionResponse.model_json_schema()}

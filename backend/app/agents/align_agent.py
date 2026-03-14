@@ -98,7 +98,6 @@ async def alignment_session_message(
         response = await client.chat.completions.create(
             model=settings.OPENAI_MODEL_FAST, # Идеально для частых JSON-ответов
             messages=messages,
-            temperature=0.7,
             response_format={
                 "type": "json_schema", 
                 "json_schema": {"name": "alignment_schema", "schema": AlignmentResponse.model_json_schema()}

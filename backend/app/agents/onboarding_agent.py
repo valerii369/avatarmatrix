@@ -77,7 +77,6 @@ async def generate_onboarding_response(chat_history: list[dict], gender: str = N
         response = await client.chat.completions.create(
             model=settings.OPENAI_MODEL_FAST,
             messages=messages,
-            temperature=0.6,
             response_format={
                 "type": "json_schema", 
                 "json_schema": {"name": "onboarding_schema", "schema": OnboardingResponse.model_json_schema()}
@@ -116,7 +115,6 @@ async def extract_onboarding_cards(chat_history: list[dict]) -> list[dict]:
             model=settings.OPENAI_MODEL,
             messages=[{"role": "user", "content": summary_prompt}],
             max_tokens=400,
-            temperature=0.3,
         )
         user_summary = summary_resp.choices[0].message.content
     except Exception as e:
@@ -203,27 +201,16 @@ async def extract_onboarding_cards(chat_history: list[dict]) -> list[dict]:
             model=settings.OPENAI_MODEL,
             messages=[{"role": "user", "content": prompt}],
             max_tokens=1000,
-            temperature=0.2,
             response_format={"type": "json_object"},
         )
         raw_content = response.choices[0].message.content
-    except Exception as e:
-        print(f"[Onboarding Card Ranking Error] {e}")
-        # Return top 5 from vector search directly if LLM fails
-        return [
-            {
-                "archetype_id": c["archetype_id"],
-                "sphere": c["sphere"],
-                "score": 0.7,
-                "reason": "Прямое семантическое совпадение с запросом.",
-            }
-            for c in context_cards[:5]
-        ]
+        
         # Remove any markdown code block wrappers if they slip through
-        if raw_content.startswith("```"):
-            raw_content = raw_content.split("\n", 1)[-1]
-            if raw_content.endswith("```"):
-                raw_content = raw_content[:-3]
+        if raw_content.strip().startswith("```"):
+            lines = raw_content.strip().split("\n")
+            if lines[0].startswith("```"): lines = lines[1:]
+            if lines and lines[-1].startswith("```"): lines = lines[:-1]
+            raw_content = "\n".join(lines).strip()
         
         data = json.loads(raw_content)
         cards = data.get("cards", [])
@@ -233,7 +220,7 @@ async def extract_onboarding_cards(chat_history: list[dict]) -> list[dict]:
         validated = []
         for card in cards:
             arch_id = card.get("archetype_id")
-            sphere = card.get("sphere", "").upper()
+            sphere = str(card.get("sphere", "")).upper()
             if (arch_id, sphere) in valid_combos:
                 validated.append({
                     "archetype_id": arch_id,

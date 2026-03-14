@@ -193,10 +193,8 @@ class DatasetBuilder:
             messages=[{"role": "system", "content": system_prompt},
                       {"role": "user", "content": "Сгенерируй эволюционную сцену в формате JSON."}],
             response_format={
-                "type": "json_schema", 
                 "json_schema": {"name": "scene_schema", "schema": SceneData.model_json_schema()}
-            },
-            temperature=0.7
+            }
         )
         
         data_obj = SceneData.model_validate_json(response.choices[0].message.content)

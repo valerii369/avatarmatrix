@@ -54,7 +54,6 @@ async def synthesize_sphere_descriptions(chart_dict: dict, aspects_dict: list) -
             {"role": "system", "content": SPHERES_PROMPT},
             {"role": "user", "content": f"THE RAIN DATA (Natal Chart):\n{json.dumps(raw_data, ensure_ascii=False)}"}
         ],
-        temperature=0.4,
         response_format={"type": "json_object"},
     )
     

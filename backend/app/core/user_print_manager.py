@@ -158,8 +158,7 @@ RETURN COMPLETE JSON according to UserPrintSchema:
             response = await client.chat.completions.create(
                 model=settings.OPENAI_MODEL,
                 messages=[{"role": "system", "content": extraction_prompt}],
-                response_format={"type": "json_object"},
-                temperature=0.3
+                response_format={"type": "json_object"}
             )
             
             new_data_raw = json.loads(response.choices[0].message.content)
@@ -202,6 +201,15 @@ RETURN COMPLETE JSON according to UserPrintSchema:
                 status="Зарождение",
                 insight=insight
             )
+
+        # Core ID text synthesis (Placeholder or from available data)
+        core_id_text = "Личность, проходящая первичную сонастройку и исследование своего потенциала через систему AVATAR."
+        if "IDENTITY" in spheres_data:
+            id_details = spheres_data["IDENTITY"]
+            if isinstance(id_details, dict) and "interpretation" in id_details:
+                core_id_text = id_details["interpretation"]
+            elif isinstance(id_details, str):
+                core_id_text = id_details
 
         initial_data = UserPrintSchema(
             portrait_summary=PortraitSummary(

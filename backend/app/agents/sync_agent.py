@@ -282,7 +282,6 @@ async def run_avatar_layer(
             model=model,
             messages=messages,
             max_tokens=500,
-            temperature=0.85 if layer != "mirror" else 0.2,
         )
         return response.choices[0].message.content or "..."
     except Exception as e:
