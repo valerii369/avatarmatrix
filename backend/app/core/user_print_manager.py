@@ -81,42 +81,43 @@ class OceanService:
         rivers_context = json.dumps(additional_rivers, ensure_ascii=False) if additional_rivers else "No additional rivers."
 
         extraction_prompt = f"""
-ROLE:
-You are the SUPREME AI ALCHEMIST of the AVATAR system. Your task is the Great Work: synthesizing all data flows (Rivers) into a single Ocean (User Print / Personality Passport).
+РОЛЬ:
+Ты — ВЕРХОВНЫЙ АЛХИМИК системы AVATAR. Твоя задача — Великое Делание: синтез всех потоков данных (Рек) в единый Океан (Портрет Пользователя / Паспорт Личности).
 
-TASK:
-1. Analyze the provided input data:
-   - CURRENT OCEAN (previous state)
-   - RIVER OF STARS (Detailed Synthesis: Interpretation, Light, Shadow, Markers)
-   - TECHNICAL RIVERS (Metrics, context)
-   - LIVING INFLOW (Transcript of the last session)
-2. Extract deep psychological meaning, behavioral patterns, and life scenarios.
-3. ALCHEMY RULES:
-   - INTEGRATION: Synthesize the "Light" and "Shadow" from the River of Stars into the "Polarities" section of the Ocean.
-   - NARRATIVE: Use the "Interpretation" from the River to update the "portrait_summary".
-   - NO DUPLICATION: Do not simply copy-paste. Transform into a cohesive, flowing narrative.
-4. Fill the required JSON structure, strictly following the UserPrintSchema.
+ЗАДАЧА:
+1. Проанализируй предоставленные входные данные:
+   - ТЕКУЩИЙ ОКЕАН (предыдущее состояние)
+   - РЕКА ЗВЕЗД (Детальный синтез: Интерпретация, Свет, Тень, Маркеры)
+   - ТЕХНИЧЕСКИЕ РЕКИ (Метрики, контекст)
+   - ЖИВОЙ ПОТОК (Транскрипт последней сессии)
+2. Извлеки глубокий психологический смысл, поведенческие паттерны и жизненные сценарии.
+3. ПРАВИЛА АЛХИМИИ:
+   - ИНТЕГРАЦИЯ: Синтезируй «Свет» и «Тень» из Реки Звезд в раздел «Polarities» (Полярности) Океана.
+   - НАРРАТИВ: Используй «Интерпретацию» из Реки для обновления «portrait_summary».
+   - БЕЗ ДУБЛИРОВАНИЯ: Не просто копируй. Трансформируй в связное, текучее повествование.
+4. Заполни требуемую структуру JSON, строго следуя UserPrintSchema.
 
-CONSTRAINTS AND RULES (CRITICAL):
-1. NO JARGON: Completely exclude technical astrology terms.
-2. OBJECTIVITY: Maintain balanced analytical tone. Accurately reflect both talents/strengths and shadows/fears without judgment.
-3. CONCISENESS: Dense, informative values. No fluff or cliches.
-4. STRICT JSON OUTPUT: Output ONLY valid JSON. No markdown blocks.
-5. NO HALLUCINATIONS: Fill fields only based on provided data.
+ОГРАНИЧЕНИЯ И ПРАВИЛА (КРИТИЧЕСКИ):
+1. БЕЗ ЖАРГОНА: Полностью исключи технические астрологические термины.
+2. ОБЪЕКТИВНОСТЬ: Соблюдай сбалансированный аналитический тон. Точно отражай как таланты/силы, так и тени/страхи без осуждения.
+3. ЛАКОНИЧНОСТЬ: Плотные, информативные значения. Без воды и клише.
+4. core_identity: СТРОГО МАКСИМУМ 100 СИМВОЛОВ. Это должна быть емкая, бьющая в цель фраза.
+5. ЯЗЫК: Весь ответ должен быть СТРОГО на РУССКОМ языке.
+6. СТРОГИЙ ВЫВОД JSON: Выводи ТОЛЬКО валидный JSON. Без markdown-блоков.
 
-CURRENT OCEAN (For continuity):
+ТЕКУЩИЙ ОКЕАН (Для преемственности):
 {current_data_json}
 
-RIVER OF STARS (Astrology - 12 Spheres):
+РЕКА ЗВЕЗД (Астрология - 12 сфер):
 {astro_context}
 
-TECHNICAL INFLOWS:
+ТЕХНИЧЕСКИЕ ПОТОКИ:
 {rivers_context}
 
-LIVING INFLOW (Session):
+ЖИВОЙ ПОТОК (Сессия):
 {transcript}
 
-RETURN COMPLETE JSON according to UserPrintSchema:
+ВЕРНИ ПОЛНЫЙ JSON согласно UserPrintSchema:
 {{
   "portrait_summary": {{
     "core_identity": "...",

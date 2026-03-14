@@ -103,11 +103,11 @@ export default function MasterHubView({ userId }: { userId: number }) {
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-violet-400 animate-pulse" />
                   <span className="text-[10px] font-bold text-violet-400 uppercase tracking-[0.3em]">
-                    Avatar Identity
+                    Идентификация Аватара
                   </span>
                 </div>
 
-                <p className="text-lg font-medium text-white leading-snug">
+                <p className="text-sm font-medium text-white leading-snug">
                   {portrait_summary.core_identity}
                 </p>
 
