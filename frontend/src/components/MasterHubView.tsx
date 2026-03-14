@@ -184,16 +184,16 @@ export default function MasterHubView({ userId }: { userId: number }) {
                         className="p-2.5 rounded-[1.25rem] bg-white/[0.02] border border-white/[0.04] flex items-center gap-3 active:scale-[0.98] transition-all cursor-pointer hover:bg-white/[0.05] group"
                       >
                         <div 
-                          className="w-9 h-9 flex-shrink-0 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110"
+                          className="w-10 h-10 flex-shrink-0 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110"
                           style={{ backgroundColor: `${meta.color}15`, color: meta.color, border: `1px solid ${meta.color}20` }}
                         >
-                          <Icon size={18} />
+                          <Icon size={20} />
                         </div>
                         <div className="flex flex-col min-w-0">
-                          <span className="text-[7px] font-bold text-white/20 uppercase tracking-wider mb-0.5">
+                          <span className="text-[8px] font-bold text-white/20 uppercase tracking-wider mb-0.5">
                             {status?.status || "Инициация"}
                           </span>
-                          <span className="font-bold text-[11px] text-white/90 block leading-none truncate">
+                          <span className="font-bold text-[12px] text-white/90 block leading-none truncate">
                             {meta.name}
                           </span>
                           <p className="text-[9px] text-white/40 leading-tight font-light truncate mt-1">
