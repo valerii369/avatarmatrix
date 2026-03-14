@@ -163,8 +163,8 @@ export default function MasterHubView({ userId }: { userId: number }) {
             ) : (
               <motion.div
                 key="analysis-tab"
-                initial={{ opacity: 0, x: 10 }}
-                animate={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
                 className="space-y-4"
               >
                 {/* ── 12 Spheres Grid (6x2) ── */}
@@ -175,26 +175,26 @@ export default function MasterHubView({ userId }: { userId: number }) {
                     return (
                       <motion.div
                         key={meta.key}
-                        initial={{ opacity: 0, y: 5 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: idx * 0.03 }}
+                        initial={{ opacity: 0, scale: 0.98 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: idx * 0.015 }}
                         onClick={() => setSelectedSphere(meta.key)}
-                        className="p-3.5 rounded-3xl bg-white/[0.02] border border-white/[0.04] flex flex-col gap-3 active:scale-[0.98] transition-all cursor-pointer hover:bg-white/[0.05] group"
+                        className="p-2.5 rounded-[1.25rem] bg-white/[0.02] border border-white/[0.04] flex items-center gap-3 active:scale-[0.98] transition-all cursor-pointer hover:bg-white/[0.05] group"
                       >
-                        <div className="flex items-center justify-between w-full">
-                          <div 
-                            className="w-9 h-9 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110"
-                            style={{ backgroundColor: `${meta.color}15`, color: meta.color, border: `1px solid ${meta.color}20` }}
-                          >
-                            <Icon size={18} />
-                          </div>
-                          <span className="text-[8px] font-bold text-white/30 uppercase tracking-tighter bg-white/5 px-1.5 py-0.5 rounded-md">
+                        <div 
+                          className="w-9 h-9 flex-shrink-0 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110"
+                          style={{ backgroundColor: `${meta.color}15`, color: meta.color, border: `1px solid ${meta.color}20` }}
+                        >
+                          <Icon size={18} />
+                        </div>
+                        <div className="flex flex-col min-w-0">
+                          <span className="text-[7px] font-bold text-white/20 uppercase tracking-wider mb-0.5">
                             {status?.status || "Инициация"}
                           </span>
-                        </div>
-                        <div className="space-y-0.5">
-                          <span className="font-bold text-xs text-white/90 block">{meta.name}</span>
-                          <p className="text-[10px] text-white/40 leading-tight font-light">
+                          <span className="font-bold text-[11px] text-white/90 block leading-none truncate">
+                            {meta.name}
+                          </span>
+                          <p className="text-[9px] text-white/40 leading-tight font-light truncate mt-1">
                             {meta.subtitle}
                           </p>
                         </div>
@@ -236,11 +236,11 @@ export default function MasterHubView({ userId }: { userId: number }) {
                     return <Icon size={22} />;
                   })()}
                 </div>
-                <div>
-                  <h1 className="text-xl font-bold text-white tracking-tight -mb-1">
+                <div className="flex flex-col">
+                  <h1 className="text-xl font-bold text-white tracking-tight mb-0.5">
                     {activeSphereMeta?.name}
                   </h1>
-                  <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">
+                  <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest leading-none">
                     {activeSphereData?.status || "Стадия не определена"}
                   </span>
                 </div>
