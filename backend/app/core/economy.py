@@ -1,8 +1,8 @@
 """
 Economy service: handles ✦ Energy credits, token budgets, and streak logic.
 """
-from datetime import datetime, date
-from typing import Optional
+from datetime import datetime, date, timedelta
+from typing import Optional, Tuple
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
@@ -248,6 +248,55 @@ async def update_streak(db: AsyncSession, user: User) -> tuple[int, int, bool]:
     user.last_activity = datetime.utcnow()
     db.add(user)
     return user.streak, bonus_xp, is_new_day
+
+
+async def get_claim_status(db: AsyncSession, user_id: int) -> dict:
+    """Get manual energy claim status (12h cooldown, +10✦)."""
+    stmt = select(GameState).where(GameState.user_id == user_id)
+    result = await db.execute(stmt)
+    game_state = result.scalar_one_or_none()
+
+    if not game_state:
+        game_state = GameState(user_id=user_id)
+        db.add(game_state)
+        await db.flush()
+
+    last_claim = game_state.last_energy_claim
+    if not last_claim:
+        return {"can_claim": True, "next_claim_at": None}
+
+    next_claim = last_claim + timedelta(hours=12)
+    can_claim = datetime.utcnow() >= next_claim
+    return {
+        "can_claim": can_claim,
+        "next_claim_at": next_claim.isoformat() if not can_claim else None
+    }
+
+
+async def claim_manual_energy(db: AsyncSession, user_id: int) -> Tuple[bool, int]:
+    """Execute manual energy claim. Returns (success, new_balance)."""
+    status = await get_claim_status(db, user_id)
+    if not status["can_claim"]:
+        return False, 0
+
+    user_result = await db.execute(select(User).where(User.id == user_id))
+    user = user_result.scalar_one_or_none()
+    if not user:
+        return False, 0
+
+    # Execute claim
+    user.energy = (user.energy or 0) + 10
+    
+    # Update claim time
+    stmt = select(GameState).where(GameState.user_id == user_id)
+    gs_result = await db.execute(stmt)
+    game_state = gs_result.scalar_one_or_none()
+    game_state.last_energy_claim = datetime.utcnow()
+
+    db.add(user)
+    db.add(game_state)
+    await db.commit()
+    return True, user.energy
 
 
 def calculate_xp_for_level(level: int) -> int:

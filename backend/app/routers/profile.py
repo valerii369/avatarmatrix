@@ -4,7 +4,7 @@ from sqlalchemy import select
 
 from app.database import get_db
 from app.models import User, CardProgress, NatalChart, Pattern
-from app.core.economy import calculate_xp_for_level, get_level_title
+from app.core.economy import calculate_xp_for_level, get_level_title, get_claim_status
 from app.agents.common import SPHERES
 
 router = APIRouter()
@@ -86,6 +86,7 @@ async def get_profile(user_id: int, db: AsyncSession = Depends(get_db)):
         "referral_code": user.referral_code,
         "referral_count": referral_count,
         "referral_energy_earned": referral_energy_earned,
+        "energy_claim": await get_claim_status(db, user_id),
     }
 
 

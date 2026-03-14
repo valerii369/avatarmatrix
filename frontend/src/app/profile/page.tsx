@@ -581,7 +581,12 @@ function ShopModal({ onClose, userId }: { onClose: () => void; userId: number })
                             <div className="flex items-center gap-3">
                                 <div className="text-2xl">⚡</div>
                                 <div className="text-left">
-                                    <p className="font-bold text-white">{offer.name}</p>
+                                    <div className="flex items-center gap-2">
+                                        <p className="font-bold text-white">{offer.name}</p>
+                                        {offer.id === "pack_300" && <span className="text-[9px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded-md border border-emerald-500/20">-2%</span>}
+                                        {offer.id === "pack_500" && <span className="text-[9px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded-md border border-emerald-500/20">-5%</span>}
+                                        {offer.id === "pack_1000" && <span className="text-[9px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded-md border border-emerald-500/20">-10%</span>}
+                                    </div>
                                     <p className="text-[11px] text-white/40">Начислится моментально</p>
                                 </div>
                             </div>
@@ -672,7 +677,10 @@ function SubscriptionModal({ onClose, userId }: { onClose: () => void; userId: n
                     {isBuying ? (
                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     ) : (
-                        <>Купить за ⭐️ 330</>
+                        <div className="flex flex-col items-center">
+                           <span className="flex items-center gap-1.5">Купить за ⭐️ 800</span>
+                           <span className="text-[10px] opacity-60 font-medium">Экономия 20% • +1000 ✦</span>
+                        </div>
                     )}
                 </button>
             </motion.div>

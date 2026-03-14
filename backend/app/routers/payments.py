@@ -1,3 +1,4 @@
+import logging
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -6,6 +7,8 @@ from sqlalchemy import select
 from app.database import get_db
 from app.models import User
 from app.core.economy import award_energy, REFERRAL_PURCHASE_BONUS
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -17,10 +20,11 @@ class PaymentOffer(BaseModel):
     stars: int
 
 OFFERS = [
-    PaymentOffer(id="pack_1000", name="1000 ✦ Энергии", energy=1000, price_usd=1.9, stars=100),
-    PaymentOffer(id="pack_2500", name="2500 ✦ Энергии", energy=2500, price_usd=3.9, stars=250),
-    PaymentOffer(id="pack_5000", name="5000 ✦ Энергии", energy=5000, price_usd=6.9, stars=500),
-    PaymentOffer(id="pack_premium", name="AVATAR Premium", energy=0, price_usd=6.0, stars=330),
+    PaymentOffer(id="pack_100", name="100 ✦ Энергии", energy=100, price_usd=1.0, stars=100),
+    PaymentOffer(id="pack_300", name="300 ✦ Энергии", energy=300, price_usd=2.94, stars=294), # 2% off
+    PaymentOffer(id="pack_500", name="500 ✦ Энергии", energy=500, price_usd=4.75, stars=475), # 5% off
+    PaymentOffer(id="pack_1000", name="1000 ✦ Энергии", energy=1000, price_usd=9.0, stars=900), # 10% off
+    PaymentOffer(id="pack_premium", name="AVATAR Premium + 1000 ✦", energy=1000, price_usd=8.0, stars=800), # 20% off
 ]
 
 class InvoiceRequest(BaseModel):
@@ -57,6 +61,7 @@ async def create_invoice(request: InvoiceRequest, db: AsyncSession = Depends(get
             "title": offer.name,
             "description": description,
             "payload": payload,
+            "provider_token": "",  # STARRY PAYMENTS (XTR) REQUIRE EMPTY PROVIDER TOKEN
             "currency": "XTR",
             "prices": [{"label": "Цена", "amount": offer.stars}]
         }
@@ -64,7 +69,7 @@ async def create_invoice(request: InvoiceRequest, db: AsyncSession = Depends(get
         
         data = resp.json()
         if not data.get("ok"):
-            print(f"TG PAYMENT ERROR: {data}")  # Basic log to console/journal
+            logger.error(f"TG PAYMENT ERROR for user {request.user_id}: {data}")
             raise HTTPException(status_code=500, detail=f"TG Error: {data.get('description')}")
             
         return {"invoice_link": data["result"]}

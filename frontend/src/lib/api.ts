@@ -119,6 +119,9 @@ export const paymentsAPI = {
     createInvoice: (userId: number, offerId: string) =>
         api.post("/api/payments/create-invoice", { user_id: userId, offer_id: offerId }),
 };
+export const economyAPI = {
+    claim: (userId: number) => api.post("/api/economy/claim", { user_id: userId }),
+};
 
 export const masterHubAPI = {
     get: (userId: number) => api.get(`/api/master-hub/${userId}`),

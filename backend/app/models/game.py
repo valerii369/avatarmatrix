@@ -1,8 +1,8 @@
 from typing import Optional
-from sqlalchemy import Integer, ForeignKey, String, Date
+from sqlalchemy import Integer, ForeignKey, String, Date, DateTime
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
-from datetime import date
+from datetime import date, datetime
 
 from app.database import Base
 from app.models.base import TimestampMixin
@@ -23,6 +23,9 @@ class GameState(Base, TimestampMixin):
     # Daily energy (burns at end of day)
     daily_energy: Mapped[int] = mapped_column(Integer, default=10)
     daily_energy_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+
+    # Manual energy claim (12 hours)
+    last_energy_claim: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
 
 
 class Match(Base, TimestampMixin):

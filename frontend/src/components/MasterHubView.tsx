@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import useSWR from "swr";
-import { masterHubAPI } from "@/lib/api";
+import useSWR, { mutate } from "swr";
+import { masterHubAPI, economyAPI } from "@/lib/api";
+import { useUserStore } from "@/lib/store";
+import { useAudio } from "@/lib/hooks/useAudio";
 import { 
   User, Wallet, Heart, Home, Award, Activity, Zap, Moon, 
   ArrowLeft, Info, Eye, EyeOff, Sparkles, AlertCircle, ShieldCheck,
@@ -71,6 +73,9 @@ export default function MasterHubView({ userId }: { userId: number }) {
   const [selectedSphere, setSelectedSphere] = useState<string | null>(null);
   const [subTab, setSubTab] = useState<"personality" | "sides" | "analysis">("personality");
   const [activeTooltip, setActiveTooltip] = useState<{label: string, value: string} | null>(null);
+  const { play } = useAudio();
+  const { setUser } = useUserStore();
+  const [isClaiming, setIsClaiming] = useState(false);
 
   const { data: hub, isValidating: hubLoading } = useSWR(
     userId ? ["master-hub", userId] : null,
@@ -163,6 +168,54 @@ export default function MasterHubView({ userId }: { userId: number }) {
                 Разбор сфер
               </button>
             </div>
+            
+            {/* ── Energy Claim Notification ── */}
+            {hub.energy_claim?.can_claim && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                onClick={async () => {
+                  if (isClaiming) return;
+                  setIsClaiming(true);
+                  play('success');
+                  try {
+                    const res = await economyAPI.claim(userId);
+                    if (res.data.success) {
+                      setUser({ energy: res.data.new_energy });
+                      // Refresh hub to update claim status
+                      mutate(["master-hub", userId]);
+                    }
+                  } catch (e) {
+                    console.error("Claim error", e);
+                  } finally {
+                    setIsClaiming(false);
+                  }
+                }}
+                className="mx-2 p-4 rounded-2xl bg-gradient-to-r from-amber-500/20 to-amber-600/10 border border-amber-500/30 flex items-center justify-between cursor-pointer active:scale-[0.98] transition-all relative overflow-hidden group shadow-lg shadow-amber-500/5"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-amber-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="flex items-center gap-3 relative z-10">
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center text-xl shadow-inner">⚡</div>
+                  <div>
+                    <p className="text-sm font-bold text-amber-200">Доступна энергия! (+10 ✦)</p>
+                    <p className="text-[10px] text-amber-200/50 uppercase font-bold tracking-widest">Нажми чтобы забрать</p>
+                  </div>
+                </div>
+                <div className="relative z-10">
+                  {isClaiming ? (
+                    <div className="w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <motion.div
+                      animate={{ x: [0, 5, 0] }}
+                      transition={{ repeat: Infinity, duration: 1.5 }}
+                      className="text-amber-500/40"
+                    >
+                      →
+                    </motion.div>
+                  )}
+                </div>
+              </motion.div>
+            )}
 
             {subTab === "personality" && (
               <motion.div
