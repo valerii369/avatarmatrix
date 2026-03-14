@@ -304,20 +304,20 @@ export default function MasterHubView({ userId }: { userId: number }) {
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed bottom-0 left-0 right-0 bg-[#0a0a0a] border-t border-white/10 rounded-t-[2rem] p-8 z-[101] shadow-2xl"
+              className="fixed bottom-0 left-0 right-0 bg-[#0a0a0a] border-t border-white/10 rounded-t-[2rem] px-6 pt-5 pb-10 z-[101] shadow-2xl"
             >
               <div className="w-12 h-1.5 bg-white/10 rounded-full mx-auto mb-6" />
-              <div className="space-y-4">
-                <div className="flex flex-col gap-1">
+              <div className="space-y-2.5">
+                <div className="flex flex-col gap-0.5">
                   <span className="text-[10px] font-bold text-violet-400 uppercase tracking-widest">{activeTooltip.label}</span>
                   <h3 className="text-xl font-bold text-white tracking-tight">{activeTooltip.value}</h3>
                 </div>
-                <p className="text-sm text-white/60 leading-relaxed font-light">
+                <p className="text-[13px] text-white/60 leading-relaxed font-light">
                   {TRAIT_DESCRIPTIONS[activeTooltip.value] || "Глубинный смысл этого качества раскрывается в твоей персональной истории развития."}
                 </p>
                 <button 
                   onClick={() => setActiveTooltip(null)}
-                  className="w-full py-4 mt-2 bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl text-xs font-bold uppercase tracking-widest transition-colors"
+                  className="w-full py-4 mt-1.5 bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl text-xs font-bold uppercase tracking-widest transition-colors"
                 >
                   Понятно
                 </button>
