@@ -60,6 +60,11 @@ const TRAIT_DESCRIPTIONS: Record<string, string> = {
   "Наблюдатель": "Анализирующий и видящий суть процессов со стороны",
   "Целитель": "Восстанавливающий баланс и гармонию систем",
   "Архитектор": "Проектирующий будущее и сложные структуры",
+
+  // Социальный интерфейс
+  "Мировоззрение": "Индивидуальная система взглядов и ценностей аватара",
+  "Коммуникация": "Приоритетный способ взаимодействия и обмена информацией",
+  "Экзистенциальный урок": "Ключевая жизненная задача для текущего этапа",
 };
 
 export default function MasterHubView({ userId }: { userId: number }) {
@@ -162,6 +167,28 @@ export default function MasterHubView({ userId }: { userId: number }) {
                       <SummaryTag label="Энергия" value={portrait_summary.energy_type} color="emerald" onClick={() => setActiveTooltip({ label: "Энергия", value: portrait_summary.energy_type })} />
                       <SummaryTag label="Фокус" value={portrait_summary.current_dynamic} color="amber" onClick={() => setActiveTooltip({ label: "Фокус", value: portrait_summary.current_dynamic })} />
                     </div>
+
+                    <div className="pt-4 mt-2 border-t border-white/[0.05] space-y-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em]">Социальный интерфейс</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <SummaryTag label="Мировоззрение" value={deep_profile_data.social_interface.worldview_stance} color="blue" onClick={() => setActiveTooltip({ label: "Мировоззрение", value: deep_profile_data.social_interface.worldview_stance })} />
+                        <SummaryTag label="Коммуникация" value={deep_profile_data.social_interface.communication_style} color="violet" onClick={() => setActiveTooltip({ label: "Коммуникация", value: deep_profile_data.social_interface.communication_style })} />
+                      </div>
+                      <div 
+                        onClick={() => setActiveTooltip({ label: "Экзистенциальный урок", value: deep_profile_data.social_interface.karmic_lesson })}
+                        className="pt-3 border-t border-white/[0.03] cursor-pointer group active:scale-[0.99] transition-all"
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="text-[9px] font-bold uppercase tracking-tight text-white/30">Экзистенциальный урок</div>
+                          <Info size={10} className="text-white/10 group-hover:text-white/30 transition-colors" />
+                        </div>
+                        <div className="text-xs italic text-violet-300/90 leading-relaxed">
+                          «{deep_profile_data.social_interface.karmic_lesson}»
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </motion.div>
 
@@ -169,22 +196,6 @@ export default function MasterHubView({ userId }: { userId: number }) {
                 <div className="grid grid-cols-2 gap-3">
                   <PolarityCard title="Сильные стороны" items={deep_profile_data.polarities.core_strengths} icon={ShieldCheck} color="#10B981" />
                   <PolarityCard title="Теневые аспекты" items={deep_profile_data.polarities.shadow_aspects} icon={AlertCircle} color="#EF4444" />
-                </div>
-                
-                <div className="p-5 rounded-[1.25rem] bg-white/[0.03] border border-white/[0.05] space-y-4 shadow-lg">
-                  <h3 className="text-[9px] font-bold uppercase tracking-widest text-white/20 flex items-center gap-2">
-                    <Info size={13} /> Социальный интерфейс
-                  </h3>
-                  <div className="space-y-3.5">
-                    <InfoBlock label="Мировоззрение" text={deep_profile_data.social_interface.worldview_stance} />
-                    <InfoBlock label="Коммуникация" text={deep_profile_data.social_interface.communication_style} />
-                    <div className="pt-3 border-t border-white/[0.03]">
-                      <div className="text-[9px] font-bold uppercase tracking-tight text-white/30 mb-1">Экзистенциальный урок</div>
-                      <div className="text-xs italic text-violet-300/90 leading-relaxed">
-                        «{deep_profile_data.social_interface.karmic_lesson}»
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </motion.div>
             ) : (
