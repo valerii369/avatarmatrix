@@ -12,62 +12,66 @@ SPHERES_PROMPT = """
 1. Глубоко проанализируй предоставленный JSON Натальной карты (планеты, знаки, дома и аспекты).
 2. Для каждой из 12 сфер проведи многомерный синтез.
 3. Предоставь структурированный ответ для КАЖДОЙ сферы, содержащий:
-   - interpretation: Глубокое, профессиональное психологическое и эволюционное описание сферы (8-10 предложений). Пиши плотно, без воды, раскрывая причинно-следственные связи.
-   - light: Высший потенциал, таланты и дары души в этой области.
-   - shadow: Страхи, искажения, кармические ловушки и точки потери энергии.
-   - astrological_markers: Краткое пояснение, какие планеты, знаки и аспекты сформировали этот вывод (для прозрачности).
+   - interpretation: Краткое и емкое психологическое описание сферы (3-5 предложений). Пиши по сути, для быстрого ознакомления.
+   - light: Главный талант или дар в этой области.
+   - shadow: Основной вызов или ловушка.
+   - astrological_markers: Краткий список ключевых показателей (планета в знаке/доме).
 
 ПРИНЦИПЫ:
-- БЕЗ ЖАРГОНА В ИНТЕРПРЕТАЦИИ: Используй ясный, живой и профессиональный психологический язык.
-- ЭКСПЕРТНЫЙ УРОВЕНЬ: Не просто перечисляй положения. Синтезируй управителя дома, планеты в доме и мажорные аспекты.
-- БАЛАНС: Будь честен в отношении вызовов, но не впадай в фатализм.
-- ЯЗЫК: Весь контент должен быть СТРОГО на РУССКОМ языке.
+- КРАТКОСТЬ: Это первичный срез для быстрой загрузки. Не более 5 предложений в интерпретации.
+- БЕЗ ЖАРГОНА: Используй живой человеческий язык.
+- ЯЗЫК: Строго РУССКИЙ.
 
 СФЕРЫ (МАППИНГ):
-1. IDENTITY: Я, маска, физическое тело, первое впечатление.
-2. RESOURCES: Самооценка, деньги, врожденные таланты, жизненная энергия.
-3. COMMUNICATION: Интеллект, окружение, обучение, короткие пути.
-4. ROOTS: Фундамент, род, дом, внутренняя безопасность.
-5. CREATIVITY: Радость, созидание, любовь, самовыражение, огонь.
-6. SERVICE: Дневной ритм, тело, работа, дисциплина.
-7. PARTNERSHIP: Другой, зеркала, контракты, союзы.
-8. TRANSFORMATION: Глубинная власть, тени, алхимия кризиса.
-9. EXPANSION: Расширение горизонтов, философия, мудрость, длинные пути.
-10. STATUS: Социальный пик, призвание, публичная роль, результаты.
-11. VISION: Будущее, групповое сознание, братство, мечты.
-12. SPIRIT: Одиночество, завершение, божественная связь, тишина.
+1. IDENTITY: Я, маска, физическое тело.
+2. RESOURCES: Самооценка, деньги, энергия.
+3. COMMUNICATION: Интеллект, окружение, обучение.
+4. ROOTS: Фундамент, род, дом.
+5. CREATIVITY: Радость, созидание, любовь.
+6. SERVICE: Ритм, тело, работа.
+7. PARTNERSHIP: Другой, зеркала, союзы.
+8. TRANSFORMATION: Власть, тени, кризис.
+9. EXPANSION: Горизонты, философия, мудрость.
+10. STATUS: Призвание, роль, результаты.
+11. VISION: Будущее, группы, мечты.
+12. SPIRIT: Тишина, божественная связь.
 
 ВЫВОД: Верни валидный JSON-объект с ключом "spheres_12".
 """
 
 async def synthesize_sphere_descriptions(chart_dict: dict, aspects_dict: list) -> dict:
     """
-    Analyzes the natal chart and generates a high-detail structured analysis for all 12 spheres.
+    Calls LLM to synthesize raw data into 12 detailed sphere descriptions.
     """
-    raw_data = {
-        "chart": chart_dict,
-        "aspects": aspects_dict
-    }
-    
-    response = await client.chat.completions.create(
-        model=settings.OPENAI_MODEL,
-        messages=[
-            {"role": "system", "content": SPHERES_PROMPT},
-            {"role": "user", "content": f"THE RAIN DATA (Natal Chart):\n{json.dumps(raw_data, ensure_ascii=False)}"}
-        ],
-        response_format={"type": "json_object"},
-    )
-    
+    chart_json = json.dumps(chart_dict, ensure_ascii=False)
+    aspects_json = json.dumps(aspects_dict, ensure_ascii=False)
+
+    user_content = f"NATAL CHART DATA:\n{chart_json}\n\nASPECTS DATA:\n{aspects_json}"
+
     try:
-        content = json.loads(response.choices[0].message.content)
-        # Ensure the expected key exists
-        if "spheres_12" in content:
-            return content
+        response = await client.chat.completions.create(
+            model=settings.OPENAI_MODEL,
+            messages=[
+                {"role": "system", "content": SPHERES_PROMPT},
+                {"role": "user", "content": user_content}
+            ]
+        )
+        content = response.choices[0].message.content
+        
+        # Cleanup markdown formatting if present
+        if "```json" in content:
+            content = content.split("```json")[1].split("```")[0].strip()
+        elif "```" in content:
+            content = content.split("```")[1].split("```")[0].strip()
+            
+        parsed_content = json.loads(content)
+        # Ensure the expected key exists, or wrap the content if it's missing
+        if "spheres_12" in parsed_content:
+            return parsed_content
         else:
-            # Fallback if AI missed the top-level key
-            return {"spheres_12": content}
+            return {"spheres_12": parsed_content}
     except Exception as e:
-        print(f"Error in Master of Synthesis synthesis: {e}")
+        print(f"Error in synthesize_sphere_descriptions: {e}")
         sphere_keys = [
             "IDENTITY", "RESOURCES", "COMMUNICATION", "ROOTS",
             "CREATIVITY", "SERVICE", "PARTNERSHIP", "TRANSFORMATION",

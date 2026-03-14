@@ -278,6 +278,9 @@ def calculate_natal_chart(
             result.planets.append(planet_pos)
 
         except Exception as e:
+            if "not found" in str(e) and planet_name == "Chiron":
+                # Silently skip Chiron if ephemeris files are missing
+                continue
             print(f"Error calculating {planet_name}: {e}")
 
     # Add South Node (opposite of True Node)
