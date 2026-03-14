@@ -79,8 +79,7 @@ const MINUTES = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0'))
 
 const GENDER_OPTIONS = [
     { value: "male", label: "Мужской", icon: "♂" },
-    { value: "female", label: "Женский", icon: "♀" },
-    { value: "other", label: "Другой", icon: "⚧" }
+    { value: "female", label: "Женский", icon: "♀" }
 ];
 
 const CustomSelect = ({ value, onChange, options, flex, label }: any) => (
@@ -194,9 +193,9 @@ function AstroFlow({ onBack }: { onBack: () => void }) {
                 <motion.div
                     key={step}
                     initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
-                    className="glass-strong p-6 rounded-[2rem] border border-white/10 mb-5 shadow-2xl"
+                    className="glass-strong px-5 py-5 rounded-[2rem] border border-white/10 mb-4 shadow-2xl mx-1"
                 >
-                    <div className="flex items-center gap-4 mb-5">
+                    <div className="flex items-center gap-3 mb-4">
                         <div style={{
                             width: 40, height: 40, borderRadius: 12, background: "rgba(255,255,255,0.05)",
                             border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center",
@@ -207,11 +206,11 @@ function AstroFlow({ onBack }: { onBack: () => void }) {
                             <p className="text-[10px] text-white/40 leading-tight mt-0.5">{currentStep.description}</p>
                         </div>
                     </div>
-                    <div className="h-px bg-white/5 mb-6" />
+                    <div className="h-px bg-white/5 mb-4" />
 
-                    <div className="space-y-4">
+                    <div className="space-y-3">
                         {currentStep.id === "gender" ? (
-                            <div className="grid grid-cols-3 gap-3">
+                            <div className="grid grid-cols-2 gap-3">
                                 {GENDER_OPTIONS.map(opt => (
                                     <button
                                         key={opt.value}
@@ -602,9 +601,9 @@ export default function OnboardingPage() {
                 ))}
             </div>
 
-            <div className="relative z-10 w-full max-w-[360px]" style={{ transform: "translateY(-8vh)" }}>
+            <div className="relative z-10 w-full max-w-[340px]" style={{ transform: "translateY(-6vh)" }}>
                 {/* Logo & Header */}
-                <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
+                <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-8">
                     <div style={{ marginBottom: 4 }}>
                         <SacredGeometryLogo size={216} progress={0.9} />
                     </div>
