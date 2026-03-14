@@ -179,7 +179,7 @@ export default function MasterHubView({ userId }: { userId: number }) {
                     <InfoBlock label="Мировоззрение" text={deep_profile_data.social_interface.worldview_stance} />
                     <InfoBlock label="Коммуникация" text={deep_profile_data.social_interface.communication_style} />
                     <div className="pt-3 border-t border-white/[0.03]">
-                      <div className="text-[8px] font-bold uppercase tracking-tight text-white/30 mb-1">Экзистенциальный урок</div>
+                      <div className="text-[9px] font-bold uppercase tracking-tight text-white/30 mb-1">Экзистенциальный урок</div>
                       <div className="text-xs italic text-violet-300/90 leading-relaxed">
                         «{deep_profile_data.social_interface.karmic_lesson}»
                       </div>
@@ -345,10 +345,10 @@ function SummaryTag({ label, value, color, onClick }: any) {
       className={`p-2 rounded-lg border cursor-pointer transition-all active:scale-[0.97] ${colors[color] || colors.violet} flex flex-col gap-0.5 relative group`}
     >
       <div className="flex items-center justify-between">
-        <span className="text-[7px] uppercase font-bold opacity-40">{label}</span>
+        <span className="text-[8px] uppercase font-bold opacity-40">{label}</span>
         <Info size={10} className="text-white/20 group-hover:text-white/40 transition-colors" />
       </div>
-      <span className="text-[10px] font-bold truncate tracking-tight">{value}</span>
+      <span className="text-[12px] font-bold truncate tracking-tight">{value}</span>
     </div>
   );
 }
