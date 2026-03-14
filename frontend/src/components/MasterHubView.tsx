@@ -38,9 +38,34 @@ const SPHERES_META = [
   { key: "SPIRIT", name: "Дух", subtitle: "Тишина и тайны", color: "#64748B" },
 ];
 
+const TRAIT_DESCRIPTIONS: Record<string, string> = {
+  // Архетипы
+  "Странник": "Поиск свободы и новых смыслов через опыт",
+  "Герой": "Преодоление препятствий и достижение великих целей",
+  "Мудрец": "Постижение истины и системное понимание мира",
+  "Маг": "Трансформация реальности через волю и знание",
+  "Творец": "Самовыражение и создание нового уникального продукта",
+  "Правитель": "Создание порядка и управление структурами",
+  "Опекун": "Забота, поддержка и защита окружающих",
+  "Искатель": "Исследование неизведанного и поиск истины",
+  "Бунтарь": "Разрушение старых структур ради перемен",
+  "Шут": "Радость жизни и высмеивание ложных догм",
+  
+  // Энергии
+  "Ян": "Активная, направленная вовне мужская энергия",
+  "Инь": "Принимающая, интуитивная женская энергия",
+  
+  // Роли
+  "Лидер": "Ведущий и вдохновляющий за собой других",
+  "Наблюдатель": "Анализирующий и видящий суть процессов со стороны",
+  "Целитель": "Восстанавливающий баланс и гармонию систем",
+  "Архитектор": "Проектирующий будущее и сложные структуры",
+};
+
 export default function MasterHubView({ userId }: { userId: number }) {
   const [selectedSphere, setSelectedSphere] = useState<string | null>(null);
   const [subTab, setSubTab] = useState<"personality" | "analysis">("personality");
+  const [activeTooltip, setActiveTooltip] = useState<{label: string, value: string} | null>(null);
 
   const { data: hub, isValidating: hubLoading } = useSWR(
     userId ? ["master-hub", userId] : null,
@@ -132,10 +157,10 @@ export default function MasterHubView({ userId }: { userId: number }) {
                     </p>
 
                     <div className="grid grid-cols-2 gap-2 mt-2">
-                      <SummaryTag label="Архетип" value={portrait_summary.core_archetype} color="violet" />
-                      <SummaryTag label="Роль" value={portrait_summary.narrative_role} color="blue" />
-                      <SummaryTag label="Энергия" value={portrait_summary.energy_type} color="emerald" />
-                      <SummaryTag label="Фокус" value={portrait_summary.current_dynamic} color="amber" />
+                      <SummaryTag label="Архетип" value={portrait_summary.core_archetype} color="violet" onClick={() => setActiveTooltip({ label: "Архетип", value: portrait_summary.core_archetype })} />
+                      <SummaryTag label="Роль" value={portrait_summary.narrative_role} color="blue" onClick={() => setActiveTooltip({ label: "Роль", value: portrait_summary.narrative_role })} />
+                      <SummaryTag label="Энергия" value={portrait_summary.energy_type} color="emerald" onClick={() => setActiveTooltip({ label: "Энергия", value: portrait_summary.energy_type })} />
+                      <SummaryTag label="Фокус" value={portrait_summary.current_dynamic} color="amber" onClick={() => setActiveTooltip({ label: "Фокус", value: portrait_summary.current_dynamic })} />
                     </div>
                   </div>
                 </motion.div>
@@ -262,22 +287,67 @@ export default function MasterHubView({ userId }: { userId: number }) {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* ── Tooltip Overlay ── */}
+      <AnimatePresence>
+        {activeTooltip && (
+          <>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setActiveTooltip(null)}
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100]"
+            />
+            <motion.div 
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="fixed bottom-0 left-0 right-0 bg-[#0a0a0a] border-t border-white/10 rounded-t-[2rem] p-8 z-[101] shadow-2xl"
+            >
+              <div className="w-12 h-1.5 bg-white/10 rounded-full mx-auto mb-6" />
+              <div className="space-y-4">
+                <div className="flex flex-col gap-1">
+                  <span className="text-[10px] font-bold text-violet-400 uppercase tracking-widest">{activeTooltip.label}</span>
+                  <h3 className="text-xl font-bold text-white tracking-tight">{activeTooltip.value}</h3>
+                </div>
+                <p className="text-sm text-white/60 leading-relaxed font-light">
+                  {TRAIT_DESCRIPTIONS[activeTooltip.value] || "Глубинный смысл этого качества раскрывается в твоей персональной истории развития."}
+                </p>
+                <button 
+                  onClick={() => setActiveTooltip(null)}
+                  className="w-full py-4 mt-2 bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl text-xs font-bold uppercase tracking-widest transition-colors"
+                >
+                  Понятно
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
 
 // ── Sub-components for cleaner code ──────────────────────────────────────────
 
-function SummaryTag({ label, value, color }: any) {
+function SummaryTag({ label, value, color, onClick }: any) {
   const colors: Record<string, string> = {
-    violet: "bg-violet-500/10 text-violet-300 border-violet-500/20",
-    blue: "bg-blue-500/10 text-blue-300 border-blue-500/20",
-    emerald: "bg-emerald-500/10 text-emerald-300 border-emerald-500/20",
-    amber: "bg-amber-500/10 text-amber-300 border-amber-500/20",
+    violet: "bg-violet-500/10 text-violet-300 border-violet-500/20 hover:bg-violet-500/20",
+    blue: "bg-blue-500/10 text-blue-300 border-blue-500/20 hover:bg-blue-500/20",
+    emerald: "bg-emerald-500/10 text-emerald-300 border-emerald-500/20 hover:bg-emerald-500/20",
+    amber: "bg-amber-500/10 text-amber-300 border-amber-500/20 hover:bg-amber-500/20",
   };
   return (
-    <div className={`p-2 rounded-lg border ${colors[color] || colors.violet} flex flex-col gap-0.5`}>
-      <span className="text-[7px] uppercase font-bold opacity-40">{label}</span>
+    <div 
+      onClick={onClick}
+      className={`p-2 rounded-lg border cursor-pointer transition-all active:scale-[0.97] ${colors[color] || colors.violet} flex flex-col gap-0.5 relative group`}
+    >
+      <div className="flex items-center justify-between">
+        <span className="text-[7px] uppercase font-bold opacity-40">{label}</span>
+        <Info size={10} className="text-white/20 group-hover:text-white/40 transition-colors" />
+      </div>
       <span className="text-[10px] font-bold truncate tracking-tight">{value}</span>
     </div>
   );
