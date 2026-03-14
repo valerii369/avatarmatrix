@@ -116,13 +116,13 @@ export default function MasterHubView({ userId }: { userId: number }) {
                 {/* ── Portrait Summary Card ── */}
                 <motion.div
                   layout
-                  className="p-6 rounded-[2.5rem] bg-gradient-to-br from-violet-600/10 to-blue-600/5 border border-white/10 backdrop-blur-3xl shadow-2xl relative overflow-hidden"
+                  className="p-5 rounded-[1.25rem] bg-gradient-to-br from-violet-600/[0.08] to-blue-600/[0.04] border border-white/10 backdrop-blur-3xl shadow-xl relative overflow-hidden"
                 >
-                  <div className="absolute -top-10 -right-10 w-40 h-40 bg-violet-500/20 blur-[60px] rounded-full" />
-                  <div className="flex flex-col gap-4">
+                  <div className="absolute -top-10 -right-10 w-40 h-40 bg-violet-500/10 blur-[60px] rounded-full" />
+                  <div className="flex flex-col gap-3.5">
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-violet-400 animate-pulse" />
-                      <span className="text-[10px] font-bold text-violet-400 uppercase tracking-[0.3em]">
+                      <div className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse" />
+                      <span className="text-[9px] font-bold text-violet-400/80 uppercase tracking-[0.2em]">
                         Идентификация Аватара
                       </span>
                     </div>
@@ -146,16 +146,18 @@ export default function MasterHubView({ userId }: { userId: number }) {
                   <PolarityCard title="Теневые аспекты" items={deep_profile_data.polarities.shadow_aspects} icon={AlertCircle} color="#EF4444" />
                 </div>
                 
-                <div className="p-5 rounded-3xl bg-white/[0.03] border border-white/[0.05] space-y-4 shadow-xl">
-                  <h3 className="text-[10px] font-bold uppercase tracking-widest text-white/30 flex items-center gap-2">
-                    <Info size={14} /> Социальный интерфейс
+                <div className="p-5 rounded-[1.25rem] bg-white/[0.03] border border-white/[0.05] space-y-4 shadow-lg">
+                  <h3 className="text-[9px] font-bold uppercase tracking-widest text-white/20 flex items-center gap-2">
+                    <Info size={13} /> Социальный интерфейс
                   </h3>
-                  <div className="space-y-3">
+                  <div className="space-y-3.5">
                     <InfoBlock label="Мировоззрение" text={deep_profile_data.social_interface.worldview_stance} />
                     <InfoBlock label="Коммуникация" text={deep_profile_data.social_interface.communication_style} />
-                    <div className="pt-2 border-t border-white/5">
-                      <div className="text-[9px] text-white/40 mb-1">Экзистенциальный урок</div>
-                      <div className="text-xs italic text-violet-300">«{deep_profile_data.social_interface.karmic_lesson}»</div>
+                    <div className="pt-3 border-t border-white/[0.03]">
+                      <div className="text-[8px] font-bold uppercase tracking-tight text-white/30 mb-1">Экзистенциальный урок</div>
+                      <div className="text-xs italic text-violet-300/90 leading-relaxed">
+                        «{deep_profile_data.social_interface.karmic_lesson}»
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -274,16 +276,16 @@ function SummaryTag({ label, value, color }: any) {
     amber: "bg-amber-500/10 text-amber-300 border-amber-500/20",
   };
   return (
-    <div className={`p-2 rounded-xl border ${colors[color] || colors.violet} flex flex-col gap-0.5`}>
-      <span className="text-[8px] uppercase font-bold opacity-50">{label}</span>
-      <span className="text-[10px] font-bold truncate">{value}</span>
+    <div className={`p-2 rounded-lg border ${colors[color] || colors.violet} flex flex-col gap-0.5`}>
+      <span className="text-[7px] uppercase font-bold opacity-40">{label}</span>
+      <span className="text-[10px] font-bold truncate tracking-tight">{value}</span>
     </div>
   );
 }
 
 function PolarityCard({ title, items, icon: Icon, color }: any) {
   return (
-    <div className="p-4 rounded-3xl bg-white/5 border border-white/10 flex flex-col gap-3">
+    <div className="p-4 rounded-[1.25rem] bg-white/[0.03] border border-white/5 flex flex-col gap-3">
       <div className="flex items-center gap-2" style={{ color }}>
         <Icon size={16} />
         <span className="text-[10px] font-bold uppercase tracking-wider">{title}</span>
