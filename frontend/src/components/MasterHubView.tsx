@@ -72,7 +72,7 @@ export default function MasterHubView({ userId }: { userId: number }) {
   const activeSphereData = selectedSphere ? deep_profile_data?.spheres_status?.[selectedSphere] : null;
 
   return (
-    <div className="px-4 py-2 space-y-6 pb-12 relative">
+    <div className="px-4 pt-0 space-y-6 pb-12 relative">
       <AnimatePresence mode="wait">
         {!selectedSphere ? (
           <motion.div
@@ -83,12 +83,12 @@ export default function MasterHubView({ userId }: { userId: number }) {
             className="space-y-6"
           >
             {/* ── Sub-Navigation Tabs ── */}
-            <div className="flex p-1 gap-1 bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 mx-1">
+            <div className="flex p-1 gap-1 bg-white/[0.04] backdrop-blur-xl rounded-[14px] border border-white/10">
               <button
                 onClick={() => setSubTab("personality")}
                 className={`flex-1 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all ${
                   subTab === "personality" 
-                  ? "bg-violet-500/20 text-violet-300 border border-violet-500/30 shadow-lg" 
+                  ? "bg-white/10 text-white border border-white/10 shadow-lg" 
                   : "text-white/40 hover:text-white/60"
                 }`}
               >
@@ -98,7 +98,7 @@ export default function MasterHubView({ userId }: { userId: number }) {
                 onClick={() => setSubTab("analysis")}
                 className={`flex-1 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all ${
                   subTab === "analysis" 
-                  ? "bg-blue-500/20 text-blue-300 border border-blue-500/30 shadow-lg" 
+                  ? "bg-white/10 text-white border border-white/10 shadow-lg" 
                   : "text-white/40 hover:text-white/60"
                 }`}
               >
