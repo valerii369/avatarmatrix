@@ -84,13 +84,13 @@ const GENDER_OPTIONS = [
 
 const CustomSelect = ({ value, onChange, options, flex, label }: any) => (
     <div style={{ flex: flex || 1, position: "relative" }}>
-        {label && <p className="text-[10px] text-white/20 uppercase tracking-widest mb-1.5 ml-1">{label}</p>}
+        {label && <p className="text-[11px] text-white/20 uppercase tracking-widest mb-1 ml-1">{label}</p>}
         <select
             value={value}
             onChange={(e) => onChange(e.target.value)}
             className="w-full text-base outline-none appearance-none transition-all"
             style={{
-                padding: "14px 12px",
+                padding: "8px 12px",
                 background: "rgba(255,255,255,0.05)",
                 border: "1px solid var(--border)",
                 borderRadius: 12,
@@ -108,16 +108,16 @@ const CustomSelect = ({ value, onChange, options, flex, label }: any) => (
             ))}
         </select>
         <div style={{
-            position: "absolute", right: 10, bottom: 16,
+            position: "absolute", right: 10, bottom: 10,
             pointerEvents: "none", opacity: 0.3, fontSize: 8
         }}>▼</div>
     </div>
 );
 
-function AstroFlow({ onBack }: { onBack: () => void }) {
+function AstroFlow({ step, setStep, onBack }: { step: number, setStep: React.Dispatch<React.SetStateAction<number>>, onBack: () => void }) {
     const router = useRouter();
     const { userId, setUser } = useUserStore();
-    const [step, setStep] = useState(0);
+    // step state moved up
     const [form, setForm] = useState({
         gender: "male",
         birth_year: "1990", birth_month: "01", birth_day: "15",
@@ -136,7 +136,6 @@ function AstroFlow({ onBack }: { onBack: () => void }) {
     ];
 
     const currentStep = steps[step];
-    const progress = ((step + 1) / steps.length) * 100;
 
     const handleNext = async () => {
         setError("");
@@ -179,31 +178,22 @@ function AstroFlow({ onBack }: { onBack: () => void }) {
 
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full">
-            <div className="mb-6">
-                <div className="flex justify-between mb-1.5 text-white/20">
-                    <span className="text-[10px] uppercase font-bold tracking-widest">Шаг {step + 1} из {steps.length}</span>
-                    <span className="text-[10px] font-bold">{Math.round(progress)}%</span>
-                </div>
-                <div className="h-1 bg-white/5 rounded-full overflow-hidden">
-                    <motion.div className="h-full bg-gradient-to-r from-violet-500 to-emerald-500 rounded-full" animate={{ width: `${progress}%` }} />
-                </div>
-            </div>
-
             <AnimatePresence mode="wait">
                 <motion.div
                     key={step}
                     initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
-                    className="glass-strong px-5 py-5 rounded-[2rem] border border-white/10 mb-4 shadow-2xl mx-1"
+                    className="p-5 rounded-[1.5rem] border border-white/10 mb-5 shadow-2xl mx-1"
+                    style={{ background: "rgba(255,255,255,0.04)", backdropFilter: "blur(20px)" }}
                 >
                     <div className="flex items-center gap-3 mb-4">
                         <div style={{
-                            width: 40, height: 40, borderRadius: 12, background: "rgba(255,255,255,0.05)",
+                            width: 38, height: 38, borderRadius: 12, background: "rgba(255,255,255,0.05)",
                             border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center",
-                            fontSize: 18, color: currentStep.iconColor, flexShrink: 0
+                            fontSize: 16, color: currentStep.iconColor, flexShrink: 0
                         }}>{currentStep.icon}</div>
                         <div className="min-w-0">
-                            <h2 className="text-sm font-bold text-white/90 truncate">{currentStep.title}</h2>
-                            <p className="text-[10px] text-white/40 leading-tight mt-0.5">{currentStep.description}</p>
+                            <h2 className="text-base font-bold text-white/90 truncate">{currentStep.title}</h2>
+                            <p className="text-xs text-white/40 leading-tight mt-0.5">{currentStep.description}</p>
                         </div>
                     </div>
                     <div className="h-px bg-white/5 mb-4" />
@@ -215,14 +205,14 @@ function AstroFlow({ onBack }: { onBack: () => void }) {
                                     <button
                                         key={opt.value}
                                         onClick={() => setForm(f => ({ ...f, gender: opt.value }))}
-                                        className={`p-4 rounded-xl border transition-all flex flex-col items-center gap-2 ${
+                                        className={`p-3 rounded-xl border transition-all flex flex-col items-center gap-2 ${
                                             form.gender === opt.value 
-                                            ? "bg-violet-500/20 border-violet-500/50 text-white" 
+                                            ? "bg-violet-500/10 border-violet-500/40 text-white" 
                                             : "bg-white/5 border-white/10 text-white/40 hover:bg-white/10"
                                         }`}
                                     >
-                                        <span className="text-2xl">{opt.icon}</span>
-                                        <span className="text-[10px] font-bold uppercase tracking-wider">{opt.label}</span>
+                                        <span className="text-xl">{opt.icon}</span>
+                                        <span className="text-[11px] font-bold uppercase tracking-wider">{opt.label}</span>
                                     </button>
                                 ))}
                             </div>
@@ -235,7 +225,7 @@ function AstroFlow({ onBack }: { onBack: () => void }) {
                         ) : currentStep.id === "time" ? (
                             <div className="flex gap-2 items-end">
                                 <CustomSelect label="Час" value={form.birth_hour} onChange={(v: string) => setForm(f => ({ ...f, birth_hour: v }))} options={HOURS} />
-                                <div className="text-white/20 pb-4 font-bold">:</div>
+                                <div className="text-white/20 pb-3 font-bold">:</div>
                                 <CustomSelect label="Мин" value={form.birth_minute} onChange={(v: string) => setForm(f => ({ ...f, birth_minute: v }))} options={MINUTES} />
                             </div>
                         ) : currentStep.id === "place" ? (
@@ -244,31 +234,36 @@ function AstroFlow({ onBack }: { onBack: () => void }) {
                                     type="text" value={form.birth_place}
                                     onChange={(e) => setForm(f => ({ ...f, birth_place: e.target.value }))}
                                     placeholder={currentStep.placeholder} autoFocus
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-[16px] text-white placeholder:text-white/20 outline-none focus:border-emerald-500/50 transition-all font-medium"
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-[16px] text-white placeholder:text-white/20 outline-none focus:border-emerald-500/50 transition-all font-medium"
                                 />
                             </div>
                         ) : (
-                            <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-2xl p-5 text-center">
-                                <p className="text-xs text-white/60 mb-1">Место определено как:</p>
-                                <p className="text-lg font-bold text-white mb-4">{geoResult?.place}</p>
-                                <div className="flex justify-center gap-6 text-[10px] text-white/40 font-mono">
+                            <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-2xl p-4 text-center">
+                                <div className="flex flex-col items-center mb-4">
+                                    <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center mb-2">
+                                        <span className="text-emerald-400">📍</span>
+                                    </div>
+                                    <p className="text-[11px] font-bold text-emerald-400 uppercase tracking-widest mb-1">Место определено</p>
+                                    <p className="text-lg font-bold text-white leading-tight">{geoResult?.place}</p>
+                                </div>
+                                <div className="grid grid-cols-3 gap-2 py-3 border-t border-emerald-500/10 text-[10px] text-white/40 font-mono">
                                     <div className="flex flex-col">
-                                        <span>ШИРОТА</span>
-                                        <span className="text-emerald-400 font-bold">{geoResult?.lat.toFixed(4)}°</span>
+                                        <span className="mb-0.5">ШИРОТА</span>
+                                        <span className="text-white/80 font-bold">{geoResult?.lat.toFixed(4)}°</span>
                                     </div>
                                     <div className="flex flex-col">
-                                        <span>ДОЛГОТА</span>
-                                        <span className="text-emerald-400 font-bold">{geoResult?.lon.toFixed(4)}°</span>
+                                        <span className="mb-0.5">ДОЛГОТА</span>
+                                        <span className="text-white/80 font-bold">{geoResult?.lon.toFixed(4)}°</span>
                                     </div>
                                     <div className="flex flex-col">
-                                        <span>ЧАСОВОЙ ПОЯС</span>
-                                        <span className="text-emerald-400 font-bold">{geoResult?.tz_name}</span>
+                                        <span className="mb-0.5">ЗОНА</span>
+                                        <span className="text-white/80 font-bold truncate">{geoResult?.tz_name?.split('/').pop()}</span>
                                     </div>
                                 </div>
                             </div>
                         )}
                     </div>
-                    <p className="text-[10px] text-white/20 mt-5 flex items-center gap-2">
+                    <p className="text-[11px] text-white/20 mt-4 flex items-center gap-2">
                         <span style={{ color: currentStep.iconColor }}>●</span>{currentStep.hint}
                     </p>
                 </motion.div>
@@ -564,6 +559,11 @@ import SacredGeometryLogo from "@/components/SacredGeometryLogo";
 
 export default function OnboardingPage() {
     const [path, setPath] = useState<"astro" | "ai" | "visual" | null>("astro");
+    const [step, setStep] = useState(0); // Moved step state up to track progress globally
+    
+    // total steps for astro flow
+    const totalAstroSteps = 5;
+    const progress = ((step + 1) / totalAstroSteps) * 100;
 
     const particles = useMemo(() =>
         Array.from({ length: 24 }, (_, i) => ({
@@ -603,22 +603,34 @@ export default function OnboardingPage() {
 
             <div className="relative z-10 w-full max-w-[340px]" style={{ transform: "translateY(-6vh)" }}>
                 {/* Logo & Header */}
-                <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-8">
-                    <div style={{ marginBottom: 4 }}>
-                        <SacredGeometryLogo size={216} progress={0.9} />
+                <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-6">
+                    <div style={{ marginBottom: 2 }}>
+                        <SacredGeometryLogo size={200} progress={0.9} />
                     </div>
                     <h1 className="text-[44px] font-bold tracking-tight" style={{
-                        marginBottom: -2,
+                        marginBottom: -4,
                         background: "linear-gradient(to right, #EF4444 5%, #F97316, #EAB308, #10B981, #3B82F6, #6366F1, #A855F7 95%)",
                         WebkitBackgroundClip: "text",
                         WebkitTextFillColor: "transparent",
                         backgroundClip: "text",
                         color: "transparent"
                     }}>AVATAR</h1>
-                    <p className="text-[10px] text-white/30 uppercase tracking-[0.2em]">Платформа эволюции</p>
+                    <p className="text-[10px] text-white/30 uppercase tracking-[0.2em] mb-6">Платформа эволюции</p>
+                    
+                    {path === 'astro' && (
+                        <div className="w-full px-4 mb-4">
+                            <div className="flex justify-between mb-1.5 text-white/20">
+                                <span className="text-[11px] uppercase font-bold tracking-widest">Шаг {step + 1} из {totalAstroSteps}</span>
+                                <span className="text-[11px] font-bold">{Math.round(progress)}%</span>
+                            </div>
+                            <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+                                <motion.div className="h-full bg-gradient-to-r from-violet-500 to-emerald-500 rounded-full" animate={{ width: `${progress}%` }} />
+                            </div>
+                        </div>
+                    )}
                 </motion.div>
 
-                {path === 'astro' && <AstroFlow onBack={() => {}} />}
+                {path === 'astro' && <AstroFlow step={step} setStep={setStep} onBack={() => {}} />}
                 {path === 'ai' && <AIFlow onBack={() => setPath('astro')} />}
             </div>
         </div>
