@@ -127,7 +127,7 @@ export default function CardPage() {
                         Сфера: {card.sphere_name_ru}
                     </p>
                     <h1 style={{
-                        fontSize: 24,
+                        fontSize: 26,
                         fontWeight: 900,
                         color: "var(--text-primary)",
                         margin: 0,
@@ -151,7 +151,7 @@ export default function CardPage() {
                         LVL {card.rank}
                     </p>
                     <p style={{
-                        fontSize: 24,
+                        fontSize: 26,
                         fontWeight: 800,
                         color: card.hawkins_peak > 0 ? getHawkinsColor(card.hawkins_peak) : "rgba(255,255,255,0.2)",
                         margin: 0,
