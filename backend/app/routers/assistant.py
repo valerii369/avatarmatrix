@@ -73,9 +73,31 @@ async def assistant_chat(request: AssistantChatRequest, db: AsyncSession = Depen
     user_res = await db.execute(select(User).where(User.id == request.user_id))
     user = user_res.scalar_one_or_none()
 
+    # Detect return after pause (> 24h)
+    from datetime import datetime, timedelta, timezone
+    is_returning_after_pause = False
+    
+    # Check if this is a fresh start in an active session (no previous messages) 
+    # and there was a previous session more than 24h ago
+    if not session.messages_json:
+        last_session_res = await db.execute(
+            select(AssistantSession).where(
+                AssistantSession.user_id == request.user_id,
+                AssistantSession.id != session.id
+            ).order_by(AssistantSession.created_at.desc()).limit(1)
+        )
+        last_session = last_session_res.scalar_one_or_none()
+        if last_session and last_session.created_at:
+            # Assumes created_at is UTC
+            diff = datetime.now(timezone.utc) - last_session.created_at.replace(tzinfo=timezone.utc)
+            if diff > timedelta(hours=24):
+                is_returning_after_pause = True
+
     # Process message
     ai_response, sphere, increment, activated = await generate_assistant_response(
-        db, request.user_id, session.messages_json, request.message, gender=user.gender or "не указан"
+        db, request.user_id, session.messages_json, request.message, 
+        gender=user.gender or "не указан",
+        is_returning_after_pause=is_returning_after_pause
     )
 
     # Update session
