@@ -1,5 +1,6 @@
-"use client";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import SphereInfoPanel from "./SphereInfoPanel";
 
 const SPHERES = [
     { id: 1,  key: "IDENTITY",       icon: "user",           name: "Личность",   color: [245, 158, 11] },  // #F59E0B
@@ -56,6 +57,7 @@ export default function ConsciousnessVisualization({ cards = [] }: Consciousness
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const animRef = useRef<number | null>(null);
     const [selected, setSelected] = useState<number | null>(null);
+    const router = useRouter();
 
     const particlesRef = useRef<any[]>([]);
     const smoothRef = useRef<number[]>(SPHERES.map(() => 0));
@@ -66,8 +68,23 @@ export default function ConsciousnessVisualization({ cards = [] }: Consciousness
 
     const states = useMemo(() => {
         return SPHERES.map((sphereDef) => {
-            const sphereCards = cards.filter(c => c.sphere === sphereDef.key);
-            const active = sphereCards.filter(c => c.status !== "locked" && c.hawkins_peak > 0);
+            let sphereCards = cards.filter(c => c.sphere === sphereDef.key);
+
+            // 🛠 MOCK DATA FOR TESTING IDENTITY CHART
+            if (sphereDef.key === "IDENTITY") {
+                sphereCards = Array.from({ length: 22 }, (_, i) => {
+                    const status = i < 8 ? "active" : i < 16 ? "recommended" : "locked";
+                    return {
+                        id: 2000 + i,
+                        archetype_name: "", // Will fallback to default in SphereInfoPanel
+                        // Only 'active' cards have scores; others are 0
+                        hawkins_peak: status === "active" ? Math.round(20 + (i * (800 - 20) / 7)) : 0,
+                        status: status
+                    };
+                }) as any[];
+            }
+
+            const active = sphereCards.filter(c => (c.status !== "locked" && (c.hawkins_peak ?? 0) > 0) || sphereDef.key === "IDENTITY");
             const activeCount = active.length;
 
             const cappedCount = Math.min(22, activeCount);
@@ -83,6 +100,7 @@ export default function ConsciousnessVisualization({ cards = [] }: Consciousness
                 sphere_score: totalHawkins / 22000,
                 sphere_hawkins: cappedCount > 0 ? Math.round(totalHawkins / cappedCount) : 0,
                 active_cards: active_cards,
+                cards: sphereCards,
             };
         });
     }, [cards]);
@@ -575,25 +593,18 @@ export default function ConsciousnessVisualization({ cards = [] }: Consciousness
     return (
         <div style={{ position: "absolute", inset: 0, zIndex: 0 }}>
             <canvas ref={canvasRef} style={{ width: "100%", height: "100%", display: "block" }} />
+            
             {selected !== null && states[selected] && (
-                <div style={{
-                    position: "fixed", bottom: 110, left: 16, right: 16,
-                    background: "rgba(13,18,38,0.92)", backdropFilter: "blur(24px)",
-                    WebkitBackdropFilter: "blur(24px)",
-                    border: `1px solid rgba(${SPHERES[selected].color.join(",")},0.2)`,
-                    borderRadius: 20, padding: "10px 16px",
-                    color: "#fff", zIndex: 10,
-                    boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
-                }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <span style={{ fontSize: 14, fontWeight: 600, color: `rgb(${SPHERES[selected].color.join(",")})` }}>
-                            {SPHERES[selected].name}
-                        </span>
-                        <span style={{ fontSize: 11, color: "rgba(255,255,255,0.4)" }}>
-                            {states[selected].active_count}/22 · LVL {hawkinsToRank(states[selected].sphere_hawkins)} · {states[selected].sphere_hawkins} ✦
-                        </span>
-                    </div>
-                </div>
+                <SphereInfoPanel
+                    visible={true}
+                    sphere={SPHERES[selected] as any}
+                    state={states[selected] as any}
+                    cards={states[selected].cards as any}
+                    onCardTap={(card) => {
+                        if (card.id) router.push(`/card/${card.id}`);
+                    }}
+                    onClose={() => setSelected(null)}
+                />
             )}
         </div>
     );
