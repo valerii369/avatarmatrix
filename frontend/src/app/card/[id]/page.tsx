@@ -214,6 +214,8 @@ export default function CardPage() {
                             objectFit: "cover",
                             objectPosition: "center top",
                             display: "block",
+                            filter: canAlign ? "none" : "grayscale(100%)",
+                            transition: "filter 0.5s ease",
                         }}
                     />
                     {/* Bottom gradient overlay for readability */}
@@ -232,7 +234,7 @@ export default function CardPage() {
             <div style={{ padding: "0 20px 0" }}>
 
                 {/* ── Action buttons ── */}
-                <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 15 }}>
 
                     {card.status === "locked" && (
                         <div style={{
@@ -241,7 +243,7 @@ export default function CardPage() {
                             border: "1px solid rgba(255,255,255,0.07)",
                             textAlign: "center",
                         }}>
-                            <p style={{ fontSize: 13, color: "var(--text-muted)", margin: 0 }}>
+                            <p style={{ fontSize: 14, color: "var(--text-muted)", margin: 0 }}>
                                 🔒 Сначала пройдите рекомендованные карты
                             </p>
                         </div>
@@ -260,14 +262,14 @@ export default function CardPage() {
                                 background: "linear-gradient(135deg, #10B981 0%, #059669 100%)",
                                 color: "#000",
                                 fontWeight: 800,
-                                fontSize: 14,
+                                fontSize: 16,
                                 letterSpacing: "0.1em",
                                 boxShadow: "0 10px 30px -10px rgba(16,185,129,0.5), inset 0 1px 0 rgba(255,255,255,0.2)",
                                 fontFamily: "'Outfit', sans-serif",
                                 textTransform: "uppercase",
                             }}
                         >
-                            {isResuming ? "Продолжить активацию" : `Активировать · 25 ✦`}
+                            {isResuming ? "Продолжить активацию" : `Активировать карту · 25 ✦`}
                         </motion.button>
                     )}
 
@@ -284,7 +286,7 @@ export default function CardPage() {
                                 background: "linear-gradient(135deg, #F59E0B 0%, #D97706 100%)",
                                 color: "#000",
                                 fontWeight: 800,
-                                fontSize: 14,
+                                fontSize: 16,
                                 letterSpacing: "0.1em",
                                 boxShadow: "0 10px 30px -10px rgba(245,158,11,0.4), inset 0 1px 0 rgba(255,255,255,0.2)",
                                 fontFamily: "'Outfit', sans-serif",
@@ -296,8 +298,23 @@ export default function CardPage() {
                     )}
                 </div>
 
+                {/* ── Energy Info Hint ── */}
+                <p style={{
+                    fontSize: 11,
+                    fontWeight: 600,
+                    color: "rgba(255,255,255,0.25)",
+                    textAlign: "left",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.12em",
+                    marginBottom: 10,
+                    marginTop: 20,
+                    paddingLeft: 4
+                }}>
+                    Информация об энергии архетипа
+                </p>
+
                 {/* ── Tabs Navigation ── */}
-                <div style={{ paddingBottom: "20px" }}>
+                <div style={{ paddingBottom: "12px" }}>
                     <div
                         className="grid gap-1 p-1"
                         style={{
@@ -334,7 +351,7 @@ export default function CardPage() {
                 <div style={{ minHeight: "200px" }}>
                     {activeTab === "desc" && (
                         <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }}>
-                            <p style={{ fontSize: 13, color: "rgba(255,255,255,0.7)", lineHeight: 1.6, margin: 0 }}>
+                            <p style={{ fontSize: 14, color: "rgba(255,255,255,0.7)", lineHeight: 1.6, margin: 0 }}>
                                 {card.archetype_description || "Описание формируется..."}
                             </p>
                         </motion.div>
@@ -342,7 +359,7 @@ export default function CardPage() {
 
                     {activeTab === "shadow" && (
                         <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }}>
-                            <p style={{ fontSize: 13, color: "rgba(255,255,255,0.7)", lineHeight: 1.6, margin: 0 }}>
+                            <p style={{ fontSize: 14, color: "rgba(255,255,255,0.7)", lineHeight: 1.6, margin: 0 }}>
                                 {card.archetype_shadow || "—"}
                             </p>
                         </motion.div>
@@ -350,7 +367,7 @@ export default function CardPage() {
 
                     {activeTab === "light" && (
                         <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }}>
-                            <p style={{ fontSize: 13, color: "rgba(255,255,255,0.7)", lineHeight: 1.6, margin: 0 }}>
+                            <p style={{ fontSize: 14, color: "rgba(255,255,255,0.7)", lineHeight: 1.6, margin: 0 }}>
                                 {card.archetype_light || "—"}
                             </p>
                         </motion.div>

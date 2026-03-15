@@ -81,7 +81,7 @@ export default function HawkinsBar({ value, animated = true }: Props) {
 
   return (
     <div style={{
-      margin: "16px 20px 12px",
+      margin: "12px 20px 12px",
       background: "rgba(255,255,255,0.025)",
       border: "1px solid rgba(255,255,255,0.06)",
       borderRadius: 14,
@@ -92,7 +92,7 @@ export default function HawkinsBar({ value, animated = true }: Props) {
         justifyContent: "space-between",
         alignItems: "baseline",
         marginBottom: 12,
-        padding: "16px 20px 0",
+        padding: "12px 20px 0",
       }}>
         <span style={{
           fontFamily: "'Outfit', sans-serif",
@@ -106,29 +106,44 @@ export default function HawkinsBar({ value, animated = true }: Props) {
         </span>
 
         <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-          <span style={{
-            fontFamily: "'Outfit', sans-serif",
-            fontSize: 10,
-            fontWeight: 500,
-            letterSpacing: "0.18em",
-            textTransform: "uppercase",
-            color: "rgba(240,237,230,0.50)",
-          }}>
-            {lvl.ru}
-          </span>
-          <span style={{
-            fontFamily: "'Outfit', sans-serif",
-            fontSize: 10,
-            fontWeight: 500,
-            letterSpacing: "0.18em",
-            color: c,
-          }}>
-            {value}
-          </span>
+          {value > 0 ? (
+            <>
+              <span style={{
+                fontFamily: "'Outfit', sans-serif",
+                fontSize: 10,
+                fontWeight: 500,
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
+                color: "rgba(240,237,230,0.50)",
+              }}>
+                {lvl.ru}
+              </span>
+              <span style={{
+                fontFamily: "'Outfit', sans-serif",
+                fontSize: 10,
+                fontWeight: 500,
+                letterSpacing: "0.18em",
+                color: c,
+              }}>
+                {value}
+              </span>
+            </>
+          ) : (
+            <span style={{
+              fontFamily: "'Outfit', sans-serif",
+              fontSize: 10,
+              fontWeight: 500,
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              color: "rgba(240,237,230,0.25)",
+            }}>
+              Не активирована
+            </span>
+          )}
         </div>
       </div>
 
-      <div style={{ padding: "0 20px 12px" }}>
+      <div style={{ padding: "0 20px 8px" }}>
         {/* Track */}
         <div style={{
           position: "relative",
