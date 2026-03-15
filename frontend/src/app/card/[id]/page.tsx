@@ -128,7 +128,7 @@ export default function CardPage() {
                     </p>
                     <h1 style={{
                         fontSize: 24,
-                        fontWeight: 800,
+                        fontWeight: 900,
                         color: "var(--text-primary)",
                         margin: 0,
                         lineHeight: 1,
