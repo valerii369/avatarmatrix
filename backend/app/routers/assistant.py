@@ -52,18 +52,8 @@ async def init_assistant(request: AssistantInitRequest, db: AsyncSession = Depen
         await db.commit()
         await db.refresh(session)
 
-    # Initial AI greeting/trigger
-    ai_response, sphere, increment, activated = await generate_assistant_response(
-        db, request.user_id, session.messages_json, "", gender=user.gender or "не указан"
-    )
-    
-    session.messages_json.append({"role": "assistant", "content": ai_response})
-    db.add(session)
-    await db.commit()
-
     return {
         "session_id": session.id,
-        "ai_response": ai_response,
         "is_first_touch": is_first_touch
     }
 
@@ -144,14 +134,57 @@ async def finish_assistant(request: AssistantChatRequest, db: AsyncSession = Dep
     session_res = await db.execute(
         select(AssistantSession).where(
             AssistantSession.id == request.session_id,
-            AssistantSession.user_id == request.user_id
+            AssistantSession.user_id == request.user_id,
+            AssistantSession.is_active == True
         )
     )
     session = session_res.scalar_one_or_none()
     if not session:
-        raise HTTPException(status_code=404, detail="Session not found")
+        raise HTTPException(status_code=404, detail="Active session not found")
 
+    # Generate summary of the dialogue
+    from app.agents.assistant_agent import generate_diary_summary, extract_and_save_insights
+    summary = await generate_diary_summary(db, session.messages_json)
+    
+    # Extract semantic memory (atomic insights)
+    await extract_and_save_insights(db, request.user_id, session.messages_json, session.id)
+    
     session.is_active = False
+    session.final_analysis = {"diary_summary": summary}
     db.add(session)
     await db.commit()
-    return {"status": "session_closed"}
+    
+    return {
+        "status": "session_closed",
+        "diary_summary": summary
+    }
+
+@router.post("/save-to-diary")
+async def save_to_diary(request: AssistantChatRequest, db: AsyncSession = Depends(get_db)):
+    session_res = await db.execute(
+        select(AssistantSession).where(
+            AssistantSession.id == request.session_id,
+            AssistantSession.user_id == request.user_id
+        )
+    )
+    session = session_res.scalar_one_or_none()
+    if not session or not session.final_analysis:
+        raise HTTPException(status_code=404, detail="Session or summary not found")
+
+    summary = session.final_analysis.get("diary_summary", "Общение с цифровым помощником.")
+    
+    # Create Diary Entry
+    from app.models import DiaryEntry
+    entry = DiaryEntry(
+        user_id=request.user_id,
+        text=summary,
+        source="ASSSISTANT",
+        meta_data={"session_id": session.id}
+    )
+    db.add(entry)
+    
+    # Award XP for reflection
+    await award_xp(db, request.user_id, 15, "assistant_reflection")
+    
+    await db.commit()
+    return {"status": "saved"}

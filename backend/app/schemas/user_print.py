@@ -33,6 +33,11 @@ class DeepProfileData(BaseModel):
     social_interface: SocialInterface
     spheres_status: Dict[str, SphereStatus]
 
+class EnergyClaimStatus(BaseModel):
+    """Статус сбора бесплатной энергии."""
+    can_claim: bool
+    next_claim_at: Optional[str] = None
+
 class UserPrintSchema(BaseModel):
     """
     THE OCEAN: Unified Personal Passport.
@@ -40,4 +45,5 @@ class UserPrintSchema(BaseModel):
     """
     portrait_summary: PortraitSummary
     deep_profile_data: DeepProfileData
+    energy_claim: Optional[EnergyClaimStatus] = None
     metadata: Dict[str, Any] = Field(default_factory=dict)

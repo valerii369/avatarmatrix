@@ -360,8 +360,8 @@ export function BottomNav({ active }: { active: string }) {
   const navItems = [
     { key: "home", icon: "/icons/home.svg", label: "AVATAR", path: "/" },
     { key: "cards", icon: "/icons/cards.svg", label: "Карточки", path: "/cards" },
+    { key: "assistant", icon: "/icons/assistant.svg", label: "Помощник", path: "/assistant" },
     { key: "diary", icon: "/icons/diary.svg", label: "Дневник", path: "/diary" },
-    { key: "assistant", icon: "/icons/reflect.svg", label: "Помощник", path: "/assistant" },
     { key: "profile", icon: "/icons/profile.svg", label: "Профиль", path: "/profile" },
   ];
 

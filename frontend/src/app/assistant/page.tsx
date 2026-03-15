@@ -15,6 +15,57 @@ const MicIcon = ({ className }: { className?: string }) => (
     </svg>
 );
 
+const useVoiceRecorder = (userId: number | null, setInput: React.Dispatch<React.SetStateAction<string>>) => {
+    const [isRecording, setIsRecording] = useState(false);
+    const [isTranscribing, setIsTranscribing] = useState(false);
+    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+    const chunksRef = useRef<Blob[]>([]);
+
+    const startRecording = useCallback(async () => {
+        if (!userId || isRecording || isTranscribing) return;
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+                ? "audio/webm;codecs=opus" : "audio/webm";
+
+            const recorder = new MediaRecorder(stream, { mimeType });
+            chunksRef.current = [];
+            recorder.ondataavailable = e => { if (e.data.size > 0) chunksRef.current.push(e.data); };
+            recorder.onstop = async () => {
+                stream.getTracks().forEach(t => t.stop());
+                if (chunksRef.current.length === 0) return;
+                const blob = new Blob(chunksRef.current, { type: mimeType });
+                setIsTranscribing(true);
+                try {
+                    const res = await voiceAPI.transcribe(userId, blob, "assistant");
+                    const transcript = res.data.transcript?.trim();
+                    if (transcript) {
+                        setInput(prev => prev ? prev + " " + transcript : transcript);
+                    }
+                } catch (err) {
+                    console.error("Transcription error:", err);
+                } finally {
+                    setIsTranscribing(false);
+                }
+            };
+            recorder.start(100);
+            mediaRecorderRef.current = recorder;
+            setIsRecording(true);
+        } catch (err) {
+            console.error("Microphone access error:", err);
+        }
+    }, [isRecording, isTranscribing, userId, setInput]);
+
+    const stopRecording = useCallback(() => {
+        if (mediaRecorderRef.current && isRecording) {
+            mediaRecorderRef.current.stop();
+            setIsRecording(false);
+        }
+    }, [isRecording]);
+
+    return { isRecording, isTranscribing, startRecording, stopRecording };
+};
+
 export default function AssistantPage() {
     const router = useRouter();
     const { userId } = useUserStore();
@@ -22,24 +73,37 @@ export default function AssistantPage() {
     const [input, setInput] = useState("");
     const [loading, setLoading] = useState(false);
     const [sessionId, setSessionId] = useState<number | null>(null);
-    const [isInitialized, setIsInitialized] = useState(false);
     const [isFirstTouch, setIsFirstTouch] = useState(false);
+    const [isFinished, setIsFinished] = useState(false);
+    const [diarySummary, setDiarySummary] = useState<string | null>(null);
+    const [isSavingDiary, setIsSavingDiary] = useState(false);
     
     const scrollRef = useRef<HTMLDivElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+    const { isRecording, isTranscribing, startRecording, stopRecording } = useVoiceRecorder(userId, setInput);
 
     // Initialization
     useEffect(() => {
         if (!userId) return;
         const init = async () => {
             try {
+                // Return fast from init
                 const res = await assistantAPI.init(userId);
-                setSessionId(res.data.session_id);
+                const sid = res.data.session_id;
+                setSessionId(sid);
                 setIsFirstTouch(res.data.is_first_touch);
-                setMessages([{ role: "assistant", content: res.data.ai_response }]);
-                setIsInitialized(true);
+                
+                // Immediately trigger greeting bubble in background
+                setLoading(true);
+                const chatRes = await assistantAPI.chat(userId, sid, "");
+                if (chatRes.data.ai_response) {
+                    setMessages([{ role: "assistant", content: chatRes.data.ai_response }]);
+                }
             } catch (err) {
                 console.error("Assistant init error:", err);
+            } finally {
+                setLoading(false);
             }
         };
         init();
@@ -50,12 +114,13 @@ export default function AssistantPage() {
     }, [messages]);
 
     const handleSend = async () => {
-        if (!input.trim() || loading || !sessionId || !userId) return;
+        if (!input.trim() || loading || !sessionId || !userId || isTranscribing || isFinished) return;
         
         const userMsg = input.trim();
         const newHistory = [...messages, { role: "user", content: userMsg }];
         setMessages(newHistory);
         setInput("");
+        if (textareaRef.current) textareaRef.current.style.height = "auto";
         setLoading(true);
 
         try {
@@ -63,9 +128,36 @@ export default function AssistantPage() {
             setMessages([...newHistory, { role: "assistant", content: res.data.ai_response }]);
         } catch (err) {
             console.error("Assistant chat error:", err);
-            setMessages([...newHistory, { role: "assistant", content: "Прости, мое зеркало помутнело. Давай попробуем еще раз?" }]);
+            setMessages([...newHistory, { role: "assistant", content: "Простите, моё зеркало помутнело. Давайте попробуем еще раз?" }]);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleFinish = async () => {
+        if (!sessionId || !userId || loading || isFinished) return;
+        setLoading(true);
+        try {
+            const res = await assistantAPI.finish(userId, sessionId);
+            setIsFinished(true);
+            setDiarySummary(res.data.diary_summary);
+        } catch (err) {
+            console.error("Assistant finish error:", err);
+            router.push("/");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleSaveDiary = async () => {
+        if (!sessionId || !userId || isSavingDiary) return;
+        setIsSavingDiary(true);
+        try {
+            await assistantAPI.saveToDiary(userId, sessionId);
+            router.push("/diary");
+        } catch (err) {
+            console.error("Save to diary error:", err);
+            setIsSavingDiary(false);
         }
     };
 
@@ -73,114 +165,259 @@ export default function AssistantPage() {
         setInput(e.target.value);
         if (textareaRef.current) {
             textareaRef.current.style.height = "auto";
-            textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, window.innerHeight * 0.4)}px`;
+            textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, window.innerHeight * 0.5)}px`;
         }
     };
 
+    // Auto-adjust on transcript arrival
+    useEffect(() => {
+        if (textareaRef.current) {
+            textareaRef.current.style.height = "auto";
+            textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, window.innerHeight * 0.5)}px`;
+        }
+    }, [input]);
+
     const particles = useMemo(() =>
-        Array.from({ length: 20 }, (_, i) => ({
+        Array.from({ length: 24 }, (_, i) => ({
             left: `${(i * 37 + 5) % 100}%`,
             top: `${(i * 53 + 10) % 100}%`,
-            opacity: 0.03 + (i % 5) * 0.03,
-            duration: 3 + (i % 4),
-            delay: (i % 6) * 0.5,
+            opacity: 0.04 + (i % 5) * 0.04,
+            duration: 2.5 + (i % 4),
+            delay: (i % 6) * 0.4,
             size: i % 3 === 0 ? 2 : 1,
         })), []);
 
-    if (!isInitialized) {
-        return (
-            <div className="min-h-screen bg-[#060818] flex flex-col items-center justify-center p-10">
-                <SacredGeometryLogo size={180} progress={0.5} />
-                <p className="mt-8 text-white/20 uppercase tracking-[0.3em] text-[10px] animate-pulse">Настройка зеркала...</p>
-            </div>
-        );
-    }
-
     return (
-        <div className="min-h-screen bg-[#060818] text-white flex flex-col relative overflow-hidden">
+        <div 
+            className="fixed inset-0 flex flex-col bg-[#060818] overflow-hidden" 
+            style={{ zIndex: 10 }}
+        >
             {/* Background Particles */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                <div style={{
+                    position: "absolute", top: "10%", left: "15%", width: 280, height: 280,
+                    background: "radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 70%)",
+                    borderRadius: "50%", filter: "blur(32px)"
+                }} />
+                <div style={{
+                    position: "absolute", bottom: "15%", right: "10%", width: 220, height: 220,
+                    background: "radial-gradient(circle, rgba(245,158,11,0.10) 0%, transparent 70%)",
+                    borderRadius: "50%", filter: "blur(28px)"
+                }} />
                 {particles.map((p, i) => (
                     <motion.div key={i}
                         className="absolute rounded-full bg-white"
                         style={{ left: p.left, top: p.top, width: p.size, height: p.size, opacity: p.opacity }}
-                        animate={{ opacity: [p.opacity, p.opacity * 4, p.opacity] }}
+                        animate={{ opacity: [p.opacity, p.opacity * 3, p.opacity] }}
                         transition={{ duration: p.duration, repeat: Infinity, delay: p.delay }}
                     />
                 ))}
             </div>
 
-            {/* Header */}
-            <header className="relative z-20 px-4 py-3 border-bottom border-white/5 flex items-center justify-between backdrop-blur-md bg-[#060818]/40">
-                <button onClick={() => router.push("/")} className="text-white/40 text-xs font-bold uppercase tracking-widest">Назад</button>
-                <div className="flex flex-col items-center">
-                    <span className="text-[10px] font-bold text-amber-500/80 uppercase tracking-[0.2em]">Цифровой Помощник</span>
-                    <span className="text-[8px] text-white/20 uppercase tracking-widest">Зеркало Личности</span>
+            {/* Top bar */}
+            <div style={{ padding: "12px 16px 8px", borderBottom: "1px solid rgba(255,255,255,0.05)", flexShrink: 0, position: "relative", zIndex: 20 }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <button
+                        onClick={() => router.push("/")}
+                        style={{ fontSize: 12, color: "rgba(255,255,255,0.3)", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", background: "none", border: "none", cursor: "pointer", padding: "4px 0" }}
+                    >
+                        ← Назад
+                    </button>
+                    <div className="flex flex-col items-center gap-1">
+                        <h1 className="text-sm font-bold tracking-[0.2em] uppercase text-white/40" data-v="2.1.0">Чат с внутренним миром</h1>
+                        <div className="h-[1px] w-12 bg-amber-500/20" />
+                    </div>
+                    <button
+                        onClick={handleFinish}
+                        disabled={isFinished || loading}
+                        style={{ fontSize: 10, color: "rgba(245,158,11,0.6)", fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.2)", borderRadius: 8, padding: "4px 8px", opacity: isFinished ? 0.3 : 1 }}
+                    >
+                        Завершить
+                    </button>
                 </div>
-                <div className="w-10" />
-            </header>
+            </div>
 
-            {/* Chat Messages */}
-            <div 
+            {/* Chat messages */}
+            <div
                 ref={scrollRef}
-                className="flex-1 overflow-y-auto px-4 py-6 flex flex-col gap-6 relative z-10 no-scrollbar"
+                style={{ flex: 1, overflowY: "auto", padding: "12px 16px", display: "flex", flexDirection: "column", gap: 10, scrollbarWidth: "none", position: "relative", zIndex: 10 }}
+                className="no-scrollbar"
             >
                 {messages.map((msg, i) => (
                     <motion.div 
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         key={i} 
-                        className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                        style={{ display: "flex", justifyContent: msg.role === "user" ? "flex-end" : "flex-start" }}
                     >
-                        <div className={`
-                            max-w-[85%] px-4 py-3 rounded-2xl text-sm leading-relaxed
-                            ${msg.role === 'user' 
-                                ? 'bg-amber-500/10 border border-amber-500/20 text-amber-100 rounded-tr-none' 
-                                : 'bg-white/5 border border-white/10 text-white/90 rounded-tl-none'}
-                        `}>
+                        <div style={{
+                            padding: "10px 14px",
+                            borderRadius: msg.role === "user" ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
+                            maxWidth: "85%",
+                            fontSize: 14,
+                            lineHeight: 1.5,
+                            background: msg.role === "user" ? "rgba(245,158,11,0.18)" : "rgba(255,255,255,0.06)",
+                            color: msg.role === "user" ? "#FEF3C7" : "rgba(255,255,255,0.9)",
+                            border: msg.role === "user" ? "1px solid rgba(245,158,11,0.15)" : "1px solid rgba(255,255,255,0.08)",
+                        }}>
                             {msg.content}
                         </div>
                     </motion.div>
                 ))}
+                
                 {loading && (
-                    <div className="flex justify-start">
-                        <div className="bg-white/5 border border-white/10 px-4 py-2 rounded-2xl rounded-tl-none animate-pulse">
-                            <span className="text-[10px] text-white/20 uppercase tracking-widest">Зеркало настраивается...</span>
+                    <div style={{ display: "flex", justifyContent: "flex-start" }}>
+                        <div style={{ 
+                            padding: "10px 14px", 
+                            borderRadius: "18px 18px 18px 4px", 
+                            background: "rgba(255,255,255,0.05)", 
+                            display: "flex", 
+                            gap: 4, 
+                            alignItems: "center" 
+                        }}>
+                            {[0, 1, 2].map(i => (
+                                <motion.div key={i}
+                                    style={{ width: 4, height: 4, borderRadius: "50%", background: "rgba(255,255,255,0.3)" }}
+                                    animate={{ opacity: [0.3, 1, 0.3] }}
+                                    transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }}
+                                />
+                            ))}
                         </div>
                     </div>
                 )}
+
+                {/* Diary Prompt Dialog */}
+                <AnimatePresence>
+                    {isFinished && diarySummary && (
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            style={{
+                                marginTop: 20,
+                                padding: 20,
+                                background: "rgba(13,18,38,0.7)",
+                                backdropFilter: "blur(20px)",
+                                borderRadius: 24,
+                                border: "1px solid rgba(255,255,255,0.1)",
+                                textAlign: "center",
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: 15,
+                                zIndex: 30
+                            }}
+                        >
+                            <h3 style={{ fontSize: 16, color: "rgba(255,255,255,0.9)", margin: 0 }}>Внести итоги в дневник?</h3>
+                            <p style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", lineHeight: 1.5, fontStyle: "italic" }}>
+                                "{diarySummary}"
+                            </p>
+                            <div style={{ display: "flex", gap: 10 }}>
+                                <button
+                                    onClick={() => router.push("/")}
+                                    style={{ flex: 1, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, padding: "12px", color: "rgba(255,255,255,0.4)", fontSize: 13 }}
+                                >
+                                    Пропустить
+                                </button>
+                                <button
+                                    onClick={handleSaveDiary}
+                                    disabled={isSavingDiary}
+                                    style={{ flex: 1, background: "rgba(245,158,11,0.2)", border: "1px solid rgba(245,158,11,0.3)", borderRadius: 12, padding: "12px", color: "#FCD34D", fontSize: 13, fontWeight: 600 }}
+                                >
+                                    {isSavingDiary ? "Сохраняю..." : "Внести в дневник"}
+                                </button>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
 
-            {/* Input Area */}
-            <div className="relative z-20 px-4 pt-2 pb-8 bg-gradient-to-t from-[#060818] via-[#060818]/95 to-transparent">
-                <div className="relative flex items-end gap-3 max-w-[500px] mx-auto">
-                    <div className="relative flex-1">
+            {/* Bottom panel */}
+            <div style={{ flexShrink: 0, padding: "10px 16px 20px", borderTop: "1px solid rgba(255,255,255,0.05)", display: "flex", flexDirection: "column", gap: 8, position: "relative", zIndex: 20, background: "rgba(6,8,24,0.8)", backdropFilter: "blur(10px)", opacity: isFinished ? 0.3 : 1, pointerEvents: isFinished ? "none" : "auto" }}>
+                <div style={{ display: "flex", gap: 8, alignItems: "center", position: "relative" }}>
+                    <div style={{ flex: 1, position: "relative" }}>
                         <textarea
                             ref={textareaRef}
                             rows={1}
-                            value={input}
+                            value={isTranscribing ? "Транскрибирую..." : input}
                             onChange={handleTextChange}
                             onKeyDown={(e) => {
-                                if (e.key === 'Enter' && !e.shiftKey) {
+                                if (e.key === "Enter" && !e.shiftKey) {
                                     e.preventDefault();
                                     handleSend();
                                 }
                             }}
-                            placeholder="О чем молчит твоё отражение?"
-                            className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3.5 text-sm text-white placeholder:text-white/20 outline-none focus:border-amber-500/40 transition-all resize-none max-h-[200px]"
+                            placeholder="Задайте вопрос Вашему внутреннему миру..."
+                            disabled={loading || isTranscribing || isFinished}
+                            style={{
+                                width: "100%",
+                                background: "rgba(255,255,255,0.06)",
+                                border: "1px solid rgba(255,255,255,0.1)",
+                                borderRadius: 16,
+                                padding: "14px 48px 14px 16px",
+                                fontSize: 14,
+                                color: "#fff",
+                                outline: "none",
+                                boxSizing: "border-box",
+                                resize: "none",
+                                overflowY: "auto",
+                                maxHeight: "50vh",
+                                lineHeight: "1.5",
+                                display: "block",
+                            }}
+                            className="placeholder:text-white/20 focus:border-amber-500/50"
                         />
-                        <button 
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center pointer-events-none">
+                            <h1 className="text-xl font-medium tracking-wide first-letter:uppercase">Чат с внутренним миром</h1>
+                            <span className="text-[10px] opacity-40 tracking-[0.2em] font-light uppercase mt-1" data-v="2.0.1">AVATAR Intelligence</span>
+                        </div>
+                        <button
                             onClick={handleSend}
-                            disabled={!input.trim() || loading}
-                            className="absolute right-2 bottom-2 w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center disabled:opacity-20 transition-all"
+                            disabled={!input.trim() || loading || isTranscribing || isFinished}
+                            style={{
+                                position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)",
+                                width: 32, height: 32, borderRadius: 10, border: "none", cursor: "pointer",
+                                background: "rgba(245,158,11,0.2)", color: "#FCD34D",
+                                display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16,
+                                opacity: (!input.trim() || loading || isFinished) ? 0.3 : 1,
+                            }}
                         >
-                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                <line x1="12" y1="19" x2="12" y2="5" />
-                                <polyline points="5 12 12 5 19 12" />
-                            </svg>
+                            ↑
                         </button>
+                        <AnimatePresence>
+                            {isRecording && (
+                                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                                    style={{ position: "absolute", inset: 0, background: "rgba(245,158,11,0.1)", backdropFilter: "blur(8px)", borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid rgba(245,158,11,0.2)", pointerEvents: "none" }}>
+                                    <div style={{ display: "flex", gap: 4 }}>
+                                        {[0, 1, 2].map(i => (
+                                            <motion.div key={i} style={{ width: 4, height: 16, borderRadius: 4, background: "rgba(251,191,36,0.6)" }}
+                                                animate={{ scaleY: [1, 2, 1] }}
+                                                transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.1 }} />
+                                        ))}
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
+                    <button
+                        onPointerDown={startRecording}
+                        onPointerUp={stopRecording}
+                        onPointerLeave={stopRecording}
+                        disabled={isFinished}
+                        style={{
+                            flexShrink: 0, width: 52, height: 52, borderRadius: 16, cursor: "pointer",
+                            background: isRecording ? "#EF4444" : "rgba(255,255,255,0.06)",
+                            border: isRecording ? "none" : "1px solid rgba(255,255,255,0.1)",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            transform: isRecording ? "scale(0.95)" : "scale(1)",
+                            transition: "all 0.15s",
+                            opacity: isFinished ? 0.3 : 1
+                        }}
+                    >
+                        {isRecording ? "🔴" : <MicIcon className="w-5 h-5 text-amber-500/60" />}
+                    </button>
                 </div>
+                <p style={{ textAlign: "center", fontSize: 10, color: "rgba(255,255,255,0.25)", textTransform: "uppercase", letterSpacing: "0.1em", margin: 0 }}>
+                    {loading ? "Думаю..." : "☼ Чат с внутренним миром"}
+                </p>
             </div>
         </div>
     );

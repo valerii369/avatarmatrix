@@ -133,6 +133,8 @@ export const assistantAPI = {
         api.post("/api/assistant/chat", { user_id: userId, session_id: sessionId, message }),
     finish: (userId: number, sessionId: number) =>
         api.post("/api/assistant/finish", { user_id: userId, session_id: sessionId }),
+    saveToDiary: (userId: number, sessionId: number) =>
+        api.post("/api/assistant/save-to-diary", { user_id: userId, session_id: sessionId }),
 };
 
 // WebSocket helper

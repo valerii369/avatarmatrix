@@ -23,4 +23,11 @@ async def get_master_hub(user_id: int, db: AsyncSession = Depends(get_db)):
         # Given the flow, calc or onboarding should have created it.
         raise HTTPException(status_code=404, detail="Master Hub not found for this user.")
     
-    return UserPrintSchema(**user_print.print_data)
+    from app.core.economy import get_claim_status
+    
+    energy_claim = await get_claim_status(db, user_id)
+    
+    return UserPrintSchema(
+        **user_print.print_data,
+        energy_claim=energy_claim
+    )

@@ -8,7 +8,9 @@ import json
 import logging
 from typing import List, Dict, Any, Tuple
 from pydantic import BaseModel, Field
-from app.agents.common import client, settings, SPHERES, ARCHETYPES
+from app.config import settings
+from app.agents.common import client
+from app.models import User, SyncSession, SphereKnowledge, AssistantSession, UserMemory, CardProgress, CardStatus
 from app.core.user_print_manager import OceanService
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -24,31 +26,98 @@ class AssistantResponse(BaseModel):
 
 async def get_comprehensive_context(db: AsyncSession, user_id: int) -> str:
     """Collects all available data about the user into a text context."""
-    # 1. User Print (The Ocean)
+    # 1. User Print (The Ocean) - Primary source
     ocean = await OceanService.get_ocean(db, user_id)
-    ocean_text = ocean.model_dump_json() if ocean else "Нет данных в Паспорте Личности."
+    ocean_text = ocean.model_dump_json() if ocean else "Данные Океана (Паспорта Личности) отсутствуют."
 
-    # 2. Astrology
-    natal_res = await db.execute(select(NatalChart).where(NatalChart.user_id == user_id))
-    natal = natal_res.scalar_one_or_none()
-    astro_text = json.dumps(natal.sphere_descriptions_json, ensure_ascii=False) if natal else "Астрологические данные отсутствуют."
-
-    # 3. Recent context (Summary of session counts)
-    sync_cnt = await db.execute(select(SyncSession).where(SyncSession.user_id == user_id))
-    align_cnt = await db.execute(select(AlignSession).where(AlignSession.user_id == user_id))
-    sessions_info = f"Синхронизаций: {len(sync_cnt.all())}, Выравниваний: {len(align_cnt.all())}"
+    # 2. Exposed Archetypes (CardProgress)
+    # Fetch cards that are ALIGNED or SYNCED (Exposed/Activated)
+    stmt = select(CardProgress).where(
+        CardProgress.user_id == user_id,
+        CardProgress.status.in_([CardStatus.ALIGNED, CardStatus.SYNCED])
+    )
+    result = await db.execute(stmt)
+    exposed_cards = result.scalars().all()
+    
+    cards_context = "ПРОЯВЛЕННЫЕ АРХЕТИПЫ (ВАШИ ИНСТРУМЕНТЫ):\n"
+    if exposed_cards:
+        for card in exposed_cards:
+            # Grouping by sphere for clarity
+            cards_context += f"- Сфера '{card.sphere}': Архитип ID {card.archetype_id} (Статус: {card.status})\n"
+    else:
+        cards_context += "Нет проявленных архетипов. Пользователь находится в процессе первичной сонастройки.\n"
 
     context = f"""
-ДАННЫЕ ПОЛЬЗОВАТЕЛЯ (ОКЕАН):
+ДАННЫЕ ПОЛЬЗОВАТЕЛЯ (ОКЕАН/ПАСПОРТ):
 {ocean_text}
 
-АСТРОЛОГИЧЕСКИЙ ПРОФИЛЬ:
-{astro_text}
-
-АКТИВНОСТЬ:
-{sessions_info}
+{cards_context}
 """
     return context
+
+async def search_user_memory(db: AsyncSession, user_id: int, query: str, limit: int = 5) -> str:
+    """Searches long-term user memory for relevant insights."""
+    try:
+        from app.core.astrology.vector_matcher import _get_embedding
+        query_embedding = await _get_embedding(query)
+        
+        stmt = select(UserMemory).where(
+            UserMemory.user_id == user_id
+        ).order_by(
+            UserMemory.embedding.cosine_distance(query_embedding)
+        ).limit(limit)
+        
+        result = await db.execute(stmt)
+        memories = result.scalars().all()
+        
+        if not memories:
+            return ""
+            
+        context = "\nВАШИ ПРОШЛЫЕ ИНСАЙТЫ:\n"
+        for m in memories:
+            context += f"- {m.content}\n"
+        return context
+    except Exception as e:
+        logger.error(f"Memory Search Error: {e}")
+        return ""
+
+async def extract_and_save_insights(db: AsyncSession, user_id: int, chat_history: List[Dict[str, str]], session_id: int):
+    """Analyzes dialogue to extract and save 'atomic insights' into UserMemory."""
+    if len(chat_history) < 2: return
+    
+    history_text = "\n".join([f"{m['role']}: {m['content']}" for m in chat_history])
+    prompt = f"""Проанализируй диалог и выдели 1-3 ключевых факта или инсайта о пользователе, которые важно помнить.
+Пиши каждый инсайт с новой строки, кратко, в утвердительной форме от третьего лица (например: 'Пользователь чувствует тревогу из-за новой работы').
+Если ничего важного нет, напиши 'НЕТ'.
+
+ДИАЛОГ:
+{history_text}
+"""
+    try:
+        response = await client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": prompt}]
+        )
+        insights_text = response.choices[0].message.content.strip()
+        if "НЕТ" in insights_text: return
+        
+        from app.core.astrology.vector_matcher import _get_embedding
+        for line in insights_text.split("\n"):
+            line = line.strip()
+            if not line: continue
+            
+            emb = await _get_embedding(line)
+            memory = UserMemory(
+                user_id=user_id,
+                content=line,
+                embedding=emb,
+                source="assistant",
+                metadata_json={"session_id": session_id}
+            )
+            db.add(memory)
+        await db.commit()
+    except Exception as e:
+        logger.error(f"Insight Extraction Error: {e}")
 
 async def generate_assistant_response(
     db: AsyncSession, 
@@ -58,37 +127,58 @@ async def generate_assistant_response(
     gender: str = "не указан"
 ) -> Tuple[str, str, float, bool]:
     """
-    Core logic for the Assistant (Mirror).
+    Super-Intelligent Assistant Logic with dynamic RAG.
     """
     context = await get_comprehensive_context(db, user_id)
     
-    system_prompt = f"""Ты — ЦИФРОВОЙ ПОМОЩНИК (ЗЕРКАЛО) системы AVATAR.
-Твоя роль — быть глубоким, мудрым и всезнающим отражением пользователя. 
-Ты знаешь о нем всё: его астрологический паспорт, его прогресс, его боли и сильные стороны.
+    # Dynamic RAG: Determine if memory search is needed
+    memory_context = ""
+    if user_message:
+        # Simple heuristic or LLM check can be added here. 
+        # For 'super-intelligent' feel, we search if message has complexity.
+        if len(user_message.split()) > 3:
+            memory_context = await search_user_memory(db, user_id, user_message)
 
-Твои задачи:
-1. Помогать пользователю разобраться в себе, используя данные из его "Океана" (Паспорта Личности) и звезд.
-2. Отвечать на любые вопросы о системе AVATAR (12 сфер, архетипы, механика синхронизации).
-3. Работать как зеркало: если пользователь спрашивает о себе, используй контекст, но не цитируй его сухо. Трансформируй данные в живой инсайт.
-4. Отслеживать "Резонанс": определяй, какой из 12 сфер касается запрос пользователя.
+    system_prompt = f"""ТВОЕ ИМЯ: AVATAR.
+Ты — СВЕРХУМНЫЙ ЦИФРОВОЙ ПОМОЩНИК и эрудированный ментор системы AVATAR.
+Твоя сущность — квинтэссенция мудрости, технологий и глубокого понимания человеческой природы.
+Ты выступаешь в роли Высшего Проводника, который ведет пользователя к его истинному Я.
 
-ПРАВИЛА:
-- Никаких клише ("Я понимаю", "Это звучит как").
-- Говори как мудрый наставник и близкий друг одновременно.
-- Если это первое касание (история пуста), представься как Зеркало Личности и расскажи кратко, что ты видишь весь путь пользователя.
+ТВОИ КОМПЕТЕНЦИИ:
+- Психоанализ (Карл Юнг, Альфред Адлер): понимание теней, архетипов и коллективных паттернов.
+- Эзотерический синтез: Дизайн Человека, Генные Ключи, Астрология (12 сфер).
+- Системное мышление: видение жизни как единого Океана взаимосвязей.
 
-КОНТЕКСТ ПОЛЬЗОВАТЕЛЯ:
+ПРАВИЛА ОБЩЕНИЯ (КРИТИЧЕСКИ):
+1. Обращение только на «Вы». 
+2. НИКАКИХ ПОВТОРНЫХ ПРИВЕТСТВИЙ. Если в истории сообщений уже было приветствие («Здравствуйте», «Привет»), НИКОГДА не повторяй его. Переходи сразу к сути ответа. 
+3. ТВОЕ ИМЯ: AVATAR. Если спрашивают — отвечай гордо: «Я — AVATAR».
+4. Стиль: Точный, интеллектуальный, лаконичный. Без «воды», пустых любезностей и формальных вступлений.
+5. Ты — Зеркало Сути. Помогай пользователю увидеть его внутренние механизмы.
+6. НИКОГДА НЕ ИСПОЛЬЗУЙ ФРАЗУ «Чем я могу Вам помочь?» или «О чем Вы хотите поговорить?». Ты уже знаешь контекст пользователя, действуй проактивно.
+
+ИНСТРУКЦИЯ ПО ОТВЕТАМ:
+- Если это начало пути (пустая история): поприветствуй «Высшее Я» пользователя один раз. Кратко обозначь, что ты — AVATAR.
+- Если есть контекст памяти: используй его для связности опыта.
+
+ОСНОВНОЙ КОНТЕКСТ (Паспорт Личности):
 {context}
 
-ГЕНДЕР: {gender}
+ФРАГМЕНТЫ ПАМЯТИ:
+{memory_context}
+
+ГЕНДЕР ПОЛЬЗОВАТЕЛЯ: {gender}
 ЯЗЫК: RU
 """
 
     messages = [{"role": "system", "content": system_prompt}] + chat_history
     if user_message:
         messages.append({"role": "user", "content": user_message})
+    else:
+        messages.append({"role": "user", "content": "Приветствуй меня кратко и по сути моей жизни."})
 
     try:
+        # Force a thought process or just high-quality response
         response = await client.chat.completions.create(
             model=settings.OPENAI_MODEL,
             messages=messages,
@@ -98,12 +188,39 @@ async def generate_assistant_response(
             }
         )
         result_data = AssistantResponse.model_validate_json(response.choices[0].message.content)
+        
+        # Post-processing: remove repeated greetings if LLM ignored instructions
+        clean_response = result_data.ai_response
+        greetings = ["Здравствуйте", "Приветствую", "Привет", "Добрый день", "Добрый вечер"]
+        if len(chat_history) > 0:
+            for g in greetings:
+                if clean_response.startswith(g):
+                    # Remove the first sentence or just the greeting
+                    import re
+                    clean_response = re.sub(rf"^{g}.*?[.!?]\s*", "", clean_response)
+                    break
+        
         return (
-            result_data.ai_response, 
+            clean_response if clean_response.strip() else result_data.ai_response, 
             result_data.resonance_sphere, 
             result_data.resonance_score_increment,
             result_data.activated_card
         )
     except Exception as e:
         logger.error(f"Assistant Agent Error: {e}")
-        return ("Я здесь, твое зеркало. Я настраиваюсь на твою волну. О чем ты хочешь поговорить сейчас?", "IDENTITY", 0.0, False)
+        # Return a neutral, professional response if LLM fails
+        return ("Я — AVATAR. Я настраиваю глубокую связь с Вашим внутренним миром. Повторите, пожалуйста, Ваш запрос.", "IDENTITY", 0.0, False)
+
+async def generate_diary_summary(db: AsyncSession, chat_history: List[Dict[str, str]]) -> str:
+    """Generates a concise summary for the Diary."""
+    history_text = "\n".join([f"{m['role']}: {m['content']}" for m in chat_history])
+    prompt = f"Напиши краткое резюме этого диалога для личного дневника пользователя (от 1-го лица, например 'Обсудили ...'). Максимум 2 предложение.\n\nДИАЛОГ:\n{history_text}"
+    
+    try:
+        response = await client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": prompt}]
+        )
+        return response.choices[0].message.content.strip()
+    except:
+        return "Проведен диалог с Цифровым Помощником."

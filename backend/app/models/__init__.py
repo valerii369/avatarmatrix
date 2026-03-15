@@ -13,6 +13,7 @@ from app.models.ai_diagnostic import AIDiagnosticSession
 from app.models.data_architecture import Event, SessionFeatures, UserBehaviorProfileV2
 from app.models.reflection_session import ReflectionSession
 from app.models.assistant_session import AssistantSession
+from app.models.user_memory import UserMemory
 from app.models.text_diagnostics import (
     Sphere, Archetype, TextScene, SceneInteraction, SceneStats, SceneSet, SceneSetItem
 )
@@ -47,5 +48,6 @@ __all__ = [
     "SceneSetItem",
     "ReflectionSession",
     "AssistantSession",
+    "UserMemory",
     "UserPrint"
 ]
