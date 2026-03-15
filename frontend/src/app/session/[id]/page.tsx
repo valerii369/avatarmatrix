@@ -376,8 +376,8 @@ export default function SessionPage() {
                         <button
                             onClick={() => router.push("/diary")}
                             style={{
-                                width: "100%", padding: "18px", borderRadius: 20, border: "none",
-                                cursor: "pointer", fontSize: 15, fontWeight: 800, textTransform: "uppercase",
+                                width: "100%", padding: "18px 20px", borderRadius: 18, border: "none",
+                                cursor: "pointer", fontSize: 14, fontWeight: 800, textTransform: "uppercase",
                                 background: "linear-gradient(135deg, #8B5CF6, #6366F1)", color: "#fff",
                                 boxShadow: "0 8px 24px rgba(139,92,246,0.3)",
                             }}

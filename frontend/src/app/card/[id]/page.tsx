@@ -127,7 +127,7 @@ export default function CardPage() {
                         Сфера: {card.sphere_name_ru}
                     </p>
                     <h1 style={{
-                        fontSize: 30,
+                        fontSize: 24,
                         fontWeight: 800,
                         color: "var(--text-primary)",
                         margin: 0,
@@ -151,7 +151,7 @@ export default function CardPage() {
                         LVL {card.rank}
                     </p>
                     <p style={{
-                        fontSize: 30,
+                        fontSize: 24,
                         fontWeight: 800,
                         color: card.hawkins_peak > 0 ? getHawkinsColor(card.hawkins_peak) : "rgba(255,255,255,0.2)",
                         margin: 0,
@@ -255,14 +255,14 @@ export default function CardPage() {
                             onClick={() => router.push(`/sync/${card.id}`)}
                             style={{
                                 width: "100%",
-                                padding: "20px",
-                                borderRadius: 20,
+                                padding: "18px 20px",
+                                borderRadius: 18,
                                 border: "1px solid rgba(255,255,255,0.1)",
                                 cursor: "pointer",
                                 background: "linear-gradient(135deg, #10B981 0%, #059669 100%)",
                                 color: "#000",
                                 fontWeight: 800,
-                                fontSize: 16,
+                                fontSize: 14,
                                 letterSpacing: "0.1em",
                                 boxShadow: "0 10px 30px -10px rgba(16,185,129,0.5), inset 0 1px 0 rgba(255,255,255,0.2)",
                                 fontFamily: "'Outfit', sans-serif",
@@ -279,14 +279,14 @@ export default function CardPage() {
                             onClick={() => router.push(`/session/${card.id}`)}
                             style={{
                                 width: "100%",
-                                padding: "20px",
-                                borderRadius: 20,
+                                padding: "18px 20px",
+                                borderRadius: 18,
                                 border: "1px solid rgba(255,255,255,0.1)",
                                 cursor: "pointer",
                                 background: "linear-gradient(135deg, #F59E0B 0%, #D97706 100%)",
                                 color: "#000",
                                 fontWeight: 800,
-                                fontSize: 16,
+                                fontSize: 14,
                                 letterSpacing: "0.1em",
                                 boxShadow: "0 10px 30px -10px rgba(245,158,11,0.4), inset 0 1px 0 rgba(255,255,255,0.2)",
                                 fontFamily: "'Outfit', sans-serif",
