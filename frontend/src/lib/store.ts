@@ -16,7 +16,9 @@ interface UserState {
     xpNext: number;
     referralCode: string;
     photoUrl: string;
+    assistantMessages: { role: string; content: string }[];
     setUser: (data: Partial<UserState>) => void;
+    setAssistantMessages: (msgs: { role: string; content: string }[]) => void;
     reset: () => void;
 }
 
@@ -37,11 +39,14 @@ export const useUserStore = create<UserState>()(
             xpNext: 0,
             referralCode: "",
             photoUrl: "",
+            assistantMessages: [],
             setUser: (data) => set((state) => ({ ...state, ...data })),
+            setAssistantMessages: (msgs) => set({ assistantMessages: msgs.slice(-50) }),
             reset: () => set({
                 userId: null, tgId: null, firstName: "", token: null,
                 energy: 0, streak: 0, evolutionLevel: 1, title: "Искатель", onboardingDone: false,
                 xp: 0, xpCurrent: 0, xpNext: 0, referralCode: "", photoUrl: "",
+                assistantMessages: [],
             }),
         }),
         { name: "avatar-user" }

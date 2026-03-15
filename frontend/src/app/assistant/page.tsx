@@ -67,8 +67,8 @@ const useVoiceRecorder = (userId: number | null, setInput: React.Dispatch<React.
 
 export default function AssistantPage() {
     const router = useRouter();
-    const { userId } = useUserStore();
-    const [messages, setMessages] = useState<{ role: string, content: string }[]>([]);
+    const { userId, assistantMessages, setAssistantMessages } = useUserStore();
+    const [messages, setMessages] = useState<{ role: string, content: string }[]>(assistantMessages);
     const [input, setInput] = useState("");
     const [loading, setLoading] = useState(false);
     const [sessionId, setSessionId] = useState<number | null>(null);
@@ -82,22 +82,24 @@ export default function AssistantPage() {
 
     const { isRecording, isTranscribing, startRecording, stopRecording } = useVoiceRecorder(userId, setInput);
 
-    // Initialization
     useEffect(() => {
         if (!userId) return;
         const init = async () => {
             try {
-                // Return fast from init
                 const res = await assistantAPI.init(userId);
                 const sid = res.data.session_id;
                 setSessionId(sid);
                 setIsFirstTouch(res.data.is_first_touch);
                 
-                // Immediately trigger greeting bubble in background
-                setLoading(true);
-                const chatRes = await assistantAPI.chat(userId, sid, "");
-                if (chatRes.data.ai_response) {
-                    setMessages([{ role: "assistant", content: chatRes.data.ai_response }]);
+                // If there are no persistent messages, get a greeting from the backend
+                if (messages.length === 0) {
+                    setLoading(true);
+                    const chatRes = await assistantAPI.chat(userId, sid, "");
+                    if (chatRes.data.ai_response) {
+                        const greeting = { role: "assistant", content: chatRes.data.ai_response };
+                        setMessages([greeting]);
+                        setAssistantMessages([greeting]);
+                    }
                 }
             } catch (err) {
                 console.error("Assistant init error:", err);
@@ -107,6 +109,13 @@ export default function AssistantPage() {
         };
         init();
     }, [userId]);
+
+    // Save messages to store whenever they change
+    useEffect(() => {
+        if (messages.length > 0) {
+            setAssistantMessages(messages);
+        }
+    }, [messages, setAssistantMessages]);
 
     useEffect(() => {
         if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -191,27 +200,6 @@ export default function AssistantPage() {
             className="fixed inset-0 flex flex-col bg-[#060818] overflow-hidden" 
             style={{ zIndex: 10 }}
         >
-            {/* Background Particles */}
-            <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                <div style={{
-                    position: "absolute", top: "10%", left: "15%", width: 280, height: 280,
-                    background: "radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 70%)",
-                    borderRadius: "50%", filter: "blur(32px)"
-                }} />
-                <div style={{
-                    position: "absolute", bottom: "15%", right: "10%", width: 220, height: 220,
-                    background: "radial-gradient(circle, rgba(245,158,11,0.10) 0%, transparent 70%)",
-                    borderRadius: "50%", filter: "blur(28px)"
-                }} />
-                {particles.map((p, i) => (
-                    <motion.div key={i}
-                        className="absolute rounded-full bg-white"
-                        style={{ left: p.left, top: p.top, width: p.size, height: p.size, opacity: p.opacity }}
-                        animate={{ opacity: [p.opacity, p.opacity * 3, p.opacity] }}
-                        transition={{ duration: p.duration, repeat: Infinity, delay: p.delay }}
-                    />
-                ))}
-            </div>
 
             {/* Top bar */}
             <div style={{ padding: "12px 16px 8px", borderBottom: "1px solid rgba(255,255,255,0.05)", flexShrink: 0, position: "relative", zIndex: 20 }}>
@@ -339,7 +327,7 @@ export default function AssistantPage() {
                                     handleSend();
                                 }
                             }}
-                            placeholder="Задайте вопрос Вашему внутреннему миру..."
+                            placeholder="задайте вопрос"
                             disabled={loading || isTranscribing || isFinished}
                             style={{
                                 width: "100%",
@@ -350,6 +338,7 @@ export default function AssistantPage() {
                                 fontSize: 14,
                                 color: "#fff",
                                 outline: "none",
+                                fontFamily: "inherit",
                                 boxSizing: "border-box",
                                 resize: "none",
                                 overflowY: "auto",
