@@ -2,11 +2,11 @@
 from app.routers import (
     auth, calc, cards, sync, session,
     diary, profile, portrait, game, voice, retro, match, reflect,
-    onboarding_ai, payments, master_hub
+    onboarding_ai, payments, master_hub, assistant
 )
 
 __all__ = [
     "auth", "calc", "cards", "sync", "session",
     "diary", "profile", "portrait", "game", "voice", "retro", "match", "reflect",
-    "onboarding_ai", "payments", "master_hub"
+    "onboarding_ai", "payments", "master_hub", "assistant"
 ]

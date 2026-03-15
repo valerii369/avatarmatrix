@@ -8,7 +8,7 @@ from app.database import init_db
 from app.routers import (
     auth, profile, sync, reflect, session, onboarding_ai, 
     diary, cards, calc, game, match, portrait, retro, 
-    voice, payments, master_hub, economy
+    voice, payments, master_hub, economy, assistant
 )
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -53,6 +53,7 @@ app.include_router(reflect.router,  prefix="/api/reflect",  tags=["Reflect"])
 app.include_router(payments.router, prefix="/api/payments", tags=["Payments"])
 app.include_router(master_hub.router, prefix="/api/master-hub", tags=["MasterHub"])
 app.include_router(economy.router,    prefix="/api/economy",    tags=["Economy"])
+app.include_router(assistant.router,  prefix="/api/assistant",  tags=["Assistant"])
 
 
 @app.get("/health", tags=["Meta"])

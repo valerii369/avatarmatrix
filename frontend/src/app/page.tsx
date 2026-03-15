@@ -361,7 +361,7 @@ export function BottomNav({ active }: { active: string }) {
     { key: "home", icon: "/icons/home.svg", label: "AVATAR", path: "/" },
     { key: "cards", icon: "/icons/cards.svg", label: "Карточки", path: "/cards" },
     { key: "diary", icon: "/icons/diary.svg", label: "Дневник", path: "/diary" },
-    { key: "reflect", icon: "/icons/reflect.svg", label: "Рефлексия", path: "/reflect" },
+    { key: "assistant", icon: "/icons/reflect.svg", label: "Помощник", path: "/assistant" },
     { key: "profile", icon: "/icons/profile.svg", label: "Профиль", path: "/profile" },
   ];
 

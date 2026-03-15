@@ -127,6 +127,14 @@ export const masterHubAPI = {
     get: (userId: number) => api.get(`/api/master-hub/${userId}`),
 };
 
+export const assistantAPI = {
+    init: (userId: number) => api.post("/api/assistant/init", { user_id: userId }),
+    chat: (userId: number, sessionId: number, message: string) =>
+        api.post("/api/assistant/chat", { user_id: userId, session_id: sessionId, message }),
+    finish: (userId: number, sessionId: number) =>
+        api.post("/api/assistant/finish", { user_id: userId, session_id: sessionId }),
+};
+
 // WebSocket helper
 export function createSessionWS(userId: number, cardProgressId: number): WebSocket {
     const wsBase = API_BASE.replace("http", "ws");
