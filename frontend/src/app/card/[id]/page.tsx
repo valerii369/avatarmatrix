@@ -6,6 +6,7 @@ import { cardsAPI } from "@/lib/api";
 import { useUserStore } from "@/lib/store";
 import { BottomNav } from "@/app/page";
 import ArchetypeChart from "@/components/ArchetypeChart";
+import HawkinsBar from "@/components/HawkinsBar";
 
 type TabKey = "desc" | "shadow" | "light" | "status";
 const TABS: { key: TabKey, label: string }[] = [
@@ -112,7 +113,7 @@ export default function CardPage() {
             </div>
 
             {/* ── Sphere + Name + Score ────────────────────────────────────── */}
-            <div style={{ padding: "4px 20px 16px", display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
+            <div style={{ padding: "4px 20px 4px", display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
                 {/* Left: sphere label + archetype name */}
                 <div>
                     <p style={{
@@ -162,6 +163,37 @@ export default function CardPage() {
                 </div>
             </div>
 
+            {/* ── Status row ───────────────────────────────────────────────── */}
+            <div style={{
+                padding: "4px 20px 8px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                borderBottom: "1px solid rgba(255,255,255,0.05)",
+                marginBottom: 4
+            }}>
+                <p style={{
+                    fontSize: 11,
+                    fontWeight: 600,
+                    letterSpacing: "0.12em",
+                    color: "rgba(255,255,255,0.35)",
+                    margin: 0,
+                    textTransform: "uppercase",
+                }}>
+                    Статус: {statusCfg.label}
+                </p>
+                <p style={{
+                    fontSize: 12,
+                    fontWeight: 700,
+                    color: statusCfg.color,
+                    margin: 0,
+                    letterSpacing: "0.08em",
+                    textTransform: "uppercase",
+                }}>
+                    {statusCfg.statusLabel}
+                </p>
+            </div>
+
             {/* ── Archetype Image ──────────────────────────────────────────── */}
             <div style={{ padding: "0 16px" }}>
                 <div style={{
@@ -193,39 +225,11 @@ export default function CardPage() {
                 </div>
             </div>
 
-            {/* ── Info block ───────────────────────────────────────────────── */}
-            <div style={{ padding: "16px 20px 0" }}>
+            {/* ── Hawkins Scale ── */}
+            <HawkinsBar value={card.hawkins_peak || 0} />
 
-                {/* Status row */}
-                <div style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    marginBottom: 16,
-                    paddingBottom: 16,
-                    borderBottom: "1px solid rgba(255,255,255,0.07)",
-                }}>
-                    <p style={{
-                        fontSize: 11,
-                        fontWeight: 600,
-                        letterSpacing: "0.12em",
-                        color: "rgba(255,255,255,0.35)",
-                        margin: 0,
-                        textTransform: "uppercase",
-                    }}>
-                        Статус: {statusCfg.label}
-                    </p>
-                    <p style={{
-                        fontSize: 12,
-                        fontWeight: 700,
-                        color: statusCfg.color,
-                        margin: 0,
-                        letterSpacing: "0.08em",
-                        textTransform: "uppercase",
-                    }}>
-                        {statusCfg.statusLabel}
-                    </p>
-                </div>
+            {/* ── Info block ───────────────────────────────────────────────── */}
+            <div style={{ padding: "0 20px 0" }}>
 
                 {/* ── Action buttons ── */}
                 <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
@@ -245,44 +249,44 @@ export default function CardPage() {
 
                     {canSync && (
                         <motion.button
-                            whileTap={{ scale: 0.97 }}
+                            whileTap={{ scale: 0.98 }}
                             onClick={() => router.push(`/sync/${card.id}`)}
                             style={{
                                 width: "100%",
-                                padding: "18px",
-                                borderRadius: 18,
-                                border: "none",
+                                padding: "20px",
+                                borderRadius: 20,
+                                border: "1px solid rgba(255,255,255,0.1)",
                                 cursor: "pointer",
-                                background: "linear-gradient(135deg, #10B981, #059669)",
+                                background: "linear-gradient(135deg, #10B981 0%, #059669 100%)",
                                 color: "#000",
                                 fontWeight: 800,
-                                fontSize: 15,
-                                letterSpacing: "0.08em",
-                                boxShadow: "0 8px 28px rgba(16,185,129,0.4)",
+                                fontSize: 14,
+                                letterSpacing: "0.1em",
+                                boxShadow: "0 10px 30px -10px rgba(16,185,129,0.5), inset 0 1px 0 rgba(255,255,255,0.2)",
                                 fontFamily: "'Outfit', sans-serif",
                                 textTransform: "uppercase",
                             }}
                         >
-                            {isResuming ? "Продолжить синхронизацию" : `Синхронизация · 25 ✦`}
+                            {isResuming ? "Продолжить активацию" : `Активировать · 25 ✦`}
                         </motion.button>
                     )}
 
                     {canAlign && (
                         <motion.button
-                            whileTap={{ scale: 0.97 }}
+                            whileTap={{ scale: 0.98 }}
                             onClick={() => router.push(`/session/${card.id}`)}
                             style={{
                                 width: "100%",
-                                padding: "18px",
-                                borderRadius: 18,
-                                border: "none",
+                                padding: "20px",
+                                borderRadius: 20,
+                                border: "1px solid rgba(255,255,255,0.1)",
                                 cursor: "pointer",
-                                background: "linear-gradient(135deg, #F59E0B, #D97706)",
+                                background: "linear-gradient(135deg, #F59E0B 0%, #D97706 100%)",
                                 color: "#000",
                                 fontWeight: 800,
-                                fontSize: 15,
-                                letterSpacing: "0.08em",
-                                boxShadow: "0 8px 28px rgba(245,158,11,0.35)",
+                                fontSize: 14,
+                                letterSpacing: "0.1em",
+                                boxShadow: "0 10px 30px -10px rgba(245,158,11,0.4), inset 0 1px 0 rgba(255,255,255,0.2)",
                                 fontFamily: "'Outfit', sans-serif",
                                 textTransform: "uppercase",
                             }}
