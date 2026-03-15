@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { assistantAPI, voiceAPI } from "@/lib/api";
 import { useUserStore } from "@/lib/store";
-import SacredGeometryLogo from "@/components/SacredGeometryLogo";
 
 const MicIcon = ({ className }: { className?: string }) => (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -223,10 +222,7 @@ export default function AssistantPage() {
                     >
                         ← Назад
                     </button>
-                    <div className="flex flex-col items-center gap-1">
-                        <h1 className="text-sm font-bold tracking-[0.2em] uppercase text-white/40" data-v="2.1.0">Чат с внутренним миром</h1>
-                        <div className="h-[1px] w-12 bg-amber-500/20" />
-                    </div>
+                    <span style={{ fontSize: 10, color: "rgba(255,255,255,0.2)", letterSpacing: "0.1em", textTransform: "uppercase" }}>☼ Чат с внутренним миром</span>
                     <button
                         onClick={handleFinish}
                         disabled={isFinished || loading}
@@ -244,9 +240,7 @@ export default function AssistantPage() {
                 className="no-scrollbar"
             >
                 {messages.map((msg, i) => (
-                    <motion.div 
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
+                    <div 
                         key={i} 
                         style={{ display: "flex", justifyContent: msg.role === "user" ? "flex-end" : "flex-start" }}
                     >
@@ -262,7 +256,7 @@ export default function AssistantPage() {
                         }}>
                             {msg.content}
                         </div>
-                    </motion.div>
+                    </div>
                 ))}
                 
                 {loading && (
@@ -365,10 +359,6 @@ export default function AssistantPage() {
                             }}
                             className="placeholder:text-white/20 focus:border-amber-500/50"
                         />
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center pointer-events-none">
-                            <h1 className="text-xl font-medium tracking-wide first-letter:uppercase">Чат с внутренним миром</h1>
-                            <span className="text-[10px] opacity-40 tracking-[0.2em] font-light uppercase mt-1" data-v="2.0.1">AVATAR Intelligence</span>
-                        </div>
                         <button
                             onClick={handleSend}
                             disabled={!input.trim() || loading || isTranscribing || isFinished}
