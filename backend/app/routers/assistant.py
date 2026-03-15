@@ -97,6 +97,7 @@ async def assistant_chat(request: AssistantChatRequest, db: AsyncSession = Depen
     ai_response, sphere, increment, activated = await generate_assistant_response(
         db, request.user_id, session.messages_json, request.message, 
         gender=user.gender or "не указан",
+        user_name=user.first_name or "Путешественник",
         is_returning_after_pause=is_returning_after_pause
     )
 
