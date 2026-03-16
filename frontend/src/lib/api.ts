@@ -5,12 +5,12 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://avatar.aiguro.pro";
 
 export const api = axios.create({
     baseURL: API_BASE,
-    timeout: 60000,
+    timeout: 120000, // Increased to 120s for LLM synthesis
 });
 
 export const voiceAxios = axios.create({
     baseURL: API_BASE,
-    timeout: 60000,   // 60s for Whisper transcription
+    timeout: 120000, 
 });
 
 voiceAxios.interceptors.request.use((config) => {

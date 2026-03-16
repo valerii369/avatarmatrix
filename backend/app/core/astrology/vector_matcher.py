@@ -1,3 +1,4 @@
+import asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from openai import AsyncOpenAI
@@ -29,18 +30,33 @@ async def match_archetypes_to_spheres(
     # Handle the new nested structure from llm_engine (Master of Synthesis)
     spheres_data = sphere_descriptions.get("spheres_12", sphere_descriptions)
     
+    # 1. Prepare descriptions
+    descriptions = []
+    sphere_keys = []
     for sphere, details in spheres_data.items():
-        # Handle both old format (str) and new format (dict with 'interpretation')
         description = details.get("interpretation", "") if isinstance(details, dict) else details
-        
-        if not description or not (isinstance(description, str) and description.strip()):
-            continue
+        if description and isinstance(description, str) and description.strip():
+            descriptions.append(description)
+            sphere_keys.append(sphere)
             
+    if not descriptions:
+        return []
+
+    # 2. Get all embeddings in BATCH (The most efficient way)
+    try:
+        response = await client.embeddings.create(
+            input=descriptions,
+            model="text-embedding-3-small"
+        )
+        query_embeddings = [d.embedding for d in response.data]
+    except Exception as e:
+        print(f"Error in batch embedding: {e}")
+        return []
+    
+    # 3. Perform DB queries (Sequential is safe and fast here)
+    for sphere, query_embedding, description in zip(sphere_keys, query_embeddings, descriptions):
         try:
-            # 1. Get embedding for the sphere's description
-            query_embedding = await _get_embedding(description)
-            
-            # 2. Query Postgres vector distance
+            # Query Postgres vector distance
             stmt = select(AvatarCard).where(
                 AvatarCard.sphere == sphere
             ).order_by(
@@ -50,9 +66,8 @@ async def match_archetypes_to_spheres(
             result = await db.execute(stmt)
             top_cards = result.scalars().all()
             
-            # 3. Add to recommendations
+            # Add to recommendations
             priorities = ["critical", "high", "medium"]
-            
             for idx, card in enumerate(top_cards):
                 if idx >= len(priorities):
                     break
@@ -64,7 +79,6 @@ async def match_archetypes_to_spheres(
                     reason=f"Наилучшее соответствие: {description[:100]}..." if idx == 0 else "Дополнительное соответствие энергии."
                 )
                 recommended_cards.append(rec)
-                
         except Exception as e:
             print(f"Error matching vector for sphere {sphere}: {e}")
             

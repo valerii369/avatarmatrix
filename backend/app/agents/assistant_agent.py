@@ -14,7 +14,8 @@ from app.models import User, SyncSession, SphereKnowledge, AssistantSession, Use
 from app.core.user_print_manager import OceanService
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from app.models import NatalChart, SyncSession, AlignSession, DiaryEntry
+from app.models import NatalChart, SyncSession, AlignSession, DiaryEntry, UserPortrait, SphereKnowledge
+import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -30,30 +31,79 @@ async def get_comprehensive_context(db: AsyncSession, user_id: int) -> str:
     ocean = await OceanService.get_ocean(db, user_id)
     ocean_text = ocean.model_dump_json() if ocean else "Данные Океана (Паспорта Личности) отсутствуют."
 
-    # 2. Exposed Archetypes (CardProgress)
-    # Fetch cards that are ALIGNED or SYNCED (Exposed/Activated)
-    stmt = select(CardProgress).where(
+    # 2. Episodic Memory (Last 5 sessions)
+    stmt_sessions = select(AssistantSession).where(
+        AssistantSession.user_id == user_id,
+        AssistantSession.is_active == False
+    ).order_by(AssistantSession.created_at.desc()).limit(5)
+    sessions_res = await db.execute(stmt_sessions)
+    last_sessions = sessions_res.scalars().all()
+    
+    episodic_context = "\nИСТОРИЯ ПОСЛЕДНИХ ДИАЛОГОВ (Эпизодическая память):\n"
+    if last_sessions:
+        for s in last_sessions:
+            summary = s.final_analysis.get("diary_summary") if s.final_analysis else None
+            if summary:
+                date_str = s.created_at.strftime("%Y-%m-%d") if s.created_at else "Недавно"
+                episodic_context += f"- [{date_str}]: {summary}\n"
+    else:
+        episodic_context += "Нет истории прошлых сессий.\n"
+
+    # 3. Exposed Archetypes (CardProgress)
+    stmt_cards = select(CardProgress).where(
         CardProgress.user_id == user_id,
         CardProgress.status.in_([CardStatus.ALIGNED, CardStatus.SYNCED])
     )
-    result = await db.execute(stmt)
+    result = await db.execute(stmt_cards)
     exposed_cards = result.scalars().all()
     
     cards_context = "ПРОЯВЛЕННЫЕ АРХЕТИПЫ (ВАШИ ИНСТРУМЕНТЫ):\n"
     if exposed_cards:
         for card in exposed_cards:
-            # Grouping by sphere for clarity
             cards_context += f"- Сфера '{card.sphere}': Архитип ID {card.archetype_id} (Статус: {card.status})\n"
     else:
-        cards_context += "Нет проявленных архетипов. Пользователь находится в процессе первичной сонастройки.\n"
+        cards_context += "Нет проявленных архетипов.\n"
 
     context = f"""
 ДАННЫЕ ПОЛЬЗОВАТЕЛЯ (ОКЕАН/ПАСПОРТ):
 {ocean_text}
 
+{episodic_context}
+
 {cards_context}
 """
     return context
+
+async def autonomous_reasoning(user_message: str, context: str) -> Dict[str, Any]:
+    """
+    Preliminary analysis step (Thinking State) to detect emotional tone and spheres.
+    """
+    prompt = f"""ПРОАНАЛИЗИРУЙ СООБЩЕНИЕ И КОНТЕКСТ:
+1. Выдели доминирующую эмоцию или «вайб» сообщения.
+2. Определи основную и вторичную сферу (из 12), о которых идет речь.
+3. Коротко выдели одну скрытую связь между сферами (если есть).
+
+СООБЩЕНИЕ: {user_message}
+КОНТЕКСТ: {context[:1000]}...
+
+ОТВЕТЬ В JSON:
+{{
+  "vibe": "string",
+  "primary_sphere": "string",
+  "secondary_sphere": "string",
+  "cross_sphere_insight": "string"
+}}
+"""
+    try:
+        response = await client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": prompt}],
+            response_format={"type": "json_object"}
+        )
+        return json.loads(response.choices[0].message.content)
+    except Exception as e:
+        logger.error(f"Reasoning Error: {e}")
+        return {"vibe": "neutral", "primary_sphere": "IDENTITY", "secondary_sphere": None, "cross_sphere_insight": None}
 
 async def search_user_memory(db: AsyncSession, user_id: int, query: str, limit: int = 5) -> str:
     """Searches long-term user memory for relevant insights."""
@@ -119,6 +169,32 @@ async def extract_and_save_insights(db: AsyncSession, user_id: int, chat_history
     except Exception as e:
         logger.error(f"Insight Extraction Error: {e}")
 
+async def get_smart_buffer(db: AsyncSession, chat_history: List[Dict[str, str]], limit: int = 20) -> Tuple[List[Dict[str, str]], str]:
+    """
+    Manages long conversations via a sliding window and a 'Running Summary'.
+    """
+    if len(chat_history) <= limit:
+        return chat_history, ""
+        
+    # Summarize the 'overflow' part (all but the last 10 messages)
+    overflow_count = len(chat_history) - 10
+    overflow_history = chat_history[:overflow_count]
+    recent_history = chat_history[overflow_count:]
+    
+    history_text = "\n".join([f"{m['role']}: {m['content']}" for m in overflow_history])
+    prompt = f"Кратко перескажи суть начала этого долгого диалога (процесс, основные темы, выводы). Максимум 3-4 предложения.\n\nИСТОРИЯ:\n{history_text}"
+    
+    try:
+        response = await client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": prompt}]
+        )
+        running_summary = response.choices[0].message.content.strip()
+        return recent_history, f"РАНЕЕ В ДИАЛОГЕ (Краткое содержание): {running_summary}"
+    except Exception as e:
+        logger.error(f"Summarization Error: {e}")
+        return recent_history, ""
+
 async def generate_assistant_response(
     db: AsyncSession, 
     user_id: int, 
@@ -129,59 +205,67 @@ async def generate_assistant_response(
     is_returning_after_pause: bool = False
 ) -> Tuple[str, str, float, bool]:
     """
-    Super-Intelligent Assistant Logic with dynamic RAG.
+    Advanced Assistant Logic with Reasoning, Memory Tiers, and Smart Buffer.
     """
+    # 1. Base Context
     context = await get_comprehensive_context(db, user_id)
     
-    # Dynamic RAG: Determine if memory search is needed
-    memory_context = ""
-    if user_message:
-        # Simple heuristic or LLM check can be added here. 
-        # For 'super-intelligent' feel, we search if message has complexity.
-        if len(user_message.split()) > 3:
-            memory_context = await search_user_memory(db, user_id, user_message)
+    # 2. Smart Context Buffer
+    sliced_history, running_summary = await get_smart_buffer(db, chat_history)
 
+    # 3. Proactive Reasoning (Thinking State)
+    reasoning = await autonomous_reasoning(user_message, context)
+    primary_sphere = reasoning.get("primary_sphere", "IDENTITY")
+    cross_insight = reasoning.get("cross_sphere_insight")
+
+    # 4. Cross-Spherical Context (if reasoning detected a secondary sphere)
+    secondary_context = ""
+    if reasoning.get("secondary_sphere"):
+        res = await db.execute(
+            select(UserPortrait).where(UserPortrait.user_id == user_id, UserPortrait.sphere == reasoning["secondary_sphere"])
+        )
+        port = res.scalar_one_or_none()
+        if port:
+            secondary_context = f"\nСМЕЖНАЯ СФЕРА ({reasoning['secondary_sphere']}): {port.patterns_json or 'Стабильно'}\n"
+
+    # 5. Dynamic Memory Search
+    memory_context = ""
+    if user_message and len(user_message.split()) > 3:
+        memory_context = await search_user_memory(db, user_id, user_message)
+
+    # 6. Stable Personality & Prompt
     system_prompt = f"""ТВОЕ ИМЯ: AVATAR.
 Ты — СВЕРХУМНЫЙ ЦИФРОВОЙ ПОМОЩНИК и эрудированный ментор системы AVATAR.
-Твоя сущность — квинтэссенция мудрости, технологий и глубокого понимания человеческой природы.
-
-КТО ТЫ И ЧЕМ ПОЛЕЗЕН:
-1. Высший Проводник: Ты связываешь внешние события жизни пользователя с его внутренним «Океаном» (Паспортом Личности).
-2. Мастер Архетипов: Ты помогаешь «проявлять» (активировать) заблокированные сферы жизни, анализируя диалог и находя резонанс.
-3. Решатель Жизненных Вопросов: Ты помогаешь разобраться в любых вопросах — от отношений и карьеры до глубоких экзистенциальных поисков, используя базу знаний AVATAR и данные натальной карты.
+Твоя задача — быть Зеркалом сознания {user_name} ({gender}).
 
 ПРАВИЛА ОБЩЕНИЯ (КРИТИЧЕСКИ):
-1. Обращение только на «Вы» и по имени: {user_name}. НИКАКИХ «Высшее Я», «Пользователь» и прочих абстракций.
+1. Обращение только на «Вы» и по имени: {user_name}.
 2. ЛОГИКА ПРИВЕТСТВИЯ:
-   - Если история сообщений пуста: Кратко представься как AVATAR (проводник по 12 сферам и архетипам Океана). Предложи помощь в решении конкретных жизненных вопросов. Будь лаконичен.
+   - Если история сообщений пуста: Кратко представься как AVATAR.
    - Если is_returning_after_pause = True: Напиши «С возвращением, {user_name}».
    - Во всех остальных случаях: СРАЗУ к сути. ЗАПРЕЩЕНО использовать приветствия.
-3. ТВОЕ ИМЯ: AVATAR.
-4. СТИЛЬ: МАКСИМАЛЬНО СЖАТЫЙ И ЛАКОНИЧНЫЙ. 
-   - Не пиши более 2-3 предложений, если запрос не требует глубокого анализа или подробного объяснения.
-   - Избегай пустых любезностей и вводных слов. 
-   - Умная краткость — твой приоритет.
-5. Ты — Зеркало. Показывай суть, а не лей воду.
-6. НИКОГДА НЕ ИСПОЛЬЗУЙ ФРАЗУ «Чем я могу Вам помочь?» или «О чем Вы хотите поговорить?». Задавай вектор сам или отвечай на запрос.
+3. СТИЛЬ: МАКСИМАЛЬНО СЖАТЫЙ (2-4 предложения).
 
 ОСНОВНОЙ КОНТЕКСТ (Паспорт Личности):
 {context}
 
-ФРАГМЕНТЫ ПАМЯТИ:
+СМЕЖНЫЙ КОНТЕКСТ:
+{secondary_context}
+ИНСАЙТ О СВЯЗИ СФЕР: {cross_insight if cross_insight else "Неявная"}
+
+ФРАГМЕНТЫ ПРОШЛОЙ ПАМЯТИ:
 {memory_context}
 
-ГЕНДЕР ПОЛЬЗОВАТЕЛЯ: {gender}
-ЯЗЫК: RU
+{running_summary}
 """
 
-    messages = [{"role": "system", "content": system_prompt}] + chat_history
+    messages = [{"role": "system", "content": system_prompt}] + sliced_history
     if user_message:
         messages.append({"role": "user", "content": user_message})
     else:
         messages.append({"role": "user", "content": "Приветствуй меня кратко и по сути моей жизни."})
 
     try:
-        # Force a thought process or just high-quality response
         response = await client.chat.completions.create(
             model=settings.OPENAI_MODEL,
             messages=messages,

@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.database import init_db
 from app.routers import (
-    auth, profile, sync, reflect, session, onboarding_ai, 
+    auth, profile, sync, session, 
     diary, cards, calc, game, match, portrait, retro, 
     voice, payments, master_hub, economy, assistant
 )
@@ -38,7 +38,7 @@ app.add_middleware(
 # Routers
 app.include_router(auth.router,     prefix="/api/auth",     tags=["Auth"])
 app.include_router(calc.router,     prefix="/api/calc",     tags=["Calc"])
-app.include_router(onboarding_ai.router, prefix="/api/onboarding/ai", tags=["Onboarding"])
+
 app.include_router(cards.router,    prefix="/api/cards",    tags=["Cards"])
 app.include_router(sync.router,     prefix="/api/sync",     tags=["Sync"])
 app.include_router(session.router,  prefix="/api/session",  tags=["Session"])
@@ -49,7 +49,7 @@ app.include_router(game.router,     prefix="/api/game",     tags=["Game"])
 app.include_router(voice.router,    prefix="/api/voice",    tags=["Voice"])
 app.include_router(retro.router,    prefix="/api/retro",    tags=["Retro"])
 app.include_router(match.router,    prefix="/api/match",    tags=["Match"])
-app.include_router(reflect.router,  prefix="/api/reflect",  tags=["Reflect"])
+
 app.include_router(payments.router, prefix="/api/payments", tags=["Payments"])
 app.include_router(master_hub.router, prefix="/api/master-hub", tags=["MasterHub"])
 app.include_router(economy.router,    prefix="/api/economy",    tags=["Economy"])
