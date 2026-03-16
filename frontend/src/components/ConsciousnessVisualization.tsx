@@ -76,6 +76,7 @@ export default function ConsciousnessVisualization({ cards = [] }: Consciousness
                     const status = i < 8 ? "active" : i < 16 ? "recommended" : "locked";
                     return {
                         id: 2000 + i,
+                        sphere: sphereDef.key, // Added missing property
                         archetype_name: "", // Will fallback to default in SphereInfoPanel
                         // Only 'active' cards have scores; others are 0
                         hawkins_peak: status === "active" ? Math.round(20 + (i * (800 - 20) / 7)) : 0,

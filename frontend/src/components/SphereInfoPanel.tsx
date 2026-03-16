@@ -214,7 +214,7 @@ export default function SphereInfoPanel({
   sphere,
   state,
   cards,
-  onCardTap,
+  onCardTap: _onCardTap, // Prefix as unused
   onClose,
 }: Props) {
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
@@ -346,7 +346,7 @@ export default function SphereInfoPanel({
                   tickLine={false}
                   width={34}
                   tickFormatter={(val) => val.toString()}
-                  tick={({ x, y, payload }: any) => (
+                  tick={({ x: _x, y, payload }: any) => (
                     <text
                       x={4}
                       y={Number(y) + 4}
@@ -372,10 +372,10 @@ export default function SphereInfoPanel({
                     const isRecommended = data?.status === "recommended";
                     
                     const color = isActive 
-                      ? "rgba(110, 231, 183, 0.5)" // Muted green for active
+                      ? "rgba(255, 255, 255, 0.5)" // Muted gray for active
                       : isRecommended 
-                        ? "rgba(253, 186, 116, 0.6)" // Muted orange for recommended
-                        : "rgba(255,255,255,0.18)";
+                        ? "rgba(253, 186, 116, 0.3)" // Even more muted orange
+                        : "rgba(255, 255, 255, 0.12)";
 
                     return (
                       <text
@@ -427,7 +427,7 @@ export default function SphereInfoPanel({
                 <Bar
                   dataKey="hawkins"
                   shape={<RoundedBar />}
-                  background={{ fill: "rgba(255,255,255,0.05)", radius: [6, 6, 0, 0] }}
+                  background={{ fill: "rgba(255,255,255,0.05)", radius: 6 }}
                   animationDuration={800}
                   animationEasing="ease-out"
                   animationBegin={100}
