@@ -68,9 +68,14 @@ async def alignment_session(
 
         core_belief = last_sync.extracted_core_belief if last_sync else ""
         shadow_pattern = last_sync.extracted_shadow_pattern if last_sync else ""
+        recurring_symbol = last_sync.recurring_symbol if last_sync else ""
         hawkins_entry = card.hawkins_current or 100
         archetype_id = card.archetype_id
         sphere = card.sphere
+
+        # NEW: Fetch recent life context for Align agent
+        from app.agents.assistant_agent import search_user_memory
+        memory_context = await search_user_memory(db, user_id, f"Сфера {sphere}")
 
         # Build History Context
         history_lines = []
@@ -129,6 +134,8 @@ async def alignment_session(
         core_belief=core_belief,
         shadow_pattern=shadow_pattern,
         history_context=history_context,
+        recurring_symbol=recurring_symbol,
+        memory_context=memory_context
     )
     opening = opening_dict.get("ai_response", "Дыши. Что ты чувствуешь?")
     chat_history.append({"role": "assistant", "content": opening})
@@ -170,7 +177,9 @@ async def alignment_session(
                     core_belief=core_belief,
                     shadow_pattern=shadow_pattern,
                     history_context=history_context,
-                    is_deepening=is_deepening
+                    is_deepening=is_deepening,
+                    recurring_symbol=recurring_symbol,
+                    memory_context=memory_context
                 )
                 
                 ai_response = ai_response_dict.get("ai_response", "...")

@@ -27,6 +27,38 @@ def get_response_metrics(text: str) -> dict:
         "has_objects": has_objects
     }
 
+async def autonomous_somatic_check(user_message: str, scene_context: str) -> dict:
+    """
+    Uses LLM to detect if the user's response is somatic (body/environment) or abstract (thinking).
+    """
+    prompt = f"""ПРОАНАЛИЗИРУЙ ОТВЕТ ПОЛЬЗОВАТЕЛЯ В ГЛУБОКОЙ СЕССИИ:
+СЦЕНА (КОНТЕКСТ): {scene_context}
+ОТВЕТ: {user_message}
+
+ЗАДАЧА:
+Определи, содержит ли ответ конкретные телесные ощущения (соматику) или описание объектов среды (пространство). 
+Многие пользователи пытаются "умничать" (байпасинг), описывая мысли вместо чувств.
+
+ОТВЕТЬ В JSON:
+{{
+  "is_somatic": bool,
+  "has_body": bool,
+  "has_objects": bool,
+  "reason": "краткое пояснение (почему не соматика)"
+}}
+"""
+    try:
+        response = await client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": prompt}],
+            response_format={"type": "json_object"}
+        )
+        return json.loads(response.choices[0].message.content)
+    except Exception:
+        # Fallback to simple metrics if LLM fails
+        m = get_response_metrics(user_message)
+        return {"is_somatic": not (m["length"] < 10 or (not m["has_body"] and not m["has_objects"])), "has_body": m["has_body"], "has_objects": m["has_objects"], "reason": "fallback"}
+
 def is_abstract_response(text: str) -> bool:
     """Legacy wrapper for backward compatibility."""
     m = get_response_metrics(text)
@@ -191,10 +223,12 @@ def build_avatar_prompt(
    - Телесную реакцию в момент выбора.
    - Задержку/сопротивление в ответе.
 
-2. АНАЛИЗ СИМВОЛА:
-   Символ (из Слоя 2) — проекция ресурса или конфликта. Оцени:
-   - Путь символа через слои 3 и 4.
-   - Финальное состояние (разрушение / стагнация / трансформация).
+    - Путь символа через слои 3 и 4.
+    - Финальное состояние (разрушение / стагнация / трансформация).
+
+3. ИНТЕРПРЕТАЦИЯ СИМВОЛОВ:
+   Если в контексте были даны толкования символов — используй их. 
+   Выдели ключевой символ сессии и дай его интерпретацию.
 
 3. АНАЛИЗ ПРОСТРАНСТВА:
    Сравни Слой 1 (фасад) и Слой 4 (глубина).
@@ -218,6 +252,10 @@ JSON:
   "key_choice": "анализ выбора на Разломе (тело + решение)",
   "recurring_symbol": "путь символа и его итог",
   "symbol_vector": "degraded / static / transformed",
+  "symbols_identified": {
+    "символ1": "конкретное значение в этой сессии",
+    "символ2": "конкретное значение в этой сессии"
+  },
   "core_belief": "дословное ядро из Слоя 5",
   "facade_vs_core": "описание разрыва между фасадом и глубиной",
   "mental_thinking": ["тип мышления 1", "тип мышления 2"],

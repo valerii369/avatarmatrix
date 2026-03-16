@@ -10,7 +10,7 @@ from sqlalchemy import select
 from app.database import get_db
 from app.models import CardProgress, SyncSession, User, SphereKnowledge, UserWorldKnowledge, UserPortrait, SceneSet, SceneSetItem, SceneInteraction
 from app.models.card_progress import CardStatus
-from app.agents.sync_agent import run_avatar_layer, get_response_metrics
+from app.agents.sync_agent import run_avatar_layer, get_response_metrics, autonomous_somatic_check
 from app.agents.analytic_agent import run_mirror_analysis, extract_response_features, update_user_portrait
 from app.core.feature_extractor import FeatureExtractor
 from app.core.economy import spend_energy, hawkins_to_rank, award_xp, process_card_rank_up, XP_VALUES
@@ -380,15 +380,24 @@ async def process_phase(
         is_abstract = False
         metrics = {"length": 0, "has_body": False, "has_objects": False}
     else:
-        metrics = get_response_metrics(user_response_text)
+        # NEW: Autonomous Somatic Check
+        scene_text = state.get("scenes", {}).get(current_layer, {}).get("text", "")
+        somatic_result = await autonomous_somatic_check(user_response_text, scene_text)
+        
+        is_abstract = not somatic_result.get("is_somatic", False)
+        metrics = {
+            "length": len(user_response_text),
+            "has_body": somatic_result.get("has_body", False),
+            "has_objects": somatic_result.get("has_objects", False),
+            "ai_reason": somatic_result.get("reason")
+        }
+        
         # Store metrics in session state per phase
         if "metrics" not in state:
             state["metrics"] = {}
         state["metrics"][current_layer] = metrics
         
-        # Heuristic for abstraction: too short or no body/objects
-        is_abstract = metrics["length"] < 10 or (not metrics["has_body"] and not metrics["has_objects"])
-        should_move_deeper = not is_abstract or sub_phase >= 2
+        should_move_deeper = not is_abstract or sub_phase >= 1 # Max 1 retry for abstract responses
     
     if should_move_deeper:
         # Move to next layer
@@ -439,8 +448,14 @@ async def process_phase(
         portrait_ctx = await _get_portrait_context(db, request.user_id, session.sphere)
         
         analysis = await run_mirror_analysis(
-            session.archetype_id, session.sphere, transcript, session.phase_data, portrait_context=portrait_ctx
+            session.archetype_id, session.sphere, transcript, session.phase_data, portrait_context=portrait_ctx, db=db
         )
+        
+        # NEW: Save personal symbols if any were identified
+        identified_syms = analysis.get("symbols_identified")
+        if identified_syms:
+            from app.core.symbolic_service import SymbolicService
+            await SymbolicService.update_personal_symbols(db, request.user_id, identified_syms, session.sphere)
         
         # Save results (Level 3 Knowledge Cell)
         session.is_complete = True

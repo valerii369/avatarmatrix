@@ -70,3 +70,26 @@ class Connection(Base, TimestampMixin):
     connection_type: Mapped[str] = mapped_column(String(32), nullable=False)
     label: Mapped[Optional[str]] = mapped_column(String(256), nullable=True)
     strength: Mapped[int] = mapped_column(Integer, default=1)
+
+
+class UserSymbol(Base, TimestampMixin):
+    """
+    Personal symbolic interpretations for a user.
+    Tracks how a specific person perceives a symbol (deviation from global).
+    """
+    __tablename__ = "user_symbols"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id", ondelete="CASCADE"), index=True)
+
+    symbol: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    interpretation: Mapped[str] = mapped_column(Text, nullable=False)
+    
+    # Emotional charge associated with the symbol: -1.0 to 1.0
+    emotional_charge: Mapped[float] = mapped_column(Float, default=0.0)
+    
+    # Life sphere where this interpretation is most relevant (optional)
+    sphere: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)
+    
+    # Count of times this symbol appeared
+    occurrences: Mapped[int] = mapped_column(Integer, default=1)

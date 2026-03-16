@@ -5,7 +5,7 @@ from app.models.card_progress import CardProgress, CardStatus
 from app.models.sync_session import SyncSession
 from app.models.align_session import AlignSession
 from app.models.diary import DiaryEntry
-from app.models.portrait import UserPortrait, Pattern, Connection
+from app.models.portrait import UserPortrait, Pattern, Connection, UserSymbol
 from app.models.game import GameState, Match, DailyReflect, VoiceRecord
 from app.models.knowledge import SphereKnowledge, UserWorldKnowledge
 from app.models.avatar_card import AvatarCard
@@ -49,5 +49,6 @@ __all__ = [
     "ReflectionSession",
     "AssistantSession",
     "UserMemory",
-    "UserPrint"
+    "UserPrint",
+    "UserSymbol"
 ]

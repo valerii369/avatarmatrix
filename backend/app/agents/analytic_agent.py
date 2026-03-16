@@ -12,7 +12,8 @@ async def run_mirror_analysis(
     sphere: str,
     session_transcript: list,
     phase_data: dict = None,
-    portrait_context: dict = None
+    portrait_context: dict = None,
+    db: AsyncSession = None
 ) -> dict:
     """Run the final analytical 'Mirror' call."""
     system_prompt, layer_prompt = build_avatar_prompt("mirror", archetype_id, sphere, {}, False, None, portrait_context)
@@ -24,7 +25,13 @@ async def run_mirror_analysis(
     # Format transcript for the analyst
     transcript_text = "\n".join([f"{m['role']}: {m['content']}" for m in session_transcript])
     
-    user_content = f"Транскрипт сессии:\n{transcript_text}"
+    # NEW: Symbolic Intelligence Context
+    symbol_context = ""
+    if db:
+        from app.core.symbolic_service import SymbolicService
+        symbol_context = await SymbolicService.get_symbolic_context(db, portrait_context.get('user_id', 0), transcript_text, sphere)
+
+    user_content = f"Транскрипт сессии:\n{transcript_text}\n\n{symbol_context}"
     if phase_data:
         if "metrics" in phase_data:
             metrics_json = json.dumps(phase_data["metrics"], ensure_ascii=False, indent=2)
@@ -51,6 +58,9 @@ async def run_mirror_analysis(
         max_tokens=1500,
         response_format={"type": "json_object"},
     )
+    
+    # Requirement: The analyzer must now also output a 'symbols_identified' field {symbol: interpretation}
+    # This will be used to update personal symbols.
     
     try:
         return json.loads(response.choices[0].message.content)
