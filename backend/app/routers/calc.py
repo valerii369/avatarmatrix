@@ -235,37 +235,40 @@ async def calculate(
     user.onboarding_done = True
     db.add(user)
 
-    logger.info(f"Committing Astro results for user {user.id}...")
+    # 7. Finalize Level 1 (Rain) results and initiate Pipeline
+    logger.info(f"Committing Level 1 (Rain) results for user {user.id}...")
     await db.commit()
     logger.info("Commit successful.")
 
-    # Populate the Hub (Ocean) immediately with Astro data (Synchronous)
-    try:
-        await OceanService.initialize_from_astro(db, user.id, sphere_descriptions)
-    except Exception as init_e:
-        logger.warning(f"Initial User Print population failed: {init_e}")
-
-    # Update the Hub (Ocean - User Print) with deep synthesis refinement via background task
+    # Level 2 & 3 Pipeline (Background)
+    from app.services.astro_river import AstroRiver
     from app.database import AsyncSessionLocal
-    async def _bg_hub_update(u_id, s_desc):
+
+    async def _run_rro_pipeline(u_id, n_id):
         async with AsyncSessionLocal() as session:
             try:
-                await OceanService.update_ocean(
-                    session, 
-                    u_id, 
-                    "Initial Astrological Calculation", 
-                    {"source": "astro_natal_chart", "spheres": s_desc}
-                )
-                await session.commit()
-            except Exception as bg_e:
-                logger.warning(f"Background User Print synthesis failed: {bg_e}")
+                # Get L1 data
+                n_res = await session.execute(select(NatalChart).where(NatalChart.id == n_id))
+                natal_obj = n_res.scalar_one()
 
-    background_tasks.add_task(_bg_hub_update, user.id, sphere_descriptions)
+                # Level 2: River (Interpretation)
+                river = AstroRiver()
+                interpretation_data = await river.flow(session, u_id, natal_obj)
+                
+                if interpretation_data:
+                    # Level 3: Ocean (Synthesis)
+                    await OceanService.update_ocean(session, u_id, [interpretation_data])
+                    await session.commit()
+                    logger.info(f"RRO v2 Pipeline completed for user {u_id}")
+            except Exception as e:
+                logger.error(f"RRO v2 Pipeline failed for user {u_id}: {e}")
+
+    background_tasks.add_task(_run_rro_pipeline, user.id, natal.id)
 
     return CalcResponse(
         success=True,
         natal_chart=chart_dict,
         recommended_cards=recommended_dict,
         total_cards=22 * 12,
-        message=f"Карта рассчитана. Рекомендовано {len(recommended_dict)} карточек.",
+        message=f"Карта рассчитана (L1). Синтез (L2/L3) запущен в фоне.",
     )

@@ -34,25 +34,29 @@ async def _background_sync_processing(user_id: int, session_id: int, sphere: str
             # 3. Update technical portrait (River)
             portrait_res = await update_user_portrait(session, user_id, session_id)
             
-            # 4. Update the Hub (Ocean - User Print)
-            # Fetch the completed session to get the transcript
+            # 4. Level 2 & 3 Pipeline: Update the Hub (Ocean - User Print)
+            from app.services.sync_river import SyncRiver
+            
             sync_session_res = await session.execute(select(SyncSession).where(SyncSession.id == session_id))
             sync_session = sync_session_res.scalar_one_or_none()
             
             if sync_session:
-                transcript_text = "\n".join([f"{m['role']}: {m['content']}" for m in sync_session.session_transcript])
-                
-                # We pass the analytical results as 'source_data' for the Alchemist
-                source_data = {
-                    "sphere": sphere,
-                    "hawkins_score": sync_session.hawkins_score,
-                    "core_pattern": sync_session.core_pattern,
-                    "shadow_active": sync_session.shadow_active,
-                    "body_anchor": sync_session.body_anchor,
-                    "archetype_id": sync_session.archetype_id
+                # Prepare Level 1 (Rain) data for the River
+                rain_data = {
+                    "session_id": session_id,
+                    "transcript": sync_session.session_transcript,
+                    "phase_data": sync_session.phase_data,
+                    "archetype_id": sync_session.archetype_id,
+                    "sphere": sync_session.sphere
                 }
                 
-                await OceanService.update_ocean(session, user_id, transcript_text, source_data)
+                # Level 2: River
+                river = SyncRiver()
+                interpretation = await river.flow(session, user_id, rain_data)
+                
+                if interpretation:
+                    # Level 3: Ocean
+                    await OceanService.update_ocean(session, user_id, [interpretation])
             
             await session.commit()
         except Exception as e:

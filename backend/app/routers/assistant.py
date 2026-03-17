@@ -1,14 +1,16 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from typing import List, Dict, Any, Optional
 
-from app.database import get_db
+from app.database import get_db, AsyncSessionLocal
 from app.models import User, AssistantSession, CardProgress, CardStatus
 from app.agents.assistant_agent import generate_assistant_response
 from app.core.economy import spend_energy, award_xp
 from app.core.astrology.vector_matcher import match_text_to_archetypes
+from app.core.user_print_manager import OceanService
+from app.services.session_river import SessionRiver
 
 router = APIRouter()
 
@@ -154,7 +156,11 @@ async def assistant_chat(request: AssistantChatRequest, db: AsyncSession = Depen
     }
 
 @router.post("/finish")
-async def finish_assistant(request: AssistantChatRequest, db: AsyncSession = Depends(get_db)):
+async def finish_assistant(
+    request: AssistantChatRequest, 
+    background_tasks: BackgroundTasks,
+    db: AsyncSession = Depends(get_db)
+):
     session_res = await db.execute(
         select(AssistantSession).where(
             AssistantSession.id == request.session_id,
@@ -177,6 +183,29 @@ async def finish_assistant(request: AssistantChatRequest, db: AsyncSession = Dep
     session.final_analysis = {"diary_summary": summary}
     db.add(session)
     await db.commit()
+    
+    # Level 2 & 3 Pipeline: Update the Hub (Ocean - User Print)
+    async def _run_session_rro_pipeline(u_id, s_id):
+        async with AsyncSessionLocal() as session_db:
+            try:
+                # Get fresh data
+                res = await session_db.execute(select(AssistantSession).where(AssistantSession.id == s_id))
+                as_session = res.scalar_one_or_none()
+                if not as_session: return
+                
+                # Level 2: River
+                river = SessionRiver()
+                interpretation = await river.flow(session_db, u_id, {"history": as_session.messages_json})
+                
+                if interpretation:
+                    # Level 3: Ocean
+                    await OceanService.update_ocean(session_db, u_id, [interpretation])
+                    await session_db.commit()
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).error(f"Session RRO Pipeline Error: {e}")
+
+    background_tasks.add_task(_run_session_rro_pipeline, request.user_id, session.id)
     
     return {
         "status": "session_closed",

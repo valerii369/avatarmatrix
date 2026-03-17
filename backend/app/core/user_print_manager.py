@@ -62,61 +62,42 @@ class OceanService:
         return "\n".join(lines) + "\nSpeak to the soul using this narrative. Do not mention labels.\n"
 
     @staticmethod
-    async def update_ocean(db: AsyncSession, user_id: int, transcript: str, additional_rivers: Optional[Dict[str, Any]] = None):
+    async def update_ocean(db: AsyncSession, user_id: int, rivers_data: List[Dict[str, Any]]):
         """
-        Alchemy Synthesis: Takes raw data (Rivers) and mutates the Ocean (User Print).
-        Updated to use the professional synthesis prompt.
+        THE OCEAN SYNTHESIS (Level 3): 
+        Acts as the 'Grand Alchemist' Hub. 
+        Takes processed interpretations (Rivers) and mutates the Ocean (User Print).
         """
         current_ocean = await OceanService.get_ocean(db, user_id)
         current_data_json = current_ocean.model_dump_json() if current_ocean else "{}"
         
-        # 1. Primary River: Astrology
-        natal_res = await db.execute(select(NatalChart).where(NatalChart.user_id == user_id))
-        natal_chart = natal_res.scalar_one_or_none()
-        astro_context = "Astro River is dry (no natal chart)."
-        if natal_chart:
-            astro_context = json.dumps(natal_chart.sphere_descriptions_json, ensure_ascii=False)
+        # Consolidate all river data into a single context for the Alchemist
+        consolidated_rivers = json.dumps(rivers_data, ensure_ascii=False)
 
-        # 2. Secondary Rivers: Session features, user history, etc.
-        rivers_context = json.dumps(additional_rivers, ensure_ascii=False) if additional_rivers else "No additional rivers."
-
-        extraction_prompt = f"""
+        synthesis_prompt = f"""
 РОЛЬ:
-Ты — ВЕРХОВНЫЙ АЛХИМИК системы AVATAR. Твоя задача — Великое Делание: синтез всех потоков данных (Рек) в единый Океан (Портрет Пользователя / Паспорт Личности).
+Ты — ВЕРХОВНЫЙ АЛХИМИК системы AVATAR (Уровень 3: Океан). 
+Твоя задача — Великое Делание: финальный синтез СМЫСЛОВ из различных потоков (Рек) в единый Океан (Портрет Пользователя / Паспорт Личности).
 
-ЗАДАЧА:
-1. Проанализируй предоставленные входные данные:
-   - ТЕКУЩИЙ ОКЕАН (предыдущее состояние)
-   - РЕКА ЗВЕЗД (Детальный синтез: Интерпретация, Свет, Тень, Маркеры)
-   - ТЕХНИЧЕСКИЕ РЕКИ (Метрики, контекст)
-   - ЖИВОЙ ПОТОК (Транскрипт последней сессии)
-2. Извлеки глубокий психологический смысл, поведенческие паттерны и жизненные сценарии.
-3. ПРАВИЛА АЛХИМИИ:
-   - ИНТЕГРАЦИЯ: Синтезируй «Свет» и «Тень» из Реки Звезд в раздел «Polarities» (Полярности) Океана.
-   - НАРРАТИВ: Используй «Интерпретацию» из Реки для обновления «portrait_summary» и «spheres_status».
-   - ГЛУБИНА: Для каждой сферы в «spheres_status» напиши ДЕТАЛЬНЫЙ «insight» (8-10 предложений). Это финальное глубокое описание.
-   - БЕЗ ДУБЛИРОВАНИЯ: Не просто копируй. Трансформируй в связное, текучее повествование.
-4. Заполни требуемую структуру JSON, строго следуя UserPrintSchema.
+ВХОДНЫЕ ДАННЫЕ (РЕКИ):
+{consolidated_rivers}
 
-ОГРАНИЧЕНИЯ И ПРАВИЛА (КРИТИЧЕСКИ):
-1. БЕЗ ЖАРГОНА: Полностью исключи технические астрологические термины.
-2. ОБЪЕКТИВНОСТЬ: Соблюдай сбалансированный аналитический тон. Точно отражай как таланты/силы, так и тени/страхи без осуждения.
-3. ЛАКОНИЧНОСТЬ: Плотные, информативные значения. Без воды и клише.
-4. core_identity: СТРОГО МАКСИМУМ 100 СИМВОЛОВ. Это должна быть емкая, бьющая в цель фраза.
-5. ЯЗЫК: Весь ответ должен быть СТРОГО на РУССКОМ языке.
-6. СТРОГИЙ ВЫВОД JSON: Выводи ТОЛЬКО валидный JSON. Без markdown-блоков.
-
-ТЕКУЩИЙ ОКЕАН (Для преемственности):
+ТЕКУЩЕЕ СОСТОЯНИЕ ОКЕАНА (Для преемственности):
 {current_data_json}
 
-РЕКА ЗВЕЗД (Астрология - 12 сфер):
-{astro_context}
+ЗАДАЧА:
+1. Проанализируй интерпретации от различных узкоспециализированных агентов (Астрологи, Нумерологи и т.д.).
+2. Создай цельный, глубокий психологический портрет, устраняя противоречия и находя скрытые связи между учениями.
+3. ПРАВИЛА АЛХИМИИ (L3):
+   - ИНТЕГРАЦИЯ: Объедини сильные стороны и тени из всех Рек в раздел «Polarities».
+   - НАРРАТИВ: Сформируй единую «core_identity» (СТРОГО МАКСИМУМ 100 СИМВОЛОВ) — самую суть на стыке всех учений.
+   - СФЕРЫ: Для каждой из 12 сфер жизни напиши финальный, глубочайший «insight» (8-10 предложений), вобравший в себя мудрость всех предоставленных Рек.
+   - СТИЛЬ: Без технического жаргона. Живой, текучий, проникающий в самую суть.
 
-ТЕХНИЧЕСКИЕ ПОТОКИ:
-{rivers_context}
-
-ЖИВОЙ ПОТОК (Сессия):
-{transcript}
+ОГРАНИЧЕНИЯ:
+1. БЕЗ ЖАРГОНА: Полностью исключи астрологические или нумерологические термины. Только смыслы.
+2. ЯЗЫК: СТРОГО на РУССКОМ языке.
+3. ВЫВОД: ТОЛЬКО валидный JSON согласно схеме.
 
 ВЕРНИ ПОЛНЫЙ JSON согласно UserPrintSchema:
 {{
@@ -159,14 +140,14 @@ class OceanService:
         try:
             response = await client.chat.completions.create(
                 model=settings.OPENAI_MODEL,
-                messages=[{"role": "system", "content": extraction_prompt}],
+                messages=[{"role": "system", "content": synthesis_prompt}],
                 response_format={"type": "json_object"}
             )
             
             new_data_raw = json.loads(response.choices[0].message.content)
             validated_ocean = UserPrintSchema(**new_data_raw)
             
-            # Save to DB
+            # Save/Update in DB
             result = await db.execute(select(UserPrint).where(UserPrint.user_id == user_id))
             up_model = result.scalar_one_or_none()
             if not up_model:
@@ -175,11 +156,12 @@ class OceanService:
             
             up_model.print_data = validated_ocean.model_dump()
             await db.commit()
-            logger.info(f"Ocean (User Print) synthesized for user {user_id}")
+            logger.info(f"Level 3 Ocean synthesis completed for user {user_id}")
             return True
         except Exception as e:
-            logger.error(f"Error in Ocean Synthesis: {e}")
+            logger.error(f"Error in Level 3 Ocean Synthesis: {e}")
             return False
+
 
     @staticmethod
     async def initialize_from_astro(db: AsyncSession, user_id: int, sphere_descriptions: Dict[str, Any]):
