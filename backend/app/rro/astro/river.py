@@ -27,23 +27,24 @@ class AstroRiver(BaseRiver):
         try:
             deep_spheres = {}
             
-            # Sequential Loop for maximum depth per sphere
-            for sphere in SPHERES_KEYS:
-                logger.debug(f"Synthesizing deep data for sphere: {sphere}")
-                sphere_data = await synthesize_deep_sphere(
+            # Parallel Synthesis (v3.0) for maximum speed
+            tasks = [
+                synthesize_deep_sphere(
                     sphere,
                     rain_data.planets_json,
                     rain_data.aspects_json
-                )
-                deep_spheres[sphere] = sphere_data
+                ) for sphere in SPHERES_KEYS
+            ]
+            results = await asyncio.gather(*tasks)
+            deep_spheres = dict(zip(SPHERES_KEYS, results))
             
             return RiverOutput(
                 source="astro_river",
                 domain="astrology",
                 content={"spheres": deep_spheres},
                 metadata={
-                    "type": "deep_sequential",
-                    "synthesis_version": "2.2"
+                    "type": "deep_parallel",
+                    "synthesis_version": "3.0"
                 }
             )
         except Exception as e:

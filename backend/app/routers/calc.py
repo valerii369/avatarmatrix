@@ -18,6 +18,7 @@ from app.rro.ocean.hub import OceanService
 from app.rro.astro.river import AstroRiver
 from app.rro.astro.rain import AstroRain
 import logging
+from app.services.notification import NotificationService
 
 logger = logging.getLogger(__name__)
 
@@ -153,6 +154,17 @@ async def run_rro_pipeline(u_id: int, n_id: int):
                 await OceanService.update_ocean(session, u_id, [interpretation_data])
                 await session.commit()
                 logger.info(f"[BACKGROUND] RRO v2 Pipeline completed successfully for user {u_id}")
+
+                # Notify user via Telegram
+                user_res = await session.execute(select(User).where(User.id == u_id))
+                user_obj = user_res.scalar_one_or_none()
+                if user_obj and user_obj.tg_id:
+                    msg = (
+                        "✅ <b>Твой AVATAR обновлен!</b>\n\n"
+                        "Глубинный синтез всех 12 сфер завершен. Полный психологический паспорт "
+                        "и новые рекомендации уже ждут тебя в приложении. ✨"
+                    )
+                    await NotificationService.send_tg_message(user_obj.tg_id, msg)
             else:
                 logger.warning(f"[BACKGROUND] Level 2 (River) returned no data for user {u_id}")
     except Exception as e:

@@ -114,7 +114,7 @@ class OceanService:
 """
         try:
             response = await openai_client.chat.completions.create(
-                model="gpt-4o",
+                model=settings.OPENAI_MODEL,
                 messages=[{"role": "system", "content": prompt}],
                 response_format={"type": "json_object"}
             )

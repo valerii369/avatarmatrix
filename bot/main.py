@@ -160,13 +160,12 @@ def build_router(bot: Bot) -> Dispatcher:
 
                 if calc_resp.status_code == 200:
                     calc_data = calc_resp.json()
-                    total = calc_data.get("total_cards", 176)
                     await message.answer(
-                        f"✅ <b>Карта пересчитана!</b>\n\n"
-                        f"📊 Открыто архетипов: <b>{total}</b>\n"
-                        f"📅 Дата: <b>{birth_date}</b>\n"
-                        f"📍 Место: <b>{user_data['birth_place']}</b>\n\n"
-                        "Открой приложение чтобы увидеть новые приоритеты 🌟",
+                        "✅ <b>Натальная карта пересчитана!</b>\n\n"
+                        "🔄 Сейчас я запускаю <b>глубинный синтез</b> твоих 12 сфер жизни. "
+                        "Это займет буквально минуту.\n\n"
+                        "✨ Я пришлю тебе сообщение, как только всё будет готово. "
+                        "А пока можешь заглянуть в приложение!",
                         reply_markup=_open_btn("🌟 Открыть AVATAR"),
                         parse_mode="HTML",
                     )
