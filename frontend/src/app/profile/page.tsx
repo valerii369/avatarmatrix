@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { authAPI, profileAPI, gameAPI, paymentsAPI } from "@/lib/api";
 import { useUserStore } from "@/lib/store";
 import { useAudio } from "@/lib/hooks/useAudio";
-import { BottomNav } from "@/app/page";
+import BottomNav from "@/components/BottomNav";
 import useSWR from "swr";
 import { Skeleton } from "@/components/Skeleton";
 import { EnergyIcon } from "@/components/EnergyIcon";

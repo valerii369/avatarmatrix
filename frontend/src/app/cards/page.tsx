@@ -6,7 +6,7 @@ import useSWR from "swr";
 import { useUserStore, useCardsStore, type CardProgress } from "@/lib/store";
 import { authAPI, cardsAPI } from "@/lib/api";
 import { EnergyIcon } from "@/components/EnergyIcon";
-import { BottomNav } from "@/app/page";
+import BottomNav from "@/components/BottomNav";
 import { Skeleton, MiniCardSkeleton } from "@/components/Skeleton";
 
 // ─── Constants ────────────────────────────────────────────────────────────────

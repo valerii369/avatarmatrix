@@ -4,7 +4,7 @@ import { useRouter, useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { cardsAPI } from "@/lib/api";
 import { useUserStore } from "@/lib/store";
-import { BottomNav } from "@/app/page";
+import BottomNav from "@/components/BottomNav";
 import ArchetypeChart from "@/components/ArchetypeChart";
 import HawkinsBar from "@/components/HawkinsBar";
 

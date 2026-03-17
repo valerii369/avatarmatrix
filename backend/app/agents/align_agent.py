@@ -1,3 +1,4 @@
+import logging
 from typing import Optional
 from pydantic import BaseModel, Field
 from app.agents.common import (
@@ -5,6 +6,8 @@ from app.agents.common import (
     SPHERE_AGENT_STYLES, LEVEL_METHODOLOGIES, LEVEL_GOALS
 )
 from app.agents.hawkins_agent import get_hawkins_agent_level
+
+logger = logging.getLogger(__name__)
 
 class AlignmentResponse(BaseModel):
     ai_response: str = Field(description="Ответ пользователю согласно текущему протоколу (2-4 предложения).")
@@ -115,7 +118,7 @@ async def alignment_session_message(
         return result_data.model_dump()
         
     except Exception as e:
-        print(f"[Alignment Error] {e}")
+        logger.error(f"Alignment Error: {e}")
         return {
             "ai_response": "Дыши. Что ты чувствуешь прямо сейчас?",
             "is_depth_sufficient": False,

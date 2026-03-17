@@ -48,6 +48,7 @@ async def init_db():
             await conn.run_sync(Base.metadata.create_all)
     else:
         # In production just test the connection
+        from sqlalchemy import text
         async with engine.begin() as conn:
-            await conn.execute(__import__("sqlalchemy").text("SELECT 1"))
+            await conn.execute(text("SELECT 1"))
         logger.info("✅ Database connection verified")

@@ -38,11 +38,12 @@ async def init_assistant(request: AssistantInitRequest, db: AsyncSession = Depen
     
     is_first_touch = False
     if not session:
-        # Check if user ever had a session
-        total_sessions = await db.execute(
-            select(AssistantSession).where(AssistantSession.user_id == request.user_id)
+        from sqlalchemy import func
+        result = await db.execute(
+            select(func.count(AssistantSession.id)).where(AssistantSession.user_id == request.user_id)
         )
-        is_first_touch = len(total_sessions.all()) == 0
+        total_sessions_count = result.scalar() or 0
+        is_first_touch = total_sessions_count == 0
         
         session = AssistantSession(
             user_id=request.user_id,

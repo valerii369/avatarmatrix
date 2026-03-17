@@ -6,16 +6,19 @@ Assistant Agent (The Mirror):
 """
 import json
 import logging
+import re
 from typing import List, Dict, Any, Tuple
 from pydantic import BaseModel, Field
 from app.config import settings
 from app.agents.common import client
-from app.models import User, SyncSession, SphereKnowledge, AssistantSession, UserMemory, CardProgress, CardStatus
+from app.models import (
+    User, SyncSession, SphereKnowledge, AssistantSession, 
+    UserMemory, CardProgress, CardStatus, NatalChart, 
+    UserPortrait
+)
 from app.core.user_print_manager import OceanService
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from app.models import NatalChart, SyncSession, AlignSession, DiaryEntry, UserPortrait, SphereKnowledge
-import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -96,7 +99,7 @@ async def autonomous_reasoning(user_message: str, context: str) -> Dict[str, Any
 """
     try:
         response = await client.chat.completions.create(
-            model="gpt-4o-mini",
+            model=settings.OPENAI_MODEL,
             messages=[{"role": "user", "content": prompt}],
             response_format={"type": "json_object"}
         )
@@ -289,12 +292,12 @@ async def generate_assistant_response(
         clean_response = result_data.ai_response
         greetings = ["Здравствуйте", "Приветствую", "Привет", "Добрый день", "Добрый вечер"]
         if len(chat_history) > 0:
-            for g in greetings:
-                if clean_response.startswith(g):
-                    # Remove the first sentence or just the greeting
-                    import re
-                    clean_response = re.sub(rf"^{g}.*?[.!?]\s*", "", clean_response)
-                    break
+            # More robust removal: check if any greeting is followed by a delimiter or space at the start
+            greeting_pattern = rf"^({'|'.join(greetings)})([.,!?\s]|$)"
+            clean_response = re.sub(greeting_pattern, "", clean_response, flags=re.IGNORECASE).strip()
+            # If the resulting string starts with punctuation or is empty, we might have over-cleaned, 
+            # but usually it's followed by the name which we want to keep if it's "Name, ..."
+            # However, the goal is "No greetings", so let's stick to simple sub.
         
         return (
             clean_response if clean_response.strip() else result_data.ai_response, 

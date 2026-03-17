@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import useSWR, { mutate } from "swr";
 import { diaryAPI } from "@/lib/api";
 import { useUserStore } from "@/lib/store";
-import { BottomNav } from "@/app/page";
+import BottomNav from "@/components/BottomNav";
 import { CardSkeleton } from "@/components/Skeleton";
 
 const SPHERE_NAMES: Record<string, string> = {

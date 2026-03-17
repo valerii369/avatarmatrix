@@ -1,4 +1,5 @@
 import random
+import json
 from app.agents.common import client, settings, ARCHETYPES, SPHERES, MATRIX_DATA
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -49,7 +50,7 @@ async def autonomous_somatic_check(user_message: str, scene_context: str) -> dic
 """
     try:
         response = await client.chat.completions.create(
-            model="gpt-4o-mini",
+            model=settings.OPENAI_MODEL_FAST,
             messages=[{"role": "user", "content": prompt}],
             response_format={"type": "json_object"}
         )

@@ -1,4 +1,5 @@
 import json
+import logging
 from typing import Optional
 from app.agents.common import client, settings, ARCHETYPES, SPHERES, MATRIX_DATA
 from app.agents.sync_agent import build_avatar_prompt
@@ -6,6 +7,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update
 from app.models.portrait import UserPortrait, Pattern
 from app.models.sync_session import SyncSession
+
+logger = logging.getLogger(__name__)
 
 async def run_mirror_analysis(
     archetype_id: int,
@@ -150,8 +153,7 @@ async def extract_response_features(
         )
         return json.loads(response.choices[0].message.content)
     except Exception as e:
-        import logging
-        logging.getLogger(__name__).error(f"Feature Extraction Error: {e}")
+        logger.error(f"Feature Extraction Error: {e}")
         return {
             "action_type": "unknown",
             "pace": "unknown",
