@@ -12,6 +12,7 @@ with open(os.path.join(DATA_DIR, "archetypes.json")) as f:
 
 with open(os.path.join(DATA_DIR, "spheres.json")) as f:
     SPHERES = {item["key"]: item for item in json.load(f)}
+ARCHETYPE_IDS = list(range(22))
 
 try:
     with open(os.path.join(DATA_DIR, "archetype_sphere_matrix.json"), "r", encoding="utf-8") as f:

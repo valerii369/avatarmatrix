@@ -23,9 +23,14 @@ class SocialInterface(BaseModel):
     karmic_lesson: str = Field(..., description="Трансформационная задача")
 
 class SphereStatus(BaseModel):
-    """Статус отдельной сферы."""
-    status: str = Field(..., description="Стадия развития")
-    insight: str = Field(..., description="Глубокая выжимка по сфере")
+    """Статус отдельной сферы с глубокой детализацией."""
+    status: str = Field(..., description="Стадия развития/Архетипический маркер")
+    insight: str = Field(..., description="Краткая суть (pithy summary)")
+    light: Optional[str] = Field(None, description="Светлая сторона")
+    shadow: Optional[str] = Field(None, description="Теневая сторона")
+    evolutionary_task: Optional[str] = Field(None, description="Эволюционная задача")
+    life_hacks: List[str] = Field(default_factory=list, description="Рекомендации")
+    resonance: int = Field(default=50, description="Заряженность сферы")
 
 class DeepProfileData(BaseModel):
     """Глубинные данные профиля."""

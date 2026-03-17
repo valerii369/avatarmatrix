@@ -26,7 +26,7 @@ class OceanService:
         res = await db.execute(select(UserPrint).where(UserPrint.user_id == user_id))
         user_print = res.scalar_one_or_none()
         
-        current_data = user_print.data if user_print else {}
+        current_data = user_print.print_data if user_print else {}
         
         # 2. Prepare context for the Alchemist
         # Convert Pydantic models to serializable dicts
@@ -43,19 +43,57 @@ class OceanService:
 {rivers_context}
 
 ТВОЯ ЗАДАЧА:
-1. Интегрировать новые инсайты в существующую структуру.
-2. Сгладить противоречия между разными источниками (например, если Астрология говорит одно, а текущая сессия — другое).
-3. Обновить Психологический Портрет, Сильные стороны и Тени.
-4. Выделить 3 главных фокуса для пользователя на данный момент.
+Синтезируй глубокий, поэтичный и психологически точный "Паспорт Личности".
+Используй данные Натальной карты (Astro River) как фундамент, а данные сессий и дневников — как динамические дополнения.
 
-ВЕРНИ ОБНОВЛЕННЫЙ ПАСПОРТ В ФОРМАТЕ JSON (строго по схеме):
+ВЕРНИ ОБНОВЛЕННЫЙ ПАСПОРТ В СТРОГОМ JSON:
 {{
-  "psychological_portrait": "...",
-  "strengths": ["...", "..."],
-  "weaknesses": ["...", "..."],
-  "behavioral_patterns": ["...", "..."],
-  "current_state": "...",
-  "recommendations": ["...", "..." ]
+  "portrait_summary": {{
+    "core_identity": "2-3 глубоких предложения о сути человека",
+    "core_archetype": "Название ведущего архетипа",
+    "energy_type": "Описание динамики жизненной силы",
+    "narrative_role": "Роль человека в его жизненном мифе",
+    "current_dynamic": "Главный внутренний фокус или конфликт сейчас"
+  }},
+  "deep_profile_data": {{
+    "polarities": {{
+      "core_strengths": ["...", "..."],
+      "hidden_talents": ["...", "..."],
+      "shadow_aspects": ["...", "..."],
+      "drain_factors": ["...", "..."]
+    }},
+    "social_interface": {{
+      "worldview_stance": "Базовое мировоззрение",
+      "communication_style": "Паттерны общения",
+      "karmic_lesson": "Трансформационная задача"
+    }},
+    "spheres_status": {{
+      "IDENTITY": {{ 
+        "status": "Архетипический маркер", 
+        "insight": "Краткая суть",
+        "light": "Глубокий разбор Света",
+        "shadow": "Глубокий разбор Тени",
+        "evolutionary_task": "Задача",
+        "life_hacks": ["...", "..."],
+        "resonance": 100
+      }},
+      "RESOURCES": {{ "status": "...", "insight": "...", "light": "...", "shadow": "...", "evolutionary_task": "...", "life_hacks": [], "resonance": 50 }},
+      "COMMUNICATION": {{ "status": "...", "insight": "...", "light": "...", "shadow": "...", "evolutionary_task": "...", "life_hacks": [], "resonance": 50 }},
+      "ROOTS": {{ "status": "...", "insight": "...", "light": "...", "shadow": "...", "evolutionary_task": "...", "life_hacks": [], "resonance": 50 }},
+      "CREATIVITY": {{ "status": "...", "insight": "...", "light": "...", "shadow": "...", "evolutionary_task": "...", "life_hacks": [], "resonance": 50 }},
+      "SERVICE": {{ "status": "...", "insight": "...", "light": "...", "shadow": "...", "evolutionary_task": "...", "life_hacks": [], "resonance": 50 }},
+      "PARTNERSHIP": {{ "status": "...", "insight": "...", "light": "...", "shadow": "...", "evolutionary_task": "...", "life_hacks": [], "resonance": 50 }},
+      "TRANSFORMATION": {{ "status": "...", "insight": "...", "light": "...", "shadow": "...", "evolutionary_task": "...", "life_hacks": [], "resonance": 50 }},
+      "EXPANSION": {{ "status": "...", "insight": "...", "light": "...", "shadow": "...", "evolutionary_task": "...", "life_hacks": [], "resonance": 50 }},
+      "STATUS": {{ "status": "...", "insight": "...", "light": "...", "shadow": "...", "evolutionary_task": "...", "life_hacks": [], "resonance": 50 }},
+      "VISION": {{ "status": "...", "insight": "...", "light": "...", "shadow": "...", "evolutionary_task": "...", "life_hacks": [], "resonance": 50 }},
+      "SPIRIT": {{ "status": "...", "insight": "...", "light": "...", "shadow": "...", "evolutionary_task": "...", "life_hacks": [], "resonance": 50 }}
+    }}
+  }},
+  "metadata": {{
+    "last_river": "name",
+    "synthesis_version": "2.2"
+  }}
 }}
 """
         try:
@@ -69,12 +107,12 @@ class OceanService:
             
             # 3. Save to Ocean
             if not user_print:
-                user_print = UserPrint(user_id=user_id, data=new_ocean_data)
+                user_print = UserPrint(user_id=user_id, print_data=new_ocean_data)
                 db.add(user_print)
             else:
-                user_print.data = new_ocean_data
+                user_print.print_data = new_ocean_data
                 from sqlalchemy.orm.attributes import flag_modified
-                flag_modified(user_print, "data")
+                flag_modified(user_print, "print_data")
             
             await db.flush()
             logger.info(f"Ocean updated for user {user_id}")
@@ -90,4 +128,4 @@ class OceanService:
         from sqlalchemy import select
         res = await db.execute(select(UserPrint).where(UserPrint.user_id == user_id))
         obj = res.scalar_one_or_none()
-        return obj.data if obj else {}
+        return obj.print_data if obj else {}

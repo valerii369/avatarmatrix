@@ -113,31 +113,7 @@ async def calculate(
         await db.commit()
         logger.info("Commit successful.")
 
-        # Level 2 & 3 Pipeline (Background)
-        from app.rro.astro.river import AstroRiver
-        from app.rro.ocean.hub import OceanService
-        from app.database import AsyncSessionLocal
-
-        async def _run_rro_pipeline(u_id, n_id):
-            async with AsyncSessionLocal() as session:
-                try:
-                    # Get L1 data
-                    n_res = await session.execute(select(NatalChart).where(NatalChart.id == n_id))
-                    natal_obj = n_res.scalar_one()
-
-                    # Level 2: River (Interpretation)
-                    river = AstroRiver()
-                    interpretation_data = await river.flow(session, u_id, natal_obj)
-                    
-                    if interpretation_data:
-                        # Level 3: Ocean (Synthesis)
-                        await OceanService.update_ocean(session, u_id, [interpretation_data])
-                        await session.commit()
-                        logger.info(f"RRO v2 Pipeline completed for user {u_id}")
-                except Exception as e:
-                    logger.error(f"RRO v2 Pipeline failed for user {u_id}: {e}")
-
-        background_tasks.add_task(_run_rro_pipeline, user.id, natal.id)
+        background_tasks.add_task(run_rro_pipeline, user.id, natal.id)
 
         return CalcResponse(
             success=True,
@@ -149,3 +125,35 @@ async def calculate(
     except Exception as e:
         logger.error(f"Astro processing failed: {e}")
         raise HTTPException(status_code=500, detail=f"Astro processing error: {e}")
+
+async def run_rro_pipeline(u_id: int, n_id: int):
+    """
+    Background RRO Pipeline executor.
+    """
+    logger.info(f"--- [BACKGROUND] RRO v2 Pipeline INITIALIZED for user {u_id} ---")
+    try:
+        async with AsyncSessionLocal() as session:
+            # Get L1 data
+            n_res = await session.execute(select(NatalChart).where(NatalChart.id == n_id))
+            natal_obj = n_res.scalar_one_or_none()
+            
+            if not natal_obj:
+                logger.error(f"[BACKGROUND] NatalChart {n_id} not found for user {u_id}")
+                return
+
+            # Level 2: River (Interpretation)
+            logger.info(f"[BACKGROUND] Starting Level 2 (River) for user {u_id}")
+            river = AstroRiver()
+            interpretation_data = await river.flow(session, u_id, natal_obj)
+            logger.info(f"[BACKGROUND] Level 2 (River) completed for user {u_id}")
+            
+            if interpretation_data:
+                # Level 3: Ocean (Synthesis)
+                logger.info(f"[BACKGROUND] Starting Level 3 (Ocean) for user {u_id}")
+                await OceanService.update_ocean(session, u_id, [interpretation_data])
+                await session.commit()
+                logger.info(f"[BACKGROUND] RRO v2 Pipeline completed successfully for user {u_id}")
+            else:
+                logger.warning(f"[BACKGROUND] Level 2 (River) returned no data for user {u_id}")
+    except Exception as e:
+        logger.error(f"[BACKGROUND] RRO v2 Pipeline failed for user {u_id}: {e}", exc_info=True)

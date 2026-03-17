@@ -21,7 +21,6 @@ class UserPrint(Base, TimestampMixin):
 
     # Indices for performance on common queries
     __table_args__ = (
-        Index("ix_user_prints_data_identity", print_data["identity"], postgresql_using="gin"),
-        Index("ix_user_prints_data_psychology", print_data["psychology"], postgresql_using="gin"),
-        Index("ix_user_prints_data_spheres", print_data["spheres"], postgresql_using="gin"),
+        Index("ix_user_prints_portrait", print_data["portrait_summary"], postgresql_using="gin"),
+        Index("ix_user_prints_deep_profile", print_data["deep_profile_data"], postgresql_using="gin"),
     )

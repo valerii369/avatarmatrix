@@ -3,7 +3,7 @@ from typing import Dict, Any, List
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from app.core.astrology.natal_chart import calculate_natal_chart, get_spheres_data, to_dict as chart_to_dict
+from app.core.astrology.natal_chart import calculate_natal_chart, to_dict as chart_to_dict
 from app.core.astrology.aspect_calculator import calculate_aspects, to_dict as aspects_to_dict
 from app.core.astrology.priority_engine import generate_recommended_cards
 from app.core.astrology.vector_matcher import match_archetypes_to_spheres
@@ -62,7 +62,7 @@ class AstroRain:
         existing_result = await db.execute(select(CardProgress).where(CardProgress.user_id == user_obj.id))
         existing_cards = {(cp.archetype_id, cp.sphere): cp for cp in existing_result.scalars().all()}
 
-        SPHERES_KEYS = ["IDENTITY", "RESOURCES", "COMMUNICATION", "ROOTS", "CREATIVITY", "SERVICE", "RELATIONSHIPS", "TRANSFORMATION", "PHILOSOPHY", "CAREER", "SOCIAL", "SPIRIT"]
+        SPHERES_KEYS = ["IDENTITY", "RESOURCES", "COMMUNICATION", "ROOTS", "CREATIVITY", "SERVICE", "PARTNERSHIP", "TRANSFORMATION", "EXPANSION", "STATUS", "VISION", "SPIRIT"]
 
         for archetype_id in ARCHETYPE_IDS:
             for sphere in SPHERES_KEYS:
