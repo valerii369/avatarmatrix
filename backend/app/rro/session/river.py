@@ -1,8 +1,8 @@
 import logging
 import json
-from typing import Dict, Any, List
+from typing import Dict, Any
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.services.base_river import BaseRiver
+from app.rro.base import BaseRiver, RiverOutput
 from app.agents.common import client
 
 logger = logging.getLogger(__name__)
@@ -12,7 +12,7 @@ class SessionRiver(BaseRiver):
     Session River (Level 2): Interprets general Assistant dialogues (Rain) into user profile updates.
     """
     
-    async def flow(self, db: AsyncSession, user_id: int, rain_data: Dict[str, Any]) -> Dict[str, Any]:
+    async def flow(self, db: AsyncSession, user_id: int, rain_data: Dict[str, Any]) -> RiverOutput:
         """
         Takes raw history and returns a summary of psychological/behavioral insights.
         """
@@ -20,7 +20,7 @@ class SessionRiver(BaseRiver):
         
         history = rain_data.get("history", [])
         if not history:
-            return {}
+             return RiverOutput(source="session_river", domain="psychology", content={})
             
         history_text = "\n".join([f"{m['role']}: {m['content']}" for m in history])
         
@@ -47,11 +47,17 @@ class SessionRiver(BaseRiver):
             )
             analysis = json.loads(response.choices[0].message.content)
             
-            return {
-                "source": "session_river",
-                "content": analysis,
-                "metadata": {"length": len(history)}
-            }
+            return RiverOutput(
+                source="session_river",
+                domain="psychology",
+                content=analysis,
+                metadata={"length": len(history)}
+            )
         except Exception as e:
             logger.error(f"SessionRiver interpretation failed: {e}")
-            return {}
+            return RiverOutput(
+                source="session_river",
+                domain="psychology",
+                content={},
+                metadata={"error": str(e)}
+            )
