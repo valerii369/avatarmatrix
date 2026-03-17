@@ -112,57 +112,73 @@ async def get_profile_by_tg(tg_id: int, db: AsyncSession = Depends(get_db)):
 async def reset_profile_by_tg(tg_id: int, db: AsyncSession = Depends(get_db)):
     from fastapi import HTTPException
     from sqlalchemy import delete
-    from app.models import GameState, SyncSession, AlignSession, DiaryEntry
+    from app.models import (
+        GameState, SyncSession, AlignSession, DiaryEntry, 
+        UserPortrait, Connection, UserSymbol, Match, 
+        DailyReflect, VoiceRecord, AIDiagnosticSession,
+        ReflectionSession, AssistantSession, UserMemory, UserPrint,
+        Pattern, Event, SessionFeatures, UserBehaviorProfileV2
+    )
     
-    user_result = await db.execute(select(User).where(User.tg_id == tg_id))
-    user = user_result.scalar_one_or_none()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+    try:
+        user_result = await db.execute(select(User).where(User.tg_id == tg_id))
+        user = user_result.scalar_one_or_none()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
 
-    # Clear user onboarding fields
-    user.birth_date = None
-    user.birth_time = None
-    user.birth_place = None
-    user.birth_lat = None
-    user.birth_lon = None
-    user.birth_tz = None
-    user.onboarding_done = False
-    
-    # Clear user progression fields
-    initial_energy = 200
-    from app.config import settings
-    if user.tg_id == settings.OWNER_TG_ID:
-        initial_energy = 1000
+        # Clear user onboarding fields
+        user.birth_date = None
+        user.birth_time = None
+        user.birth_place = None
+        user.birth_lat = None
+        user.birth_lon = None
+        user.birth_tz = None
+        user.onboarding_done = False
         
-    user.energy = initial_energy
-    user.streak = 0
-    user.evolution_level = 1
-    user.xp = 0
-    user.title = "Искатель"
-    user.last_activity = None
-    
-    # Reset GameState
-    game_state_result = await db.execute(select(GameState).where(GameState.user_id == user.id))
-    game_state = game_state_result.scalar_one_or_none()
-    if game_state:
-        game_state.titles_unlocked = []
-        game_state.badges_json = []
-        game_state.current_title = "Искатель"
-        game_state.daily_energy = 10
-        game_state.daily_energy_date = None
-        db.add(game_state)
-    
-    # Delete dependent charts/cards and sessions
-    await db.execute(delete(CardProgress).where(CardProgress.user_id == user.id))
-    await db.execute(delete(NatalChart).where(NatalChart.user_id == user.id))
-    await db.execute(delete(SyncSession).where(SyncSession.user_id == user.id))
-    await db.execute(delete(AlignSession).where(AlignSession.user_id == user.id))
-    await db.execute(delete(DiaryEntry).where(DiaryEntry.user_id == user.id))
-    
-    db.add(user)
-    await db.commit()
-    
-    return {"success": True, "message": "Профиль сброшен."}
+        # Clear user progression fields
+        initial_energy = 200
+        from app.config import settings
+        if user.tg_id == settings.OWNER_TG_ID:
+            initial_energy = 1000
+            
+        user.energy = initial_energy
+        user.streak = 0
+        user.evolution_level = 1
+        user.xp = 0
+        user.title = "Искатель"
+        user.last_activity = None
+        
+        # Reset GameState
+        game_state_result = await db.execute(select(GameState).where(GameState.user_id == user.id))
+        game_state = game_state_result.scalar_one_or_none()
+        if game_state:
+            game_state.titles_unlocked = []
+            game_state.badges_json = []
+            game_state.milestones_awarded = []
+            game_state.current_title = "Искатель"
+            game_state.daily_energy = 10
+            game_state.daily_energy_date = None
+            db.add(game_state)
+        
+        # Delete dependent charts/cards and sessions
+        tables_to_clear = [
+            CardProgress, NatalChart, SyncSession, AlignSession, DiaryEntry,
+            UserPortrait, Connection, UserSymbol, Match, DailyReflect,
+            VoiceRecord, AIDiagnosticSession, ReflectionSession, 
+            AssistantSession, UserMemory, UserPrint, Pattern,
+            Event, SessionFeatures, UserBehaviorProfileV2
+        ]
+        
+        for table in tables_to_clear:
+            await db.execute(delete(table).where(table.user_id == user.id))
+        
+        db.add(user)
+        await db.commit()
+        
+        return {"success": True, "message": "Профиль сброшен."}
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=f"Reset error: {str(e)}")
 
 @router.get("/{user_id}/referrals")
 async def get_user_referrals(user_id: int, db: AsyncSession = Depends(get_db)):

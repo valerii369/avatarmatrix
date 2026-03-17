@@ -89,8 +89,9 @@ def build_router(bot: Bot) -> Dispatcher:
                     reply_markup=_open_btn("🚀 Открыть AVATAR"),
                 )
             else:
+                resp_text = resp.text.replace("<", "&lt;").replace(">", "&gt;")[:300]
                 await message.answer(
-                    f"❌ Ошибка сброса (код {resp.status_code}):\n<code>{resp.text[:300]}</code>",
+                    f"❌ Ошибка сброса (код {resp.status_code}):\n<code>{resp_text}</code>",
                     parse_mode="HTML",
                 )
 
@@ -103,7 +104,9 @@ def build_router(bot: Bot) -> Dispatcher:
             )
         except Exception as e:
             logger.error(f"Reset error: {e}")
-            await message.answer(f"❌ Непредвиденная ошибка: <code>{str(e)[:200]}</code>", parse_mode="HTML")
+            # Ensure error message doesn't break HTML parsing
+            err_msg = str(e).replace("<", "&lt;").replace(">", "&gt;")[:200]
+            await message.answer(f"❌ Непредвиденная ошибка: <code>{err_msg}</code>", parse_mode="HTML")
 
     # ── /restart ─────────────────────────────────────────────────────────────
     @dp.message(Command("restart"))
@@ -168,9 +171,10 @@ def build_router(bot: Bot) -> Dispatcher:
                         parse_mode="HTML",
                     )
                 else:
+                    resp_text = calc_resp.text.replace("<", "&lt;").replace(">", "&gt;")[:300]
                     await message.answer(
                         f"❌ Ошибка пересчёта (код {calc_resp.status_code}):\n"
-                        f"<code>{calc_resp.text[:300]}</code>",
+                        f"<code>{resp_text}</code>",
                         parse_mode="HTML",
                     )
 
@@ -182,7 +186,8 @@ def build_router(bot: Bot) -> Dispatcher:
             )
         except Exception as e:
             logger.error(f"Restart error: {e}")
-            await message.answer(f"❌ Непредвиденная ошибка: <code>{str(e)[:200]}</code>", parse_mode="HTML")
+            err_msg = str(e).replace("<", "&lt;").replace(">", "&gt;")[:200]
+            await message.answer(f"❌ Непредвиденная ошибка: <code>{err_msg}</code>", parse_mode="HTML")
 
     # ── Voice ─────────────────────────────────────────────────────────────────
     @dp.message(F.voice)

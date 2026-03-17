@@ -249,15 +249,15 @@ function AstroFlow({ step, setStep, onBack }: { step: number, setStep: React.Dis
                                 <div className="grid grid-cols-3 gap-2 py-3 border-t border-emerald-500/10 text-[10px] text-white/40 font-mono">
                                     <div className="flex flex-col">
                                         <span className="mb-0.5">ШИРОТА</span>
-                                        <span className="text-white/80 font-bold">{geoResult?.lat.toFixed(4)}°</span>
+                                        <span className="text-white/80 font-bold">{geoResult?.lat != null ? geoResult.lat.toFixed(4) : "—"}°</span>
                                     </div>
                                     <div className="flex flex-col">
                                         <span className="mb-0.5">ДОЛГОТА</span>
-                                        <span className="text-white/80 font-bold">{geoResult?.lon.toFixed(4)}°</span>
+                                        <span className="text-white/80 font-bold">{geoResult?.lon != null ? geoResult.lon.toFixed(4) : "—"}°</span>
                                     </div>
                                     <div className="flex flex-col">
                                         <span className="mb-0.5">ЗОНА</span>
-                                        <span className="text-white/80 font-bold truncate">{geoResult?.tz_name?.split('/').pop()}</span>
+                                        <span className="text-white/80 font-bold truncate">{geoResult?.tz_name?.split('/').pop() || "—"}</span>
                                     </div>
                                 </div>
                             </div>
@@ -564,6 +564,14 @@ export default function OnboardingPage() {
     // total steps for astro flow
     const totalAstroSteps = 5;
     const progress = ((step + 1) / totalAstroSteps) * 100;
+
+    useEffect(() => {
+        console.log("OnboardingPage initialized, path:", path, "step:", step);
+    }, []);
+
+    useEffect(() => {
+        console.log("Onboarding progress update:", { path, step, progress });
+    }, [path, step, progress]);
 
     const particles = useMemo(() =>
         Array.from({ length: 24 }, (_, i) => ({
