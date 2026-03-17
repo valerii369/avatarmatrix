@@ -18,17 +18,23 @@ router = APIRouter()
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 DATA_DIR = os.path.join(BASE_DIR, "data")
 
-with open(os.path.join(DATA_DIR, "archetypes.json")) as f:
-    ARCHETYPES = {item["id"]: item for item in json.load(f)}
-
-with open(os.path.join(DATA_DIR, "spheres.json")) as f:
-    SPHERES_DATA = {item["key"]: item for item in json.load(f)}
-
 try:
     with open(os.path.join(DATA_DIR, "archetype_sphere_matrix.json"), "r", encoding="utf-8") as f:
         MATRIX_DATA = json.load(f)
 except Exception:
     MATRIX_DATA = {}
+
+ARCHETYPES = {
+    int(arch_id): {
+        "id": int(arch_id), 
+        "name": data.get("_meta", {}).get("archetype_name", f"Архетип {arch_id}")
+    } 
+    for arch_id, data in MATRIX_DATA.items() if arch_id.isdigit()
+}
+
+with open(os.path.join(DATA_DIR, "spheres.json")) as f:
+    SPHERES_DATA = {item["key"]: item for item in json.load(f)}
+
 
 
 class CardSummary(BaseModel):

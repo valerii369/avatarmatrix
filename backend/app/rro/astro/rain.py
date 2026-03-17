@@ -57,37 +57,7 @@ class AstroRain:
             for c in combined_recommendations
         ]
 
-        # 3. CardProgress Persistence
-        recommended_set = {(r.archetype_id, r.sphere): r for r in combined_recommendations}
-        existing_result = await db.execute(select(CardProgress).where(CardProgress.user_id == user_obj.id))
-        existing_cards = {(cp.archetype_id, cp.sphere): cp for cp in existing_result.scalars().all()}
-
-        SPHERES_KEYS = ["IDENTITY", "RESOURCES", "COMMUNICATION", "ROOTS", "CREATIVITY", "SERVICE", "PARTNERSHIP", "TRANSFORMATION", "EXPANSION", "STATUS", "VISION", "SPIRIT"]
-
-        for archetype_id in ARCHETYPE_IDS:
-            for sphere in SPHERES_KEYS:
-                key = (archetype_id, sphere)
-                rec = recommended_set.get(key)
-                if key in existing_cards:
-                    cp = existing_cards[key]
-                    if rec and not cp.is_recommended_astro:
-                        cp.is_recommended_astro = True
-                        cp.astro_priority = rec.priority
-                        cp.astro_reason = rec.reason
-                        if cp.status == CardStatus.LOCKED:
-                            cp.status = CardStatus.RECOMMENDED
-                        db.add(cp)
-                else:
-                    status = CardStatus.RECOMMENDED if rec else CardStatus.LOCKED
-                    cp = CardProgress(
-                        user_id=user_obj.id, archetype_id=archetype_id, sphere=sphere, status=status,
-                        is_recommended_astro=rec is not None,
-                        astro_priority=rec.priority if rec else None,
-                        astro_reason=rec.reason if rec else None
-                    )
-                    db.add(cp)
-
-        # 4. NatalChart Persistence
+        # 3. NatalChart Persistence
         natal_res = await db.execute(select(NatalChart).where(NatalChart.user_id == user_obj.id))
         natal = natal_res.scalar_one_or_none()
         if not natal:

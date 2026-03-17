@@ -4,6 +4,8 @@ from typing import Dict, Any, List
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.rro.base import BaseRiver, RiverOutput
 from app.agents.common import client as openai_client, settings
+from app.core.manifest_service import ManifestationService
+
 
 logger = logging.getLogger(__name__)
 
@@ -92,9 +94,11 @@ class OceanService:
   }},
   "metadata": {{
     "last_river": "name",
-    "synthesis_version": "2.2"
+    "synthesis_version": "3.1"
   }}
 }}
+
+
 """
         try:
             response = await openai_client.chat.completions.create(
@@ -115,8 +119,17 @@ class OceanService:
                 flag_modified(user_print, "print_data")
             
             await db.flush()
-            logger.info(f"Ocean updated for user {user_id}")
+            
+            # 4. Semantic Manifestation: Update Card Matrix via vector search
+            await ManifestationService.sync_with_portrait(db, user_id, new_ocean_data)
+            
+            # 5. Final Senior Atomic Commit!
+            await db.commit()
+            
+            logger.info(f"Ocean and Semantic Manifestation (ATOMIC) updated for user {user_id}")
             return new_ocean_data
+
+
             
         except Exception as e:
             logger.error(f"Ocean synthesis failed: {e}")

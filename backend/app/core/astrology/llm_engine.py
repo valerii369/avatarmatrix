@@ -25,8 +25,13 @@ DEEP_SPHERE_PROMPT = """
   "evolutionary_task": "Конкретный духовный и экзистенциальный урок этой сферы. Зачем это дано?",
   "life_hacks": ["Практический шаг 1", "Практический шаг 2", "Практический шаг 3"],
   "astrological_markers": ["Планета X в доме Y", "Аспект A к B", "Положение управителя"],
-  "resonance_score": 0-100 (целое число, отражающее 'мощность' этой сферы в карте)
+  "resonance_score": 0-100,
+  "weighted_resonance": [
+    {"archetype_id": 1, "weight": 95, "reason": "Управитель дома в экзальтации"},
+    {"archetype_id": 7, "weight": 45, "reason": "Обитатель дома"}
+  ]
 }}
+
 
 ЯЗЫК: Строго РУССКИЙ.
 ТЕКСТ: Живой, глубокий, без "астрологического мусора". Фокус на психологии и трансформации.
@@ -77,8 +82,10 @@ async def synthesize_deep_sphere(sphere_key: str, chart_dict: dict, aspects_dict
             "evolutionary_task": "...",
             "life_hacks": [],
             "astrological_markers": [],
-            "resonance_score": 0
+            "resonance_score": 0,
+            "weighted_resonance": []
         }
+
 
 SPHERES_PROMPT = """
 РОЛЬ:

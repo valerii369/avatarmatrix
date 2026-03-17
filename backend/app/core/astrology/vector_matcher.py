@@ -18,69 +18,115 @@ async def _get_embedding(text: str) -> list[float]:
 
 async def match_archetypes_to_spheres(
     db: AsyncSession, 
-    sphere_descriptions: dict
+    sphere_descriptions: dict,
+    multi_vector: bool = True
 ) -> list[RecommendedCard]:
     """
-    Takes LLM generated descriptions for each of the 12 spheres, converts them
-    to embeddings, and queries pgvector to find the closest matching Archetype 
-    (from the AvatarCards table) for that specific sphere.
+    Senior v3.1: Parallel Multi-Vector Matching.
+    Matches text portfolios to archetypes using weighted semantic resonance.
     """
     recommended_cards = []
-    
-    # Handle the new nested structure from llm_engine (Master of Synthesis)
     spheres_data = sphere_descriptions.get("spheres_12", sphere_descriptions)
     
-    # 1. Prepare descriptions
-    descriptions = []
-    sphere_keys = []
-    for sphere, details in spheres_data.items():
-        description = details.get("interpretation", "") if isinstance(details, dict) else details
-        if description and isinstance(description, str) and description.strip():
-            descriptions.append(description)
-            sphere_keys.append(sphere)
-            
-    if not descriptions:
+    if not spheres_data:
         return []
 
-    # 2. Get all embeddings in BATCH (The most efficient way)
+    # 1. Collect all texts for batch embedding (Fastest method)
+    all_texts = []
+    sphere_tasks = [] # (sphere, type)
+    
+    for sphere, details in spheres_data.items():
+        if multi_vector and isinstance(details, dict):
+            # Weighted search: Shadow, Light, Insight
+            t_shadow = details.get("shadow", "")
+            t_light = details.get("light", "")
+            t_insight = details.get("insight", "")
+            
+            if t_shadow: 
+                all_texts.append(t_shadow)
+                sphere_tasks.append((sphere, "shadow"))
+            if t_light:
+                all_texts.append(t_light)
+                sphere_tasks.append((sphere, "light"))
+            if t_insight:
+                all_texts.append(t_insight)
+                sphere_tasks.append((sphere, "insight"))
+        else:
+            txt = details.get("interpretation", "") if isinstance(details, dict) else details
+            if txt:
+                all_texts.append(txt)
+                sphere_tasks.append((sphere, "unified"))
+
+    if not all_texts:
+        return []
+
+    # 2. Batch Embedding (1 request instead of 36)
     try:
         response = await client.embeddings.create(
-            input=descriptions,
-            model="text-embedding-3-small"
+            input=all_texts,
+            model="text-embedding-3-large", # Upgrade to Large for high precision
+            dimensions=1536  # Clip to 1536 to match current DB schema
         )
-        query_embeddings = [d.embedding for d in response.data]
+        embeddings = [d.embedding for d in response.data]
+
     except Exception as e:
-        print(f"Error in batch embedding: {e}")
+        logger.error(f"Batch embedding failed: {e}")
         return []
-    
-    # 3. Perform DB queries (Sequential is safe and fast here)
-    for sphere, query_embedding, description in zip(sphere_keys, query_embeddings, descriptions):
+
+    # 3. Parallel DB Queries (asyncio.gather)
+    async def _query_sphere(sphere, emb, weight, s_type):
         try:
-            # Query Postgres vector distance
             stmt = select(AvatarCard).where(
                 AvatarCard.sphere == sphere
             ).order_by(
-                AvatarCard.embedding.cosine_distance(query_embedding)
-            ).limit(3)
+                AvatarCard.embedding.cosine_distance(emb)
+            ).limit(2) # Get top 2 candidates per vector
             
             result = await db.execute(stmt)
-            top_cards = result.scalars().all()
-            
-            # Add to recommendations
-            priorities = ["critical", "high", "medium"]
-            for idx, card in enumerate(top_cards):
-                if idx >= len(priorities):
-                    break
-                    
-                rec = RecommendedCard(
-                    archetype_id=card.archetype_id,
-                    sphere=sphere,
-                    priority=priorities[idx],
-                    reason=f"Наилучшее соответствие: {description[:100]}..." if idx == 0 else "Дополнительное соответствие энергии."
-                )
-                recommended_cards.append(rec)
+            cards = result.scalars().all()
+            return [(card.archetype_id, weight, s_type) for card in cards]
         except Exception as e:
-            print(f"Error matching vector for sphere {sphere}: {e}")
+            logger.error(f"Query error for {sphere}: {e}")
+            return []
+
+    # Prepare concurrent tasks
+    db_tasks = []
+    weights = {"shadow": 0.4, "light": 0.4, "insight": 0.2, "unified": 1.0}
+    
+    for (sphere, s_type), emb in zip(sphere_tasks, embeddings):
+        db_tasks.append(_query_sphere(sphere, emb, weights.get(s_type, 1.0), s_type))
+
+    # Execute all queries in PARALLEL
+    results = await asyncio.gather(*db_tasks)
+    
+    # 4. Weighted Aggregation
+    # sphere -> {archetype_id: total_score}
+    aggregated = {}
+    for (sphere, s_type), sphere_hits in zip(sphere_tasks, results):
+        if sphere not in aggregated:
+            aggregated[sphere] = {}
+        for arch_id, weight, _ in sphere_hits:
+            aggregated[sphere][arch_id] = aggregated[sphere].get(arch_id, 0) + weight
+
+    # 5. Final Selection
+    for sphere, scores in aggregated.items():
+        if not scores: continue
+        # Sort by total score descending
+        sorted_archs = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+        
+        # Get top candidate
+        top_arch_id, top_score = sorted_archs[0]
+        
+        priority = "medium"
+        if top_score >= 0.7: priority = "critical"
+        elif top_score >= 0.4: priority = "high"
+        
+        recommended_cards.append(RecommendedCard(
+            archetype_id=top_arch_id,
+            sphere=sphere,
+            priority=priority,
+            reason=f"Смысловой резонанс {int(top_score*100)}% (Синтез Тени и Света)."
+        ))
             
     return recommended_cards
 

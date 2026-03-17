@@ -7,18 +7,25 @@ client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
 
 DATA_DIR = settings.DATA_DIR
 
-with open(os.path.join(DATA_DIR, "archetypes.json")) as f:
-    ARCHETYPES = {item["id"]: item for item in json.load(f)}
-
-with open(os.path.join(DATA_DIR, "spheres.json")) as f:
-    SPHERES = {item["key"]: item for item in json.load(f)}
-ARCHETYPE_IDS = list(range(22))
-
 try:
     with open(os.path.join(DATA_DIR, "archetype_sphere_matrix.json"), "r", encoding="utf-8") as f:
         MATRIX_DATA = json.load(f)
 except Exception:
     MATRIX_DATA = {}
+
+ARCHETYPES = {
+    int(arch_id): {
+        "id": int(arch_id), 
+        "name": data.get("_meta", {}).get("archetype_name", f"Архетип {arch_id}")
+    } 
+    for arch_id, data in MATRIX_DATA.items() if arch_id.isdigit()
+}
+
+with open(os.path.join(DATA_DIR, "spheres.json")) as f:
+    SPHERES = {item["key"]: item for item in json.load(f)}
+ARCHETYPE_IDS = list(range(22))
+
+
 
 with open(os.path.join(DATA_DIR, "hawkins_scale.json")) as f:
     HAWKINS_SCALE = json.load(f)

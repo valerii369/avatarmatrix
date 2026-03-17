@@ -17,19 +17,21 @@ DATA_DIR = settings.DATA_DIR
 with open(os.path.join(DATA_DIR, "planet_archetype_map.json")) as f:
     PLANET_ARCHETYPE_MAP = json.load(f)
 
-with open(os.path.join(DATA_DIR, "sign_archetype_map.json")) as f:
-    SIGN_ARCHETYPE_MAP = json.load(f)
-
 with open(os.path.join(DATA_DIR, "house_sphere_map.json")) as f:
     HOUSE_SPHERE_MAP = json.load(f)
 
-with open(os.path.join(DATA_DIR, "decan_map.json")) as f:
-    DECAN_MAP = json.load(f)
+SIGN_RULERS = {
+    "Aries": "Mars", "Taurus": "Venus", "Gemini": "Mercury",
+    "Cancer": "Moon", "Leo": "Sun", "Virgo": "Mercury",
+    "Libra": "Venus", "Scorpio": "Pluto", "Sagittarius": "Jupiter",
+    "Capricorn": "Saturn", "Aquarius": "Uranus", "Pisces": "Neptune"
+}
 
 ZODIAC_SIGNS = [
     "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
     "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"
 ]
+
 
 ZODIAC_SIGNS_RU = [
     "Овен", "Телец", "Близнецы", "Рак", "Лев", "Дева",
@@ -146,6 +148,9 @@ class NatalChartData:
     south_node_sign: str = ""
     south_node_sign_ru: str = ""
     raw_cusps: list[float] = field(default_factory=list)
+    house_rulers: dict[int, str] = field(default_factory=dict)
+    dispositor_chains: dict[str, Any] = field(default_factory=dict)
+
 
 
 def degree_to_sign(degree: float) -> tuple[str, str, float]:
@@ -166,6 +171,66 @@ def get_house(degree: float, cusps: list[float]) -> int:
     if degree >= cusps[11] or degree < cusps[0]:
         return 12
     return 1
+
+
+def calculate_dispositor_chains(planets: list[PlanetPosition]) -> dict[str, Any]:
+    """
+    Build chains of dispositors to find the 'Final Dispositor' or 'Mutual Reception'.
+    A dispositor is the ruler of the sign a planet is in.
+    """
+    planet_map = {p.name_en: p for p in planets if p.name_en in PLANET_CODES}
+    dispositor_map = {}
+
+    for name, p in planet_map.items():
+        sign = p.sign
+        # Modern rulers
+        ruler = SIGN_RULERS.get(sign, "Sun")
+        dispositor_map[name] = ruler
+
+    chains = {}
+    for start_planet in planet_map:
+        chain = [start_planet]
+        current = start_planet
+        visited = {start_planet}
+        
+        while True:
+            nxt = dispositor_map.get(current)
+            if not nxt or nxt not in planet_map:
+                break
+            if nxt in visited:
+                # Cycle or Final Dispositor
+                chain.append(nxt)
+                break
+            chain.append(nxt)
+            visited.add(nxt)
+            current = nxt
+        chains[start_planet] = chain
+    
+    # Identify unique final dispositors/receptions
+    finals = []
+    for chain in chains.values():
+        last = chain[-1]
+        if len(chain) > 1 and chain[-1] == chain[-2]: # Planet in its own sign
+             finals.append(last)
+        elif len(chain) >= 2 and chain[-1] in chain[:-1]: # Mutual reception or cycle
+             cycle_start_idx = chain.index(chain[-1])
+             cycle = chain[cycle_start_idx:]
+             # Convert cycle to a stable format for set
+             finals.append(tuple(sorted(list(set(cycle)))))
+    
+    # Final cleanup of finals (removing duplicates and ensuring only unique cycles/planets)
+    unique_finals = []
+    seen = set()
+    for f in finals:
+        if f not in seen:
+            unique_finals.append(f)
+            seen.add(f)
+
+    return {
+        "chains": chains,
+        "finals": unique_finals
+    }
+
 
 
 async def geocode_place(place: str) -> tuple[float, float, str]:
@@ -221,8 +286,15 @@ def calculate_natal_chart(
 
     asc_sign_en, asc_sign_ru, _ = degree_to_sign(ascendant_degree)
 
+    # Calculate house rulers
+    house_rulers = {}
+    for i, cusp in enumerate(cusps):
+         sign_en, _, _ = degree_to_sign(cusp)
+         ruler = SIGN_RULERS.get(sign_en, "Sun")
+         house_rulers[i+1] = ruler
+
     # Get ascendant ruler
-    asc_ruler = SIGN_ARCHETYPE_MAP.get(asc_sign_en, {}).get("ruler", "Sun")
+    asc_ruler = SIGN_RULERS.get(asc_sign_en, "Sun")
 
     result = NatalChartData(
         ascendant_degree=ascendant_degree,
@@ -231,7 +303,9 @@ def calculate_natal_chart(
         ascendant_ruler=asc_ruler,
         mc_degree=mc_degree,
         raw_cusps=cusps,
+        house_rulers=house_rulers
     )
+
 
     # Calculate planet positions
     for planet_name, planet_code in PLANET_CODES.items():
@@ -246,14 +320,7 @@ def calculate_natal_chart(
             house_num = get_house(degree, cusps)
 
             planet_data = PLANET_ARCHETYPE_MAP.get(planet_name, {})
-            sign_data = SIGN_ARCHETYPE_MAP.get(sign_en, {})
             
-            # Decan logic
-            decan_idx = int(position_in_sign // 10)
-            if decan_idx > 2: decan_idx = 2
-            decan_ruler = DECAN_MAP.get(sign_en, ["Sun", "Sun", "Sun"])[decan_idx]
-            decan_ruler_archetype = PLANET_ARCHETYPE_MAP.get(decan_ruler, {}).get("archetype_id", 0)
-
             dignity, dignity_score = calculate_dignity(planet_name, sign_en)
 
             planet_pos = PlanetPosition(
@@ -267,10 +334,10 @@ def calculate_natal_chart(
                 is_stationary=is_stationary,
                 speed=round(speed, 6),
                 archetype_id=planet_data.get("archetype_id", 0),
-                sign_primary_archetype=sign_data.get("primary_archetype", 0),
-                sign_secondary_archetype=sign_data.get("secondary_archetype", 0),
-                decan_ruler=decan_ruler,
-                decan_ruler_archetype=decan_ruler_archetype,
+                sign_primary_archetype=0,
+                sign_secondary_archetype=0,
+                decan_ruler="",
+                decan_ruler_archetype=0,
                 priority=planet_data.get("priority", "medium"),
                 dignity=dignity,
                 dignity_score=dignity_score,
@@ -302,10 +369,10 @@ def calculate_natal_chart(
             is_stationary=False,
             speed=0.0,
             archetype_id=12,  # Повешенный
-            sign_primary_archetype=south_sign_data.get("primary_archetype", 0),
-            sign_secondary_archetype=south_sign_data.get("secondary_archetype", 0),
-            decan_ruler=DECAN_MAP.get(south_sign_en, ["Sun", "Sun", "Sun"])[min(int((south_degree % 30) // 10), 2)],
-            decan_ruler_archetype=PLANET_ARCHETYPE_MAP.get(DECAN_MAP.get(south_sign_en, ["Sun", "Sun", "Sun"])[min(int((south_degree % 30) // 10), 2)], {}).get("archetype_id", 0),
+            sign_primary_archetype=0,
+            sign_secondary_archetype=0,
+            decan_ruler="",
+            decan_ruler_archetype=0,
             priority="additional",
         )
         result.planets.append(south_node)
@@ -343,10 +410,10 @@ def calculate_natal_chart(
             is_stationary=False,
             speed=0.0,
             archetype_id=10,  # Колесо Фортуны
-            sign_primary_archetype=f_sign_data.get("primary_archetype", 0),
-            sign_secondary_archetype=f_sign_data.get("secondary_archetype", 0),
-            decan_ruler=DECAN_MAP.get(f_sign_en, ["Sun", "Sun", "Sun"])[min(int((fortune_degree % 30) // 10), 2)],
-            decan_ruler_archetype=PLANET_ARCHETYPE_MAP.get(DECAN_MAP.get(f_sign_en, ["Sun", "Sun", "Sun"])[min(int((fortune_degree % 30) // 10), 2)], {}).get("archetype_id", 0),
+            sign_primary_archetype=0,
+            sign_secondary_archetype=0,
+            decan_ruler="",
+            decan_ruler_archetype=0,
             priority="high",
         )
         result.planets.append(fortune)
@@ -392,4 +459,7 @@ def to_dict(chart: NatalChartData) -> dict:
             for p in chart.planets
         ],
         "cusps": chart.raw_cusps,
+        "house_rulers": chart.house_rulers,
+        "dispositor_chains": chart.dispositor_chains,
     }
+
