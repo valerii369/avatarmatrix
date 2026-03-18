@@ -149,7 +149,7 @@ async def run_rro_pipeline(u_id: int, n_id: int):
             if interpretation_data:
                 # Level 3: Ocean (Synthesis)
                 logger.info(f"[BACKGROUND] Starting Level 3 (Ocean) for user {u_id}")
-                await OceanService.update_ocean(session, u_id, [interpretation_data])
+                await OceanService.update_ocean(session, u_id)
                 await session.commit()
                 logger.info(f"[BACKGROUND] RRO v2 Pipeline completed successfully for user {u_id}")
 

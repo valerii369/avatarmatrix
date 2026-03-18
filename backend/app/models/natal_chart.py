@@ -30,4 +30,11 @@ class NatalChart(Base, TimestampMixin):
     # Stelliums detected
     stelliums_json: Mapped[Optional[list]] = mapped_column(JSONB, nullable=True)
 
+    # Birth location name for reference
+    location_name: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+
     # REMOVED: sphere_descriptions_json (Now handled in Level 2 River)
+
+    # NEW: Advanced Technical Markers (Senior +++)
+    moon_phase: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)
+    technical_summary_json: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)

@@ -50,6 +50,11 @@ class AstroRain:
         natal.ascendant_sign = chart.ascendant_sign
         natal.ascendant_ruler = chart.ascendant_ruler
         natal.location_name = location_name
+        
+        # SAVE NEW TECH MARKERS
+        natal.moon_phase = chart_dict.get("moon_phase")
+        natal.technical_summary_json = chart_dict.get("technical_summary")
+        natal.stelliums_json = chart_dict.get("stelliums")
 
         # 5. User Object Update
         user_obj.birth_date = birth_date

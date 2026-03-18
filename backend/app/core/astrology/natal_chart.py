@@ -150,6 +150,9 @@ class NatalChartData:
     raw_cusps: list[float] = field(default_factory=list)
     house_rulers: dict[int, str] = field(default_factory=dict)
     dispositor_chains: dict[str, Any] = field(default_factory=dict)
+    moon_phase: str = "Unknown"
+    technical_summary: dict[str, Any] = field(default_factory=dict)
+    stelliums: list[dict] = field(default_factory=list)
 
 
 
@@ -418,6 +421,67 @@ def calculate_natal_chart(
         )
         result.planets.append(fortune)
 
+    # ─── NEW: Technical Depth Enhancements (Senior +++) ───────────
+    
+    # 1. Moon Phase
+    sun = next((p for p in result.planets if p.name_en == "Sun"), None)
+    moon = next((p for p in result.planets if p.name_en == "Moon"), None)
+    if sun and moon:
+        diff = (moon.degree - sun.degree) % 360
+        if diff < 45: mp = "New Moon"
+        elif diff < 90: mp = "Waxing Crescent"
+        elif diff < 135: mp = "First Quarter"
+        elif diff < 180: mp = "Waxing Gibbous"
+        elif diff < 225: mp = "Full Moon"
+        elif diff < 270: mp = "Waning Gibbous"
+        elif diff < 315: mp = "Last Quarter"
+        else: mp = "Waning Crescent"
+        result.moon_phase = mp
+
+    # 2. Hemispheres & Quadrants
+    # Quadrant 1: Houses 1,2,3 | Q2: 4,5,6 | Q3: 7,8,9 | Q4: 10,11,12
+    q_counts = {1: 0, 2: 0, 3: 0, 4: 0}
+    hemi_h = {"South": 0, "North": 0} # South=Upper(7-12), North=Lower(1-6)
+    hemi_v = {"East": 0, "West": 0}   # East=Left(10-3), West=Right(4-9)
+    
+    for p in result.planets:
+        if p.name_en in ["Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto"]:
+            h = p.house
+            if h <= 3: q_counts[1] += 1
+            elif h <= 6: q_counts[2] += 1
+            elif h <= 9: q_counts[3] += 1
+            else: q_counts[4] += 1
+            
+            if 7 <= h <= 12: hemi_h["South"] += 1
+            else: hemi_h["North"] += 1
+            
+            if h >= 10 or h <= 3: hemi_v["East"] += 1
+            else: hemi_v["West"] += 1
+
+    result.technical_summary = {
+        "quadrants": q_counts,
+        "hemispheres": {
+            "horizontal": hemi_h,
+            "vertical": hemi_v
+        }
+    }
+
+    # 3. Stelliums (3+ planets in same house or sign)
+    house_clusters = {}
+    sign_clusters = {}
+    for p in result.planets:
+        if p.name_en in ["Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn"]: # Only traditional + outer for stelliums
+            house_clusters.setdefault(p.house, []).append(p.name_en)
+            sign_clusters.setdefault(p.sign, []).append(p.name_en)
+    
+    stelliums = []
+    for h, ps in house_clusters.items():
+        if len(ps) >= 3: stelliums.append({"type": "house", "target": h, "planets": ps})
+    for s, ps in sign_clusters.items():
+        if len(ps) >= 3: stelliums.append({"type": "sign", "target": s, "planets": ps})
+    
+    result.stelliums = stelliums
+
     return result
 
 
@@ -461,5 +525,8 @@ def to_dict(chart: NatalChartData) -> dict:
         "cusps": chart.raw_cusps,
         "house_rulers": chart.house_rulers,
         "dispositor_chains": chart.dispositor_chains,
+        "moon_phase": chart.moon_phase,
+        "technical_summary": chart.technical_summary,
+        "stelliums": chart.stelliums,
     }
 

@@ -16,53 +16,61 @@ class OceanService:
     """
 
     @staticmethod
-    async def update_ocean(db: AsyncSession, user_id: int, rivers_data: List[RiverOutput]):
+    async def update_ocean(db: AsyncSession, user_id: int):
         """
         The Hub's main entry point for synthesis.
-        Accepts a list of standardized RiverOutput objects.
+        Strict RRO v2.2+ Logic: Smart Merge (Data Preservation).
         """
         from app.models.user_print import UserPrint
+        from app.models.river_result import RiverResult # Import RiverResult
         from sqlalchemy import select
 
         # 1. Fetch current Ocean state
         res = await db.execute(select(UserPrint).where(UserPrint.user_id == user_id))
         user_print = res.scalar_one_or_none()
         
-        current_data = user_print.print_data if user_print else {}
+        current_print = user_print.print_data if user_print else {
+            "portrait_summary": {},
+            "deep_profile_data": {"spheres_status": {}, "polarities": {}, "social_interface": {}},
+            "metadata": {"synthesis_version": "3.3"}
+        }
         
-        # 2. Prepare context for the Alchemist
-        # Convert Pydantic models to serializable dicts
-        rivers_json = [r.dict() for r in rivers_data]
-        rivers_context = json.dumps(rivers_json, ensure_ascii=False, indent=2)
+        # 2. Fetch all RiverResult entries for the user
+        river_results_res = await db.execute(select(RiverResult).where(RiverResult.user_id == user_id))
+        all_river_results: List[RiverResult] = river_results_res.scalars().all()
+
+        # 3. Programmatic Sync (Smart Merge) - Merge RiverResult data into current_print
+        # We take descriptions from the Rivers and put them into the Ocean structure
+        # to prevent LLM hallucinations or data loss.
+        new_spheres = current_print["deep_profile_data"].get("spheres_status", {})
         
+        for river_result in all_river_results:
+            if river_result.domain == "astrology" and "spheres" in river_result.interpretation_data:
+                astro_spheres = river_result.interpretation_data["spheres"]
+                for s_key, s_data in astro_spheres.items():
+                    # Preserve River data exactly (Smart Merge)
+                    new_spheres[s_key] = s_data
+        
+        current_print["deep_profile_data"]["spheres_status"] = new_spheres
+
+        # 4. Call the Alchemist for Global Synthesis (Persona, Role, Global Tone)
+        # We ONLY pass what's needed for the global summary to keep prompt focused
         prompt = f"""
-Ты — Верховный Алхимик системы AVATAR. Твоя задача — синтезировать "Паспорт Личности" из разрозненных данных.
+Ты — Верховный Алхимик AVATAR. Ты получил данные от "Рек" (глубинные интерпретации сфер жизни).
+Твоя задача — создать ЕДИНЫЙ ПОРТРЕТ (Portrait Summary), который объединяет всё это в цельную личность.
 
-ТЕКУЩЕЕ СОСТОЯНИЕ ОКЕАНА:
-{json.dumps(current_data, ensure_ascii=False, indent=2)}
-
-НОВЫЕ ДАННЫЕ ОТ РЕК (ИНТЕРПРЕТАЦИИ):
-{rivers_context}
+ДАННЫЕ ПО СФЕРАМ (УЖЕ СИНТЕЗИРОВАНЫ):
+{json.dumps(new_spheres, ensure_ascii=False, indent=2)}
 
 ТВОЯ ЗАДАЧА:
-Синтезируй глубокий, поэтичный и психологически точный "Паспорт Личности". 
-Твой главный фокус — **резонанс между всеми частями портрета**.
+1. Синтезируй **portrait_summary**: Квинтэссенция личности (core_identity), Архетип (core_archetype — СТРОГО один из 22 классических мажорных арканов), Стихия (energy_type), Роль (narrative_role) и Текущий конфликт/динамика (current_dynamic).
+2. Синтезируй **polarities**: Сильные стороны, таланты, тени и факторы утечки на основе ВСЕХ сфер.
+3. Синтезируй **social_interface**: Мировоззрение, стиль общения и кармический урок.
 
-ПРАВИЛА ДЛЯ ПАРАМЕТРОВ (portrait_summary):
-1. **core_identity**: Это квинтэссенция личности. Ты должен вывести её не только из астрологии, а на основе **всего портрета личности (deep_profile_data)**. Это должно быть 2-3 глубоких предложения, которые объединяют таланты, тени и текущий путь человека.
-2. **core_archetype**: Выбери СТРОГО один из 22 классических архетипов (Мажорные Арканы): 
-   Шут, Маг, Жрица, Императрица, Император, Жрец, Влюбленные, Колесница, Сила, Отшельник, Колесо Фортуны, Справедливость, Повешенный, Смерть, Умеренность, Дьявол, Башня, Звезда, Луна, Солнце, Суд, Мир.
-   Выбор должен резонировать с доминирующими энергиями в deep_profile_data.
-3. **energy_type**: Определи доминирующий элемент личности. Выбери СТРОГО один из 5:
-   Земля, Вода, Воздух, Огонь, Эфир (Космос).
-4. **narrative_role**: Роль человека в его жизненном мифе, исходя из его потенциалов и теней.
-5. **current_dynamic**: Главный внутренний фокус или конфликт "здесь и сейчас".
+ВАЖНО: Тебе НЕ НУЖНО переписывать тексты сфер. Сфокусируйся на ОБЩЕМ ПОРТРЕТЕ.
+ЯЗЫК: Строго РУССКИЙ.
 
-ТРЕБОВАНИЯ К ДАННЫМ:
-- Параметры в `portrait_summary` должны быть **идеальным отражением** того, что описано в `deep_profile_data`. 
-- `deep_profile_data` должна содержать максимально детальные разборы 12 сфер (spheres_status), используя как фундамент астрологию, так и динамические дополнения из сессий.
-
-ВЕРНИ ОБНОВЛЕННЫЙ ПАСПОРТ В СТРОГОМ JSON:
+ОТВЕТЬ В СТРОГОМ JSON:
 {{
   "portrait_summary": {{
     "core_identity": "...",
@@ -73,42 +81,16 @@ class OceanService:
   }},
   "deep_profile_data": {{
     "polarities": {{
-      "core_strengths": ["...", "..."],
-      "hidden_talents": ["...", "..."],
-      "shadow_aspects": ["...", "..."],
-      "drain_factors": ["...", "..."]
+       "core_strengths": ["...", "..."],
+       "hidden_talents": ["...", "..."],
+       "shadow_aspects": ["...", "..."],
+       "drain_factors": ["...", "..."]
     }},
     "social_interface": {{
-      "worldview_stance": "...",
-      "communication_style": "...",
-      "karmic_lesson": "..."
-    }},
-    "spheres_status": {{
-      "IDENTITY": {{ 
-        "status": "...", 
-        "insight": "...",
-        "light": "...",
-        "shadow": "...",
-        "evolutionary_task": "...",
-        "life_hacks": ["...", "..."],
-        "resonance": 100
-      }},
-      "RESOURCES": {{ "status": "...", "insight": "...", "light": "...", "shadow": "...", "evolutionary_task": "...", "life_hacks": [], "resonance": 50 }},
-      "COMMUNICATION": {{ "status": "...", "insight": "...", "light": "...", "shadow": "...", "evolutionary_task": "...", "life_hacks": [], "resonance": 50 }},
-      "ROOTS": {{ "status": "...", "insight": "...", "light": "...", "shadow": "...", "evolutionary_task": "...", "life_hacks": [], "resonance": 50 }},
-      "CREATIVITY": {{ "status": "...", "insight": "...", "light": "...", "shadow": "...", "evolutionary_task": "...", "life_hacks": [], "resonance": 50 }},
-      "SERVICE": {{ "status": "...", "insight": "...", "light": "...", "shadow": "...", "evolutionary_task": "...", "life_hacks": [], "resonance": 50 }},
-      "PARTNERSHIP": {{ "status": "...", "insight": "...", "light": "...", "shadow": "...", "evolutionary_task": "...", "life_hacks": [], "resonance": 50 }},
-      "TRANSFORMATION": {{ "status": "...", "insight": "...", "light": "...", "shadow": "...", "evolutionary_task": "...", "life_hacks": [], "resonance": 50 }},
-      "EXPANSION": {{ "status": "...", "insight": "...", "light": "...", "shadow": "...", "evolutionary_task": "...", "life_hacks": [], "resonance": 50 }},
-      "STATUS": {{ "status": "...", "insight": "...", "light": "...", "shadow": "...", "evolutionary_task": "...", "life_hacks": [], "resonance": 50 }},
-      "VISION": {{ "status": "...", "insight": "...", "light": "...", "shadow": "...", "evolutionary_task": "...", "life_hacks": [], "resonance": 50 }},
-      "SPIRIT": {{ "status": "...", "insight": "...", "light": "...", "shadow": "...", "evolutionary_task": "...", "life_hacks": [], "resonance": 50 }}
+       "worldview_stance": "...",
+       "communication_style": "...",
+       "karmic_lesson": "..."
     }}
-  }},
-  "metadata": {{
-    "last_river": "name",
-    "synthesis_version": "3.2"
   }}
 }}
 """
@@ -119,33 +101,40 @@ class OceanService:
                 response_format={"type": "json_object"}
             )
             
-            new_ocean_data = json.loads(response.choices[0].message.content)
+            synthesis = json.loads(response.choices[0].message.content)
             
-            # 3. Save to Ocean
+            # 5. Integrate Synthesis back into the Print
+            current_print["portrait_summary"] = synthesis.get("portrait_summary", {})
+            current_print["deep_profile_data"]["polarities"] = synthesis.get("deep_profile_data", {}).get("polarities", {})
+            current_print["deep_profile_data"]["social_interface"] = synthesis.get("deep_profile_data", {}).get("social_interface", {})
+            current_print["metadata"]["last_update"] = "alchemist_merge"
+            current_print["metadata"]["synthesis_version"] = "3.3"
+
+            # 6. Atomic Save
             if not user_print:
-                user_print = UserPrint(user_id=user_id, print_data=new_ocean_data)
+                user_print = UserPrint(user_id=user_id, print_data=current_print)
                 db.add(user_print)
             else:
-                user_print.print_data = new_ocean_data
+                user_print.print_data = current_print
                 from sqlalchemy.orm.attributes import flag_modified
                 flag_modified(user_print, "print_data")
             
             await db.flush()
             
-            # 4. Semantic Manifestation: Update Card Matrix via vector search
-            await ManifestationService.sync_with_portrait(db, user_id, new_ocean_data)
+            # 7. Manifestation (Semantic update of CardProgress)
+            # This uses the new data to pick archetypes for cards
+            await ManifestationService.sync_with_portrait(db, user_id, current_print)
             
-            # 5. Final Senior Atomic Commit!
+            # 8. Final Atomic Commit
             await db.commit()
             
-            logger.info(f"Ocean and Semantic Manifestation (ATOMIC) updated for user {user_id}")
-            return new_ocean_data
+            logger.info(f"Ocean Hub: Smart Merge completed for user {user_id}")
+            return current_print
 
-
-            
         except Exception as e:
-            logger.error(f"Ocean synthesis failed: {e}")
-            return current_data
+            logger.error(f"Ocean Hub Synthesis failed: {e}")
+            await db.rollback()
+            return current_print
 
     @staticmethod
     async def get_ocean(db: AsyncSession, user_id: int) -> Dict[str, Any]:
