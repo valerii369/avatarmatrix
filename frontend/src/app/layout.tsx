@@ -4,7 +4,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "AVATAR — Эволюция Сознания",
-  description: "Платформа трансформации через 176 архетипов по шкале Хокинса",
+  description: "Платформа трансформации через 264 архетипа по шкале Хокинса",
   manifest: "/manifest.json",
 };
 

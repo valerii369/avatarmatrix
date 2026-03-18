@@ -14,7 +14,7 @@ import {
 } from "recharts";
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// SphereInfoPanel — нижняя плашка сферы с recharts bar chart (22 архетипа)
+// SphereInfoPanel — нижняя плашка сферы с recharts bar chart (22 архетипа × 12 сфер = 264 карты)
 //
 // Stack: Next.js 16 · React 19 · Tailwind 4 · recharts · framer-motion
 //

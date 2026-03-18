@@ -72,7 +72,7 @@ async def get_all_cards(
     user_id: int,
     db: AsyncSession = Depends(get_db),
 ):
-    """Get all 176 cards for a user with their current status."""
+    """Get all 264 cards for a user with their current status."""
     result = await db.execute(
         select(CardProgress)
         .where(CardProgress.user_id == user_id)

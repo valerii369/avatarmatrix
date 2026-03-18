@@ -1,5 +1,5 @@
 """
-Economy service: handles ✦ Energy credits, token budgets, and streak logic.
+Economy service: handles ✦ Energy credits, token budgets, and streak logic for the 264-card matrix.
 """
 from datetime import datetime, date, timedelta
 from typing import Optional, Tuple

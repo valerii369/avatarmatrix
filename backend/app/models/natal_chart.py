@@ -21,7 +21,7 @@ class NatalChart(Base, TimestampMixin):
 
     # Recommended cards from astrology calculation
     # [{archetype_id, sphere, priority, reason}]
-    recommended_cards_json: Mapped[Optional[list]] = mapped_column(JSONB, nullable=True)
+    # REMOVED: recommended_cards_json (Now handled in Level 3 Manifestation)
 
     # Ascendant sign and ruler
     ascendant_sign: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)
@@ -30,5 +30,4 @@ class NatalChart(Base, TimestampMixin):
     # Stelliums detected
     stelliums_json: Mapped[Optional[list]] = mapped_column(JSONB, nullable=True)
 
-    # LLM synthesized energetic descriptions for each of the 12 spheres
-    sphere_descriptions_json: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
+    # REMOVED: sphere_descriptions_json (Now handled in Level 2 River)

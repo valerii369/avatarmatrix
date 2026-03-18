@@ -5,9 +5,7 @@ from sqlalchemy import select
 
 from app.core.astrology.natal_chart import calculate_natal_chart, to_dict as chart_to_dict
 from app.core.astrology.aspect_calculator import calculate_aspects, to_dict as aspects_to_dict
-from app.core.astrology.priority_engine import generate_recommended_cards
-from app.core.astrology.vector_matcher import match_archetypes_to_spheres
-from app.core.astrology.llm_engine import synthesize_sphere_descriptions
+# REMOVED: priority_engine, vector_matcher, llm_engine (Moved to L2/L3)
 from app.agents.common import ARCHETYPE_IDS
 from app.models.natal_chart import NatalChart
 from app.models.card_progress import CardProgress, CardStatus
@@ -30,32 +28,14 @@ class AstroRain:
         """
         logger.info(f"AstroRain processing onboarding for user {user_obj.id}")
 
-        # 1. Calculation
+        # 1. Calculation (Strictly "Dry" Data)
         chart = calculate_natal_chart(birth_date, birth_time, lat, lon, tz_name)
         chart_dict = chart_to_dict(chart)
         aspects = calculate_aspects(chart_dict["planets"])
         aspects_dict = aspects_to_dict(aspects)
 
-        # 2. Rule + Vector Recommendations
-        sphere_descriptions = await synthesize_sphere_descriptions(chart_dict, aspects_dict)
-        recommended_rules = generate_recommended_cards(chart, aspects)
-        recommended_vector = await match_archetypes_to_spheres(db, sphere_descriptions)
-
-        # Merge recommendations
-        combined_recommendations = []
-        seen_rec = set()
-        for r in recommended_rules:
-            combined_recommendations.append(r)
-            seen_rec.add((r.archetype_id, r.sphere))
-        for r in recommended_vector:
-            if (r.archetype_id, r.sphere) not in seen_rec:
-                combined_recommendations.append(r)
-                seen_rec.add((r.archetype_id, r.sphere))
-
-        recommended_dict = [
-            {"archetype_id": c.archetype_id, "sphere": c.sphere, "priority": c.priority, "reason": c.reason}
-            for c in combined_recommendations
-        ]
+        # REMOVED: Level 1 Interpretations and Recommendations
+        # These now happen in L2 (River) and L3 (Ocean)
 
         # 3. NatalChart Persistence
         natal_res = await db.execute(select(NatalChart).where(NatalChart.user_id == user_obj.id))
@@ -66,8 +46,7 @@ class AstroRain:
         
         natal.planets_json = chart_dict
         natal.aspects_json = aspects_dict
-        natal.recommended_cards_json = recommended_dict
-        natal.sphere_descriptions_json = sphere_descriptions
+        # REMOVED: recommended_cards_json and sphere_descriptions_json
         natal.ascendant_sign = chart.ascendant_sign
         natal.ascendant_ruler = chart.ascendant_ruler
         natal.location_name = location_name
@@ -81,6 +60,23 @@ class AstroRain:
         user_obj.birth_tz = tz_name
         user_obj.onboarding_done = True
         db.add(user_obj)
+
+        # 4. Initialize CardProgress (Senior v3.2 Unified Matrix)
+        # 264 cards total (12 spheres * 22 archetypes)
+        spheres = [
+            "IDENTITY", "RESOURCES", "COMMUNICATION", "ROOTS",
+            "CREATIVITY", "SERVICE", "PARTNERSHIP", "TRANSFORMATION",
+            "EXPANSION", "STATUS", "VISION", "SPIRIT"
+        ]
+        for sphere in spheres:
+            for arch_id in ARCHETYPE_IDS:
+                cp = CardProgress(
+                    user_id=user_obj.id,
+                    sphere=sphere,
+                    archetype_id=arch_id,
+                    status=CardStatus.LOCKED
+                )
+                db.add(cp)
 
         await db.flush()
         return natal

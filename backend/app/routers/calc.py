@@ -43,7 +43,6 @@ class BirthDataRequest(BaseModel):
 class CalcResponse(BaseModel):
     success: bool
     natal_chart: dict
-    recommended_cards: list
     total_cards: int
     message: str
 
@@ -119,7 +118,6 @@ async def calculate(
         return CalcResponse(
             success=True,
             natal_chart=natal.planets_json,
-            recommended_cards=natal.recommended_cards_json,
             total_cards=22 * 12,
             message=f"Карта рассчитана (L1). Синтез (L2/L3) запущен в фоне.",
         )
