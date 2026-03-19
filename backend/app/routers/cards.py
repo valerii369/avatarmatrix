@@ -12,6 +12,7 @@ from sqlalchemy import select
 from app.database import get_db
 from app.models import CardProgress, AlignSession, SyncSession
 from app.core.economy import hawkins_to_rank, RANK_NAMES
+from app.services.evolution_service import EvolutionService
 
 router = APIRouter()
 
@@ -131,6 +132,19 @@ async def get_card_detail(
     rank = hawkins_to_rank(card.hawkins_peak)
 
     matrix_data = MATRIX_DATA.get(str(card.archetype_id), {}).get(card.sphere, {})
+    
+    # User Evolution: Record card opening touch
+    await EvolutionService.record_touch(
+        db=db,
+        user_id=user_id,
+        touch_type="CARD_OPEN",
+        payload={
+            "card_id": card_id,
+            "archetype_id": card.archetype_id,
+            "sphere": card.sphere,
+            "status": card.status
+        }
+    )
     
     return CardDetail(
         id=card.id,

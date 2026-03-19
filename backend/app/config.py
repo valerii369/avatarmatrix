@@ -15,6 +15,10 @@ class Settings(BaseSettings):
     MINI_APP_URL: str = "https://your-app.vercel.app"
     API_BASE_URL: str = "http://localhost:8000"
     ENVIRONMENT: str = "development"
+    
+    # Astrology API (astrologyapi.com)
+    ASTROLOGY_API_USER_ID: str = ""
+    ASTROLOGY_API_KEY: str = ""
 
     # CORS
     CORS_ORIGINS: list[str] = ["*"]

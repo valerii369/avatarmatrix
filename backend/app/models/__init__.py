@@ -5,19 +5,16 @@ from app.models.card_progress import CardProgress, CardStatus
 from app.models.sync_session import SyncSession
 from app.models.align_session import AlignSession
 from app.models.diary import DiaryEntry
-from app.models.portrait import UserPortrait, Pattern, Connection, UserSymbol
 from app.models.game import GameState, Match, DailyReflect, VoiceRecord
-from app.models.knowledge import SphereKnowledge, UserWorldKnowledge
 from app.models.avatar_card import AvatarCard
 from app.models.ai_diagnostic import AIDiagnosticSession
-from app.models.data_architecture import Event, SessionFeatures, UserBehaviorProfileV2
+from app.models.data_architecture import Event
 from app.models.reflection_session import ReflectionSession
 from app.models.assistant_session import AssistantSession
 from app.models.user_memory import UserMemory
-from app.models.text_diagnostics import (
-    Sphere, Archetype, TextScene, SceneInteraction, SceneStats, SceneSet, SceneSetItem
-)
 from app.models.user_print import UserPrint
+from app.models.identity_passport import IdentityPassport
+from app.models.user_evolution import UserEvolution
 
 __all__ = [
     "User",
@@ -26,7 +23,6 @@ __all__ = [
     "SyncSession",
     "AlignSession",
     "NatalChart",
-    "Pattern",
     "DiaryEntry",
     "AvatarCard",
     "GameState",
@@ -34,21 +30,11 @@ __all__ = [
     "DailyReflect",
     "VoiceRecord",
     "AIDiagnosticSession",
-    "SphereKnowledge",
-    "UserWorldKnowledge",
     "Event",
-    "SessionFeatures",
-    "UserBehaviorProfileV2",
-    "Sphere",
-    "Archetype",
-    "TextScene",
-    "SceneInteraction",
-    "SceneStats",
-    "SceneSet",
-    "SceneSetItem",
     "ReflectionSession",
     "AssistantSession",
     "UserMemory",
     "UserPrint",
-    "UserSymbol"
+    "IdentityPassport",
+    "UserEvolution"
 ]

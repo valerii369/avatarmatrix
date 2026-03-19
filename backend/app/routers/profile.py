@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.database import get_db
-from app.models import User, CardProgress, NatalChart, Pattern
+from app.models import User, CardProgress, NatalChart
 from app.core.economy import calculate_xp_for_level, get_level_title, get_claim_status
 from app.agents.common import SPHERES
 
@@ -21,8 +21,7 @@ async def get_profile(user_id: int, db: AsyncSession = Depends(get_db)):
     cards_result = await db.execute(select(CardProgress).where(CardProgress.user_id == user_id))
     all_cards = cards_result.scalars().all()
 
-    patterns_result = await db.execute(select(Pattern).where(Pattern.user_id == user_id))
-    patterns = patterns_result.scalars().all()
+    patterns = []
 
     # Build fingerprint (for matching — available when spheres ≥500)
     strong_spheres = {}
@@ -114,10 +113,9 @@ async def reset_profile_by_tg(tg_id: int, db: AsyncSession = Depends(get_db)):
     from sqlalchemy import delete
     from app.models import (
         GameState, SyncSession, AlignSession, DiaryEntry, 
-        UserPortrait, Connection, UserSymbol, Match, 
         DailyReflect, VoiceRecord, AIDiagnosticSession,
         ReflectionSession, AssistantSession, UserMemory, UserPrint,
-        Pattern, Event, SessionFeatures, UserBehaviorProfileV2
+        Event, IdentityPassport, UserEvolution
     )
     
     try:
@@ -163,10 +161,9 @@ async def reset_profile_by_tg(tg_id: int, db: AsyncSession = Depends(get_db)):
         # Delete dependent charts/cards and sessions
         tables_to_clear = [
             CardProgress, NatalChart, SyncSession, AlignSession, DiaryEntry,
-            UserPortrait, Connection, UserSymbol, Match, DailyReflect,
-            VoiceRecord, AIDiagnosticSession, ReflectionSession, 
-            AssistantSession, UserMemory, UserPrint, Pattern,
-            Event, SessionFeatures, UserBehaviorProfileV2
+            DailyReflect, VoiceRecord, AIDiagnosticSession, ReflectionSession, 
+            AssistantSession, UserMemory, UserPrint,
+            Event, IdentityPassport, UserEvolution
         ]
         
         for table in tables_to_clear:

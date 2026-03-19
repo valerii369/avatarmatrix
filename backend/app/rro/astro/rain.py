@@ -1,3 +1,4 @@
+import datetime
 import logging
 from typing import Dict, Any, List
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,6 +10,8 @@ from app.core.astrology.aspect_calculator import calculate_aspects, to_dict as a
 from app.agents.common import ARCHETYPE_IDS
 from app.models.natal_chart import NatalChart
 from app.models.card_progress import CardProgress, CardStatus
+from app.rro.astro.api_client import AstrologyAPIClient
+import pytz
 
 logger = logging.getLogger(__name__)
 
@@ -85,3 +88,54 @@ class AstroRain:
 
         await db.flush()
         return natal
+
+    @staticmethod
+    async def enrich_with_api(db: AsyncSession, natal_id: int):
+        """
+        Level 1 Enrichment: Fetch professional data from astrologyapi.com
+        and store it in natal_charts.api_raw_json.
+        """
+        from app.models.user import User
+        res = await db.execute(
+            select(NatalChart, User)
+            .join(User, User.id == NatalChart.user_id)
+            .where(NatalChart.id == natal_id)
+        )
+        row = res.fetchone()
+        if not row:
+            logger.error(f"NatalChart {natal_id} not found for enrichment")
+            return
+
+        natal, user = row
+        client = AstrologyAPIClient()
+        
+        try:
+            # Prepare birth data for API
+            # Note: hour:min parsing from user.birth_time (HH:mm)
+            h, m = map(int, user.birth_time.split(":"))
+            
+            # Calculate tzone offset
+            tz = pytz.timezone(user.birth_tz)
+            dt = datetime.datetime.combine(user.birth_date, datetime.time(h, m))
+            offset = tz.utcoffset(dt).total_seconds() / 3600.0
+
+            api_data = await client.get_western_horoscope(
+                day=user.birth_date.day,
+                month=user.birth_date.month,
+                year=user.birth_date.year,
+                hour=h,
+                minute=m,
+                lat=user.birth_lat,
+                lon=user.birth_lon,
+                tzone=offset
+            )
+            
+            natal.api_raw_json = api_data
+            from sqlalchemy.orm.attributes import flag_modified
+            flag_modified(natal, "api_raw_json")
+            await db.flush()
+            logger.info(f"Level 1 Enrichment (API) successful for natal_id {natal_id}")
+            
+        except Exception as e:
+            logger.error(f"Level 1 Enrichment failed for natal_id {natal_id}: {e}")
+            # We don't raise here to allow the rest of the pipeline to run even if API fails

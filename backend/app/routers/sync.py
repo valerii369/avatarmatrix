@@ -4,19 +4,17 @@ Sync router: manage 5-phase synchronization sessions.
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from pydantic import BaseModel
 from typing import Optional
+import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from app.database import get_db
-from app.models import CardProgress, SyncSession, User, SphereKnowledge, UserWorldKnowledge, UserPortrait, SceneSet, SceneSetItem, SceneInteraction
+from app.database import get_db, AsyncSessionLocal
+from app.models import CardProgress, SyncSession, User
 from app.models.card_progress import CardStatus
 from app.agents.sync_agent import run_avatar_layer, get_response_metrics, autonomous_somatic_check
-from app.agents.analytic_agent import run_mirror_analysis, extract_response_features, update_user_portrait
-from app.core.feature_extractor import FeatureExtractor
-from app.core.economy import spend_energy, hawkins_to_rank, award_xp, process_card_rank_up, XP_VALUES
-from app.core.portrait_service import build_portrait_for_sphere
-from app.rro.ocean.hub import OceanService
-from app.database import AsyncSessionLocal
+from app.agents.analytic_agent import run_mirror_analysis, extract_response_features
+from app.services.evolution_service import EvolutionService
+from app.rro.passport_service import PassportService
 
 router = APIRouter()
 
@@ -25,16 +23,7 @@ async def _background_sync_processing(user_id: int, session_id: int, sphere: str
     """Wrapper for background tasks to use a fresh session."""
     async with AsyncSessionLocal() as session:
         try:
-            # 1. Aggregate knowledge
-            await _aggregate_knowledge(user_id, sphere) # This function already manages its own session
-            
-            # 2. Extract features
-            await FeatureExtractor.process_sync_session(session, session_id, user_id)
-            
-            # 3. Update technical portrait (River)
-            portrait_res = await update_user_portrait(session, user_id, session_id)
-            
-            # 4. Level 2 & 3 Pipeline: Update the Hub (Ocean - User Print)
+            # 1. Level 2 & 3 Pipeline: Update the Hub (Ocean - User Print)
             from app.rro.sync.river import SyncRiver
             from app.rro.ocean.hub import OceanService
             
@@ -51,115 +40,26 @@ async def _background_sync_processing(user_id: int, session_id: int, sphere: str
                     "sphere": sync_session.sphere
                 }
                 
-                # Level 2: River
+                # Level 2: River (Populates Passport)
                 river = SyncRiver()
-                interpretation = await river.flow(session, user_id, rain_data)
+                await river.flow(session, user_id, rain_data)
                 
-                if interpretation:
-                    # Level 3: Ocean
-                    await OceanService.update_ocean(session, user_id, [interpretation])
+                # Level 3: Ocean (Simplification)
+                await OceanService.update_ocean(session, user_id)
+                
+                # User Evolution: Record session processing completion
+                await EvolutionService.record_touch(
+                    db=session,
+                    user_id=user_id,
+                    touch_type="SYNC_PROCESSED",
+                    payload={"session_id": session_id, "sphere": sphere}
+                )
             
             await session.commit()
         except Exception as e:
             import logging
             logging.getLogger(__name__).error(f"Background Sync Processing Failed: {e}")
             await session.rollback()
-
-async def _aggregate_knowledge(user_id: int, sphere: str) -> None:
-    """Background task: Aggregate Level 3 -> Level 2 -> Level 1."""
-    async with AsyncSessionLocal() as session:
-        try:
-            # 1. Aggregate to Level 2 (Sphere)
-            # Find all completed synced cards in this sphere
-            results = await session.execute(
-                select(SyncSession).where(
-                    SyncSession.user_id == user_id,
-                    SyncSession.sphere == sphere,
-                    SyncSession.is_complete == True
-                )
-            )
-            sessions = results.scalars().all()
-            if not sessions:
-                return
-
-            # Simple aggregation logic: average Hawkins, collect patterns
-            avg_hawkins = int(sum(s.hawkins_score for s in sessions) / len(sessions))
-            patterns = [s.core_pattern for s in sessions if s.core_pattern]
-            completed_archetypes = list(set(s.archetype_id for s in sessions))
-            
-            # Find or create SphereKnowledge
-            sk_result = await session.execute(
-                select(SphereKnowledge).where(
-                    SphereKnowledge.user_id == user_id,
-                    SphereKnowledge.sphere == sphere
-                )
-            )
-            sk = sk_result.scalar_one_or_none()
-            if not sk:
-                sk = SphereKnowledge(user_id=user_id, sphere=sphere)
-                session.add(sk)
-            
-            sk.sphere_picture = f"Сводная картина по {len(sessions)} архетипам."
-            sk.sphere_pattern = " / ".join(patterns[:3])
-            sk.sphere_hawkins = avg_hawkins
-            sk.cards_completed = completed_archetypes
-            
-            # 2. Aggregate to Level 1 (World)
-            # Find all sphere knowledges for this user
-            sk_all_result = await session.execute(
-                select(SphereKnowledge).where(SphereKnowledge.user_id == user_id)
-            )
-            sks = sk_all_result.scalars().all()
-            
-            if sks:
-                world_avg_hawkins = int(sum(s.sphere_hawkins for s in sks) / len(sks))
-                completed_spheres = [s.sphere for s in sks]
-                
-                wk_result = await session.execute(
-                    select(UserWorldKnowledge).where(UserWorldKnowledge.user_id == user_id)
-                )
-                wk = wk_result.scalar_one_or_none()
-                if not wk:
-                    wk = UserWorldKnowledge(user_id=user_id)
-                    session.add(wk)
-                
-                wk.hawkins_baseline = world_avg_hawkins
-                wk.spheres_completed = completed_spheres
-                wk.overall_pattern = "Комплексный паттерн развития."
-
-            await session.commit()
-            
-            # Also rebuild portrait
-            await build_portrait_for_sphere(session, user_id, sphere)
-            
-        except Exception as e:
-            import logging
-            logging.getLogger(__name__).error(f"Knowledge aggregation error: {e}")
-
-async def _get_portrait_context(db: AsyncSession, user_id: int, sphere: str) -> dict:
-    """Retrieves previous patterns and symbols for the AI prompt."""
-    res = await db.execute(
-        select(UserPortrait).where(UserPortrait.user_id == user_id, UserPortrait.sphere == sphere)
-    )
-    portrait = res.scalar_one_or_none()
-    if not portrait or not portrait.cards_data:
-        return {}
-    
-    # Collect unique symbols and patterns from all cards in this sphere
-    symbols = []
-    patterns = []
-    anchors = []
-    
-    for card in portrait.cards_data:
-        if card.get("recurring_symbol"): symbols.append(card["recurring_symbol"])
-        if card.get("core_pattern"): patterns.append(card["core_pattern"])
-        if card.get("body_anchor"): anchors.append(card["body_anchor"])
-    
-    return {
-        "symbols": ", ".join(list(set(symbols))[:5]),
-        "patterns": ", ".join(list(set(patterns))[:5]),
-        "body_anchors": ", ".join(list(set(anchors))[:5])
-    }
 
 
 class StartSyncRequest(BaseModel):
@@ -239,35 +139,16 @@ async def start_sync(
     if not can_spend:
         raise HTTPException(status_code=402, detail="Недостаточно ✦ Энергии")
 
-    # Pre-fetch 5 scenes to eliminate DB lookups during the session
-    from app.models.text_diagnostics import TextScene
-    import random
-    from app.agents.common import SPHERES
-    
-    sphere_id = 1
-    for s in SPHERES.values():
-        if s.get('key') == card.sphere:
-            sphere_id = s.get('id', 1)
-            break
-            
-    scene_res = await db.execute(
-        select(TextScene).where(TextScene.sphere_id == sphere_id, TextScene.is_active == True)
+    # User Evolution: Record session start attempt
+    await EvolutionService.record_touch(
+        db=db,
+        user_id=request.user_id,
+        touch_type="SYNC_START_REQUEST",
+        payload={"card_id": request.card_progress_id, "sphere": card.sphere}
     )
-    scenes = scene_res.scalars().all()
-    if len(scenes) < 5:
-        scene_res = await db.execute(select(TextScene).where(TextScene.is_active == True).limit(20))
-        scenes = scene_res.scalars().all()
     
-    selected_scenes = random.sample(scenes, min(len(scenes), 5)) if scenes else []
-    
+    # In RRO v3, scenes are generated dynamically by the LLM
     scenes_data = {}
-    for i, sc in enumerate(selected_scenes):
-        layer_num = str(i + 1)
-        scenes_data[layer_num] = {
-            "id": sc.id, 
-            "text": sc.scene_text,
-            "meta_data": sc.meta_data
-        }
 
     # Create new sync session
     session = SyncSession(
@@ -296,7 +177,10 @@ async def start_sync(
     await db.refresh(session)
 
     # Get context from portrait
-    portrait_ctx = await _get_portrait_context(db, request.user_id, card.sphere)
+    # Get context from Passport instead of legacy Portrait
+    passport_data = await PassportService.get_passport_json(db, request.user_id)
+    astro_spheres = passport_data.get("astrology", {}).get("data", {}).get("spheres", {}) if passport_data else {}
+    portrait_ctx = astro_spheres.get(card.sphere, {})
 
     # 1. Generate Intro content
     ai_content = await run_avatar_layer(
@@ -450,7 +334,9 @@ async def process_phase(
     # 2. Handle Mirror Analysis (Final)
     if next_layer == "mirror":
         # Get context from portrait for continuity in analysis
-        portrait_ctx = await _get_portrait_context(db, request.user_id, session.sphere)
+        passport_data = await PassportService.get_passport_json(db, request.user_id)
+        astro_spheres = passport_data.get("astrology", {}).get("data", {}).get("spheres", {}) if passport_data else {}
+        portrait_ctx = astro_spheres.get(session.sphere, {})
         
         analysis = await run_mirror_analysis(
             session.archetype_id, session.sphere, transcript, session.phase_data, portrait_context=portrait_ctx, db=db
@@ -549,7 +435,9 @@ async def process_phase(
 
     try:
         # Get context from portrait for continuity
-        portrait_ctx = await _get_portrait_context(db, request.user_id, session.sphere)
+        passport_data = await PassportService.get_passport_json(db, request.user_id)
+        astro_spheres = passport_data.get("astrology", {}).get("data", {}).get("spheres", {}) if passport_data else {}
+        portrait_ctx = astro_spheres.get(session.sphere, {})
 
         # 3. Handle next narrative step
         if not is_fast_fail and next_layer != "mirror":
@@ -564,53 +452,19 @@ async def process_phase(
                 portrait_context=portrait_ctx
             )
 
-        # 4. Log interaction (Self-Learning Layer 1)
+        # 4. Log interaction (User Evolution)
         if current_layer != "intro" and user_response_text:
-            try:
-                # Find the scene that was shown for the phase we just COMPLETED
-                scene_id = state.get("scenes", {}).get(current_layer, {}).get("id")
-                scene_text = state.get("scenes", {}).get(current_layer, {}).get("text")
-                layer_int = int(current_layer)
-                
-                if scene_id:
-                    # Calculate timing
-                        # We need the timestamp when the AI message was sent
-                        ai_ts_str = state.get("timing", {}).get(f"{current_layer}_{sub_phase}")
-                        reading_time = 0
-                        if ai_ts_str and isinstance(ai_ts_str, str):
-                            try:
-                                ai_ts = datetime.datetime.fromisoformat(ai_ts_str)
-                                user_ts = datetime.datetime.fromisoformat(user_timestamp)
-                                reading_time = (user_ts - ai_ts).total_seconds()
-                            except (ValueError, TypeError):
-                                reading_time = 0
-
-                        from app.agents.sync_agent import get_embedding
-                        resp_emb = await get_embedding(user_response_text)
-
-                        # NEW: Extract structured features for research and future training
-                        extracted_feats = await extract_response_features(
-                            scene_text=scene_text or "",
-                            user_response=user_response_text,
-                            archetype_id=session.archetype_id,
-                            sphere=session.sphere
-                        )
-
-                        interaction = SceneInteraction(
-                            user_id=request.user_id,
-                            session_id=session.id,
-                            scene_id=scene_id,
-                            layer_index=layer_int,
-                            reading_time=reading_time,
-                            response_text=user_response_text,
-                            response_embedding=resp_emb,
-                            response_length=len(user_response_text),
-                            extracted_features=extracted_feats
-                        )
-                        db.add(interaction)
-            except Exception as ex:
-                import logging
-                logging.getLogger(__name__).error(f"SceneInteraction logging failed: {ex}")
+            await EvolutionService.record_touch(
+                db=db,
+                user_id=request.user_id,
+                touch_type="SYNC_STEP",
+                payload={
+                    "session_id": session.id,
+                    "layer": current_layer,
+                    "sub_phase": sub_phase,
+                    "response_length": len(user_response_text)
+                }
+            )
 
         # Update session state: Ensure context is saved
         timestamp = datetime.datetime.utcnow().isoformat()

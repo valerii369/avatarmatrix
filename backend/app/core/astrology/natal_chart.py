@@ -8,6 +8,7 @@ from dataclasses import dataclass, field
 import swisseph as swe
 from geopy.geocoders import Nominatim
 from timezonefinder import TimezoneFinder
+from typing import Any, Optional, Dict, List
 from datetime import datetime
 import pytz
 from app.config import settings

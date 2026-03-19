@@ -1,9 +1,6 @@
-import random
-import json
 from app.agents.common import client, settings, ARCHETYPES, SPHERES, MATRIX_DATA
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.models.text_diagnostics import TextScene, SceneSet, SceneSetItem, SceneInteraction
 
 def get_response_metrics(text: str) -> dict:
     """
@@ -76,34 +73,6 @@ async def get_embedding(text: str) -> list[float]:
     except Exception:
         return [0.0] * 1536
 
-async def select_scene_set(db: AsyncSession, session_id: int, sphere_id: int, archetype_id: int):
-    """
-    Stimulus Engine: Selects 5 scenes for a session from the library.
-    """
-    # 1. Fetch available scenes for this sphere/archetype
-    # (In a real system, we might pick different archetypes for different layers)
-    result = await db.execute(
-        select(TextScene).where(TextScene.sphere_id == sphere_id).where(TextScene.is_active == True)
-    )
-    scenes = result.scalars().all()
-    
-    if len(scenes) < 5:
-        # Fallback to random if not enough in this sphere
-        result = await db.execute(select(TextScene).where(TextScene.is_active == True).limit(20))
-        scenes = result.scalars().all()
-    
-    selected_scenes = random.sample(scenes, min(len(scenes), 5))
-    
-    # 2. Save SceneSet
-    new_set = SceneSet(session_id=session_id)
-    db.add(new_set)
-    await db.flush()
-    
-    for i, scene in enumerate(selected_scenes):
-        db.add(SceneSetItem(scene_set_id=new_set.id, scene_id=scene.id, position=i+1))
-    
-    await db.commit()
-    return selected_scenes
 
 def build_avatar_prompt(
     layer: str,
@@ -138,7 +107,7 @@ def build_avatar_prompt(
 
     if portrait_context:
         base_context += f"""
-ИСТОРИЧЕСКИЙ КОНТЕКСТ (из UserPortrait):
+ИСТОРИЧЕСКИЙ КОНТЕКСТ (из Паспорта Личности):
 - Прошлые паттерны: {portrait_context.get('patterns', 'не обнаружены')}
 - Прошлые символы: {portrait_context.get('symbols', 'не обнаружены')}
 - Прошлые телесные якоря: {portrait_context.get('body_anchors', 'не обнаружены')}

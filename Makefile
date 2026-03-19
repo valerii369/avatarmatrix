@@ -1,4 +1,4 @@
-.PHONY: install migrate dev bot test
+.PHONY: install migrate dev bot test frontend
 
 # Setup
 install:

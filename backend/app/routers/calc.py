@@ -140,6 +140,11 @@ async def run_rro_pipeline(u_id: int, n_id: int):
                 logger.error(f"[BACKGROUND] NatalChart {n_id} not found for user {u_id}")
                 return
 
+            # Level 1 Enrichment: Fetch and store API data
+            logger.info(f"[BACKGROUND] Starting Level 1 (Rain API) for user {u_id}")
+            await AstroRain.enrich_with_api(session, n_id)
+            await session.refresh(natal_obj) # Ensure we have the api_raw_json
+
             # Level 2: River (Interpretation)
             logger.info(f"[BACKGROUND] Starting Level 2 (River) for user {u_id}")
             river = AstroRiver()

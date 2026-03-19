@@ -9,7 +9,7 @@ from app.models import User, AssistantSession, CardProgress, CardStatus
 from app.agents.assistant_agent import generate_assistant_response
 from app.core.economy import spend_energy, award_xp
 from app.core.astrology.vector_matcher import match_text_to_archetypes
-from app.rro.ocean.hub import OceanService
+from app.services.evolution_service import EvolutionService
 from app.rro.session.river import SessionRiver
 
 router = APIRouter()
@@ -141,6 +141,19 @@ async def assistant_chat(request: AssistantChatRequest, db: AsyncSession = Depen
                     scores[sphere] = 0.0
                     session.resonance_scores = scores
                     break
+
+    # Record touch in Evolution layer
+    await EvolutionService.record_touch(
+        db=db,
+        user_id=request.user_id,
+        touch_type="ASSISTANT_MESSAGE",
+        payload={
+            "session_id": session.id,
+            "sphere": sphere,
+            "resonance_increment": increment,
+            "message_length": len(request.message)
+        }
+    )
 
     db.add(session)
     await db.commit()

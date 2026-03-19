@@ -5,8 +5,8 @@ from app.agents.common import client, settings, ARCHETYPES, SPHERES, MATRIX_DATA
 from app.agents.sync_agent import build_avatar_prompt
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update
-from app.models.portrait import UserPortrait, Pattern
 from app.models.sync_session import SyncSession
+from app.services.evolution_service import EvolutionService
 
 logger = logging.getLogger(__name__)
 
@@ -164,8 +164,7 @@ async def extract_response_features(
 
 async def update_user_portrait(db: AsyncSession, user_id: int, session_id: int) -> dict:
     """
-    Aggregates session results into a UserPortrait (Consciousness Imprint).
-    Identifies cross-sphere patterns and updates the body map.
+    Records session results into User Evolution (replaces legacy UserPortrait).
     """
     # 1. Fetch the completed session
     result = await db.execute(select(SyncSession).where(SyncSession.id == session_id))
@@ -173,64 +172,21 @@ async def update_user_portrait(db: AsyncSession, user_id: int, session_id: int) 
     if not session:
         return {}
 
-    # 2. Find or Create UserPortrait for this sphere
-    portrait_res = await db.execute(
-        select(UserPortrait).where(
-            UserPortrait.user_id == user_id,
-            UserPortrait.sphere == session.sphere
-        )
+    # 2. Record session completion in Evolution
+    await EvolutionService.update_session_progress(
+        db=db,
+        user_id=user_id,
+        session_type="sync",
+        progress_data={
+            "session_id": session_id,
+            "sphere": session.sphere,
+            "archetype_id": session.archetype_id,
+            "hawkins_score": session.hawkins_score,
+            "core_pattern": session.core_pattern,
+            "body_anchor": session.body_anchor,
+            "is_complete": session.is_complete
+        }
     )
-    portrait = portrait_res.scalar_one_or_none()
-    if not portrait:
-        portrait = UserPortrait(user_id=user_id, sphere=session.sphere)
-        db.add(portrait)
-        await db.flush()
-
-    # 3. Update Sphere Data
-    new_card_entry = {
-        "archetype_id": session.archetype_id,
-        "date": "now", # Ideally use real timestamp
-        "hawkins_score": session.hawkins_score,
-        "core_pattern": session.core_pattern,
-        "body_anchor": session.body_anchor,
-        "recurring_symbol": session.recurring_symbol
-    }
-    
-    cards_data = list(portrait.cards_data or [])
-    # Update if already exists for this archetype, else append
-    existing_idx = next((i for i, c in enumerate(cards_data) if c.get("archetype_id") == session.archetype_id), -1)
-    if existing_idx >= 0:
-        cards_data[existing_idx] = new_card_entry
-    else:
-        cards_data.append(new_card_entry)
-    
-    portrait.cards_data = cards_data
-    
-    # 4. Update Hawkins Stats
-    timeline = list(portrait.hawkins_timeline or [])
-    timeline.append({"date": "now", "score": session.hawkins_score, "archetype_id": session.archetype_id})
-    portrait.hawkins_timeline = timeline[-20:] # Keep last 20
-    
-    portrait.avg_hawkins = int(sum(c.get("hawkins_score", 0) for c in cards_data) / len(cards_data))
-    portrait.min_hawkins = min(c.get("hawkins_score", 1000) for c in cards_data)
-
-    # 5. Update Pattern Table (Cross-sphere)
-    if session.core_pattern:
-        # Simple tag extraction (split by space/comma)
-        tags = [t.strip().lower() for t in session.core_pattern.replace(",", " ").split() if len(t) > 3]
-        for tag in tags:
-            pattern_res = await db.execute(select(Pattern).where(Pattern.user_id == user_id, Pattern.tag == tag))
-            pattern = pattern_res.scalar_one_or_none()
-            if not pattern:
-                pattern = Pattern(user_id=user_id, tag=tag)
-                db.add(pattern)
-                await db.flush()
-            
-            pattern.occurrences += 1
-            cards_json = list(pattern.cards_json or [])
-            if session.archetype_id not in [c.get("archetype_id") for c in cards_json]:
-                cards_json.append({"archetype_id": session.archetype_id, "sphere": session.sphere, "strength": 1})
-            pattern.cards_json = cards_json
 
     await db.commit()
     return {"status": "success", "sphere": session.sphere}

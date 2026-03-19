@@ -9,6 +9,7 @@ from app.models import CardProgress, AlignSession, SyncSession, User, DiaryEntry
 from app.agents.align_agent import alignment_session_message
 from app.core.economy import spend_energy, hawkins_to_rank, process_card_rank_up
 from app.config import settings
+from app.services.evolution_service import EvolutionService
 
 router = APIRouter()
 
@@ -114,6 +115,19 @@ async def alignment_session(
         await db.commit()
         await db.refresh(align_session)
         align_session_id = align_session.id
+
+        # User Evolution: Record session start
+        await EvolutionService.record_touch(
+            db=db,
+            user_id=user_id,
+            touch_type="SESSION_START",
+            payload={
+                "session_type": "alignment",
+                "card_id": card_progress_id,
+                "archetype_id": archetype_id,
+                "sphere": sphere
+            }
+        )
 
     # 2. SESSION LOOP (Variables in memory)
     chat_history = []
@@ -300,6 +314,20 @@ async def alignment_session(
                     entry_type="session_result"
                 )
                 db.add(diary)
+
+                # User Evolution: Record session completion and progress
+                await EvolutionService.update_session_progress(
+                    db=db,
+                    user_id=user_id,
+                    session_type="alignment",
+                    progress_data={
+                        "card_id": card_progress_id,
+                        "archetype_id": card.archetype_id,
+                        "sphere": card.sphere,
+                        "hawkins_exit": align_session.hawkins_exit,
+                        "insight": final_insight
+                    }
+                )
             except Exception as e:
                 print(f"[Session Auto-Save Error] {e}")
 

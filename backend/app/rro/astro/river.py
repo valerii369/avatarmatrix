@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.rro.base import BaseRiver, RiverOutput
 from app.core.astrology.llm_engine import synthesize_deep_sphere
-from app.models.river_result import RiverResult
+from app.rro.passport_service import PassportService
 
 logger = logging.getLogger(__name__)
 
@@ -18,8 +18,7 @@ SPHERES_KEYS = [
 class AstroRiver(BaseRiver):
     """
     Astro River (Level 2): Interprets Natal Chart (Rain) into psychological spheres.
-    Sequential version (v2.2) for maximum depth.
-    Persists results to river_results for architectural separation.
+    Persists results to Identity Passport via PassportService.
     """
     
     async def flow(self, db: AsyncSession, user_id: int, rain_data: Any) -> RiverOutput:
@@ -45,33 +44,17 @@ class AstroRiver(BaseRiver):
             interpretation_data = {"spheres": deep_spheres}
             logic_version = "3.3"
 
-            # 2. Persist to Level 2 Storage (River Persistence Layer)
-            # Find existing or create new
-            res = await db.execute(
-                select(RiverResult).where(
-                    RiverResult.user_id == user_id, 
-                    RiverResult.domain == "astrology"
-                )
+            # 2. Persist to Level 2 Storage (Passport Layer)
+            await PassportService.update_channel_data(
+                db=db,
+                user_id=user_id,
+                channel="astrology",
+                source="astrologyapi",
+                data=interpretation_data
             )
-            river_res = res.scalar_one_or_none()
             
-            if not river_res:
-                river_res = RiverResult(
-                    user_id=user_id,
-                    domain="astrology",
-                    interpretation_data=interpretation_data,
-                    logic_version=logic_version
-                )
-                db.add(river_res)
-            else:
-                river_res.interpretation_data = interpretation_data
-                river_res.logic_version = logic_version
-                from sqlalchemy.orm.attributes import flag_modified
-                flag_modified(river_res, "interpretation_data")
-            
-            # We flush but don't commit - Ocean will commit the entire RRO transaction
             await db.flush()
-            logger.info(f"AstroRiver results persisted (flushed) for user {user_id}")
+            logger.info(f"AstroRiver results merged into Passport for user {user_id}")
 
             return RiverOutput(
                 source="astro_river",

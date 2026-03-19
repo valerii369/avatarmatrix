@@ -3,7 +3,7 @@ CardProgress: tracks user's progress on each of the 264 cards.
 Status flow: locked → recommended → in_sync → synced → aligning → aligned
 """
 from typing import Optional
-from sqlalchemy import Integer, ForeignKey, String, Float, Boolean
+from sqlalchemy import Integer, ForeignKey, String, Float, Boolean, DateTime
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 import enum
@@ -27,7 +27,7 @@ class CardProgress(Base, TimestampMixin):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id", ondelete="CASCADE"), index=True)
 
-    # Card identity: archetype 0-21, sphere one of 8
+    # Card identity: archetype 0-21, sphere one of 12
     archetype_id: Mapped[int] = mapped_column(Integer, nullable=False)
     sphere: Mapped[str] = mapped_column(String(32), nullable=False)
 
@@ -37,6 +37,10 @@ class CardProgress(Base, TimestampMixin):
     is_recommended_portrait: Mapped[bool] = mapped_column(Boolean, default=False)
     is_recommended_ai: Mapped[bool] = mapped_column(Boolean, default=False)
     ai_score: Mapped[float] = mapped_column(Float, default=0.0)
+
+    # Manifestation tracking
+    recommendation_source: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)  # "astro", "evolution", "ai_assistant"
+    manifested_at: Mapped[Optional[DateTime]] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Hawkins tracking
     hawkins_current: Mapped[int] = mapped_column(Integer, default=0)
@@ -58,3 +62,4 @@ class CardProgress(Base, TimestampMixin):
     # Level 3 Knowledge Cell (Current Imprint)
     # Stores {thinking, reactions, patterns, aspirations}
     mental_data: Mapped[Optional[dict]] = mapped_column(JSONB, default={})
+

@@ -38,3 +38,6 @@ class NatalChart(Base, TimestampMixin):
     # NEW: Advanced Technical Markers (Senior +++)
     moon_phase: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)
     technical_summary_json: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
+
+    # NEW: Level 1 API Raw Data (astrologyapi.com)
+    api_raw_json: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)

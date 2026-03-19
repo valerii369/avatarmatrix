@@ -12,11 +12,11 @@ from pydantic import BaseModel, Field
 from app.config import settings
 from app.agents.common import client
 from app.models import (
-    User, SyncSession, SphereKnowledge, AssistantSession, 
-    UserMemory, CardProgress, CardStatus, NatalChart, 
-    UserPortrait
+    User, SyncSession, AssistantSession, 
+    UserMemory, CardProgress, CardStatus, NatalChart,
+    IdentityPassport, UserEvolution
 )
-from app.rro.ocean.hub import OceanService
+from app.rro.passport_service import PassportService
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
@@ -29,12 +29,49 @@ class AssistantResponse(BaseModel):
     activated_card: bool = Field(default=False, description="Установи в True, если резонанс достиг пика и пора 'проявить' карту.")
 
 async def get_comprehensive_context(db: AsyncSession, user_id: int) -> str:
-    """Collects all available data about the user into a text context."""
-    # 1. User Print (The Ocean) - Primary source
-    ocean = await OceanService.get_ocean(db, user_id)
-    ocean_text = ocean.model_dump_json() if ocean else "Данные Океана (Паспорта Личности) отсутствуют."
+    """Collects all available data about the user from Identity Passport + Evolution."""
+    import json
+    from app.services.evolution_service import EvolutionService
+    
+    # 1. Identity Passport (L2 + L3) — Primary source
+    passport_res = await db.execute(
+        select(IdentityPassport).where(IdentityPassport.user_id == user_id)
+    )
+    passport = passport_res.scalar_one_or_none()
+    
+    passport_text = "Паспорт Личности ещё не сформирован."
+    if passport:
+        parts = []
+        # L3: Simplified characteristics
+        if passport.simplified_characteristics:
+            chars = "\n".join([f"  • {k}: {v}" for k, v in passport.simplified_characteristics.items()])
+            parts.append(f"ХАРАКТЕРИСТИКИ ЛИЧНОСТИ:\n{chars}")
+        # L3: Spheres brief
+        if passport.spheres_brief:
+            spheres = "\n".join([f"  • {k}: {v}" for k, v in passport.spheres_brief.items()])
+            parts.append(f"12 СФЕР (кратко):\n{spheres}")
+        passport_text = "\n\n".join(parts) if parts else "Паспорт Личности в процессе формирования."
 
-    # 2. Episodic Memory (Last 5 sessions)
+    # 2. User Evolution — Recent touches and session progress
+    evo_res = await db.execute(
+        select(UserEvolution).where(UserEvolution.user_id == user_id)
+    )
+    evo = evo_res.scalar_one_or_none()
+    
+    evolution_text = "Нет данных об эволюции."
+    if evo and evo.evolution_data:
+        touches = evo.evolution_data.get("touches", [])[-5:]  # Last 5 touches
+        progress = evo.evolution_data.get("session_progress", [])[-3:]  # Last 3 sessions
+        evo_parts = []
+        if touches:
+            touch_lines = [f"  • [{t.get('type', '?')}] {t.get('timestamp', '')[:10]}" for t in touches]
+            evo_parts.append("ПОСЛЕДНИЕ КАСАНИЯ:\n" + "\n".join(touch_lines))
+        if progress:
+            prog_lines = [f"  • {p.get('session_type', '?')} сфера {p.get('data', {}).get('sphere', '?')} (Хокинс: {p.get('data', {}).get('hawkins_score', '?')})" for p in progress]
+            evo_parts.append("ПРОГРЕСС СЕССИЙ:\n" + "\n".join(prog_lines))
+        evolution_text = "\n".join(evo_parts) if evo_parts else evolution_text
+
+    # 3. Episodic Memory (Last 5 assistant sessions)
     stmt_sessions = select(AssistantSession).where(
         AssistantSession.user_id == user_id,
         AssistantSession.is_active == False
@@ -42,7 +79,7 @@ async def get_comprehensive_context(db: AsyncSession, user_id: int) -> str:
     sessions_res = await db.execute(stmt_sessions)
     last_sessions = sessions_res.scalars().all()
     
-    episodic_context = "\nИСТОРИЯ ПОСЛЕДНИХ ДИАЛОГОВ (Эпизодическая память):\n"
+    episodic_context = "\nИСТОРИЯ ПОСЛЕДНИХ ДИАЛОГОВ:\n"
     if last_sessions:
         for s in last_sessions:
             summary = s.final_analysis.get("diary_summary") if s.final_analysis else None
@@ -52,24 +89,27 @@ async def get_comprehensive_context(db: AsyncSession, user_id: int) -> str:
     else:
         episodic_context += "Нет истории прошлых сессий.\n"
 
-    # 3. Exposed Archetypes (CardProgress)
+    # 4. Active/Exposed Cards
     stmt_cards = select(CardProgress).where(
         CardProgress.user_id == user_id,
-        CardProgress.status.in_([CardStatus.ALIGNED, CardStatus.SYNCED])
+        CardProgress.status.in_([CardStatus.ALIGNED, CardStatus.SYNCED, CardStatus.RECOMMENDED])
     )
     result = await db.execute(stmt_cards)
     exposed_cards = result.scalars().all()
     
-    cards_context = "ПРОЯВЛЕННЫЕ АРХЕТИПЫ (ВАШИ ИНСТРУМЕНТЫ):\n"
+    cards_context = "КАРТЫ ПОЛЬЗОВАТЕЛЯ:\n"
     if exposed_cards:
         for card in exposed_cards:
-            cards_context += f"- Сфера '{card.sphere}': Архитип ID {card.archetype_id} (Статус: {card.status})\n"
+            cards_context += f"- Сфера '{card.sphere}': Архетип ID {card.archetype_id} (Статус: {card.status}, Хокинс: {card.hawkins_current})\n"
     else:
-        cards_context += "Нет проявленных архетипов.\n"
+        cards_context += "Нет проявленных карт.\n"
 
     context = f"""
-ДАННЫЕ ПОЛЬЗОВАТЕЛЯ (ОКЕАН/ПАСПОРТ):
-{ocean_text}
+ПАСПОРТ ЛИЧНОСТИ:
+{passport_text}
+
+ЭВОЛЮЦИЯ ПОЛЬЗОВАТЕЛЯ:
+{evolution_text}
 
 {episodic_context}
 
@@ -233,12 +273,13 @@ async def generate_assistant_response(
     # 4. Cross-Spherical Context (if reasoning detected a secondary sphere)
     secondary_context = ""
     if reasoning.get("secondary_sphere"):
-        res = await db.execute(
-            select(UserPortrait).where(UserPortrait.user_id == user_id, UserPortrait.sphere == reasoning["secondary_sphere"])
-        )
-        port = res.scalar_one_or_none()
-        if port:
-            secondary_context = f"\nСМЕЖНАЯ СФЕРА ({reasoning['secondary_sphere']}): {port.patterns_json or 'Стабильно'}\n"
+        from app.rro.passport_service import PassportService
+        passport_json = await PassportService.get_passport_json(db, user_id)
+        if passport_json:
+            astro_spheres = passport_json.get("astrology", {}).get("data", {}).get("spheres", {})
+            sec_sphere_data = astro_spheres.get(reasoning["secondary_sphere"], {})
+            if sec_sphere_data:
+                secondary_context = f"\nСМЕЖНАЯ СФЕРА ({reasoning['secondary_sphere']}): {sec_sphere_data.get('interpretation', 'Стабильно')}\n"
 
     # 5. Dynamic Memory Search
     memory_context = ""
