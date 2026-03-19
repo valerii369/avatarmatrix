@@ -122,8 +122,11 @@ async def calculate(
             message=f"Карта рассчитана (L1). Синтез (L2/L3) запущен в фоне.",
         )
     except Exception as e:
-        logger.error(f"Astro processing failed: {e}")
-        raise HTTPException(status_code=500, detail=f"Astro processing error: {e}")
+        logger.error(f"Astro processing failed for user {request.user_id}: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Astro processing error: {str(e)}"
+        )
 
 async def run_rro_pipeline(u_id: int, n_id: int):
     """

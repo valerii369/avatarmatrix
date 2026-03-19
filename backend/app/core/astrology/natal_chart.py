@@ -15,6 +15,9 @@ from app.config import settings
 
 DATA_DIR = settings.DATA_DIR
 
+# Initialize Swiss Ephemeris
+swe.set_ephe_path(DATA_DIR)
+
 with open(os.path.join(DATA_DIR, "planet_archetype_map.json")) as f:
     PLANET_ARCHETYPE_MAP = json.load(f)
 
@@ -314,7 +317,8 @@ def calculate_natal_chart(
     # Calculate planet positions
     for planet_name, planet_code in PLANET_CODES.items():
         try:
-            pos, flags = swe.calc_ut(jd, planet_code, swe.FLG_SWIEPH | swe.FLG_SPEED)
+            # Use FLG_MOSEPH as fallback if .se1 files are missing (which they are)
+            pos, flags = swe.calc_ut(jd, planet_code, swe.FLG_MOSEPH | swe.FLG_SPEED)
             degree = pos[0] % 360
             speed = pos[3]  # negative = retrograde
             retrograde = speed < 0
@@ -360,7 +364,6 @@ def calculate_natal_chart(
         south_degree = (true_node.degree + 180) % 360
         south_sign_en, south_sign_ru, _ = degree_to_sign(south_degree)
         south_house = get_house(south_degree, cusps)
-        south_sign_data = SIGN_ARCHETYPE_MAP.get(south_sign_en, {})
 
         south_node = PlanetPosition(
             name="Южный узел",
@@ -401,7 +404,6 @@ def calculate_natal_chart(
         
         f_sign_en, f_sign_ru, _ = degree_to_sign(fortune_degree)
         f_house = get_house(fortune_degree, cusps)
-        f_sign_data = SIGN_ARCHETYPE_MAP.get(f_sign_en, {})
 
         fortune = PlanetPosition(
             name="Колесо Фортуны",

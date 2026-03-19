@@ -2,7 +2,7 @@ import datetime
 import logging
 from typing import Dict, Any, List
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, delete
 
 from app.core.astrology.natal_chart import calculate_natal_chart, to_dict as chart_to_dict
 from app.core.astrology.aspect_calculator import calculate_aspects, to_dict as aspects_to_dict
@@ -54,7 +54,30 @@ class AstroRain:
         natal.ascendant_ruler = chart.ascendant_ruler
         natal.location_name = location_name
         
-        # SAVE NEW TECH MARKERS
+        # 2. Enrichment: Fetch professional data from astrologyapi.com (Synchronous now)
+        try:
+            h, m = map(int, birth_time.split(":"))
+            tz = pytz.timezone(tz_name)
+            dt_combined = datetime.datetime.combine(birth_date, datetime.time(h, m))
+            offset = tz.utcoffset(dt_combined).total_seconds() / 3600.0
+
+            client = AstrologyAPIClient()
+            api_data = await client.get_western_horoscope(
+                day=birth_date.day,
+                month=birth_date.month,
+                year=birth_date.year,
+                hour=h,
+                minute=m,
+                lat=lat,
+                lon=lon,
+                tzone=offset
+            )
+            natal.api_raw_json = api_data
+            logger.info(f"AstrologyAPI enrichment successful for user {user_obj.id}")
+        except Exception as api_err:
+            logger.error(f"AstrologyAPI enrichment failed during onboarding: {api_err}")
+
+        # 3. SAVE TECH MARKERS (Senior +++)
         natal.moon_phase = chart_dict.get("moon_phase")
         natal.technical_summary_json = chart_dict.get("technical_summary")
         natal.stelliums_json = chart_dict.get("stelliums")
@@ -71,6 +94,9 @@ class AstroRain:
 
         # 4. Initialize CardProgress (Senior v3.2 Unified Matrix)
         # 264 cards total (12 spheres * 22 archetypes)
+        # Clear old rows if retaking onboarding
+        await db.execute(delete(CardProgress).where(CardProgress.user_id == user_obj.id))
+        
         spheres = [
             "IDENTITY", "RESOURCES", "COMMUNICATION", "ROOTS",
             "CREATIVITY", "SERVICE", "PARTNERSHIP", "TRANSFORMATION",
