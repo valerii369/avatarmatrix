@@ -10,6 +10,7 @@ from app.routers import (
     diary, cards, calc, game, match, portrait, retro, 
     voice, payments, master_hub, economy, assistant
 )
+from app.dsb.api.routes import portraits as dsb_portraits
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
@@ -54,6 +55,7 @@ app.include_router(payments.router, prefix="/api/payments", tags=["Payments"])
 app.include_router(master_hub.router, prefix="/api/master-hub", tags=["MasterHub"])
 app.include_router(economy.router,    prefix="/api/economy",    tags=["Economy"])
 app.include_router(assistant.router,  prefix="/api/assistant",  tags=["Assistant"])
+app.include_router(dsb_portraits.router, prefix="/api/dsb", tags=["DSB — Digital Soul Blueprint"])
 
 
 @app.get("/health", tags=["Meta"])
