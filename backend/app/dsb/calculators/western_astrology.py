@@ -39,6 +39,19 @@ ASPECT_ANGLES: dict[str, float] = {
     "square": 90.0,
     "trine": 120.0,
     "opposition": 180.0,
+    "quincunx": 150.0,
+    "semi_square": 45.0,
+    "sesquiquadrate": 135.0,
+    "quintile": 72.0,
+    "biquintile": 144.0,
+}
+
+ASPECT_ORBS: dict[str, float] = {
+    "quincunx": 3.0,
+    "semi_square": 2.0,
+    "sesquiquadrate": 2.0,
+    "quintile": 2.0,
+    "biquintile": 2.0,
 }
 
 
@@ -54,7 +67,9 @@ def _get_planet_tier(name: str) -> str:
     return "point"
 
 
-def _max_orb(p1: str, p2: str) -> float:
+def _max_orb(p1: str, p2: str, aspect: str) -> float:
+    if aspect in ASPECT_ORBS:
+        return ASPECT_ORBS[aspect]
     t1 = _get_planet_tier(p1)
     t2 = _get_planet_tier(p2)
     return max(ORB_TABLE[t1], ORB_TABLE[t2])
@@ -71,9 +86,9 @@ def calculate_aspects(planets: list[dict]) -> list[dict]:
     for i, p1 in enumerate(planets):
         for p2 in planets[i + 1:]:
             dist = _angular_distance(p1["degree"], p2["degree"])
-            max_orb = _max_orb(p1["name_en"], p2["name_en"])
 
             for aspect_name, target_angle in ASPECT_ANGLES.items():
+                max_orb = _max_orb(p1["name_en"], p2["name_en"], aspect_name)
                 orb = abs(dist - target_angle)
                 if orb <= max_orb:
                     is_exact = orb < 1.0
@@ -108,12 +123,145 @@ def _is_applying(p1: dict, p2: dict, angle: float) -> bool:
 
 def _aspect_weight(aspect: str, orb: float, p1: dict, p2: dict) -> float:
     """Базовый вес аспекта для influence_level."""
-    base = {"conjunction": 1.0, "opposition": 0.9, "trine": 0.8,
-            "square": 0.8, "sextile": 0.6}.get(aspect, 0.5)
+    base = {
+        "conjunction": 1.0, "opposition": 0.9, "trine": 0.8,
+        "square": 0.8, "sextile": 0.6, "quincunx": 0.5,
+        "semi_square": 0.3, "sesquiquadrate": 0.3,
+        "quintile": 0.4, "biquintile": 0.4
+    }.get(aspect, 0.2)
     # Чем точнее орб — тем выше вес
-    orb_factor = max(0.3, 1.0 - orb / 10.0)
+    orb_limit = ASPECT_ORBS.get(aspect, 10.0)
+    orb_factor = max(0.3, 1.0 - orb / orb_limit)
     tier_bonus = 0.1 if p1["name_en"] in PERSONAL_PLANETS or p2["name_en"] in PERSONAL_PLANETS else 0
     return round(min(1.0, base * orb_factor + tier_bonus), 3)
+
+
+def find_aspect_patterns(planets: list[dict], aspects: list[dict]) -> list[dict]:
+    """Находит аспектные фигуры в карте: Тау-квадрат, Большой трин, Йод и др."""
+    patterns = []
+    
+    # Вспомогательная мапа аспектов
+    asp_map: dict[tuple[str, str], str] = {}
+    for a in aspects:
+        p1, p2 = a["planet1"], a["planet2"]
+        asp_map[(p1, p2)] = a["type"]
+        asp_map[(p2, p1)] = a["type"]
+
+    # 1. Тау-квадрат (Opposition + 2 Squares)
+    for opp in [a for a in aspects if a["type"] == "opposition"]:
+        p1, p2 = opp["planet1"], opp["planet2"]
+        for p3 in [p["name_en"] for p in planets if p["name_en"] not in (p1, p2)]:
+            if asp_map.get((p1, p3)) == "square" and asp_map.get((p2, p3)) == "square":
+                p3_obj = next(p for p in planets if p["name_en"] == p3)
+                patterns.append({
+                    "type": "t_square",
+                    "planets": [p3, p1, p2],
+                    "apex": p3,
+                    "apex_sign": p3_obj["sign"],
+                    "apex_house": p3_obj["house"],
+                })
+
+    # 2. Большой трин (3 Trines)
+    planet_names = [p["name_en"] for p in planets]
+    for i, p1 in enumerate(planet_names):
+        for j, p2 in enumerate(planet_names[i+1:], i+1):
+            if asp_map.get((p1, p2)) == "trine":
+                for p3 in planet_names[j+1:]:
+                    if asp_map.get((p1, p3)) == "trine" and asp_map.get((p2, p3)) == "trine":
+                        p1_obj = next(p for p in planets if p["name_en"] == p1)
+                        # Определяем стихию (если все в одной стихии)
+                        elements = {get_element(p["sign"]) for p in planets if p["name_en"] in (p1, p2, p3)}
+                        patterns.append({
+                            "type": "grand_trine",
+                            "planets": [p1, p2, p3],
+                            "element": list(elements)[0] if len(elements) == 1 else "mixed"
+                        })
+
+    # 3. Йод / Перст Судьбы (Sextile + 2 Quincunxes)
+    for sxt in [a for a in aspects if a["type"] == "sextile"]:
+        p1, p2 = sxt["planet1"], sxt["planet2"]
+        for p3 in planet_names:
+            if p3 in (p1, p2): continue
+            if asp_map.get((p1, p3)) == "quincunx" and asp_map.get((p2, p3)) == "quincunx":
+                p3_obj = next(p for p in planets if p["name_en"] == p3)
+                patterns.append({
+                    "type": "yod",
+                    "planets": [p3, p1, p2],
+                    "apex": p3,
+                    "apex_sign": p3_obj["sign"],
+                    "apex_house": p3_obj["house"],
+                })
+
+    return patterns
+
+
+def get_element(sign: str) -> str:
+    elements = {
+        "Aries": "Fire", "Leo": "Fire", "Sagittarius": "Fire",
+        "Taurus": "Earth", "Virgo": "Earth", "Capricorn": "Earth",
+        "Gemini": "Air", "Libra": "Air", "Aquarius": "Air",
+        "Cancer": "Water", "Scorpio": "Water", "Pisces": "Water",
+    }
+    return elements.get(sign, "Unknown")
+
+
+def calc_element_balance(planets: list[dict]) -> dict:
+    """Считает распределение по стихиям и модальностям."""
+    ELEMENTS = {
+        "Aries": "Fire", "Leo": "Fire", "Sagittarius": "Fire",
+        "Taurus": "Earth", "Virgo": "Earth", "Capricorn": "Earth",
+        "Gemini": "Air", "Libra": "Air", "Aquarius": "Air",
+        "Cancer": "Water", "Scorpio": "Water", "Pisces": "Water",
+    }
+    MODALITIES = {
+        "Aries": "Cardinal", "Cancer": "Cardinal", "Libra": "Cardinal", "Capricorn": "Cardinal",
+        "Taurus": "Fixed", "Leo": "Fixed", "Scorpio": "Fixed", "Aquarius": "Fixed",
+        "Gemini": "Mutable", "Virgo": "Mutable", "Sagittarius": "Mutable", "Pisces": "Mutable",
+    }
+    
+    main_planets_names = {"Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto"}
+    main_planets = [p for p in planets if p["name_en"] in main_planets_names]
+    
+    elements = {"Fire": 0, "Earth": 0, "Air": 0, "Water": 0}
+    modalities = {"Cardinal": 0, "Fixed": 0, "Mutable": 0}
+    
+    for p in main_planets:
+        elements[ELEMENTS[p["sign"]]] += 1
+        modalities[MODALITIES[p["sign"]]] += 1
+    
+    dominant_element = max(elements, key=elements.get)
+    deficit_element = min(elements, key=elements.get)
+    dominant_modality = max(modalities, key=modalities.get)
+    
+    return {
+        "elements": elements,
+        "modalities": modalities,
+        "dominant_element": dominant_element,
+        "deficit_element": deficit_element,
+        "dominant_modality": dominant_modality,
+    }
+
+
+def get_decan(degree_in_sign: float, sign: str) -> tuple[int, str]:
+    """Возвращает номер деканата и его управителя по халдейской системе."""
+    DECAN_RULERS = {
+        "Aries": ["Mars", "Sun", "Venus"],
+        "Taurus": ["Mercury", "Moon", "Saturn"],
+        "Gemini": ["Jupiter", "Mars", "Sun"],
+        "Cancer": ["Venus", "Mercury", "Moon"],
+        "Leo": ["Saturn", "Jupiter", "Mars"],
+        "Virgo": ["Sun", "Venus", "Mercury"],
+        "Libra": ["Moon", "Saturn", "Jupiter"],
+        "Scorpio": ["Mars", "Sun", "Venus"],
+        "Sagittarius": ["Mercury", "Moon", "Saturn"],
+        "Capricorn": ["Jupiter", "Mars", "Sun"],
+        "Aquarius": ["Venus", "Mercury", "Moon"],
+        "Pisces": ["Saturn", "Jupiter", "Mars"],
+    }
+    decan = int(degree_in_sign // 10) + 1
+    if decan > 3: decan = 3
+    ruler = DECAN_RULERS.get(sign, ["Sun", "Sun", "Sun"])[decan - 1]
+    return decan, ruler
 
 
 def detect_stelliums(planets: list[dict]) -> list[dict]:
@@ -234,13 +382,34 @@ class WesternAstrologyCalculator(Calculator):
         # 5. Расчёт аспектов
         aspects = calculate_aspects(planets)
 
-        # 6. Стеллиумы
+        # 6. Аспектные фигуры
+        aspect_patterns = find_aspect_patterns(planets, aspects)
+
+        # 7. Стеллиумы
         stelliums = detect_stelliums(planets)
 
-        # 7. Полусферы
+        # 8. Полусферы и квадранты
         hemispheres = calculate_hemispheres(planets, chart_dict["ascendant"]["degree"])
 
-        # 8. Итоговый payload
+        # 9. Элементный баланс
+        element_balance = calc_element_balance(planets)
+
+        # 10. Дополнительные точки (Арабские части)
+        arabic_parts = calculate_arabic_parts(chart_dict, planets)
+        planets.extend(arabic_parts)
+
+        # 11. Обогащение планет данными (деканаты, градусы)
+        for p in planets:
+            p["degree_in_sign"] = round(p["degree"] % 30, 4)
+            p["critical_degree"] = "0_degree" if p["degree_in_sign"] < 1.0 else ("29_degree" if p["degree_in_sign"] > 29.0 else None)
+            decan, decan_ruler = get_decan(p["degree_in_sign"], p["sign"])
+            p["decan"] = decan
+            p["decan_ruler"] = decan_ruler
+
+        # 11. Дополнительные расчеты (Арабские точки)
+        arabic_parts = calculate_arabic_parts(chart_dict, planets)
+
+        # 12. Итоговый payload
         raw_data = {
             "planets": planets,
             "houses": {
@@ -251,10 +420,67 @@ class WesternAstrologyCalculator(Calculator):
             "mc_degree": chart_dict["mc_degree"],
             "south_node": chart_dict["south_node"],
             "aspects": aspects,
+            "aspect_patterns": aspect_patterns,
+            "arabic_parts": arabic_parts,
             "stelliums": stelliums,
-            "hemispheres": hemispheres,
+            "technical_summary": {
+                **hemispheres,
+                **element_balance
+            },
             "dispositor_chains": chart_dict.get("dispositor_chains", {}),
             "geocoded": {"lat": lat, "lon": lon, "timezone": tz},
         }
 
         return self._base_envelope(birth_data, raw_data)
+
+
+def calculate_arabic_parts(chart_dict: dict, planets: list[dict]) -> list[dict]:
+    """Рассчитывает дополнительные арабские точки (Дух, Брак, Профессия)."""
+    parts = []
+    asc = chart_dict["ascendant"]["degree"]
+    mc = chart_dict["mc_degree"]
+    
+    sun = next((p for p in planets if p["name_en"] == "Sun"), None)
+    moon = next((p for p in planets if p["name_en"] == "Moon"), None)
+    venus = next((p for p in planets if p["name_en"] == "Venus"), None)
+    
+    if sun and moon:
+        # Точка Духа (Part of Spirit) - инверсия Фортуны
+        is_day = sun["house"] > 6
+        if is_day:
+            spirit_deg = (asc + sun["degree"] - moon["degree"]) % 360
+        else:
+            spirit_deg = (asc + moon["degree"] - sun["degree"]) % 360
+        parts.append(_create_part("Точка Духа", "PartSpirit", spirit_deg))
+
+    if venus:
+        # Точка Брака (Part of Marriage) = Asc + Dsc - Venus
+        dsc = (asc + 180) % 360
+        marriage_deg = (asc + dsc - venus["degree"]) % 360
+        parts.append(_create_part("Точка Брака", "PartMarriage", marriage_deg))
+
+    if sun:
+        # Точка Профессии = Asc + MC - Sun
+        prof_deg = (asc + mc - sun["degree"]) % 360
+        parts.append(_create_part("Точка Профессии", "PartProfession", prof_deg))
+
+    return parts
+
+
+def _create_part(name: str, name_en: str, degree: float) -> dict:
+    from app.core.astrology.natal_chart import degree_to_sign
+    sign_en, sign_ru, _ = degree_to_sign(degree)
+    return {
+        "name": name,
+        "name_en": name_en,
+        "degree": round(degree, 4),
+        "sign": sign_en,
+        "sign_ru": sign_ru,
+        "house": 0,  # Будет уточнено позже если нужно, пока 0
+        "retrograde": False,
+        "is_stationary": False,
+        "speed": 0.0,
+        "priority": "additional",
+        "dignity": "neutral",
+        "dignity_score": 0
+    }

@@ -137,6 +137,13 @@ export const assistantAPI = {
         api.post("/api/assistant/save-to-diary", { user_id: userId, session_id: sessionId }),
 };
 
+export const dsbAPI = {
+    getSphere: (userId: number, sphereNum: number | string) =>
+        api.get(`/api/dsb/portraits/user/${userId}/sphere/${sphereNum}`),
+    getPortraitBrief: (userId: number) =>
+        api.get(`/api/dsb/portraits/user/${userId}/brief`),
+};
+
 // WebSocket helper
 export function createSessionWS(userId: number, cardProgressId: number): WebSocket {
     const wsBase = API_BASE.replace("http", "ws");

@@ -278,11 +278,10 @@ async def get_portrait(
     }
 
 
-@router.get("/portraits/{portrait_id}/sphere/{sphere_num}", summary="Одна сфера")
+@router.get("/portraits/{portrait_id}/sphere/{sphere_num}", summary="Данные одной сферы")
 async def get_sphere(
     portrait_id: str,
     sphere_num: int,
-    format: str = "full",
     session: AsyncSession = Depends(get_db),
 ):
     if sphere_num < 1 or sphere_num > 12:
@@ -293,25 +292,84 @@ async def get_sphere(
     if not portrait:
         raise HTTPException(status_code=404, detail="Portrait not found")
 
-    if format == "brief":
-        brief = await repo.get_brief_portrait(portrait_id)
-        return {
-            "sphere": sphere_num,
-            "name": SPHERE_NAMES[sphere_num],
-            "brief": brief.get(f"sphere_{sphere_num}_brief", ""),
-        }
-
+    # Собираем все слои для сферы
     facts = await repo.get_facts_for_sphere(portrait_id, sphere_num)
+    patterns = await repo.get_patterns_for_sphere(portrait_id, sphere_num)
+    recommendations = await repo.get_recommendations_for_sphere(portrait_id, sphere_num)
+    shadows = await repo.get_shadows_for_sphere(portrait_id, sphere_num)
+    
+    # Краткий бриф сферы
+    summaries = await repo.get_brief_portrait(portrait_id)
+    brief = summaries.get(f"sphere_{sphere_num}_brief", "")
+
     return {
         "sphere": sphere_num,
         "name": SPHERE_NAMES[sphere_num],
-        "facts": [
-            {"position": f.position, "influence": f.influence_level,
-             "light": f.light_aspect, "shadow": f.shadow_aspect,
-             "core_theme": f.core_theme, "triggers": f.triggers}
+        "brief": brief,
+        "factors": [
+            {
+                "id": str(f.id),
+                "position": f.position,
+                "source_system": f.source_system,
+                "influence_level": f.influence_level,
+                "core_theme": f.core_theme,
+                "light_aspect": f.light_aspect,
+                "shadow_aspect": f.shadow_aspect,
+                "energy_description": f.energy_description,
+                "developmental_task": f.developmental_task,
+                "integration_key": f.integration_key,
+                "triggers": f.triggers,
+                "timing": f.timing,
+                "spheres_affected": f.spheres_affected or [],
+            }
             for f in facts
         ],
+        "patterns": [
+            {
+                "id": str(p.id),
+                "pattern_name": p.pattern_name,
+                "formula": p.formula,
+                "influence_level": p.influence_level,
+                "convergence_score": p.convergence_score,
+                "description": p.description,
+            }
+            for p in patterns
+        ],
+        "recommendations": [
+            {
+                "id": str(r.id),
+                "recommendation": r.recommendation,
+                "influence_level": r.influence_level,
+            }
+            for r in recommendations
+        ],
+        "shadows": [
+            {
+                "id": str(s.id),
+                "risk_name": s.risk_name,
+                "description": s.description,
+                "convergence_score": s.convergence_score,
+                "antidote": s.antidote,
+            }
+            for s in shadows
+        ],
     }
+
+
+@router.get("/portraits/user/{user_id}/sphere/{sphere_num}", summary="Одна сфера по ID пользователя")
+async def get_sphere_by_user(
+    user_id: int,
+    sphere_num: int,
+    session: AsyncSession = Depends(get_db),
+):
+    """Находит последний готовый портрет пользователя и возвращает данные сферы."""
+    repo = PortraitRepository(session)
+    portrait_id = await repo.get_latest_ready_portrait_id(user_id)
+    if not portrait_id:
+        # Если портрета нет, возвращаем пустую структуру чтобы фронтенд не падал
+        return {"sphere": sphere_num, "factors": [], "patterns": [], "recommendations": [], "shadows": []}
+    
+    return await get_sphere(portrait_id, sphere_num, session)
 
 
 @router.get("/portraits/{portrait_id}/brief", summary="Краткий формат портрета")

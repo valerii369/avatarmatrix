@@ -21,6 +21,8 @@ with open(os.path.join(DATA_DIR, "planet_archetype_map.json")) as f:
 with open(os.path.join(DATA_DIR, "house_sphere_map.json")) as f:
     HOUSE_SPHERE_MAP = json.load(f)
 
+SIGN_ARCHETYPE_MAP = {}
+
 SIGN_RULERS = {
     "Aries": "Mars", "Taurus": "Venus", "Gemini": "Mercury",
     "Cancer": "Moon", "Leo": "Sun", "Virgo": "Mercury",
@@ -346,9 +348,6 @@ def calculate_natal_chart(
             result.planets.append(planet_pos)
 
         except Exception as e:
-            if "not found" in str(e) and planet_name == "Chiron":
-                # Silently skip Chiron if ephemeris files are missing
-                continue
             print(f"Error calculating {planet_name}: {e}")
 
     # Add South Node (opposite of True Node)
@@ -357,7 +356,6 @@ def calculate_natal_chart(
         south_degree = (true_node.degree + 180) % 360
         south_sign_en, south_sign_ru, _ = degree_to_sign(south_degree)
         south_house = get_house(south_degree, cusps)
-        south_sign_data = SIGN_ARCHETYPE_MAP.get(south_sign_en, {})
 
         south_node = PlanetPosition(
             name="Южный узел",
@@ -398,7 +396,6 @@ def calculate_natal_chart(
         
         f_sign_en, f_sign_ru, _ = degree_to_sign(fortune_degree)
         f_house = get_house(fortune_degree, cusps)
-        f_sign_data = SIGN_ARCHETYPE_MAP.get(f_sign_en, {})
 
         fortune = PlanetPosition(
             name="Колесо Фортуны",
@@ -418,6 +415,9 @@ def calculate_natal_chart(
             priority="high",
         )
         result.planets.append(fortune)
+
+    # 4. Calculate dispositor chains
+    result.dispositor_chains = calculate_dispositor_chains(result.planets)
 
     return result
 
