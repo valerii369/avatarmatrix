@@ -142,6 +142,55 @@ class PortraitRepository:
             ))
         await self.session.flush()
 
+    async def generate_all_embeddings(self, portrait_id: str) -> None:
+        """Генерирует и сохраняет эмбеддинги для всех записей портрета."""
+        from sqlalchemy import select
+        from app.dsb.storage.embeddings import generate_embedding_text, generate_embeddings_batch
+        from app.dsb.storage.models import (
+            PortraitFact, PortraitAspectChain, PortraitPattern,
+            PortraitRecommendation, PortraitShadowAudit, PortraitMetaPattern
+        )
+
+        models_config = [
+            (PortraitFact, "fact"),
+            (PortraitAspectChain, "chain"),
+            (PortraitPattern, "pattern"),
+            (PortraitRecommendation, "recommendation"),
+            (PortraitShadowAudit, "shadow"),
+            (PortraitMetaPattern, "meta"),
+        ]
+
+        try:
+            for model_cls, record_type in models_config:
+                result = await self.session.execute(
+                    select(model_cls).where(
+                        model_cls.portrait_id == portrait_id,
+                        model_cls.embedding.is_(None)
+                    )
+                )
+                records = list(result.scalars().all())
+                if not records:
+                    continue
+
+                texts = []
+                for rec in records:
+                    rec_dict = {k: v for k, v in rec.__dict__.items() if not k.startswith('_')}
+                    texts.append(generate_embedding_text(rec_dict, record_type))
+
+                for i in range(0, len(texts), 100):
+                    batch_texts = texts[i:i+100]
+                    batch_records = records[i:i+100]
+                    embeddings = await generate_embeddings_batch(batch_texts)
+
+                    for j, emb in enumerate(embeddings):
+                        if emb is not None:
+                            batch_records[j].embedding = emb
+
+                await self.session.flush()
+                logger.info(f"[Repo] Generated {len(records)} embeddings for {record_type}")
+        except Exception as e:
+            logger.error(f"[Repo] Failed to generate embeddings for portrait {portrait_id}: {e}")
+
     async def update_status(self, portrait_id: str, status: str) -> None:
         await self.session.execute(
             update(DigitalPortrait)

@@ -93,8 +93,8 @@ async def generate_portrait(
     await session.commit()
 
     async def run_pipeline():
-        from app.database import async_session_factory
-        async with async_session_factory() as bg_session:
+        from app.database import AsyncSessionLocal
+        async with AsyncSessionLocal() as bg_session:
             try:
                 # Используем оркестратор без повторного create_portrait
                 merger_orchestrator = PortraitOrchestrator()
@@ -153,13 +153,16 @@ async def generate_portrait(
                 brief = await Compressor().compress(list(sphere_portraits), meta)
                 await bg_repo.save_summaries(portrait_id, brief)
 
+                # Generate embeddings for search
+                await bg_repo.generate_all_embeddings(portrait_id)
+
                 await bg_repo.update_status(portrait_id, "ready")
                 await bg_session.commit()
                 logger.info(f"[API] Portrait {portrait_id} ready")
 
             except Exception as e:
                 logger.exception(f"[API] Background pipeline failed: {e}")
-                from app.database import async_session_factory as sf
+                from app.database import AsyncSessionLocal as sf
                 async with sf() as err_session:
                     err_repo = Repo(err_session)
                     await err_repo.update_status(portrait_id, "error")
