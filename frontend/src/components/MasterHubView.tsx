@@ -28,7 +28,7 @@ const ICON_MAP: Record<string, any> = {
 
 const SPHERES_META = [
   { key: "IDENTITY", name: "Личность", subtitle: "Я и тело", color: "#A855F7" },
-  { key: "RESOURCES", name: "Ресурсы", subtitle: "Деньги и ценности", color: "#10B981" },
+  { key: "RESOURCES", name: "Деньги", subtitle: "Ресурсы и ценности", color: "#10B981" },
   { key: "COMMUNICATION", name: "Связи", subtitle: "Ум и окружение", color: "#06B6D4" },
   { key: "ROOTS", name: "Корни", subtitle: "Дом и семья", color: "#F97316" },
   { key: "CREATIVITY", name: "Творчество", subtitle: "Любовь и хобби", color: "#EC4899" },

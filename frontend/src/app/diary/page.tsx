@@ -8,7 +8,7 @@ import BottomNav from "@/components/BottomNav";
 import { CardSkeleton } from "@/components/Skeleton";
 
 const SPHERE_NAMES: Record<string, string> = {
-    IDENTITY: "Личность", RESOURCES: "Ресурсы", COMMUNICATION: "Связи",
+    IDENTITY: "Личность", RESOURCES: "Деньги", COMMUNICATION: "Связи",
     ROOTS: "Корни", CREATIVITY: "Творчество", SERVICE: "Служение",
     PARTNERSHIP: "Партнерство", TRANSFORMATION: "Тень", EXPANSION: "Поиск",
     STATUS: "Статус", VISION: "Будущее", SPIRIT: "Дух"
