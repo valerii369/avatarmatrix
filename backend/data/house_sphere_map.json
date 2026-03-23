@@ -5,7 +5,7 @@
     },
     "2": {
         "spheres": ["RESOURCES"],
-        "name": "Ресурсы"
+        "name": "Деньги"
     },
     "3": {
         "spheres": ["COMMUNICATION"],

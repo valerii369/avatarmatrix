@@ -4,7 +4,7 @@ import SphereInfoPanel from "./SphereInfoPanel";
 
 const SPHERES = [
     { id: 1,  key: "IDENTITY",       icon: "user",           name: "Личность",   color: [245, 158, 11] },  // #F59E0B
-    { id: 2,  key: "RESOURCES",      icon: "database",       name: "Ресурсы",     color: [16, 185, 129] },  // #10B981
+    { id: 2,  key: "RESOURCES",      icon: "database",       name: "Деньги",     color: [16, 185, 129] },  // #10B981
     { id: 3,  key: "COMMUNICATION",  icon: "message-circle",  name: "Связи",       color: [6, 182, 212] },   // #06B6D4
     { id: 4,  key: "ROOTS",          icon: "home",           name: "Корни",       color: [249, 115, 22] },  // #F97316
     { id: 5,  key: "CREATIVITY",     icon: "heart",          name: "Творчество",  color: [236, 72, 153] },  // #EC4899

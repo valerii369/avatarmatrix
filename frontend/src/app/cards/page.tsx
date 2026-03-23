@@ -14,7 +14,7 @@ import { Skeleton, MiniCardSkeleton } from "@/components/Skeleton";
 const SPHERES = [
     { key: "ALL", name: "Все", color: "#ffffff" },
     { key: "IDENTITY", name: "Личность", color: "#F59E0B" },
-    { key: "RESOURCES", name: "Ресурсы", color: "#10B981" },
+    { key: "RESOURCES", name: "Деньги", color: "#10B981" },
     { key: "COMMUNICATION", name: "Связи", color: "#06B6D4" },
     { key: "ROOTS", name: "Корни", color: "#F97316" },
     { key: "CREATIVITY", name: "Творчество", color: "#EC4899" },
