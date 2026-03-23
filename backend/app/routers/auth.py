@@ -25,6 +25,7 @@ router = APIRouter()
 class TelegramAuthRequest(BaseModel):
     initData: str
     test_mode: bool = False
+    test_user_id: Optional[int] = None
 
 
 class AuthResponse(BaseModel):
@@ -76,7 +77,8 @@ async def authenticate(
     """Authenticate via Telegram initData."""
     if request.test_mode and settings.ENVIRONMENT == "development":
         # Allow test users in development
-        tg_user = {"id": 12345678, "first_name": "Test", "last_name": "User", "username": "testuser"}
+        test_id = request.test_user_id or 12345678
+        tg_user = {"id": test_id, "first_name": f"Test {test_id}", "last_name": "User", "username": f"test_{test_id}"}
         start_param = None
     else:
         try:

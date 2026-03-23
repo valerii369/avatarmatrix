@@ -45,12 +45,13 @@ export default function HomePage() {
         const initData = tg?.initData || "";
         const isDev = process.env.NODE_ENV === "development";
         const isDebug = new URLSearchParams(window.location.search).get("debug") === "true";
+        const testUserId = parseInt(new URLSearchParams(window.location.search).get("user_id") || "0") || undefined;
 
         if (!initData && !isDev && !isDebug) {
           throw new Error("Telegram context missing. Please open via the bot or use ?debug=true for testing.");
         }
 
-        const authRes = await authAPI.login(initData, isDev);
+        const authRes = await authAPI.login(initData, isDev || isDebug, testUserId);
         const d = authRes.data;
 
         setUser({

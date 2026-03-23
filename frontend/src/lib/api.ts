@@ -31,8 +31,8 @@ api.interceptors.request.use((config) => {
 });
 
 export const authAPI = {
-    login: (initData: string, testMode = false) =>
-        api.post("/api/auth", { initData, test_mode: testMode }),
+    login: (initData: string, testMode = false, testUserId?: number) =>
+        api.post("/api/auth", { initData, test_mode: testMode, test_user_id: testUserId }),
 };
 
 export const calcAPI = {

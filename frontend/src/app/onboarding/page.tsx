@@ -566,8 +566,34 @@ export default function OnboardingPage() {
     const progress = ((step + 1) / totalAstroSteps) * 100;
 
     useEffect(() => {
+        const checkDebug = async () => {
+            if (!userId) {
+                const params = new URLSearchParams(window.location.search);
+                const isDebug = params.get("debug") === "true";
+                const testUserId = parseInt(params.get("user_id") || "0") || undefined;
+                
+                if (isDebug) {
+                    try {
+                        console.log("Onboarding: Debug mode detected, authenticating test user...");
+                        const authRes = await api.post("/api/auth", { initData: "", test_mode: true, test_user_id: testUserId });
+                        const d = authRes.data;
+                        setUser({
+                            userId: d.user_id, tgId: d.tg_id, firstName: d.first_name,
+                            token: d.token, energy: d.energy, streak: d.streak,
+                            evolutionLevel: d.evolution_level, title: d.title,
+                            onboardingDone: d.onboarding_done,
+                        });
+                        if (typeof window !== "undefined")
+                            localStorage.setItem("avatar_token", d.token);
+                    } catch (e) {
+                        console.error("Debug login failed", e);
+                    }
+                }
+            }
+        };
+        checkDebug();
         console.log("OnboardingPage initialized, path:", path, "step:", step);
-    }, []);
+    }, [userId, setUser]);
 
     useEffect(() => {
         console.log("Onboarding progress update:", { path, step, progress });
