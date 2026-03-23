@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     # Base paths
     BASE_DIR: str = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     DATA_DIR: str = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
+    EPHE_PATH: str = os.path.join(DATA_DIR, "ephe")
 
     DATABASE_URL: str
     BOT_TOKEN: str

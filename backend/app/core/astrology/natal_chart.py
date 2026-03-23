@@ -14,6 +14,10 @@ import pytz
 from app.config import settings
 
 DATA_DIR = settings.DATA_DIR
+EPHE_PATH = settings.EPHE_PATH
+
+# Set ephemeris path
+swe.set_ephe_path(EPHE_PATH)
 
 with open(os.path.join(DATA_DIR, "planet_archetype_map.json")) as f:
     PLANET_ARCHETYPE_MAP = json.load(f)

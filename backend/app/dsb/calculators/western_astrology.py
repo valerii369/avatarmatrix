@@ -7,6 +7,9 @@ WesternAstrologyCalculator — Слой 1, активный калькулято
 """
 
 import asyncio
+import json
+import os
+import math
 from datetime import datetime
 from typing import Optional
 
@@ -137,8 +140,9 @@ def _aspect_weight(aspect: str, orb: float, p1: dict, p2: dict) -> float:
 
 
 def find_aspect_patterns(planets: list[dict], aspects: list[dict]) -> list[dict]:
-    """Находит аспектные фигуры в карте: Тау-квадрат, Большой трин, Йод и др."""
+    """Находит аспектные фигуры в карте: Тау-квадрат, Большой трин, Йод, Большой крест, Кайт, Прямоугольник."""
     patterns = []
+    planet_names = [p["name_en"] for p in planets]
     
     # Вспомогательная мапа аспектов
     asp_map: dict[tuple[str, str], str] = {}
@@ -150,7 +154,8 @@ def find_aspect_patterns(planets: list[dict], aspects: list[dict]) -> list[dict]
     # 1. Тау-квадрат (Opposition + 2 Squares)
     for opp in [a for a in aspects if a["type"] == "opposition"]:
         p1, p2 = opp["planet1"], opp["planet2"]
-        for p3 in [p["name_en"] for p in planets if p["name_en"] not in (p1, p2)]:
+        for p3 in planet_names:
+            if p3 in (p1, p2): continue
             if asp_map.get((p1, p3)) == "square" and asp_map.get((p2, p3)) == "square":
                 p3_obj = next(p for p in planets if p["name_en"] == p3)
                 patterns.append({
@@ -162,13 +167,11 @@ def find_aspect_patterns(planets: list[dict], aspects: list[dict]) -> list[dict]
                 })
 
     # 2. Большой трин (3 Trines)
-    planet_names = [p["name_en"] for p in planets]
     for i, p1 in enumerate(planet_names):
         for j, p2 in enumerate(planet_names[i+1:], i+1):
             if asp_map.get((p1, p2)) == "trine":
                 for p3 in planet_names[j+1:]:
                     if asp_map.get((p1, p3)) == "trine" and asp_map.get((p2, p3)) == "trine":
-                        p1_obj = next(p for p in planets if p["name_en"] == p1)
                         # Определяем стихию (если все в одной стихии)
                         elements = {get_element(p["sign"]) for p in planets if p["name_en"] in (p1, p2, p3)}
                         patterns.append({
@@ -192,6 +195,56 @@ def find_aspect_patterns(planets: list[dict], aspects: list[dict]) -> list[dict]
                     "apex_house": p3_obj["house"],
                 })
 
+    # 4. Большой крест (4 Planets, 4 Squares, 2 Oppositions)
+    for opp1 in [a for a in aspects if a["type"] == "opposition"]:
+        p1, p2 = opp1["planet1"], opp1["planet2"]
+        for opp2 in [a for a in aspects if a["type"] == "opposition"]:
+            if opp2["planet1"] in (p1, p2) or opp2["planet2"] in (p1, p2): continue
+            p3, p4 = opp2["planet1"], opp2["planet2"]
+            if (asp_map.get((p1, p3)) == "square" and asp_map.get((p1, p4)) == "square" and
+                asp_map.get((p2, p3)) == "square" and asp_map.get((p2, p4)) == "square"):
+                sig = tuple(sorted([p1, p2, p3, p4]))
+                if not any(set(sig) == set(p["planets"]) for p in patterns if p["type"] == "grand_cross"):
+                    p1_obj = next(p for p in planets if p["name_en"] == p1)
+                    patterns.append({
+                        "type": "grand_cross",
+                        "planets": list(sig),
+                        "modality": get_modality(p1_obj["sign"])
+                    })
+
+    # 5. Кайт (Grand Trine + 1 Opposition + 2 Sextiles)
+    for gt in [p for p in patterns if p["type"] == "grand_trine"]:
+        p1, p2, p3 = gt["planets"]
+        for i, p_apex in enumerate([p1, p2, p3]):
+            p_base1, p_base2 = [p for j, p in enumerate([p1, p2, p3]) if i != j]
+            for p4 in planet_names:
+                if p4 in (p1, p2, p3): continue
+                if asp_map.get((p_apex, p4)) == "opposition":
+                    if asp_map.get((p_base1, p4)) == "sextile" and asp_map.get((p_base2, p4)) == "sextile":
+                        patterns.append({
+                            "type": "kite",
+                            "planets": [p1, p2, p3, p4],
+                            "apex": p4,
+                            "grand_trine_planets": [p1, p2, p3]
+                        })
+
+    # 6. Мистический прямоугольник (2 Oppositions, 2 Trines, 2 Sextiles)
+    for opp1 in [a for a in aspects if a["type"] == "opposition"]:
+        p1, p2 = opp1["planet1"], opp1["planet2"]
+        for opp2 in [a for a in aspects if a["type"] == "opposition"]:
+            if opp2["planet1"] in (p1, p2) or opp2["planet2"] in (p1, p2): continue
+            p3, p4 = opp2["planet1"], opp2["planet2"]
+            if ((asp_map.get((p1, p3)) == "sextile" and asp_map.get((p2, p4)) == "sextile" and
+                 asp_map.get((p1, p4)) == "trine" and asp_map.get((p2, p3)) == "trine") or
+                (asp_map.get((p1, p3)) == "trine" and asp_map.get((p2, p4)) == "trine" and
+                 asp_map.get((p1, p4)) == "sextile" and asp_map.get((p2, p3)) == "sextile")):
+                sig = tuple(sorted([p1, p2, p3, p4]))
+                if not any(set(sig) == set(p["planets"]) for p in patterns if p["type"] == "mystic_rectangle"):
+                    patterns.append({
+                        "type": "mystic_rectangle",
+                        "planets": list(sig)
+                    })
+
     return patterns
 
 
@@ -203,6 +256,15 @@ def get_element(sign: str) -> str:
         "Cancer": "Water", "Scorpio": "Water", "Pisces": "Water",
     }
     return elements.get(sign, "Unknown")
+
+
+def get_modality(sign: str) -> str:
+    modalities = {
+        "Aries": "Cardinal", "Cancer": "Cardinal", "Libra": "Cardinal", "Capricorn": "Cardinal",
+        "Taurus": "Fixed", "Leo": "Fixed", "Scorpio": "Fixed", "Aquarius": "Fixed",
+        "Gemini": "Mutable", "Virgo": "Mutable", "Sagittarius": "Mutable", "Pisces": "Mutable",
+    }
+    return modalities.get(sign, "Unknown")
 
 
 def calc_element_balance(planets: list[dict]) -> dict:
@@ -398,13 +460,25 @@ class WesternAstrologyCalculator(Calculator):
         arabic_parts = calculate_arabic_parts(chart_dict, planets)
         planets.extend(arabic_parts)
 
-        # 11. Обогащение планет данными (деканаты, градусы)
+        # 11. Обогащение планет данными (деканаты, градусы, сабианские символы)
+        sabian_data = {}
+        # Path: backend/app/dsb/calculators/western_astrology.py -> backend/data/sabian_symbols.json
+        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+        sabian_path = os.path.join(base_dir, "data", "sabian_symbols.json")
+        if os.path.exists(sabian_path):
+            with open(sabian_path, "r", encoding="utf-8") as f:
+                sabian_data = json.load(f)
+
         for p in planets:
             p["degree_in_sign"] = round(p["degree"] % 30, 4)
             p["critical_degree"] = "0_degree" if p["degree_in_sign"] < 1.0 else ("29_degree" if p["degree_in_sign"] > 29.0 else None)
             decan, decan_ruler = get_decan(p["degree_in_sign"], p["sign"])
             p["decan"] = decan
             p["decan_ruler"] = decan_ruler
+            
+            # Sabian Symbol: degree is rounded UP (1-30)
+            sabian_deg = math.ceil(p["degree_in_sign"]) or 1
+            p["sabian_symbol"] = sabian_data.get(p["sign"], {}).get(str(sabian_deg), "")
 
         # 11. Дополнительные расчеты (Арабские точки)
         arabic_parts = calculate_arabic_parts(chart_dict, planets)
