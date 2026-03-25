@@ -558,6 +558,7 @@ function AIFlow({ onBack }: { onBack: () => void }) {
 import SacredGeometryLogo from "@/components/SacredGeometryLogo";
 
 export default function OnboardingPage() {
+    const { userId, setUser } = useUserStore();
     const [path, setPath] = useState<"astro" | "ai" | "visual" | null>("astro");
     const [step, setStep] = useState(0); // Moved step state up to track progress globally
     
