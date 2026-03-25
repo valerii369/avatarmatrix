@@ -9,7 +9,7 @@ from sqlalchemy import select, update
 from app.dsb.storage.models import (
     DigitalPortrait, PortraitFact, PortraitAspectChain,
     PortraitPattern, PortraitRecommendation, PortraitShadowAudit,
-    PortraitMetaPattern, PortraitSummary,
+    PortraitMetaPattern, PortraitSummary, PortraitRawData,
 )
 from app.dsb.interpreters.schemas import UniversalInsightSchema
 
@@ -32,6 +32,77 @@ class PortraitRepository:
         self.session.add(portrait)
         await self.session.flush()
         return portrait.id
+
+    async def save_raw_results(self, portrait_id: str, system_name: str, raw_data: dict) -> None:
+        """
+        Flatten complex calculator output into granular dsb_raw_data rows.
+        Splits data by groups (planets, aspects, houses, etc.).
+        """
+        # 1. Planets
+        for p in raw_data.get("planets", []):
+            self.session.add(PortraitRawData(
+                portrait_id=portrait_id,
+                system_name=system_name,
+                data_group="planets",
+                data_key=p.get("name_en", "Unknown"),
+                payload=p,
+            ))
+
+        # 2. Aspects
+        for a in raw_data.get("aspects", []):
+            p1, p2 = a.get("planet1"), a.get("planet2")
+            asp_type = a.get("type")
+            self.session.add(PortraitRawData(
+                portrait_id=portrait_id,
+                system_name=system_name,
+                data_group="aspects",
+                data_key=f"{p1}-{p2}-{asp_type}",
+                payload=a,
+            ))
+
+        # 3. Houses
+        houses = raw_data.get("houses", {})
+        cusps = houses.get("cusps", [])
+        rulers = houses.get("rulers", {})
+        for i, cusp_deg in enumerate(cusps):
+            h_num = i + 1
+            self.session.add(PortraitRawData(
+                portrait_id=portrait_id,
+                system_name=system_name,
+                data_group="houses",
+                data_key=f"House-{h_num}",
+                payload={
+                    "house_num": h_num,
+                    "cusp_degree": cusp_deg,
+                    "ruler": rulers.get(str(h_num)),
+                },
+            ))
+
+        # 4. Technical Summary (Hemispheres, Elements, etc.)
+        tech = raw_data.get("technical_summary", {})
+        if tech:
+            self.session.add(PortraitRawData(
+                portrait_id=portrait_id,
+                system_name=system_name,
+                data_group="technical",
+                data_key="summary",
+                payload=tech,
+            ))
+
+        # 5. Other groups (Stelliums, Arabic Parts, Patterns)
+        for key in ["aspect_patterns", "arabic_parts", "stelliums", "dispositor_chains"]:
+            group_data = raw_data.get(key)
+            if group_data:
+                self.session.add(PortraitRawData(
+                    portrait_id=portrait_id,
+                    system_name=system_name,
+                    data_group=key,
+                    data_key="collection",
+                    payload=group_data if isinstance(group_data, dict) else {"items": group_data},
+                ))
+
+        await self.session.flush()
+        logger.info(f"[Repo] Saved granular raw results for {system_name} in portrait {portrait_id}")
 
     async def save_facts(self, portrait_id: str, insights: list[UniversalInsightSchema]) -> None:
         for uis in insights:

@@ -99,6 +99,12 @@ class PortraitOrchestrator:
                 for _, calc in self._all_calculators
             ], return_exceptions=True)
 
+            # Сохранить сырые результаты для всех систем
+            for (name, _), result in zip(self._all_calculators, raw_results):
+                if not isinstance(result, Exception):
+                    await repo.save_raw_results(portrait_id, name, result.get("raw_data", {}))
+            await session.commit()
+
             # Оставляем только успешные результаты для активных агентов
             active_raw = []
             for (name, _), result in zip(self._all_calculators, raw_results):

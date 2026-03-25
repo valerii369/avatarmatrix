@@ -61,6 +61,30 @@ class DigitalPortrait(Base):
     shadow_audits = relationship("PortraitShadowAudit", back_populates="portrait", cascade="all, delete-orphan")
     meta_patterns = relationship("PortraitMetaPattern", back_populates="portrait", cascade="all, delete-orphan")
     summaries = relationship("PortraitSummary", back_populates="portrait", cascade="all, delete-orphan")
+    raw_data = relationship("PortraitRawData", back_populates="portrait", cascade="all, delete-orphan")
+
+
+# ─── Таблица 0.5: Сырые данные калькуляторов ────────────────────────────────
+class PortraitRawData(Base):
+    __tablename__ = "dsb_raw_data"
+
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=_uuid)
+    portrait_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("dsb_digital_portraits.id", ondelete="CASCADE"), index=True)
+
+    system_name: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    # western_astrology | bazi | ...
+
+    data_group: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    # planets | aspects | houses | patterns
+
+    data_key: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
+    # Sun | Moon-Sun-Trine | House-1
+
+    payload: Mapped[dict] = mapped_column(JSONB, nullable=False)
+
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+    portrait = relationship("DigitalPortrait", back_populates="raw_data")
 
 
 # ─── Таблица 1: Атомарные факты (из Слоя 2) ─────────────────────────────────
