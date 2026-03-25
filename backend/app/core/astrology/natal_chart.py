@@ -240,16 +240,29 @@ def calculate_dispositor_chains(planets: list[PlanetPosition]) -> dict[str, Any]
 
 
 
+import anyio
+
 async def geocode_place(place: str) -> tuple[float, float, str]:
     """Get latitude, longitude and timezone from place name."""
-    geolocator = Nominatim(user_agent="avatar_app")
-    location = geolocator.geocode(place)
-    if not location:
-        raise ValueError(f"Cannot geocode place: {place}")
+    print(f"DEBUG: Geocoding started for place: {place}")
+    try:
+        geolocator = Nominatim(user_agent="avatar_app")
+        # Run synchronous geocode in a thread to keep the event loop responsive
+        location = await anyio.to_thread.run_sync(lambda: geolocator.geocode(place, timeout=10))
+        print(f"DEBUG: Geocoder returned: {location}")
+        
+        if not location:
+            print(f"DEBUG: Location NOT FOUND for: {place}")
+            raise ValueError(f"Cannot geocode place: {place}")
 
-    tf = TimezoneFinder()
-    tz_name = tf.timezone_at(lng=location.longitude, lat=location.latitude)
-    return location.latitude, location.longitude, tz_name or "UTC"
+        tf = TimezoneFinder()
+        # TimezoneFinder also has a non-async lookup, but it's very fast. Still, good practice to keep it clean.
+        tz_name = await anyio.to_thread.run_sync(lambda: tf.timezone_at(lng=location.longitude, lat=location.latitude))
+        print(f"DEBUG: Timezone found: {tz_name}")
+        return location.latitude, location.longitude, tz_name or "UTC"
+    except Exception as e:
+        print(f"DEBUG: Geocoding error in geocode_place: {e}")
+        raise e
 
 
 def calculate_natal_chart(

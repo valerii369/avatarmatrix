@@ -16,7 +16,7 @@ from app.models import (
     UserMemory, CardProgress, CardStatus, NatalChart, 
     UserPortrait
 )
-from app.rro.ocean.hub import OceanService
+# from app.rro.ocean.hub import OceanService
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
@@ -30,9 +30,9 @@ class AssistantResponse(BaseModel):
 
 async def get_comprehensive_context(db: AsyncSession, user_id: int) -> str:
     """Collects all available data about the user into a text context."""
-    # 1. User Print (The Ocean) - Primary source
-    ocean = await OceanService.get_ocean(db, user_id)
-    ocean_text = ocean.model_dump_json() if ocean else "Данные Океана (Паспорта Личности) отсутствуют."
+    # 1. User Print (The Ocean) - Now bridged from DSB
+    # For now, using a stub or directly from UserPortrait if available
+    ocean_text = "Данные цифрового профиля (DSB) в процессе синтеза."
 
     # 2. Episodic Memory (Last 5 sessions)
     stmt_sessions = select(AssistantSession).where(

@@ -1,3 +1,4 @@
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy.orm import DeclarativeBase
 import logging
@@ -39,16 +40,24 @@ async def get_db() -> AsyncSession:
 async def init_db():
     """
     Initialize database on startup.
-    - Development: auto-creates tables (convenient for local dev)
+    - Development: auto-creates tables (convenient for local dev, but can hang)
     - Production: only verifies connection (use 'alembic upgrade head' for schema)
     """
-    if settings.ENVIRONMENT == "development":
-        logger.warning("⚠️  Development mode: creating tables via SQLAlchemy metadata")
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-    else:
-        # In production just test the connection
-        from sqlalchemy import text
-        async with engine.begin() as conn:
-            await conn.execute(text("SELECT 1"))
-        logger.info("✅ Database connection verified")
+    print("DEBUG: init_db started")
+    try:
+        if settings.ENVIRONMENT == "development":
+            logger.warning("⚠️  Development mode: verifying DB connection")
+            # await conn.run_sync(Base.metadata.create_all) # DISABLING TO PREVENT HANGS
+            async with engine.begin() as conn:
+                await conn.execute(text("SELECT 1"))
+            logger.info("✅ Database connection verified (Dev)")
+        else:
+            # In production just test the connection
+            async with engine.begin() as conn:
+                await conn.execute(text("SELECT 1"))
+            logger.info("✅ Database connection verified (Prod)")
+    except Exception as e:
+        logger.error(f"❌ Database initialization failed: {e}")
+        # Consider if we should raise or just log. Raising prevents server start.
+        raise e
+    print("DEBUG: init_db finished")

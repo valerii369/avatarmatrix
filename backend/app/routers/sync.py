@@ -15,7 +15,7 @@ from app.agents.analytic_agent import run_mirror_analysis, extract_response_feat
 from app.core.feature_extractor import FeatureExtractor
 from app.core.economy import spend_energy, hawkins_to_rank, award_xp, process_card_rank_up, XP_VALUES
 from app.core.portrait_service import build_portrait_for_sphere
-from app.rro.ocean.hub import OceanService
+# from app.rro.ocean.hub import OceanService
 from app.database import AsyncSessionLocal
 
 router = APIRouter()
@@ -34,9 +34,9 @@ async def _background_sync_processing(user_id: int, session_id: int, sphere: str
             # 3. Update technical portrait (River)
             portrait_res = await update_user_portrait(session, user_id, session_id)
             
-            # 4. Level 2 & 3 Pipeline: Update the Hub (Ocean - User Print)
-            from app.rro.sync.river import SyncRiver
-            from app.rro.ocean.hub import OceanService
+            # 4. Level 2 & 3 Pipeline: Update the Hub (Now handled by DSB)
+            # from app.rro.sync.river import SyncRiver
+            # from app.rro.ocean.hub import OceanService
             
             sync_session_res = await session.execute(select(SyncSession).where(SyncSession.id == session_id))
             sync_session = sync_session_res.scalar_one_or_none()
@@ -51,13 +51,8 @@ async def _background_sync_processing(user_id: int, session_id: int, sphere: str
                     "sphere": sync_session.sphere
                 }
                 
-                # Level 2: River
-                river = SyncRiver()
-                interpretation = await river.flow(session, user_id, rain_data)
-                
-                if interpretation:
-                    # Level 3: Ocean
-                    await OceanService.update_ocean(session, user_id, [interpretation])
+                # Legacy River/Ocean flow removed in favor of DSB pipeline
+                pass
             
             await session.commit()
         except Exception as e:

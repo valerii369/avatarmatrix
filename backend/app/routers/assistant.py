@@ -9,8 +9,8 @@ from app.models import User, AssistantSession, CardProgress, CardStatus
 from app.agents.assistant_agent import generate_assistant_response
 from app.core.economy import spend_energy, award_xp
 from app.core.astrology.vector_matcher import match_text_to_archetypes
-from app.rro.ocean.hub import OceanService
-from app.rro.session.river import SessionRiver
+# from app.rro.ocean.hub import OceanService
+# from app.rro.session.river import SessionRiver
 
 router = APIRouter()
 
@@ -195,14 +195,8 @@ async def finish_assistant(
                 as_session = res.scalar_one_or_none()
                 if not as_session: return
                 
-                # Level 2: River
-                river = SessionRiver()
-                interpretation = await river.flow(session_db, u_id, {"history": as_session.messages_json})
-                
-                if interpretation:
-                    # Level 3: Ocean
-                    await OceanService.update_ocean(session_db, u_id, [interpretation])
-                    await session_db.commit()
+                # Legacy Session RRO Pipeline removed (River/Ocean)
+                pass
             except Exception as e:
                 import logging
                 logging.getLogger(__name__).error(f"Session RRO Pipeline Error: {e}")
