@@ -8,12 +8,22 @@ UserPrint-объект, чтобы UI отображался корректно,
 детальные карточки прямо из DSB-таблиц.
 """
 
-import logging
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from app.models.user_print import UserPrint
-
 logger = logging.getLogger(__name__)
+
+SPHERES_META = [
+    {"key": "IDENTITY", "name": "Личность"},
+    {"key": "RESOURCES", "name": "Деньги"},
+    {"key": "COMMUNICATION", "name": "Связи"},
+    {"key": "ROOTS", "name": "Корни"},
+    {"key": "CREATIVITY", "name": "Творчество"},
+    {"key": "SERVICE", "name": "Служение"},
+    {"key": "PARTNERSHIP", "name": "Партнерство"},
+    {"key": "TRANSFORMATION", "name": "Тень"},
+    {"key": "EXPANSION", "name": "Поиск"},
+    {"key": "STATUS", "name": "Статус"},
+    {"key": "VISION", "name": "Будущее"},
+    {"key": "SPIRIT", "name": "Дух"},
+]
 
 async def generate_user_print_from_dsb(
     user_id: int, 
@@ -34,6 +44,20 @@ async def generate_user_print_from_dsb(
             top_meta = meta_patterns["meta_patterns"][0].get("name", "") + ": " + meta_patterns["meta_patterns"][0].get("description", "")
         
         # Формируем структуру, которую ожидает MasterHubView.tsx
+        spheres_mapped = {}
+        for sphere_id, meta in enumerate(SPHERES_META, 1):
+            key = f"sphere_{sphere_id}_brief"
+            insight = brief.get(key, "Сфера находится в процессе синтеза...")
+            # Пытаемся вытянуть статус из краткого текста (первое предложение)
+            status = "Активна"
+            if "." in insight:
+                status = insight.split(".")[0][:25]
+            
+            spheres_mapped[meta["key"]] = {
+                "status": status,
+                "insight": insight
+            }
+
         print_data = {
             "portrait_summary": {
                 "core_identity": overall_text,
@@ -52,20 +76,8 @@ async def generate_user_print_from_dsb(
                     "core_strengths": ["Глубокий анализ", "Осознанность 12 сфер"],
                     "shadow_aspects": ["Стадия интеграции тени"]
                 },
-                "spheres_status": {
-                    "IDENTITY": { "status": "Синтезировано (DSB)" },
-                    "RESOURCES": { "status": "Синтезировано (DSB)" },
-                    "COMMUNICATION": { "status": "Синтезировано (DSB)" },
-                    "ROOTS": { "status": "Синтезировано (DSB)" },
-                    "CREATIVITY": { "status": "Синтезировано (DSB)" },
-                    "SERVICE": { "status": "Синтезировано (DSB)" },
-                    "PARTNERSHIP": { "status": "Синтезировано (DSB)" },
-                    "TRANSFORMATION": { "status": "Синтезировано (DSB)" },
-                    "EXPANSION": { "status": "Синтезировано (DSB)" },
-                    "STATUS": { "status": "Синтезировано (DSB)" },
-                    "VISION": { "status": "Синтезировано (DSB)" },
-                    "SPIRIT": { "status": "Синтезировано (DSB)" }
-                }
+                "spheres_status": spheres_mapped,
+                "meta_patterns": meta_patterns.get("meta_patterns", []) # Добавляем для вкладки "Портрет"
             }
         }
 

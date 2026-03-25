@@ -1,15 +1,14 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import useSWR, { mutate } from "swr";
-import { masterHubAPI, economyAPI } from "@/lib/api";
+import { masterHubAPI, economyAPI, dsbAPI } from "@/lib/api";
 import { useUserStore } from "@/lib/store";
 import { useAudio } from "@/lib/hooks/useAudio";
 import { 
   User, Wallet, Heart, Home, Award, Activity, Zap, Moon, 
-  ArrowLeft, Info, Eye, EyeOff, Sparkles, AlertCircle, ShieldCheck,
+  ArrowLeft, Info, Sparkles, AlertCircle, ShieldCheck,
   Compass, Users, ChevronDown, ChevronUp
 } from "lucide-react";
-import { dsbAPI } from "@/lib/api";
 
 const ICON_MAP: Record<string, any> = {
   IDENTITY: User,
@@ -18,7 +17,7 @@ const ICON_MAP: Record<string, any> = {
   ROOTS: Home,
   CREATIVITY: Heart,
   SERVICE: Activity,
-  PARTNERSHIP: Zap, // Using Zap or another icon if needed
+  PARTNERSHIP: Zap,
   TRANSFORMATION: Sparkles,
   EXPANSION: Compass,
   STATUS: Award,
@@ -42,7 +41,6 @@ const SPHERES_META = [
 ];
 
 const TRAIT_DESCRIPTIONS: Record<string, string> = {
-  // Архетипы
   "Странник": "Поиск свободы и новых смыслов через опыт",
   "Герой": "Преодоление препятствий и достижение великих целей",
   "Мудрец": "Постижение истины и системное понимание мира",
@@ -53,24 +51,14 @@ const TRAIT_DESCRIPTIONS: Record<string, string> = {
   "Искатель": "Исследование неизведанного и поиск истины",
   "Бунтарь": "Разрушение старых структур ради перемен",
   "Шут": "Радость жизни и высмеивание ложных догм",
-  
-  // Энергии
   "Ян": "Активная, направленная вовне мужская энергия",
   "Инь": "Принимающая, интуитивная женская энергия",
-  
-  // Роли
   "Лидер": "Ведущий и вдохновляющий за собой других",
   "Наблюдатель": "Анализирующий и видящий суть процессов со стороны",
   "Целитель": "Восстанавливающий баланс и гармонию систем",
   "Архитектор": "Проектирующий будущее и сложные структуры",
-
-  // Социальный интерфейс
-  "Мировоззрение": "Индивидуальная система взглядов и ценностей аватара",
-  "Коммуникация": "Приоритетный способ взаимодействия и обмена информацией",
-  "Экзистенциальный урок": "Ключевая жизненная задача для текущего этапа",
 };
 
-// --- DSB Patch Constants ---
 const DSB_SYSTEM_SHORT: Record<string, string> = {
   western_astrology: "ASTRO",
   human_design: "HD",
@@ -143,7 +131,7 @@ function DSBPatternBlock({ pattern }: { pattern: any }) {
           <div className="w-8 h-8 rounded-lg bg-violet-500/20 flex items-center justify-center text-violet-400">
             <Zap size={16} />
           </div>
-          <div className="flex flex-col items-start">
+          <div className="flex flex-col items-start text-left">
             <span className="text-[13px] font-bold text-white/90">{pattern.pattern_name}</span>
             <span className="text-[9px] text-violet-400/60 font-mono tracking-wider">{pattern.formula}</span>
           </div>
@@ -227,15 +215,12 @@ function DSBFactorDetail({ factor, onClose }: { factor: any, onClose: () => void
           <h2 className="text-2xl font-bold text-white tracking-tight">{factor.position}</h2>
           <p className="text-sm text-violet-400/90 font-medium">{factor.core_theme}</p>
         </div>
-
         <DSBDetailSection title="Энергия и потенциал" icon={Sparkles}>
           <p className="text-sm text-white/80 leading-relaxed font-light">{factor.light_aspect}</p>
         </DSBDetailSection>
-
         <DSBDetailSection title="Теневая ловушка" icon={AlertCircle}>
           <p className="text-sm text-white/60 leading-relaxed font-light">{factor.shadow_aspect}</p>
         </DSBDetailSection>
-
         <div className="grid grid-cols-2 gap-4">
           <div className="p-4 rounded-2xl bg-white/[0.03] space-y-2 border border-white/5">
             <span className="text-[9px] font-bold text-white/20 uppercase tracking-widest">Задача развития</span>
@@ -246,7 +231,6 @@ function DSBFactorDetail({ factor, onClose }: { factor: any, onClose: () => void
             <p className="text-xs text-white/80 leading-relaxed font-light">{factor.integration_key}</p>
           </div>
         </div>
-
         {factor.triggers?.length > 0 && (
           <DSBDetailSection title="Триггеры проявления" icon={Zap}>
             <div className="flex flex-wrap gap-2">
@@ -305,349 +289,200 @@ export default function MasterHubView({ userId }: { userId: number }) {
   }
 
   const { portrait_summary, deep_profile_data } = hub;
-
   const activeSphereMeta = SPHERES_META.find(s => s.key === selectedSphere);
   const activeSphereData = selectedSphere ? deep_profile_data?.spheres_status?.[selectedSphere] : null;
 
   return (
     <div className="px-4 pt-0 space-y-6 pb-12 relative">
       <AnimatePresence mode="wait">
-        {!selectedSphere ? (
-          <motion.div
-            key="hub-main"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="space-y-6"
-          >
-            {/* ── Sub-Navigation Tabs ── */}
-            <div className="flex p-1 gap-1 bg-white/[0.04] border border-white/10 rounded-[14px]">
-              <button
-                onClick={() => setSubTab("personality")}
-                style={{
-                  padding: "8px 4px",
-                  borderRadius: 10,
-                  fontSize: 11,
-                  fontWeight: 500,
-                  transition: "all 0.2s",
-                  background: subTab === "personality" ? "rgba(255,255,255,0.1)" : "transparent",
-                  color: subTab === "personality" ? "var(--text-primary)" : "var(--text-muted)",
-                  border: "none",
-                  flex: 1
-                }}
-              >
-                О личности
-              </button>
-              <button
-                onClick={() => setSubTab("sides")}
-                style={{
-                  padding: "8px 4px",
-                  borderRadius: 10,
-                  fontSize: 11,
-                  fontWeight: 500,
-                  transition: "all 0.2s",
-                  background: subTab === "sides" ? "rgba(255,255,255,0.1)" : "transparent",
-                  color: subTab === "sides" ? "var(--text-primary)" : "var(--text-muted)",
-                  border: "none",
-                  flex: 1
-                }}
-              >
-                Стороны
-              </button>
-              <button
-                onClick={() => setSubTab("analysis")}
-                style={{
-                  padding: "8px 4px",
-                  borderRadius: 10,
-                  fontSize: 11,
-                  fontWeight: 500,
-                  transition: "all 0.2s",
-                  background: subTab === "analysis" ? "rgba(255,255,255,0.1)" : "transparent",
-                  color: subTab === "analysis" ? "var(--text-primary)" : "var(--text-muted)",
-                  border: "none",
-                  flex: 1
-                }}
-              >
-                Разбор сфер
-              </button>
-            </div>
-            
-            {/* ── Energy Claim Notification ── */}
-            {hub.energy_claim?.can_claim && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                onClick={async () => {
-                  if (isClaiming) return;
-                  setIsClaiming(true);
-                  play('success');
-                  try {
-                    const res = await economyAPI.claim(userId);
-                    if (res.data.success) {
-                      setUser({ energy: res.data.new_energy });
-                      // Refresh hub to update claim status
-                      mutate(["master-hub", userId]);
-                    }
-                  } catch (e) {
-                    console.error("Claim error", e);
-                  } finally {
-                    setIsClaiming(false);
-                  }
-                }}
-                className="mx-2 p-4 rounded-2xl bg-gradient-to-r from-amber-500/20 to-amber-600/10 border border-amber-500/30 flex items-center justify-between cursor-pointer active:scale-[0.98] transition-all relative overflow-hidden group shadow-lg shadow-amber-500/5"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-amber-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="flex items-center gap-3 relative z-10">
-                  <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center text-xl shadow-inner">⚡</div>
-                  <div>
-                    <p className="text-sm font-bold text-amber-200">Доступна энергия! (+10 ✦)</p>
-                    <p className="text-[10px] text-amber-200/50 uppercase font-bold tracking-widest">Нажми чтобы забрать</p>
-                  </div>
-                </div>
-                <div className="relative z-10">
-                  {isClaiming ? (
-                    <div className="w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <motion.div
-                      animate={{ x: [0, 5, 0] }}
-                      transition={{ repeat: Infinity, duration: 1.5 }}
-                      className="text-amber-500/40"
-                    >
-                      →
-                    </motion.div>
-                  )}
-                </div>
-              </motion.div>
-            )}
-
-            {subTab === "personality" && (
-              <motion.div
-                key="personality-tab"
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="space-y-4"
-              >
-                {/* ── Portrait Summary Card ── */}
-                <motion.div
-                  layout
-                  className="p-5 rounded-[1.25rem] bg-gradient-to-br from-violet-600/[0.08] to-blue-600/[0.04] border border-white/10 backdrop-blur-3xl shadow-xl relative overflow-hidden"
-                >
-                  <div className="absolute -top-10 -right-10 w-40 h-40 bg-violet-500/10 blur-[60px] rounded-full" />
-                  <div className="flex flex-col gap-3.5">
-                    <div className="flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse" />
-                      <span className="text-[9px] font-bold text-violet-400/80 uppercase tracking-[0.2em]">
-                        Идентификация Аватара
-                      </span>
-                    </div>
-
-                    <p className="text-sm font-medium text-white leading-snug">
-                      {portrait_summary.core_identity}
-                    </p>
-
-                    <div className="grid grid-cols-2 gap-2 mt-2">
-                      <SummaryTag label="Архетип" value={portrait_summary.core_archetype} color="violet" onClick={() => setActiveTooltip({ label: "Архетип", value: portrait_summary.core_archetype })} />
-                      <SummaryTag label="Роль" value={portrait_summary.narrative_role} color="blue" onClick={() => setActiveTooltip({ label: "Роль", value: portrait_summary.narrative_role })} />
-                      <SummaryTag label="Энергия" value={portrait_summary.energy_type} color="emerald" onClick={() => setActiveTooltip({ label: "Энергия", value: portrait_summary.energy_type })} />
-                      <SummaryTag label="Фокус" value={portrait_summary.current_dynamic} color="amber" onClick={() => setActiveTooltip({ label: "Фокус", value: portrait_summary.current_dynamic })} />
-                    </div>
-
-                    <div className="pt-4 mt-2 border-t border-white/[0.05] space-y-3">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em]">Социальный интерфейс</span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        <SummaryTag label="Мировоззрение" value={deep_profile_data.social_interface.worldview_stance} color="blue" onClick={() => setActiveTooltip({ label: "Мировоззрение", value: deep_profile_data.social_interface.worldview_stance })} />
-                        <SummaryTag label="Коммуникация" value={deep_profile_data.social_interface.communication_style} color="violet" onClick={() => setActiveTooltip({ label: "Коммуникация", value: deep_profile_data.social_interface.communication_style })} />
-                      </div>
-                      <div 
-                        onClick={() => setActiveTooltip({ label: "Экзистенциальный урок", value: deep_profile_data.social_interface.karmic_lesson })}
-                        className="pt-3 border-t border-white/[0.03] cursor-pointer group active:scale-[0.99] transition-all"
-                      >
-                        <div className="flex items-center justify-between mb-1">
-                          <div className="text-[9px] font-bold uppercase tracking-tight text-white/30">Экзистенциальный урок</div>
-                          <Info size={10} className="text-white/10 group-hover:text-white/30 transition-colors" />
-                        </div>
-                        <div className="text-xs italic text-violet-300/90 leading-relaxed">
-                          «{deep_profile_data.social_interface.karmic_lesson}»
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              </motion.div>
-            )}
-
-            {subTab === "sides" && (
-              <motion.div
-                key="sides-tab"
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="space-y-4"
-              >
-                <div className="grid grid-cols-2 gap-3">
-                  <PolarityCard title="Сильные стороны" items={deep_profile_data.polarities.core_strengths} icon={ShieldCheck} color="#10B981" />
-                  <PolarityCard title="Теневые аспекты" items={deep_profile_data.polarities.shadow_aspects} icon={AlertCircle} color="#EF4444" />
-                </div>
-              </motion.div>
-            )}
-
-            {subTab === "analysis" && (
-              <motion.div
-                key="analysis-tab"
-                initial={{ opacity: 0, x: 10 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="space-y-4"
-              >
-                {/* ── 12 Spheres Grid (6x2) ── */}
-                <div className="grid grid-cols-2 gap-2.5">
-                  {SPHERES_META.map((meta, idx) => {
-                    const status = deep_profile_data.spheres_status[meta.key];
-                    const Icon = ICON_MAP[meta.key] || User;
-                    return (
-                      <motion.div
-                        key={meta.key}
-                        initial={{ opacity: 0, scale: 0.98 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: idx * 0.015 }}
-                        onClick={() => setSelectedSphere(meta.key)}
-                        className="p-2.5 rounded-[1.25rem] bg-white/[0.02] border border-white/[0.04] flex items-center gap-3 active:scale-[0.98] transition-all cursor-pointer hover:bg-white/[0.05] group"
-                      >
-                        <div 
-                          className="w-10 h-10 flex-shrink-0 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110"
-                          style={{ backgroundColor: `${meta.color}15`, color: meta.color, border: `1px solid ${meta.color}20` }}
-                        >
-                          <Icon size={20} />
-                        </div>
-                        <div className="flex flex-col min-w-0">
-                          <span className="text-[8px] font-bold text-white/20 uppercase tracking-wider mb-0.5">
-                            {status?.status || "Инициация"}
-                          </span>
-                          <span className="font-bold text-[12px] text-white/90 block leading-none truncate">
-                            {meta.name}
-                          </span>
-                          <p className="text-[9px] text-white/40 leading-tight font-light truncate mt-1">
-                            {meta.subtitle}
-                          </p>
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              </motion.div>
-            )}
-          </motion.div>
-        ) : (
-          /* ── Sphere Detail View (DSB Expansion) ── */
-          <motion.div
-            key="sphere-detail"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            className="space-y-6 pt-2"
-          >
-            <button 
-              onClick={() => setSelectedSphere(null)}
-              className="flex items-center gap-2 text-white/40 hover:text-white transition-colors text-[10px] font-bold uppercase tracking-widest pl-2"
+        <motion.div
+          key={subTab}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, x: -20 }}
+          className="space-y-6"
+        >
+          {/* ── Sub-Navigation Tabs ── */}
+          <div className="flex p-1 gap-1 bg-white/[0.04] border border-white/10 rounded-[14px]">
+            <button
+              onClick={() => { setSubTab("personality"); setSelectedSphere(null); }}
+              style={{
+                padding: "8px 4px", borderRadius: 10, fontSize: 11, fontWeight: 500, transition: "all 0.2s",
+                background: subTab === "personality" ? "rgba(255,255,255,0.1)" : "transparent",
+                color: subTab === "personality" ? "var(--text-primary)" : "var(--text-muted)",
+                border: "none", flex: 1
+              }}
             >
-              <ArrowLeft size={16} /> Назад в Океан
+              Портрет
             </button>
+            <button
+              onClick={() => { setSubTab("analysis"); if (!selectedSphere) setSelectedSphere("IDENTITY"); }}
+              style={{
+                padding: "8px 4px", borderRadius: 10, fontSize: 11, fontWeight: 500, transition: "all 0.2s",
+                background: subTab === "analysis" ? "rgba(255,255,255,0.1)" : "transparent",
+                color: subTab === "analysis" ? "var(--text-primary)" : "var(--text-muted)",
+                border: "none", flex: 1
+              }}
+            >
+              Разбор
+            </button>
+            <button
+              onClick={() => { setSubTab("sides"); setSelectedSphere(null); }}
+              style={{
+                padding: "8px 4px", borderRadius: 10, fontSize: 11, fontWeight: 500, transition: "all 0.2s",
+                background: subTab === "sides" ? "rgba(255,255,255,0.1)" : "transparent",
+                color: subTab === "sides" ? "var(--text-primary)" : "var(--text-muted)",
+                border: "none", flex: 1
+              }}
+            >
+              Стороны
+            </button>
+          </div>
 
-            <div className="space-y-4">
-              <div className="flex items-center gap-4 px-2">
-                <div 
-                  className="w-11 h-11 rounded-2xl flex items-center justify-center shadow-lg"
-                  style={{ 
-                    backgroundColor: `${activeSphereMeta?.color}20`, 
-                    color: activeSphereMeta?.color,
-                    border: `1px solid ${activeSphereMeta?.color}30`
-                  }}
-                >
-                  {activeSphereMeta && (() => {
-                    const Icon = ICON_MAP[activeSphereMeta.key];
-                    return <Icon size={22} />;
-                  })()}
-                </div>
-                <div className="flex flex-col">
-                  <h1 className="text-xl font-bold text-white tracking-tight mb-0.5">
-                    {activeSphereMeta?.name}
-                  </h1>
-                  <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest leading-none">
-                    {activeSphereData?.status || "Стадия не определена"}
-                  </span>
+          {/* ── Energy Claim Notification ── */}
+          {hub.energy_claim?.can_claim && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+              onClick={async () => {
+                if (isClaiming) return;
+                setIsClaiming(true); play('success');
+                try {
+                  const res = await economyAPI.claim(userId);
+                  if (res.data.success) { setUser({ energy: res.data.new_energy }); mutate(["master-hub", userId]); }
+                } catch (e) { console.error("Claim error", e); } finally { setIsClaiming(false); }
+              }}
+              className="mx-2 p-4 rounded-2xl bg-gradient-to-r from-amber-500/20 to-amber-600/10 border border-amber-500/30 flex items-center justify-between cursor-pointer active:scale-[0.98] transition-all relative overflow-hidden group shadow-lg shadow-amber-500/5"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-amber-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="flex items-center gap-3 relative z-10">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center text-xl shadow-inner">⚡</div>
+                <div>
+                  <p className="text-sm font-bold text-amber-200">Доступна энергия! (+10 ✦)</p>
+                  <p className="text-[10px] text-amber-200/50 uppercase font-bold tracking-widest">Нажми чтобы забрать</p>
                 </div>
               </div>
+            </motion.div>
+          )}
 
-              {dsbLoading && !dsbPortrait ? (
-                <div className="px-2 space-y-4">
-                  <div className="h-24 bg-white/5 rounded-2xl animate-pulse" />
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="h-32 bg-white/5 rounded-2xl animate-pulse" />
-                    <div className="h-32 bg-white/5 rounded-2xl animate-pulse" />
+          {subTab === "personality" && (
+            <motion.div key="personality-tab" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
+              <motion.div className="p-5 rounded-[1.25rem] bg-gradient-to-br from-violet-600/[0.08] to-blue-600/[0.04] border border-white/10 backdrop-blur-3xl shadow-xl relative overflow-hidden">
+                <div className="absolute -top-10 -right-10 w-40 h-40 bg-violet-500/10 blur-[60px] rounded-full" />
+                <div className="flex flex-col gap-3.5">
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse" />
+                    <span className="text-[9px] font-bold text-violet-400/80 uppercase tracking-[0.2em]">Идентификация Аватара</span>
+                  </div>
+                  <p className="text-sm font-medium text-white leading-snug">{portrait_summary.core_identity}</p>
+                  <div className="grid grid-cols-2 gap-2 mt-2">
+                    <SummaryTag label="Архетип" value={portrait_summary.core_archetype} color="violet" onClick={() => setActiveTooltip({ label: "Архетип", value: portrait_summary.core_archetype })} />
+                    <SummaryTag label="Роль" value={portrait_summary.narrative_role} color="blue" onClick={() => setActiveTooltip({ label: "Роль", value: portrait_summary.narrative_role })} />
+                    <SummaryTag label="Энергия" value={portrait_summary.energy_type} color="emerald" onClick={() => setActiveTooltip({ label: "Энергия", value: portrait_summary.energy_type })} />
+                    <SummaryTag label="Фокус" value={portrait_summary.current_dynamic} color="amber" onClick={() => setActiveTooltip({ label: "Фокус", value: portrait_summary.current_dynamic })} />
                   </div>
                 </div>
-              ) : (
-                <div className="space-y-8 pb-32">
-                   {/* 1. Brief Synthesis */}
-                   <div className="px-2">
-                     <div className="p-4 rounded-3xl bg-white/[0.03] border border-white/5 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 p-3 opacity-10"><Sparkles size={40} /></div>
-                        <span className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em] block mb-3">Глубинный синтез</span>
-                        <p className="text-sm leading-relaxed text-white/80 font-light italic">
-                          «{dsbPortrait?.brief || activeSphereData?.insight || "Глубинный смысл этой сферы раскроется в процессе твоей эволюции."}»
-                        </p>
-                     </div>
-                   </div>
-
-                   {/* 2. Key Factors Layer */}
-                   <DSBDetailSection title="Ключевые факторы (Прошивка)" icon={Info}>
-                     <div className="grid grid-cols-2 gap-3 px-2">
-                        {dsbPortrait?.factors?.sort((a: any, b: any) => INFLUENCE_SORT[b.influence_level] - INFLUENCE_SORT[a.influence_level]).map((f: any) => (
-                          <DSBFactorCard key={f.id} factor={f} onClick={() => setSelectedFactor(f)} />
-                        ))}
-                     </div>
-                   </DSBDetailSection>
-
-                   {/* 3. Patterns Layer */}
-                   {dsbPortrait?.patterns?.length > 0 && (
-                     <DSBDetailSection title="Системные конфигурации" icon={Zap}>
-                       <div className="space-y-3 px-2">
-                         {dsbPortrait.patterns.map((p: any) => (
-                           <DSBPatternBlock key={p.id} pattern={p} />
-                         ))}
-                       </div>
-                     </DSBDetailSection>
-                   )}
-
-                   {/* 4. Recommendations Layer */}
-                   {dsbPortrait?.recommendations?.length > 0 && (
-                     <DSBDetailSection title="Векторы развития" icon={Zap}>
-                        <div className="space-y-2 px-2">
-                          {dsbPortrait.recommendations.map((r: any) => (
-                            <div key={r.id} className="p-4 rounded-2xl bg-emerald-500/[0.03] border border-emerald-500/10 flex gap-3">
-                               <div className="mt-1"><ShieldCheck size={14} className="text-emerald-500" /></div>
-                               <p className="text-[12px] text-white/80 leading-snug">{r.recommendation}</p>
-                            </div>
-                          ))}
-                        </div>
-                     </DSBDetailSection>
-                   )}
-
-                   {/* 5. Shadow Audit Layer */}
-                   {dsbPortrait?.shadows?.length > 0 && (
-                     <DSBDetailSection title="Аудит искажений" icon={AlertCircle}>
-                        <div className="space-y-3 px-2">
-                           {dsbPortrait.shadows.map((s: any) => (
-                             <DSBShadowBlock key={s.id} shadow={s} />
-                           ))}
-                        </div>
-                     </DSBDetailSection>
-                   )}
+              </motion.div>
+              {deep_profile_data.meta_patterns?.length > 0 && (
+                <div className="space-y-3 mt-4">
+                  <div className="flex items-center gap-2 px-1">
+                    <Zap size={12} className="text-violet-400" />
+                    <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest">Глубинные Мета-Паттерны</span>
+                  </div>
+                  {deep_profile_data.meta_patterns.map((p: any, idx: number) => (
+                    <DSBPatternBlock key={idx} pattern={p} />
+                  ))}
                 </div>
               )}
-            </div>
-          </motion.div>
-        )}
+            </motion.div>
+          )}
+
+          {subTab === "sides" && (
+            <motion.div key="sides-tab" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <PolarityCard title="Сильные стороны" items={deep_profile_data.polarities.core_strengths} icon={ShieldCheck} color="#10B981" />
+                <PolarityCard title="Теневые аспекты" items={deep_profile_data.polarities.shadow_aspects} icon={AlertCircle} color="#EF4444" />
+              </div>
+            </motion.div>
+          )}
+
+          {subTab === "analysis" && (
+            <motion.div key="analysis-tab" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
+              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 mb-2" style={{ scrollbarWidth: 'none' }}>
+                {SPHERES_META.map((meta) => {
+                  const active = selectedSphere === meta.key;
+                  const Icon = ICON_MAP[meta.key] || User;
+                  return (
+                    <button
+                      key={meta.key} onClick={() => setSelectedSphere(meta.key)}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-xl transition-all whitespace-nowrap border ${
+                        active ? 'bg-white/10 border-white/20 scale-[1.02]' : 'bg-white/[0.02] border-white/5 opacity-60'
+                      }`}
+                    >
+                      <div style={{ color: active ? meta.color : 'inherit' }}><Icon size={14} /></div>
+                      <span className={`text-[11px] font-bold ${active ? 'text-white' : 'text-white/40'}`}>{meta.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              {selectedSphere && (
+                <motion.div key={selectedSphere} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+                  <div className="flex items-center gap-4 px-1 mt-2">
+                    <div 
+                      className="w-10 h-10 rounded-xl flex items-center justify-center"
+                      style={{ backgroundColor: `${activeSphereMeta?.color}20`, color: activeSphereMeta?.color, border: `1px solid ${activeSphereMeta?.color}30` }}
+                    >
+                      {activeSphereMeta && (() => { const Icon = ICON_MAP[activeSphereMeta.key]; return <Icon size={18} />; })()}
+                    </div>
+                    <div className="flex flex-col">
+                      <h2 className="text-lg font-bold text-white tracking-tight leading-none mb-1">{activeSphereMeta?.name}</h2>
+                      <span className="text-[8px] font-bold text-white/30 uppercase tracking-widest leading-none">{activeSphereData?.status || "Инициация"}</span>
+                    </div>
+                  </div>
+                  {dsbLoading && !dsbPortrait ? (
+                    <div className="space-y-4">
+                      <div className="h-20 bg-white/5 rounded-2xl animate-pulse" />
+                      <div className="grid grid-cols-2 gap-3"><div className="h-24 bg-white/5 rounded-2xl animate-pulse" /><div className="h-24 bg-white/5 rounded-2xl animate-pulse" /></div>
+                    </div>
+                  ) : (
+                    <div className="space-y-6">
+                      <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/5 relative overflow-hidden">
+                        <span className="text-[8px] font-bold text-white/20 uppercase tracking-[0.2em] block mb-2">Глубинный синтез</span>
+                        <p className="text-[13px] leading-relaxed text-white/80 font-light italic">«{dsbPortrait?.brief || activeSphereData?.insight || "Система анализирует..."}»</p>
+                      </div>
+                      <DSBDetailSection title="Разбор фактов (Layer 2)" icon={Info}>
+                        <div className="grid grid-cols-2 gap-2.5">
+                          {dsbPortrait?.factors?.sort((a: any, b: any) => INFLUENCE_SORT[b.influence_level] - INFLUENCE_SORT[a.influence_level]).map((f: any) => (
+                            <DSBFactorCard key={f.id} factor={f} onClick={() => setSelectedFactor(f)} />
+                          ))}
+                        </div>
+                      </DSBDetailSection>
+                      {dsbPortrait?.patterns?.length > 0 && (
+                        <DSBDetailSection title="Системные конфигурации" icon={Zap}>
+                          <div className="space-y-3">{dsbPortrait.patterns.map((p: any) => <DSBPatternBlock key={p.id} pattern={p} />)}</div>
+                        </DSBDetailSection>
+                      )}
+                      {dsbPortrait?.recommendations?.length > 0 && (
+                        <DSBDetailSection title="Векторы развития" icon={Zap}>
+                          <div className="space-y-2">{dsbPortrait.recommendations.map((r: any) => (
+                            <div key={r.id} className="p-3.5 rounded-2xl bg-emerald-500/[0.03] border border-emerald-500/10 flex gap-3">
+                              <div className="mt-0.5"><ShieldCheck size={14} className="text-emerald-500" /></div>
+                              <p className="text-[11px] text-white/80 leading-snug">{r.recommendation}</p>
+                            </div>
+                          ))}</div>
+                        </DSBDetailSection>
+                      )}
+                      {dsbPortrait?.shadows?.length > 0 && (
+                        <DSBDetailSection title="Аудит искажений" icon={AlertCircle}>
+                          <div className="space-y-3">{dsbPortrait.shadows.map((s: any) => <DSBShadowBlock key={s.id} shadow={s} />)}</div>
+                        </DSBDetailSection>
+                      )}
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </motion.div>
+          )}
+        </motion.div>
       </AnimatePresence>
 
       <AnimatePresence>
@@ -656,22 +491,12 @@ export default function MasterHubView({ userId }: { userId: number }) {
         )}
       </AnimatePresence>
 
-      {/* ── Tooltip Overlay ── */}
       <AnimatePresence>
         {activeTooltip && (
           <>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setActiveTooltip(null)} className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100]" />
             <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setActiveTooltip(null)}
-              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100]"
-            />
-            <motion.div 
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} transition={{ type: "spring", damping: 25, stiffness: 200 }}
               className="fixed bottom-0 left-0 right-0 bg-[#0a0a0a] border-t border-white/10 rounded-t-[2rem] px-6 pt-5 pb-10 z-[101] shadow-2xl"
             >
               <div className="w-12 h-1.5 bg-white/10 rounded-full mx-auto mb-6" />
@@ -681,14 +506,9 @@ export default function MasterHubView({ userId }: { userId: number }) {
                   <h3 className="text-xl font-bold text-white tracking-tight">{activeTooltip.value}</h3>
                 </div>
                 <p className="text-[13px] text-white/60 leading-relaxed font-light">
-                  {TRAIT_DESCRIPTIONS[activeTooltip.value] || "Глубинный смысл этого качества раскрывается в твоей персональной истории развития."}
+                  {TRAIT_DESCRIPTIONS[activeTooltip.value] || "Глубинный смысл этого качества раскрывается в твоей..."}
                 </p>
-                <button 
-                  onClick={() => setActiveTooltip(null)}
-                  className="w-full py-4 mt-1.5 bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl text-xs font-bold uppercase tracking-widest transition-colors"
-                >
-                  Понятно
-                </button>
+                <button onClick={() => setActiveTooltip(null)} className="w-full py-4 mt-1.5 bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl text-xs font-bold uppercase tracking-widest transition-colors">Понятно</button>
               </div>
             </motion.div>
           </>

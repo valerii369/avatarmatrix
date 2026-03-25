@@ -37,6 +37,7 @@ class DeepProfileData(BaseModel):
     polarities: Polarities
     social_interface: SocialInterface
     spheres_status: Dict[str, SphereStatus]
+    meta_patterns: List[Dict[str, Any]] = Field(default_factory=list)
 
 class EnergyClaimStatus(BaseModel):
     """Статус сбора бесплатной энергии."""
