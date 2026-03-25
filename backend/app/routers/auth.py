@@ -150,6 +150,8 @@ async def authenticate(
 
     await db.commit()
     await db.refresh(user)
+    
+    logger.info(f"Auth Success: user.id={user.id}, tg_id={user.tg_id}, is_new={is_new}")
 
     return AuthResponse(
         user_id=user.id,
