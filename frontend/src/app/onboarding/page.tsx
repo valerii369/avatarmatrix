@@ -568,33 +568,39 @@ export default function OnboardingPage() {
 
     useEffect(() => {
         const checkDebug = async () => {
-            if (!userId) {
-                const params = new URLSearchParams(window.location.search);
-                const isDebug = params.get("debug") === "true";
-                const testUserId = parseInt(params.get("user_id") || "0") || undefined;
-                
-                if (isDebug) {
-                    try {
-                        console.log("Onboarding: Debug mode detected, authenticating test user...");
-                        const authRes = await api.post("/api/auth", { initData: "", test_mode: true, test_user_id: testUserId });
-                        const d = authRes.data;
-                        setUser({
-                            userId: d.user_id, tgId: d.tg_id, firstName: d.first_name,
-                            token: d.token, energy: d.energy, streak: d.streak,
-                            evolutionLevel: d.evolution_level, title: d.title,
-                            onboardingDone: d.onboarding_done,
-                        });
-                        if (typeof window !== "undefined")
-                            localStorage.setItem("avatar_token", d.token);
-                    } catch (e) {
-                        console.error("Debug login failed", e);
-                    }
+            const params = new URLSearchParams(window.location.search);
+            const isDebug = params.get("debug") === "true";
+            const testUserId = params.get("user_id");
+            
+            // Re-authenticate if in debug mode, especially if we have a specific user_id in URL
+            // OR if we don't have a userId in the store at all.
+            if (isDebug) {
+                try {
+                    console.log("Onboarding: Debug mode detected, authenticating test user...", testUserId);
+                    const authRes = await api.post("/api/auth", { 
+                        initData: "", 
+                        test_mode: true, 
+                        test_user_id: testUserId ? parseInt(testUserId) : 12345678 
+                    });
+                    const d = authRes.data;
+                    console.log("Onboarding: Debug auth success, user_id:", d.user_id);
+                    
+                    setUser({
+                        userId: d.user_id, tgId: d.tg_id, firstName: d.first_name,
+                        token: d.token, energy: d.energy, streak: d.streak,
+                        evolutionLevel: d.evolution_level, title: d.title,
+                        onboardingDone: d.onboarding_done,
+                    });
+                    if (typeof window !== "undefined")
+                        localStorage.setItem("avatar_token", d.token);
+                } catch (e) {
+                    console.error("Debug login failed", e);
                 }
             }
         };
         checkDebug();
         console.log("OnboardingPage initialized, path:", path, "step:", step);
-    }, [userId, setUser]);
+    }, [setUser]); // Remove userId from deps to avoid loop if we always re-auth in debug
 
     useEffect(() => {
         console.log("Onboarding progress update:", { path, step, progress });
