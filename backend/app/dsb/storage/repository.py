@@ -363,3 +363,48 @@ class PortraitRepository:
             else:
                 output[f"sphere_{s.sphere}_brief"] = s.brief_text
         return output
+
+    async def get_latest_ready_portrait_id(self, user_id: int) -> str | None:
+        """Returns the latest portrait_id with status 'ready' for a user."""
+        result = await self.session.execute(
+            select(DigitalPortrait.id)
+            .where(
+                DigitalPortrait.user_id == user_id,
+                DigitalPortrait.status == "ready"
+            )
+            .order_by(DigitalPortrait.created_at.desc())
+        )
+        row = result.scalars().first()
+        return str(row) if row else None
+
+    async def get_patterns_for_sphere(self, portrait_id: str, sphere: int) -> list[PortraitPattern]:
+        result = await self.session.execute(
+            select(PortraitPattern)
+            .where(
+                PortraitPattern.portrait_id == portrait_id,
+                PortraitPattern.sphere == sphere,
+            )
+            .order_by(PortraitPattern.convergence_score.desc())
+        )
+        return list(result.scalars().all())
+
+    async def get_recommendations_for_sphere(self, portrait_id: str, sphere: int) -> list[PortraitRecommendation]:
+        result = await self.session.execute(
+            select(PortraitRecommendation)
+            .where(
+                PortraitRecommendation.portrait_id == portrait_id,
+                PortraitRecommendation.sphere == sphere,
+            )
+        )
+        return list(result.scalars().all())
+
+    async def get_shadows_for_sphere(self, portrait_id: str, sphere: int) -> list[PortraitShadowAudit]:
+        result = await self.session.execute(
+            select(PortraitShadowAudit)
+            .where(
+                PortraitShadowAudit.portrait_id == portrait_id,
+                PortraitShadowAudit.sphere == sphere,
+            )
+            .order_by(PortraitShadowAudit.convergence_score.desc())
+        )
+        return list(result.scalars().all())
