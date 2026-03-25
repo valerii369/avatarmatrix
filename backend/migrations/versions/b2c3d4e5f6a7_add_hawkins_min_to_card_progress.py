@@ -26,4 +26,4 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.drop_column('card_progress', 'hawkins_min')
+    op.execute("ALTER TABLE IF EXISTS card_progress DROP COLUMN IF EXISTS hawkins_min")

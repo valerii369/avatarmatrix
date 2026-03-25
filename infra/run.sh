@@ -3,11 +3,12 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 echo "🚀 Запуск AVATAR..."
 
 # Переходим в backend
-cd "$SCRIPT_DIR/backend"
+cd "${PROJECT_ROOT}/backend"
 
 # Проверяем виртуальное окружение
 if [ ! -d "venv" ]; then
@@ -36,7 +37,7 @@ FASTAPI_PID=$!
 
 # Запускаем Telegram Bot в фоне
 echo "🤖 Запускаем Telegram Bot..."
-cd "$SCRIPT_DIR/bot"
+cd "${PROJECT_ROOT}/bot"
 python main.py &
 BOT_PID=$!
 
