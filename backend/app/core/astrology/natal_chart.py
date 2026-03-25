@@ -11,7 +11,10 @@ from timezonefinder import TimezoneFinder
 from datetime import datetime
 from typing import Any
 import pytz
+import logging
 from app.config import settings
+
+logger = logging.getLogger(__name__)
 
 DATA_DIR = settings.DATA_DIR
 EPHE_PATH = settings.EPHE_PATH
@@ -246,8 +249,8 @@ async def geocode_place(place: str) -> tuple[float, float, str]:
     """Get latitude, longitude and timezone from place name."""
     logger.info(f"[Geocode] Started for place: {place}")
     try:
-        # Using a more unique user agent to avoid rate limiting
-        geolocator = Nominatim(user_agent=f"avatar_app_{settings.ENVIRONMENT}_{place[:3]}")
+        # Using a fixed unique user agent to avoid rate limiting and encoding issues
+        geolocator = Nominatim(user_agent="avatar_app_v1_0_prod_geocoder")
         
         # Run synchronous geocode in a thread
         location = await anyio.to_thread.run_sync(lambda: geolocator.geocode(place, timeout=15))
