@@ -4,7 +4,7 @@ PYTHON=python3.11
 VENV=backend/venv
 
 install:
-	cd backend && $(PYTHON) -m venv venv && ./venv/bin/pip install -r requirements.txt
+	cd backend && rm -rf venv && $(PYTHON) -m venv venv && ./venv/bin/pip install -r requirements.txt
 
 migrate:
 	cd backend && ./venv/bin/alembic upgrade head

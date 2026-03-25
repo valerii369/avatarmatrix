@@ -1,4 +1,6 @@
 import asyncio
+import logging
+from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from openai import AsyncOpenAI
@@ -8,6 +10,7 @@ from app.models.avatar_card import AvatarCard
 from pydantic import BaseModel
 
 client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+logger = logging.getLogger(__name__)
 
 async def _get_embedding(text: str) -> list[float]:
     response = await client.embeddings.create(
