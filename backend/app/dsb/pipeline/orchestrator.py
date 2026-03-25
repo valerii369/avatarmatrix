@@ -169,9 +169,27 @@ class PortraitOrchestrator:
             await repo.save_summaries(portrait_id, brief)
 
             # ═══ Готово ═════════════════════════════════════════════════
+            # Генерируем синтетический UserPrint для старого MasterHubView
+            from app.dsb.synthesis.master_hub_adapter import generate_user_print_from_dsb
+            await generate_user_print_from_dsb(user_id, session, brief, meta_patterns)
+
             await repo.update_status(portrait_id, "ready")
             await session.commit()
             logger.info(f"[Orchestrator] Portrait {portrait_id} READY")
+
+            # Notification to user
+            from app.models.user import User
+            from sqlalchemy import select
+            user_res = await session.execute(select(User).where(User.id == user_id))
+            user_obj = user_res.scalar_one_or_none()
+            if user_obj and user_obj.tg_id:
+                msg = (
+                    "✅ <b>Твой DSB Паспорт готов!</b>\n\n"
+                    "Расчёт по 12 сферам и теневой компас полностью синтезированы.\n✨ "
+                    "Переходи во вкладку «О тебе», чтобы открыть подробности."
+                )
+                from app.services.notification import NotificationService
+                await NotificationService.send_tg_message(user_obj.tg_id, msg)
 
         except Exception as e:
             logger.exception(f"[Orchestrator] Pipeline failed for portrait {portrait_id}: {e}")

@@ -14,8 +14,6 @@ from app.models.card_progress import CardStatus
 from app.core.astrology.natal_chart import (
     calculate_natal_chart, geocode_place, to_dict as chart_to_dict
 )
-from app.rro.ocean.hub import OceanService
-from app.rro.astro.river import AstroRiver
 from app.rro.astro.rain import AstroRain
 import logging
 from app.services.notification import NotificationService
@@ -114,7 +112,17 @@ async def calculate(
         await db.commit()
         logger.info("Commit successful.")
 
-        background_tasks.add_task(run_rro_pipeline, user.id, natal.id)
+        background_tasks.add_task(
+            run_dsb_pipeline, 
+            user.id, 
+            request.birth_date, 
+            request.birth_time, 
+            lat, 
+            lon, 
+            request.birth_place, 
+            request.gender, # Optional full_name mapping
+            AsyncSessionLocal
+        )
 
         return CalcResponse(
             success=True,
@@ -127,45 +135,29 @@ async def calculate(
         logger.error(f"Astro processing failed: {e}")
         raise HTTPException(status_code=500, detail=f"Astro processing error: {e}")
 
-async def run_rro_pipeline(u_id: int, n_id: int):
+async def run_dsb_pipeline(u_id: int, birth_date, birth_time, lat, lon, place, full_name, session_maker):
     """
-    Background RRO Pipeline executor.
+    Background DSB Pipeline executor.
     """
-    logger.info(f"--- [BACKGROUND] RRO v2 Pipeline INITIALIZED for user {u_id} ---")
+    logger.info(f"--- [BACKGROUND] DSB Pipeline INITIALIZED for user {u_id} ---")
     try:
-        async with AsyncSessionLocal() as session:
-            # Get L1 data
-            n_res = await session.execute(select(NatalChart).where(NatalChart.id == n_id))
-            natal_obj = n_res.scalar_one_or_none()
+        async with session_maker() as session:
             
-            if not natal_obj:
-                logger.error(f"[BACKGROUND] NatalChart {n_id} not found for user {u_id}")
-                return
-
-            # Level 2: River (Interpretation)
-            logger.info(f"[BACKGROUND] Starting Level 2 (River) for user {u_id}")
-            river = AstroRiver()
-            interpretation_data = await river.flow(session, u_id, natal_obj)
-            logger.info(f"[BACKGROUND] Level 2 (River) completed for user {u_id}")
+            from app.dsb.calculators.base import BirthData
+            from app.dsb.pipeline.orchestrator import PortraitOrchestrator
             
-            if interpretation_data:
-                # Level 3: Ocean (Synthesis)
-                logger.info(f"[BACKGROUND] Starting Level 3 (Ocean) for user {u_id}")
-                await OceanService.update_ocean(session, u_id, [interpretation_data])
-                await session.commit()
-                logger.info(f"[BACKGROUND] RRO v2 Pipeline completed successfully for user {u_id}")
+            birth_data = BirthData(
+                date=birth_date,
+                time=birth_time,
+                place=place,
+                lat=lat,
+                lon=lon,
+                timezone="UTC", # Not strictly needed as geocoding info is mixed, but passing 
+                full_name=full_name
+            )
+            
+            orchestrator = PortraitOrchestrator()
+            await orchestrator.generate(birth_data, u_id, session)
 
-                # Notify user via Telegram
-                user_res = await session.execute(select(User).where(User.id == u_id))
-                user_obj = user_res.scalar_one_or_none()
-                if user_obj and user_obj.tg_id:
-                    msg = (
-                        "✅ <b>Твой AVATAR обновлен!</b>\n\n"
-                        "Глубинный синтез всех 12 сфер завершен. Полный психологический паспорт "
-                        "и новые рекомендации уже ждут тебя в приложении. ✨"
-                    )
-                    await NotificationService.send_tg_message(user_obj.tg_id, msg)
-            else:
-                logger.warning(f"[BACKGROUND] Level 2 (River) returned no data for user {u_id}")
     except Exception as e:
-        logger.error(f"[BACKGROUND] RRO v2 Pipeline failed for user {u_id}: {e}", exc_info=True)
+        logger.error(f"[BACKGROUND] DSB Pipeline failed for user {u_id}: {e}", exc_info=True)
