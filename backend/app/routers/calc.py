@@ -115,7 +115,8 @@ async def calculate(
             run_dsb_pipeline, 
             user.id, 
             birth_data,
-            AsyncSessionLocal
+            AsyncSessionLocal,
+            dsb_res.get("portrait_id")
         )
 
         return CalcResponse(
@@ -131,14 +132,14 @@ async def calculate(
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Onboarding error: {e}")
 
-async def run_dsb_pipeline(u_id: int, birth_data: BirthData, session_maker):
+async def run_dsb_pipeline(u_id: int, birth_data: BirthData, session_maker, portrait_id: str = None):
     """
     Background DSB Pipeline executor.
     """
-    logger.info(f"--- [BACKGROUND] DSB Pipeline STARTED for user {u_id} ---")
+    logger.info(f"--- [BACKGROUND] DSB Pipeline STARTED for user {u_id} (Portrait: {portrait_id}) ---")
     try:
         async with session_maker() as session:
             orchestrator = PortraitOrchestrator()
-            await orchestrator.generate(birth_data, u_id, session)
+            await orchestrator.generate(birth_data, u_id, session, portrait_id=portrait_id)
     except Exception as e:
         logger.error(f"[BACKGROUND] DSB Pipeline failed for user {u_id}: {e}", exc_info=True)

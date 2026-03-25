@@ -36,8 +36,17 @@ class PortraitRepository:
     async def save_raw_results(self, portrait_id: str, system_name: str, raw_data: dict) -> None:
         """
         Flatten complex calculator output into granular dsb_raw_data rows.
-        Splits data by groups (planets, aspects, houses, etc.).
+        Splits data by groups (planets, aspects, houses, etc.) and saves a full snapshot.
         """
+        # 0. Full Output Snapshot (For 100% Identicalness)
+        self.session.add(PortraitRawData(
+            portrait_id=portrait_id,
+            system_name=system_name,
+            data_group="full_output",
+            data_key="engine_results",
+            payload=raw_data,
+        ))
+
         # 1. Planets
         for p in raw_data.get("planets", []):
             self.session.add(PortraitRawData(
@@ -60,23 +69,33 @@ class PortraitRepository:
                 payload=a,
             ))
 
-        # 3. Houses
+        # 3. Houses (Full object + Detailed per house)
         houses = raw_data.get("houses", {})
-        cusps = houses.get("cusps", [])
-        rulers = houses.get("rulers", {})
-        for i, cusp_deg in enumerate(cusps):
-            h_num = i + 1
+        if houses:
             self.session.add(PortraitRawData(
                 portrait_id=portrait_id,
                 system_name=system_name,
                 data_group="houses",
-                data_key=f"House-{h_num}",
-                payload={
-                    "house_num": h_num,
-                    "cusp_degree": cusp_deg,
-                    "ruler": rulers.get(str(h_num)),
-                },
+                data_key="all_houses",
+                payload=houses,
             ))
+            
+            # Detailed house cusps/rulers
+            cusps = houses.get("cusps", [])
+            rulers = houses.get("rulers", {})
+            for i, cusp_deg in enumerate(cusps):
+                h_num = i + 1
+                self.session.add(PortraitRawData(
+                    portrait_id=portrait_id,
+                    system_name=system_name,
+                    data_group="houses_detailed",
+                    data_key=f"House-{h_num}",
+                    payload={
+                        "house_num": h_num,
+                        "cusp_degree": cusp_deg,
+                        "ruler": rulers.get(str(h_num)),
+                    },
+                ))
 
         # 4. Technical Summary (Hemispheres, Elements, etc.)
         tech = raw_data.get("technical_summary", {})
@@ -89,7 +108,41 @@ class PortraitRepository:
                 payload=tech,
             ))
 
-        # 5. Other groups (Stelliums, Arabic Parts, Patterns)
+        # 5. Core Points (Ascendant, MC, South Node)
+        if "ascendant" in raw_data:
+            self.session.add(PortraitRawData(
+                portrait_id=portrait_id,
+                system_name=system_name,
+                data_group="points",
+                data_key="ascendant",
+                payload=raw_data["ascendant"],
+            ))
+        if "mc_degree" in raw_data:
+            self.session.add(PortraitRawData(
+                portrait_id=portrait_id,
+                system_name=system_name,
+                data_group="points",
+                data_key="mc_degree",
+                payload={"degree": raw_data["mc_degree"]},
+            ))
+        if "south_node" in raw_data:
+            self.session.add(PortraitRawData(
+                portrait_id=portrait_id,
+                system_name=system_name,
+                data_group="points",
+                data_key="south_node",
+                payload=raw_data["south_node"],
+            ))
+        if "geocoded" in raw_data:
+            self.session.add(PortraitRawData(
+                portrait_id=portrait_id,
+                system_name=system_name,
+                data_group="metadata",
+                data_key="geocoding",
+                payload=raw_data["geocoded"],
+            ))
+
+        # 6. Other groups (Stelliums, Arabic Parts, Patterns, Chains)
         for key in ["aspect_patterns", "arabic_parts", "stelliums", "dispositor_chains"]:
             group_data = raw_data.get(key)
             if group_data:
@@ -102,7 +155,7 @@ class PortraitRepository:
                 ))
 
         await self.session.flush()
-        logger.info(f"[Repo] Saved granular raw results for {system_name} in portrait {portrait_id}")
+        logger.info(f"[Repo] Saved granular and full results for {system_name} in portrait {portrait_id}")
 
     async def save_facts(self, portrait_id: str, insights: list[UniversalInsightSchema]) -> None:
         for uis in insights:

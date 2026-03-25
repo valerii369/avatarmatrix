@@ -77,22 +77,25 @@ class PortraitOrchestrator:
         birth_data: BirthData,
         user_id: int,
         session: AsyncSession,
+        portrait_id: str = None,
     ) -> str:
         """
         Запускает полный пайплайн генерации портрета.
-
-        Returns: portrait_id (UUID string)
+        Если portrait_id не передан — создает новый.
         """
         repo = PortraitRepository(session)
 
-        # ─── Создать запись портрета ─────────────────────────────────────
-        portrait_id = await repo.create_portrait(
-            user_id=user_id,
-            birth_data=birth_data.model_dump(mode="json"),
-            systems_used=self._active_system_names,
-        )
-        await session.commit()
-        logger.info(f"[Orchestrator] Portrait {portrait_id} created for user {user_id}")
+        # ─── Создать запись портрета (если еще нет) ─────────────────────
+        if not portrait_id:
+            portrait_id = await repo.create_portrait(
+                user_id=user_id,
+                birth_data=birth_data.model_dump(mode="json"),
+                systems_used=self._active_system_names,
+            )
+            await session.commit()
+            logger.info(f"[Orchestrator] New Portrait {portrait_id} created for user {user_id}")
+        else:
+            logger.info(f"[Orchestrator] Using existing Portrait {portrait_id} for user {user_id}")
 
         try:
             # ═══ СЛОЙ 1: Расчёты (все калькуляторы параллельно) ════════
@@ -236,25 +239,58 @@ class PortraitOrchestrator:
             logger.error("[Orchestrator] western_astrology data missing during onboarding")
             return {"error": "Failed to calculate natal chart"}
 
-        # 2. Legacy Sync: NatalChart (чтобы работал Astro Chart на фронте)
+        # 2. Save Raw DSB Data (Immediately for L1)
+        repo = PortraitRepository(session)
+        
+        # Создаем или находим запись портрета сразу в L1
+        from app.dsb.storage.models import DigitalPortrait
+        portrait_res = await session.execute(
+            select(DigitalPortrait)
+            .where(DigitalPortrait.user_id == user_id, DigitalPortrait.status == "generating")
+            .order_by(DigitalPortrait.created_at.desc())
+        )
+        portrait = portrait_res.scalars().first()
+        
+        if not portrait:
+            portrait_id = await repo.create_portrait(
+                user_id=user_id,
+                birth_data=birth_data.model_dump(mode="json"),
+                systems_used=self._active_system_names
+            )
+        else:
+            portrait_id = portrait.id
+
+        for (name, _), res in zip(active_calcs, results):
+            if not isinstance(res, Exception):
+                await repo.save_raw_results(portrait_id, name, res.get("raw_data", {}))
+
+        # 3. Legacy Sync: NatalChart (чтобы работал Astro Chart на фронте)
         natal_res = await session.execute(select(NatalChart).where(NatalChart.user_id == user_id))
         natal = natal_res.scalar_one_or_none()
         if not natal:
             natal = NatalChart(user_id=user_id)
             session.add(natal)
         
-        natal.planets_json = {"planets": wa_data.get("planets"), "cusps": wa_data.get("houses", {}).get("cusps")}
+        # Полная идентичность полей для старого фронтенда
+        natal.planets_json = {
+            "planets": wa_data.get("planets"), 
+            "cusps": wa_data.get("houses", {}).get("cusps"),
+            "house_rulers": wa_data.get("houses", {}).get("rulers")
+        }
         natal.aspects_json = wa_data.get("aspects")
         natal.ascendant_sign = wa_data.get("ascendant", {}).get("sign")
+        natal.ascendant_ruler = wa_data.get("ascendant", {}).get("ruler")
+        natal.stelliums_json = wa_data.get("stelliums")
         natal.recommended_cards_json = [] 
         
-        # 3. Legacy Sync: CardProgress (264 карты)
+        # 4. Legacy Sync: CardProgress (264 карты)
         await self._ensure_card_progress_initialized(user_id, session)
         
         await session.flush()
         return {
+            "portrait_id": portrait_id,
             "natal_chart": natal.planets_json,
-            "recommended_cards": [], # Рекомендации появятся после L2/L3
+            "recommended_cards": [], 
             "wa_raw": wa_data,
             "natal_obj": natal
         }
