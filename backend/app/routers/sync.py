@@ -15,7 +15,6 @@ from app.agents.analytic_agent import run_mirror_analysis, extract_response_feat
 from app.core.feature_extractor import FeatureExtractor
 from app.core.economy import spend_energy, hawkins_to_rank, award_xp, process_card_rank_up, XP_VALUES
 from app.core.portrait_service import build_portrait_for_sphere
-# from app.rro.ocean.hub import OceanService
 from app.database import AsyncSessionLocal
 
 router = APIRouter()
@@ -35,8 +34,6 @@ async def _background_sync_processing(user_id: int, session_id: int, sphere: str
             portrait_res = await update_user_portrait(session, user_id, session_id)
             
             # 4. Level 2 & 3 Pipeline: Update the Hub (Now handled by DSB)
-            # from app.rro.sync.river import SyncRiver
-            # from app.rro.ocean.hub import OceanService
             
             sync_session_res = await session.execute(select(SyncSession).where(SyncSession.id == session_id))
             sync_session = sync_session_res.scalar_one_or_none()

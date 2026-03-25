@@ -9,8 +9,6 @@ from app.models import User, AssistantSession, CardProgress, CardStatus
 from app.agents.assistant_agent import generate_assistant_response
 from app.core.economy import spend_energy, award_xp
 from app.core.astrology.vector_matcher import match_text_to_archetypes
-# from app.rro.ocean.hub import OceanService
-# from app.rro.session.river import SessionRiver
 
 router = APIRouter()
 
@@ -185,8 +183,8 @@ async def finish_assistant(
     await db.commit()
     
     # Level 2 & 3 Pipeline: Update the Hub (Ocean - User Print)
-    from app.rro.session.river import SessionRiver
-    from app.rro.ocean.hub import OceanService
+    # Level 2 & 3 Pipeline: Update the Hub (Ocean - User Print)
+    # from app.dsb.synthesis.master_hub_adapter import generate_user_print_from_dsb
     async def _run_session_rro_pipeline(u_id, s_id):
         async with AsyncSessionLocal() as session_db:
             try:

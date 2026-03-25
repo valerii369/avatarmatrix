@@ -244,24 +244,25 @@ import anyio
 
 async def geocode_place(place: str) -> tuple[float, float, str]:
     """Get latitude, longitude and timezone from place name."""
-    print(f"DEBUG: Geocoding started for place: {place}")
+    logger.info(f"[Geocode] Started for place: {place}")
     try:
-        geolocator = Nominatim(user_agent="avatar_app")
-        # Run synchronous geocode in a thread to keep the event loop responsive
-        location = await anyio.to_thread.run_sync(lambda: geolocator.geocode(place, timeout=10))
-        print(f"DEBUG: Geocoder returned: {location}")
+        # Using a more unique user agent to avoid rate limiting
+        geolocator = Nominatim(user_agent=f"avatar_app_{settings.ENVIRONMENT}_{place[:3]}")
+        
+        # Run synchronous geocode in a thread
+        location = await anyio.to_thread.run_sync(lambda: geolocator.geocode(place, timeout=15))
         
         if not location:
-            print(f"DEBUG: Location NOT FOUND for: {place}")
-            raise ValueError(f"Cannot geocode place: {place}")
+            logger.warning(f"[Geocode] Location NOT FOUND for: {place}")
+            raise ValueError(f"Не удалось найти место: {place}")
 
         tf = TimezoneFinder()
-        # TimezoneFinder also has a non-async lookup, but it's very fast. Still, good practice to keep it clean.
         tz_name = await anyio.to_thread.run_sync(lambda: tf.timezone_at(lng=location.longitude, lat=location.latitude))
-        print(f"DEBUG: Timezone found: {tz_name}")
+        
+        logger.info(f"[Geocode] Found: {location.latitude}, {location.longitude}, TZ: {tz_name}")
         return location.latitude, location.longitude, tz_name or "UTC"
     except Exception as e:
-        print(f"DEBUG: Geocoding error in geocode_place: {e}")
+        logger.error(f"[Geocode] Error for {place}: {e}")
         raise e
 
 

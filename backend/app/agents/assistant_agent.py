@@ -16,7 +16,6 @@ from app.models import (
     UserMemory, CardProgress, CardStatus, NatalChart, 
     UserPortrait
 )
-# from app.rro.ocean.hub import OceanService
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
