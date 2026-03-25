@@ -5,7 +5,7 @@ from openai import AsyncOpenAI
 
 from app.config import settings
 from app.models.avatar_card import AvatarCard
-from app.core.astrology.priority_engine import RecommendedCard
+from pydantic import BaseModel
 
 client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
 
@@ -15,6 +15,15 @@ async def _get_embedding(text: str) -> list[float]:
         model="text-embedding-3-small"
     )
     return response.data[0].embedding
+
+class RecommendedCard(BaseModel):
+    archetype_id: int
+    sphere: str
+    priority: str  # critical, high, medium, additional
+    reason: str
+    planet: Optional[str] = None
+    is_retrograde: bool = False
+
 
 async def match_archetypes_to_spheres(
     db: AsyncSession, 

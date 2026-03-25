@@ -116,7 +116,7 @@ const CustomSelect = ({ value, onChange, options, flex, label }: any) => (
 
 function AstroFlow({ step, setStep, onBack }: { step: number, setStep: React.Dispatch<React.SetStateAction<number>>, onBack: () => void }) {
     const router = useRouter();
-    const { userId, setUser } = useUserStore();
+    const { userId, setUser, reset } = useUserStore();
     // step state moved up
     const [form, setForm] = useState({
         gender: "male",
@@ -146,6 +146,13 @@ function AstroFlow({ step, setStep, onBack }: { step: number, setStep: React.Dis
                 setGeoResult(res.data);
                 setStep(s => s + 1);
             } catch (e: any) {
+                const msg = e.response?.data?.detail || e.message || "";
+                if (msg.toLowerCase().includes("user not found")) {
+                    console.warn("User state is stale. Resetting and redirecting...");
+                    reset();
+                    router.push("/");
+                    return;
+                }
                 setError("Не удалось найти место. Попробуйте уточнить название.");
             } finally {
                 setLoading(false);
@@ -170,7 +177,14 @@ function AstroFlow({ step, setStep, onBack }: { step: number, setStep: React.Dis
             setUser({ onboardingDone: true });
             router.push("/");
         } catch (e: any) {
-            setError(e.response?.data?.detail || "Ошибка расчёта. Проверьте данные.");
+            const msg = e.response?.data?.detail || e.message || "";
+            if (msg.toLowerCase().includes("user not found")) {
+                console.warn("User state is stale. Resetting and redirecting...");
+                reset();
+                router.push("/");
+                return;
+            }
+            setError(msg || "Ошибка расчёта. Проверьте данные.");
         } finally {
             setLoading(false);
         }
@@ -303,7 +317,7 @@ function AstroFlow({ step, setStep, onBack }: { step: number, setStep: React.Dis
 
 function AIFlow({ onBack }: { onBack: () => void }) {
     const router = useRouter();
-    const { userId, setUser } = useUserStore();
+    const { userId, setUser, reset } = useUserStore();
     const [messages, setMessages] = useState<{ role: string, content: string }[]>([]);
     const [input, setInput] = useState("");
     const [loading, setLoading] = useState(false);
@@ -371,8 +385,15 @@ function AIFlow({ onBack }: { onBack: () => void }) {
             await api.post("/api/onboarding/ai/calculate", { user_id: userId, chat_history: messages });
             setUser({ onboardingDone: true });
             router.push("/");
-        } catch (e) {
+        } catch (e: any) {
             console.error(e);
+            const msg = e.response?.data?.detail || e.message || "";
+            if (msg.toLowerCase().includes("user not found")) {
+                console.warn("User state is stale. Resetting and redirecting...");
+                reset();
+                router.push("/");
+                return;
+            }
             alert("Ошибка расчета карт.");
             setCalcLoading(false);
         }
@@ -679,7 +700,8 @@ export default function OnboardingPage() {
 }
 
 function VisualFlow({ onBack, onComplete }: { onBack: () => void, onComplete: () => void }) {
-    const { userId } = useUserStore();
+    const { userId, reset } = useUserStore();
+    const router = useRouter();
     const [stimuli, setStimuli] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [startTime, setStartTime] = useState<number>(0);
@@ -770,8 +792,14 @@ function VisualFlow({ onBack, onComplete }: { onBack: () => void, onComplete: ()
                 visualAPI.logEvent({ user_id: userId!, session_id: res.data.session_id, event_type: "SESSION_END", payload: {} });
                 onComplete();
             }
-        } catch (e) {
+        } catch (e: any) {
             console.error(e);
+            const msg = e.response?.data?.detail || e.message || "";
+            if (msg.toLowerCase().includes("user not found")) {
+                console.warn("User state is stale. Resetting and redirecting...");
+                reset();
+                router.push("/");
+            }
         }
     };
 

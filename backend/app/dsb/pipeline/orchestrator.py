@@ -12,6 +12,7 @@ import asyncio
 import importlib
 import logging
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
 from app.dsb.calculators.base import BirthData, Calculator
 from app.dsb.interpreters.base import InterpretationAgent
@@ -21,7 +22,9 @@ from app.dsb.synthesis.sphere_agent import SphereAgent
 from app.dsb.synthesis.meta_agent import MetaAgent
 from app.dsb.synthesis.compressor import Compressor
 from app.dsb.storage.repository import PortraitRepository
-from app.dsb.config import SYSTEM_REGISTRY, ACTIVE_SYSTEMS
+from app.dsb.config import SYSTEM_REGISTRY, ACTIVE_SYSTEMS, SPHERE_NAMES
+from app.models.natal_chart import NatalChart
+from app.models.card_progress import CardProgress, CardStatus
 
 logger = logging.getLogger(__name__)
 
@@ -141,7 +144,6 @@ class PortraitOrchestrator:
             logger.info("[Orchestrator] Layer 3a: Merging by spheres...")
             merger = Merger()
             spheres_data = merger.merge([all_insights])
-            # Примечание: merger.merge ожидает list[list[UIS]] — передаём один поток
 
             # ═══ СЛОЙ 3b: 12 Sphere Agents (параллельно) ════════════════
             logger.info("[Orchestrator] Layer 3b: Synthesizing 12 spheres (parallel)...")
@@ -185,7 +187,6 @@ class PortraitOrchestrator:
 
             # Notification to user
             from app.models.user import User
-            from sqlalchemy import select
             user_res = await session.execute(select(User).where(User.id == user_id))
             user_obj = user_res.scalar_one_or_none()
             if user_obj and user_obj.tg_id:
@@ -203,3 +204,86 @@ class PortraitOrchestrator:
             await session.commit()
 
         return portrait_id
+
+    async def initialize_onboarding_layer(
+        self,
+        birth_data: BirthData,
+        user_id: int,
+        session: AsyncSession,
+    ) -> dict:
+        """
+        Специальный метод для онбординга (Слой 1 - синхронно).
+        Рассчитывает натальную карту через DSB-калькулятор и
+        синхронизирует данные со старыми таблицами (NatalChart, CardProgress).
+        """
+        # 1. Запуск калькуляторов (только активные для скорости онбординга)
+        logger.info(f"[Orchestrator] Onboarding L1: running active calculators for user {user_id}...")
+        
+        active_calcs = [
+            (name, calc) for name, calc in self._all_calculators 
+            if name in self._active_system_names
+        ]
+        
+        results = await asyncio.gather(*[
+            calc.calculate(birth_data)
+            for _, calc in active_calcs
+        ])
+        
+        # Берем данные западной астрологии как основные для старого UI
+        wa_data = next((res.get("raw_data") for (name, _), res in zip(active_calcs, results) if name == "western_astrology"), None)
+        
+        if not wa_data:
+            logger.error("[Orchestrator] western_astrology data missing during onboarding")
+            return {"error": "Failed to calculate natal chart"}
+
+        # 2. Legacy Sync: NatalChart (чтобы работал Astro Chart на фронте)
+        natal_res = await session.execute(select(NatalChart).where(NatalChart.user_id == user_id))
+        natal = natal_res.scalar_one_or_none()
+        if not natal:
+            natal = NatalChart(user_id=user_id)
+            session.add(natal)
+        
+        natal.planets_json = {"planets": wa_data.get("planets"), "cusps": wa_data.get("houses", {}).get("cusps")}
+        natal.aspects_json = wa_data.get("aspects")
+        natal.ascendant_sign = wa_data.get("ascendant", {}).get("sign")
+        natal.recommended_cards_json = [] 
+        
+        # 3. Legacy Sync: CardProgress (264 карты)
+        await self._ensure_card_progress_initialized(user_id, session)
+        
+        await session.flush()
+        return {
+            "natal_chart": natal.planets_json,
+            "recommended_cards": [], # Рекомендации появятся после L2/L3
+            "wa_raw": wa_data,
+            "natal_obj": natal
+        }
+
+    async def _ensure_card_progress_initialized(self, user_id: int, session: AsyncSession):
+        """Инициализирует 264 заблокированные карты для пользователя (DSB-native)."""
+        from app.text_diagnostics.constants import ARCHETYPE_IDS
+        SPHERES_ENUM = [
+            "IDENTITY", "RESOURCES", "COMMUNICATION", "ROOTS",
+            "CREATIVITY", "SERVICE", "PARTNERSHIP", "TRANSFORMATION",
+            "EXPANSION", "STATUS", "VISION", "SPIRIT"
+        ]
+        
+        # Проверяем наличие
+        existing = await session.execute(
+            select(CardProgress.archetype_id, CardProgress.sphere)
+            .where(CardProgress.user_id == user_id)
+        )
+        # SQLAlchemy 2.0 select results need scalars() or similar
+        existing_keys = set(existing.all())
+        
+        if len(existing_keys) < 264:
+            logger.info(f"[Orchestrator] Initializing 264 CardProgress rows for user {user_id}")
+            for sphere in SPHERES_ENUM:
+                for arch_id in ARCHETYPE_IDS:
+                    if (arch_id, sphere) not in existing_keys:
+                        session.add(CardProgress(
+                            user_id=user_id,
+                            archetype_id=arch_id,
+                            sphere=sphere,
+                            status=CardStatus.LOCKED
+                        ))

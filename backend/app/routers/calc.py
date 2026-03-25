@@ -1,6 +1,3 @@
-"""
-Calc router: birth data input → natal chart calculation → 264 cards generation.
-"""
 from datetime import datetime
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
@@ -9,25 +6,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.database import get_db, AsyncSessionLocal
-from app.models import User, NatalChart, CardProgress
-from app.models.card_progress import CardStatus
-from app.core.astrology.natal_chart import (
-    calculate_natal_chart, geocode_place, to_dict as chart_to_dict
-)
-from app.rro.astro.rain import AstroRain
+from app.models import User, NatalChart
+from app.core.astrology.natal_chart import geocode_place
+from app.dsb.pipeline.orchestrator import PortraitOrchestrator
+from app.dsb.calculators.base import BirthData
 import logging
-from app.services.notification import NotificationService
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
-
-SPHERES = [
-    "IDENTITY", "RESOURCES", "COMMUNICATION", "ROOTS",
-    "CREATIVITY", "SERVICE", "PARTNERSHIP", "TRANSFORMATION",
-    "EXPANSION", "STATUS", "VISION", "SPIRIT"
-]
-ARCHETYPE_IDS = list(range(22))  # 0-21
 
 
 class BirthDataRequest(BaseModel):
@@ -65,16 +52,15 @@ async def calculate(
     db: AsyncSession = Depends(get_db),
 ):
     """
-    Full calculation flow:
-    1. Geocode birth place
-    2. Calculate natal chart (pyswisseph)
-    3. Calculate aspects
-    4. Prioritize cards
-    5. Create/update 264 CardProgress rows
-    6. Save NatalChart to DB
+    Pure DSB Onboarding Flow:
+    1. Geocode
+    2. DSB L1 (Synchronous) -> NatalChart & CardProgress Sync
+    3. Return L1 results
+    4. Trigger DSB L2/L3 (Background)
     """
-    logger.info(f"--- Astro Calculation Started for user {request.user_id} ---")
-    # Get user
+    logger.info(f"--- [DSB] Onboarding Started for user {request.user_id} ---")
+    
+    # 1. Get user
     user_result = await db.execute(select(User).where(User.id == request.user_id))
     user = user_result.scalar_one_or_none()
     if not user:
@@ -82,82 +68,77 @@ async def calculate(
         raise HTTPException(status_code=404, detail="User not found")
 
     try:
-        logger.info(f"Geocoding: {request.birth_place}")
-        # Geocode
+        # 2. Geocoding
         lat, lon, tz_name = await geocode_place(request.birth_place)
-        logger.info(f"Geocoding result: {lat}, {lon}, {tz_name}")
-    except ValueError as e:
-        logger.error(f"Geocoding failed for {request.birth_place}: {e}")
-        raise HTTPException(status_code=400, detail=str(e))
+        
+        # 3. Prepare BirthData
+        birth_date_obj = datetime.strptime(request.birth_date, "%Y-%m-%d").date()
+        birth_time_obj = None
+        if request.birth_time:
+            try:
+                birth_time_obj = datetime.strptime(request.birth_time, "%H:%M").time()
+            except:
+                birth_time_obj = datetime.strptime("12:00", "%H:%M").time()
 
-    # Parse date
-    birth_date = datetime.strptime(request.birth_date, "%Y-%m-%d")
-    logger.info(f"Parsed birth date: {birth_date}")
-
-    try:
-        # 5. Level 1: Rain (Calculation & Persistence)
-        natal = await AstroRain.process_onboarding(
-            db=db,
-            user_obj=user,
-            birth_date=birth_date,
-            birth_time=request.birth_time,
+        birth_data = BirthData(
+            date=birth_date_obj,
+            time=birth_time_obj,
+            place=request.birth_place,
             lat=lat,
             lon=lon,
-            tz_name=tz_name,
-            location_name=request.birth_place
+            timezone=tz_name,
+            full_name=user.first_name
         )
-        
-        # 6. Finalize Level 1 (Rain) results and initiate Pipeline
-        logger.info(f"Committing Level 1 (Rain) results for user {user.id}...")
-        await db.commit()
-        logger.info("Commit successful.")
 
+        # 4. DSB L1 Initialization (Synchronous for fast UI)
+        orchestrator = PortraitOrchestrator()
+        dsb_res = await orchestrator.initialize_onboarding_layer(birth_data, user.id, db)
+        
+        if "error" in dsb_res:
+            raise Exception(dsb_res["error"])
+
+        # 5. Update User Object
+        user.birth_date = birth_date_obj
+        user.birth_time = request.birth_time
+        user.birth_place = request.birth_place
+        user.birth_lat = lat
+        user.birth_lon = lon
+        user.birth_tz = tz_name
+        user.onboarding_done = True
+        db.add(user)
+        
+        await db.commit()
+        logger.info(f"DSB L1 Commit successful for user {user.id}")
+
+        # 6. Trigger L2/L3 Background Pipeline
         background_tasks.add_task(
             run_dsb_pipeline, 
             user.id, 
-            request.birth_date, 
-            request.birth_time, 
-            lat, 
-            lon, 
-            request.birth_place, 
-            request.gender, # Optional full_name mapping
+            birth_data,
             AsyncSessionLocal
         )
 
         return CalcResponse(
             success=True,
-            natal_chart=natal.planets_json,
-            recommended_cards=natal.recommended_cards_json,
+            natal_chart=dsb_res["natal_chart"],
+            recommended_cards=dsb_res["recommended_cards"],
             total_cards=22 * 12,
-            message=f"Карта рассчитана (L1). Синтез (L2/L3) запущен в фоне.",
+            message="Расчёт по системе DSB (L1) завершён. Идёт синтез 12 сфер (L2/L3) в фоне.",
         )
-    except Exception as e:
-        logger.error(f"Astro processing failed: {e}")
-        raise HTTPException(status_code=500, detail=f"Astro processing error: {e}")
 
-async def run_dsb_pipeline(u_id: int, birth_date, birth_time, lat, lon, place, full_name, session_maker):
+    except Exception as e:
+        logger.error(f"DSB Onboarding failed: {e}", exc_info=True)
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=f"Onboarding error: {e}")
+
+async def run_dsb_pipeline(u_id: int, birth_data: BirthData, session_maker):
     """
     Background DSB Pipeline executor.
     """
-    logger.info(f"--- [BACKGROUND] DSB Pipeline INITIALIZED for user {u_id} ---")
+    logger.info(f"--- [BACKGROUND] DSB Pipeline STARTED for user {u_id} ---")
     try:
         async with session_maker() as session:
-            
-            from app.dsb.calculators.base import BirthData
-            from app.dsb.pipeline.orchestrator import PortraitOrchestrator
-            
-            birth_data = BirthData(
-                date=birth_date,
-                time=birth_time,
-                place=place,
-                lat=lat,
-                lon=lon,
-                timezone="UTC", # Not strictly needed as geocoding info is mixed, but passing 
-                full_name=full_name
-            )
-            
             orchestrator = PortraitOrchestrator()
             await orchestrator.generate(birth_data, u_id, session)
-
     except Exception as e:
         logger.error(f"[BACKGROUND] DSB Pipeline failed for user {u_id}: {e}", exc_info=True)

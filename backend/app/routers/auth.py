@@ -7,6 +7,7 @@ import json
 import secrets
 from urllib.parse import parse_qsl
 
+import logging
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -18,6 +19,8 @@ from app.database import get_db
 from app.models import User, GameState
 from app.config import settings
 from app.core.economy import update_streak, calculate_xp_for_level
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
